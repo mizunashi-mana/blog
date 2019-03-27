@@ -84,4 +84,9 @@ PYGMENTS_RST_OPTIONS = {
   'linenos': 'table',
 }
 
+PLUGIN_PATHS = ['plugins']
+PLUGINS = [
+  'tipue_search'
+]
+
 RELATIVE_URLS = True
