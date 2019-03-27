@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 AUTHOR = 'Mizunashi Mana'
 SITENAME = '続くといいな日記'
 SITEDESCRIPTION = '{AUTHOR}\'s Blog'.format(AUTHOR=AUTHOR)
+SITESUBTITLE = SITENAME
 
 SITEURL = 'localhost:8000'
 ARTICLE_URL = 'posts/{date:%Y}/{date:%m}/{slug}/'
@@ -51,6 +52,7 @@ LINKS = (
 
 # Social widget
 SOCIAL = (
+  ('envelope', 'mailto:axnnoindexr11@gmail.com'),
   ('github', 'https://github.com/mizunashi-mana'),
   ('gitlab', 'https://gitlab.com/mizunashi-mana'),
   ('twitter', 'https://twitter.com/Mizunashi_Mana'),
@@ -86,7 +88,8 @@ PYGMENTS_RST_OPTIONS = {
 
 PLUGIN_PATHS = ['plugins']
 PLUGINS = [
-  'tipue_search'
+  'tipue_search',
+  'related_posts',
 ]
 
 RELATIVE_URLS = True
