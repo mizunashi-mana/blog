@@ -58,16 +58,22 @@
       </a>
       <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
 
-
+<p>続くといいな日記</p>
       <nav>
         <ul class="list">
-          <li><a href="https://mizunashi-mana.github.io/blog/pages/about.html#about">About</a></li>
-          <li><a href="https://mizunashi-mana.github.io/blog/pages/contact.html#contact">Contact</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/privacy-policy.html#privacy-policy">Privacy Policy</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/about.html#about">このブログについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/profile.html#profile">著者について</a></li>
 
         </ul>
       </nav>
 
       <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
           <li>
             <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
             <i class="fab fa-github">
@@ -116,15 +122,42 @@
   <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/#start-blog">ブログ始めました</a></h2>
     <p>
-          Posted on 金 29 3月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/poem.html">poem</a>
+          Posted on 金 29 3月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
 
 
+          &#8226;     Tagged with
 
+              <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/github.html">GitHub</a>
     </p>
   </header>
   <div>
-      <p>てすと</p>
-
+      <p>色々あって，技術的なことを書くブログを始めようと思いました(まる)．
+今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが，
+ちゃんとしてないやつも書いていこうかなってことで．</p>
+<p>ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが，
+調査不足だったり，よく分からない系とか徒然なるままな感じのことだったりとか，あと主に自分のためにしたこととかを書いていこうと思います．</p>
+<p>で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていきます．</p>
+<div class="section" id="id2">
+<h2>サイトジェネレータの選定基準</h2>
+</div>
+<div class="section" id="id3">
+<h2>他にやりたいこと</h2>
+<p>現状幾つか解決したい問題と追加したい機能もあって，</p>
+<ul class="simple">
+<li>VSCode の reStructuredText プラグインのアンダーライン補完が日本語だとうまく動かないので，これを修正したい．</li>
+<li>全文検索に対応したい．</li>
+<li>各メニューを日本語対応させたい．</li>
+<li>シェアボタンを追加したい．</li>
+<li>Google Analytics 追加</li>
+</ul>
+<p>ぐらいはやりたい．</p>
+<p>VSCode の件は，プラグインは日本語文字の width を 1 とカウントしているのに対し，
+docutils の方は East-Asian Width を考慮して換算してるっぽくて <a class="footnote-reference" href="#docutils-column-width" id="id4">[1]</a> ，
+結果補完されるアンダーラインが短い判定を受けてしまうという感じです．
+これぐらいならすぐ直せそうなので，近いうちに PR …</p></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/#start-blog">    Continue reading
+</a>
   </div>
 </article>
 
