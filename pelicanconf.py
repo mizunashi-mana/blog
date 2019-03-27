@@ -6,14 +6,16 @@ AUTHOR = 'Mizunashi Mana'
 SITENAME = '続くといいな日記'
 SITEDESCRIPTION = '{AUTHOR}\'s Blog'
 
-SITEURL = ''
+SITEURL = 'localhost:8000'
 ARTICLE_URL = 'posts/{date:%Y}/{date:%m}/{slug}/'
 ARTICLE_SAVE_AS = 'posts/{date:%Y}/{date:%m}/{slug}/index.html'
 SLUGIFY_SOURCE = 'basename'
 
 THEME = './themes/Flex'
 PATH = 'content'
-STATIC_PATHS = ['asset']
+STATIC_PATHS = [
+  'asset'
+]
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
 
@@ -41,10 +43,11 @@ CATEGORY_FEED_RSS = 'feeds/{slug}.rss.xml'
 TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
-GITHUB_CORNER_URL = 'https://github.com/mizunashi-mana/mizunashi-mana.github.io'
+GITHUB_CORNER_URL = 'https://github.com/mizunashi-mana/blog'
 
 # Blogroll
-LINKS = ()
+LINKS = (
+)
 
 # Social widget
 SOCIAL = (

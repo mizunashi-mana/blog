@@ -14,10 +14,28 @@ from pelicanconf import *
 SITEURL = 'https://mizunashi-mana.github.io/blog'
 RELATIVE_URLS = False
 
+def add_site_url(path):
+  return SITEURL + path
+
 FEED_ALL_ATOM = 'feeds/all.atom.xml'
 CATEGORY_FEED_ATOM = 'feeds/{slug}.atom.xml'
 
 DELETE_OUTPUT_DIRECTORY = True
+
+SITELOGO = add_site_url(SITELOGO)
+FAVICON = add_site_url(FAVICON)
+
+for i, item in enumerate(LINKS, start=1):
+  if item[0][0] == '/':
+    item[0] = add_site_url(item[0])
+
+for i, item in enumerate(SOCIAL, start=1):
+  if item[0][0] == '/':
+    item[0] = add_site_url(item[0])
+
+for i, item in enumerate(MENUITEMS, start=1):
+  if item[0][0] == '/':
+    item[0] = add_site_url(item[0])
 
 # Following items are often useful when publishing
 
