@@ -6,7 +6,7 @@ AUTHOR = 'Mizunashi Mana'
 SITENAME = '続くといいな日記'
 SITEDESCRIPTION = '{AUTHOR}\'s Blog'
 
-SITEURL = 'https://mizunashi-mana.github.io'
+SITEURL = ''
 ARTICLE_URL = 'posts/{date:%Y}/{date:%m}/{slug}/'
 ARTICLE_SAVE_AS = 'posts/{date:%Y}/{date:%m}/{slug}/index.html'
 SLUGIFY_SOURCE = 'basename'

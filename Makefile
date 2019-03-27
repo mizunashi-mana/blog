@@ -1,5 +1,6 @@
 PY?=python3
-PELICAN?=pelican
+PELICAN?=pipenv run pelican
+GHP_IMPORT?=pipenv run ghp-import
 PELICANOPTS=
 
 BASEDIR=$(CURDIR)
@@ -73,7 +74,7 @@ publish:
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(PUBLISHCONF) $(PELICANOPTS)
 
 github: publish
-	ghp-import -m "Generate Pelican site" -b $(GITHUB_PAGES_BRANCH) $(OUTPUTDIR)
+	$(GHP_IMPORT) -m "Generate Pelican site" -b $(GITHUB_PAGES_BRANCH) $(OUTPUTDIR)
 	git push origin $(GITHUB_PAGES_BRANCH)
 
 
