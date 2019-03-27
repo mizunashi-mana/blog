@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 AUTHOR = 'Mizunashi Mana'
 SITENAME = '続くといいな日記'
-SITEDESCRIPTION = '{AUTHOR}\'s Blog'
+SITEDESCRIPTION = '{AUTHOR}\'s Blog'.format(AUTHOR=AUTHOR)
 
 SITEURL = 'localhost:8000'
 ARTICLE_URL = 'posts/{date:%Y}/{date:%m}/{slug}/'

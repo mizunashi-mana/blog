@@ -17,6 +17,18 @@ RELATIVE_URLS = False
 def add_site_url(path):
   return SITEURL + path
 
+def add_site_url_to_items(items):
+  new_items = []
+  for i, item in enumerate(items, start=1):
+    title = item[0]
+    link = item[1]
+    if link[0] == '/':
+      link = add_site_url(link)
+
+    new_items.append((title, link))
+
+  return tuple(new_items)
+
 FEED_ALL_ATOM = 'feeds/all.atom.xml'
 CATEGORY_FEED_ATOM = 'feeds/{slug}.atom.xml'
 
@@ -25,17 +37,9 @@ DELETE_OUTPUT_DIRECTORY = True
 SITELOGO = add_site_url(SITELOGO)
 FAVICON = add_site_url(FAVICON)
 
-for i, item in enumerate(LINKS, start=1):
-  if item[0][0] == '/':
-    item[0] = add_site_url(item[0])
-
-for i, item in enumerate(SOCIAL, start=1):
-  if item[0][0] == '/':
-    item[0] = add_site_url(item[0])
-
-for i, item in enumerate(MENUITEMS, start=1):
-  if item[0][0] == '/':
-    item[0] = add_site_url(item[0])
+LINKS = add_site_url_to_items(LINKS)
+SOCIAL = add_site_url_to_items(SOCIAL)
+MENUITEMS = add_site_url_to_items(MENUITEMS)
 
 # Following items are often useful when publishing
 
