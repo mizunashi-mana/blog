@@ -11,8 +11,11 @@ https://mizunashi-mana.github.io/
 ## Installation
 
 ```bash
+git clone https://github.com/mizunashi-mana/blog.git
+cd blog
+git submodule update --init
 pipenv install
-make html
+make publish
 ```
 
 ## Copyright
