@@ -36,7 +36,6 @@ DELETE_OUTPUT_DIRECTORY = True
 
 SITELOGO = add_site_url(SITELOGO)
 FAVICON = add_site_url(FAVICON)
-CUSTOM_CSS = add_site_url(CUSTOM_CSS)
 
 LINKS = add_site_url_to_items(LINKS)
 SOCIAL = add_site_url_to_items(SOCIAL)
