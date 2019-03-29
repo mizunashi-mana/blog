@@ -1,59 +1,60 @@
 version: 2
 
 jobs:
-  docker:
-    - image: circleci/python:3.6.4
-  steps:
-    - checkout
-    - run: git submodule update --init
+  test:
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - checkout
+      - run: git submodule update --init
 
-    - run: |
-        sudo chown -R circleci:circleci /usr/local/bin
-        sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
-    - restore_cache:  # ensure this step occurs *before* installing dependencies
-      key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-    - run: |
-        sudo pip install pipenv
-        pipenv install
-    - save_cache:
-      key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-      paths:
-        - ".venv"
-        - "/usr/local/bin"
-        - "/usr/local/lib/python3.6/site-packages"
+      - run: |
+          sudo chown -R circleci:circleci /usr/local/bin
+          sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+        key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run: |
+          sudo pip install pipenv
+          pipenv install
+      - save_cache:
+        key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+        paths:
+          - ".venv"
+          - "/usr/local/bin"
+          - "/usr/local/lib/python3.6/site-packages"
 
-    - run: make html
-    - run: make publish
+      - run: make html
+      - run: make publish
 
-deploy:
-  docker:
-    - image: circleci/python:3.6.4
-  steps:
-    - checkout
-    - run: git submodule update --init
+  deploy:
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - checkout
+      - run: git submodule update --init
 
-    - run: |
-        sudo chown -R circleci:circleci /usr/local/bin
-        sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
-    - restore_cache:  # ensure this step occurs *before* installing dependencies
-      key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-    - run: |
-        sudo pip install pipenv
-        pipenv install
-    - save_cache:
-      key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-      paths:
-        - ".venv"
-        - "/usr/local/bin"
-        - "/usr/local/lib/python3.6/site-packages"
+      - run: |
+          sudo chown -R circleci:circleci /usr/local/bin
+          sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+        key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run: |
+          sudo pip install pipenv
+          pipenv install
+      - save_cache:
+        key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+        paths:
+          - ".venv"
+          - "/usr/local/bin"
+          - "/usr/local/lib/python3.6/site-packages"
 
-    - run: |
-        git config user.name "release-bot"
-        git config user.email "release-bot@users.noreply.github.com"
-        git remote set-url origin \
-          "https://${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+      - run: |
+          git config user.name "release-bot"
+          git config user.email "release-bot@users.noreply.github.com"
+          git remote set-url origin \
+            "https://${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
 
-    - run: make github
+      - run: make github
 
 workflows:
   version: 2
