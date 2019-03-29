@@ -2,6 +2,8 @@ version: 2
 
 jobs:
   test:
+    environment:
+      LOCALE: C
     docker:
       - image: circleci/python:3.7
     steps:
@@ -30,6 +32,8 @@ jobs:
       - run: make publish
 
   deploy:
+    environment:
+      LOCALE: C
     docker:
       - image: circleci/python:3.7
     steps:
@@ -59,8 +63,7 @@ jobs:
           git config user.email "release-bot@users.noreply.github.com"
           git remote set-url origin \
             "https://${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
-
-      - run: make github
+          make github
 
 workflows:
   version: 2
