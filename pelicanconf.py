@@ -26,7 +26,7 @@ STATIC_PATHS = [
 ]
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
-CUSTOM_CSS = '/asset/custom.css'
+CUSTOM_CSS = 'asset/custom.css'
 
 BROWSER_COLOR = '#333'
 ROBOTS = 'index, follow'
