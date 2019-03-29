@@ -10,7 +10,14 @@ SITESUBTITLE = SITENAME
 SITEURL = 'localhost:8000'
 ARTICLE_URL = 'posts/{date:%Y}/{date:%m}/{slug}/'
 ARTICLE_SAVE_AS = 'posts/{date:%Y}/{date:%m}/{slug}/index.html'
+MONTH_ARCHIVE_URL = 'posts/{date:%Y}/{date:%m}/'
+MONTH_ARCHIVE_SAVE_AS = 'posts/{date:%Y}/{date:%m}/index.html'
+YEAR_ARCHIVE_URL = 'posts/{date:%Y}/'
+YEAR_ARCHIVE_SAVE_AS =  'posts/{date:%Y}/index.html'
+
 SLUGIFY_SOURCE = 'basename'
+PAGE_ORDER_BY = 'basename'
+PAGES_SORT_ATTRIBUTE = 'source_path'
 
 THEME = './themes/Flex'
 PATH = 'content'
@@ -19,6 +26,7 @@ STATIC_PATHS = [
 ]
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
+CUSTOM_CSS = '/asset/custom.css'
 
 BROWSER_COLOR = '#333'
 ROBOTS = 'index, follow'
@@ -44,7 +52,8 @@ CATEGORY_FEED_RSS = 'feeds/{slug}.rss.xml'
 TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
-GITHUB_CORNER_URL = 'https://github.com/mizunashi-mana/blog'
+GITHUB_URL = 'https://github.com/mizunashi-mana/blog'
+GITHUB_CORNER_URL = GITHUB_URL
 
 # Blogroll
 LINKS = (
