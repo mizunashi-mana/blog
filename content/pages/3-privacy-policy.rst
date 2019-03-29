@@ -40,15 +40,19 @@ Cookie
 第三者の追跡・解析サービスの利用
 --------------------------------
 
-当ページは GitHub Pages を使用して運用しています． GitHub Pages は GitHub 社が提供する静的サイトを Web 上に公開できるサービスです．この運用にあたって当サイトの閲覧者のアクセス情報が GitHub 社で利用されることがあります．その場合， GitHub 社の規定するプライバシーポリシーに従ってその情報は利用されます．
+当ページは GitHub Pages を使用して運用しています． GitHub Pages は GitHub 社が提供する静的サイトを Web 上に公開できるサービスです．この運用にあたって当サイトの閲覧者のアクセス情報が GitHub 社で利用されることがあります．その場合， GitHub 社の規定する `プライバシーポリシー <https://help.github.com/en/articles/github-privacy-statement>`_ に従ってその情報は利用されます．
 
 また，将来的に以下のサービスが導入される可能性があります．
 
 Google Analytics
   Google 社が提供するアクセス状況の解析サービスです．
 
-Google Adsense
+  https://analytics.google.com/analytics/
+
+Google AdSense
   Google 社が提供する広告プラットフォームです．
+
+  https://www.google.co.jp/adsense/
 
 これらのサービスの導入する場合，その旨を記事として公開する事で閲覧者に通知を行います．
 
