@@ -3,7 +3,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.7
     steps:
       - checkout
       - run: git submodule update --init
@@ -14,6 +14,7 @@ jobs:
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run: |
+          sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
       - save_cache:
@@ -28,7 +29,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.7
     steps:
       - checkout
       - run: git submodule update --init
@@ -39,6 +40,7 @@ jobs:
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run: |
+          sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
       - save_cache:
