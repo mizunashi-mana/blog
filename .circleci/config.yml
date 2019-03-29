@@ -62,13 +62,13 @@ workflows:
   test:
     jobs:
       - test:
-        filters:
-          branches:
-            ignore: gh-pages
+          filters:
+            branches:
+              ignore: gh-pages
 
   build-and-deploy:
     jobs:
       - deploy:
-        filters:
-          branches:
-            only: master
+          filters:
+            branches:
+              only: master
