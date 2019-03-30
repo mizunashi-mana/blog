@@ -3,6 +3,16 @@
 
 見ての通り，個人的なブログです．
 
+問い合わせ
+-----------
+
+当サイトについての誤りの指摘や意見などがありましたら，以下の方法で気軽に連絡ください．
+
+* GitHub の `Issue <https://github.com/mizunashi-mana/blog/issues>`_ で報告
+* Twitter の `リプライ <https://twitter.com/Mizunashi_Mana>`_ で報告
+
+なお，メール (axnnoindexr11@gmail.com) でも受け付けています．
+
 免責事項
 ----------
 
