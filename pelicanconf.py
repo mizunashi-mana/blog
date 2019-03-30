@@ -22,7 +22,8 @@ PAGES_SORT_ATTRIBUTE = 'source_path'
 THEME = './themes/Flex'
 PATH = 'content'
 STATIC_PATHS = [
-  'asset'
+  '.circleci',
+  'asset',
 ]
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
