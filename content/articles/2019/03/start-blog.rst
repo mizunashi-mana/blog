@@ -30,7 +30,7 @@
 * Org-mode の場合 Emacs に HTML 出力させればいいので，大半のジェネレータでいける
 * reStructuredText は変換に Python の docutils を使うか， pandoc を使うといける
 
-で，色々探してた結果， Python 製の Pelican というジェネレータがあるらしく，標準で reStructuredText に対応してたしハイライトは Pygments を使って何とかできそうで結構 Python を使うと色々ライブラリとの相性が良さそうだったので，今回はそれで行くことにしてみた．
+で，色々探してた結果， Python 製の Pelican というジェネレータがあるらしく，標準で reStructuredText に対応してたしハイライトは Pygments を使って何とかできそうだったし，結構 Python を使うと色々ライブラリとの相性が良さそうだったので，今回はそれでいくことにしてみた．
 
 テーマも良さそうなのがあったし，設定も結構簡単だったので，とりあえず満足してる．
 
@@ -197,8 +197,8 @@ Circle CI は https://circleci.com/docs/2.0/language-python/ を参考に Python
 
 VSCode の件は，プラグインは日本語文字の width を 1 とカウントしているのに対し，
 docutils の方は East-Asian Width を考慮して換算してるっぽくて [#docutils-column-width]_ ，
-結果補完されるアンダーラインが短い判定を受けてしまうという感じです．
-これぐらいならすぐ直せそうなので，近いうちに PR を送ると思います．
+結果補完されるアンダーラインが短い判定を受けてしまうという感じ．
+これぐらいならすぐ直せそうなので，近いうちに PR を送ると思う．
 
 全文検索は， Tipue Search 用の JSON を吐き出してくれるプラグインが既にあるっぽくて [#pelican-tipue-search-plugin]_ ，
 後はテーマが対応していれば問題ないみたい．
@@ -223,7 +223,7 @@ Google Analytics はアカウント設定がちょっと億劫でやってない
 * CSS Rhythmic Sizing
 * GDPR (ePrivacy) 対応
 
-全部テーマで対応してるので，それほど追加は手間ではないんだけど，とりあえず様子見．
+大体テーマで対応してるので，それほど追加は手間ではないんだけど，とりあえず様子見．
 
 広告表示は，収益出るようだったら Google Adsense とか設置したいけど，今はいいかな．
 
@@ -231,12 +231,12 @@ Google Analytics はアカウント設定がちょっと億劫でやってない
 
 CSSについては，今は適当に ``line-height: 2.0;`` とかしてるんだけど， Vertical Rhythm を導入したい気持ちがある．ただ確か現状 CSS 標準ではなかったはずなので，ちょっと見送ってる (あんまり調べてない) ．気が変わるか安定したら対応するかもしれない．
 
-GDPR (ePrivacy) 対応は現状は特に Cookie を使用していないので問題ないはずで，今後 Google Analytics や Google Adsense を導入する場合どうなるかの話だけど，正直どういう対応をすればいいか分からないので保留中．まあ， Cookie の制限については， ポップアップで Cookie の同意をとってから Google Analytics のコードとかを起動すればいいだけだし，その他については Google Analytics は修正条項が適用されたモードで起動すれば大丈夫っぽい．ただそもそも日本語で書かれたマイナーコンテンツを EU 圏がそこまで見るかって話だし熱心に対応する予定はない．
+GDPR (ePrivacy) 対応は現状は特に Cookie を使用していないので問題ないはず．今後 Google Analytics や Google Adsense を導入する場合どうなるかの話だけど，正直どういう対応をすればいいか分からないので保留中．まあ， Cookie の制限については， ポップアップで Cookie の同意をとってから Google Analytics のコードとかを起動すればいいだけだし，その他については Google Analytics は修正条項が適用されたモードで起動すれば大丈夫っぽい．ただそもそも日本語で書かれたマイナーコンテンツを EU 圏がそこまで見るかって話だし，熱心に対応する予定はない．
 
 まとめ
 ---------
 
-とりあえず，雑に続けていければなと思うので，よろしくお願いします．
+雑に続けていければなと思うので，よろしくお願いします．
 
 .. [#docutils-column-width] https://github.com/docutils-mirror/docutils/blob/e88c5fb08d5cdfa8b4ac1020dd6f7177778d5990/docutils/utils/__init__.py#L628to
 .. [#pelican-tipue-search-plugin] https://github.com/getpelican/pelican-plugins/tree/master/tipue_search
