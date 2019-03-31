@@ -103,3 +103,7 @@ PLUGINS = [
 ]
 
 RELATIVE_URLS = True
+
+DOCUTILS_SETTINGS = {
+  'auto_id_prefix': 'auto-id-',
+}
