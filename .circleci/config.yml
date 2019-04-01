@@ -2,13 +2,18 @@ version: 2
 
 jobs:
   test:
-    environment:
-      LOCALE: C
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7-stretch
     steps:
       - checkout
       - run: git submodule update --init
+
+      - run: |
+        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+          locales
+        update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
+        locale-gen ja_JP.UTF-8
+        DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
 
       - run: |
           [[ ! -d /usr/local/bin ]] || \
@@ -16,7 +21,7 @@ jobs:
           [[ ! -d /usr/local/lib/python3.6/site-packages ]] || \
             sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v1
       - run: |
           sudo pip install --upgrade pip
           sudo pip install pipenv
@@ -27,18 +32,24 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
+            - "/var/lib/apt/lists"
 
       - run: make html
       - run: make publish
 
   deploy:
-    environment:
-      LOCALE: C
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7-stretch
     steps:
       - checkout
       - run: git submodule update --init
+
+      - run: |
+        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+          locales
+        update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
+        locale-gen ja_JP.UTF-8
+        DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
 
       - run: |
           [[ ! -d /usr/local/bin ]] || \
@@ -46,17 +57,11 @@ jobs:
           [[ ! -d /usr/local/lib/python3.6/site-packages ]] || \
             sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v1
       - run: |
           sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
-      - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-          paths:
-            - ".venv"
-            - "/usr/local/bin"
-            - "/usr/local/lib/python3.6/site-packages"
 
       - run: |
           git config user.name "release-bot"
