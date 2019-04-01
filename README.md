@@ -1,5 +1,7 @@
 # mizunashi-mana.github.io
 
+[![CircleCI](https://circleci.com/gh/mizunashi-mana/blog.svg?style=svg)](https://circleci.com/gh/mizunashi-mana/blog)
+
 Powered by pelican.
 
 https://mizunashi-mana.github.io/
