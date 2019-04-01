@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Fri, 29 Mar 2019 19:00:00 +0900</lastBuildDate><item><title>ブログ始めました</title><link>https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/</link><description>&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
+<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Tue, 02 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>ブログのデザイン調整</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/</link><description>&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
+&lt;div class="section" id="circle-ci"&gt;
+&lt;h2&gt;Circle CI での謎の警告解消&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;今まで Circle CI 上だと以下の警告が出てた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system.
+&lt;/pre&gt;
+&lt;p&gt;ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた．&lt;/p&gt;
+&lt;p&gt;この警告は Pelican が出してるもので，以下が該当部分:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# https …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Tue, 02 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-02:/blog/posts/2019/04/fix-blog-config/</guid><category>Python</category><category>Pelican</category><category>ブログ</category><category>CircleCI</category></item><item><title>ブログ始めました</title><link>https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/</link><description>&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
 今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが，
 ちゃんとしてないやつも書いていこうかなってことで．&lt;/p&gt;
 &lt;p&gt;ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが，

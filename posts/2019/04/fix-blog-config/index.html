@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/asset/custom.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#333">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#333">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#333">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="ブログの改良をちょっと色々やってたので，そのご報告． Circle CI での謎の警告解消 今まで Circle CI 上だと以下の警告が出てた: WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system. ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた． この警告は Pelican が出してるもので，以下が該当部分: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15# https …" />
+<meta name="keywords" content="Python, Pelican, ブログ, CircleCI">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="ブログのデザイン調整"/>
+<meta property="og:description" content="ブログの改良をちょっと色々やってたので，そのご報告． Circle CI での謎の警告解消 今まで Circle CI 上だと以下の警告が出てた: WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system. ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた． この警告は Pelican が出してるもので，以下が該当部分: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15# https …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-04-02 00:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="Python"/>
+<meta property="article:tag" content="Pelican"/>
+<meta property="article:tag" content="ブログ"/>
+<meta property="article:tag" content="CircleCI"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; ブログのデザイン調整</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="fix-blog-config">ブログのデザイン調整</h1>
+    <p>
+          Posted on 火 02 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>ブログの改良をちょっと色々やってたので，そのご報告．</p>
+<div class="section" id="circle-ci">
+<h2>Circle CI での謎の警告解消<a class="headerlink" href="#circle-ci" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>今まで Circle CI 上だと以下の警告が出てた:</p>
+<pre class="literal-block">
+WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system.
+</pre>
+<p>ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた．</p>
+<p>この警告は Pelican が出してるもので，以下が該当部分:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># https://github.com/getpelican/pelican/blob/4.0.1/pelican/settings.py#L500</span>
+
+<span class="c1"># try to set the different locales, fallback on the default.</span>
+<span class="n">locales</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;LOCALE&#39;</span><span class="p">,</span> <span class="n">DEFAULT_CONFIG</span><span class="p">[</span><span class="s1">&#39;LOCALE&#39;</span><span class="p">])</span>
+
+<span class="k">for</span> <span class="n">locale_</span> <span class="ow">in</span> <span class="n">locales</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">locale</span><span class="o">.</span><span class="n">setlocale</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">LC_ALL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">locale_</span><span class="p">))</span>
+        <span class="k">break</span>  <span class="c1"># break if it is successful</span>
+    <span class="k">except</span> <span class="n">locale</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+        <span class="k">pass</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s2">&quot;Locale could not be set. Check the LOCALE setting, ensuring it &quot;</span>
+        <span class="s2">&quot;is valid and available on your system.&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>どうやら <tt class="docutils literal">locale.setlocale</tt> が <tt class="docutils literal">ja_JP</tt> を設定しようとするとエラーを出してるっぽい．</p>
+<p>Circle CI の良いところは Docker イメージをそのまま使ってくれるのでエラーの特定が楽ってところ．
+というわけで，実際にどういうエラーを吐いて警告が出るに至ってるのか， Docker で調べてみた:</p>
+<pre class="literal-block">
+$ docker run -it circleci/python:3.7 bash
+circleci:/$ python -c 'import locale; locale.setlocale(locale.LC_ALL, &quot;ja_JP&quot;)'
+Traceback (most recent call last):
+  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;/usr/local/lib/python3.7/locale.py&quot;, line 604, in setlocale
+    return _setlocale(category, locale)
+locale.Error: unsupported locale setting
+</pre>
+<p>てことで， <tt class="docutils literal">locale.setlocale</tt> が失敗してるって時点で何となく予想はついてたけど， <tt class="docutils literal">ja_JP</tt> のロケール情報がインストールされてないのが問題っぽい．そこまでは予想がついたんだけど，じゃあ具体的にどう対処すればいいんだろうってとこがちょっと分からなくて，色々調べた．</p>
+<p>Circle CI は通常 Debian を使ってるっぽい．一応 Debian であることを明示する為， <tt class="docutils literal"><span class="pre">-stretch</span></tt> とかいう接尾辞が付けられるっぽいので付けといた <a class="footnote-reference" href="#circleci-python-images" id="auto-id-2">[1]</a>． 現在インストールされてるロケールは， <tt class="docutils literal">locale</tt> コマンドで調べられるらしい:</p>
+<pre class="literal-block">
+circleci:/$ locale -a
+C
+C.UTF-8
+POSIX
+</pre>
+<p>ここに <tt class="docutils literal">ja_JP</tt> が表示されれば勝ち．でロケールをインストールするには，インストールしたいロケールを <tt class="docutils literal">/etc/locale.gen</tt> で見つけてそこのコメントを外し， <tt class="docutils literal"><span class="pre">locale-gen</span></tt> コマンドを走らせるか， <tt class="docutils literal"><span class="pre">dpkg-reconfigure</span> locales</tt> をすればいいらしい．なので，以下のコマンドを Circle CI の設定に追加した:</p>
+<pre class="literal-block">
+sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
+sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
+DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
+</pre>
+<p>これで完璧やろw とか思ってプッシュしたがなんかエラーが治らない．試しに Docker 上でやってみると，以下のようになった:</p>
+<pre class="literal-block">
+circleci:/$ locale -a
+C
+C.UTF-8
+POSIX
+ja_JP.utf8
+</pre>
+<p>は？ <tt class="docutils literal">ja_JP.utf8</tt> だけしか追加されとらんやんけ．どういうこっちゃって感じ．でさらに調べると，どうやら，ロケールのエイリアス情報が <tt class="docutils literal">/usr/share/locale/locale.alias</tt> って場所にあるらしく，ロケールのインストールの時はそこの名前も登録されるらしい．で，そこを見てみると，以下のようになってた:</p>
+<pre class="literal-block">
+circleci:/$ cat /usr/share/locale/locale.alias | grep ja_JP
+japanese        ja_JP.eucJP
+japanese.euc    ja_JP.eucJP
+ja_JP           ja_JP.eucJP
+ja_JP.ujis      ja_JP.eucJP
+japanese.sjis   ja_JP.SJIS
+</pre>
+<p>あ，ふーん．今は2019年， UTF-8 標準の時代やぞ．というわけで閉廷した．と言いたいとこだが，閉廷しても警告は治らないので，以下のコマンドを追加することにした:</p>
+<pre class="literal-block">
+sudo sed -i 's/ja_JP\s.*$/ja_JP ja_JP.utf8/g' /usr/share/locale/locale.alias
+</pre>
+<p>本来は Pelican の設定を変えるか， <tt class="docutils literal">ja_JP.eucJP</tt> を使うべきなんだろうが，ロケール情報は <tt class="docutils literal">gettext</tt> も使うと思われるのでマップ情報があるのは好ましくないだろうし，かといって eucJP を使うのは敗北感が強かったので間をとって（？）こうした．これにより，ちゃんとロケールが認識されるようになった:</p>
+<pre class="literal-block">
+circleci:/$ locale -a
+C
+C.UTF-8
+POSIX
+ja_JP
+ja_JP.utf8
+</pre>
+<p>ついでに， cache のバージョニングもするようにして，壊れた cache が生成された時にバージョンを上げることで古いキャッシュを捨てられるようにした．</p>
+</div>
+<div class="section" id="auto-id-3">
+<h2>アンカーリンクの追加<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>各節に飛ぶリンクを表示するようにした．これは， <a class="reference external" href="https://github.com/getpelican/pelican-plugins/tree/master/headerid">headerid</a> というプラグインがありこれを使った．単に <tt class="docutils literal">pelicanconf.py</tt> に</p>
+<pre class="literal-block">
+HEADERID_LINK_CHAR = '&lt;i class=&quot;fas fa-link anchor-link&quot;&gt;&lt;/i&gt;'
+</pre>
+<p>を足して，ちょっとデザインとかをいじっただけ．</p>
+<p>(ところで幾つかプラグインの実装を見てたんだけど，みんな HTML を Beautiful Soup でパースしてゴリ押ししてたりするんだが，大丈夫なんか... こういうもんなんだろうか...)</p>
+</div>
+<div class="section" id="vscode">
+<h2>VSCode のプラグインの修正<a class="headerlink" href="#vscode" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p><a class="reference external" href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/#auto-id-10">前の記事</a> で言ってた， reStructuredText の VSCode プラグインのバグを修正した: <a class="reference external" href="https://github.com/vscode-restructuredtext/vscode-restructuredtext/pull/153">https://github.com/vscode-restructuredtext/vscode-restructuredtext/pull/153</a> ．</p>
+<p>内容は， <tt class="docutils literal">docutils</tt> の <tt class="docutils literal">column_width <span class="pre">&lt;https://sourceforge.net/p/docutils/code/HEAD/tree/tags/docutils-0.14/docutils/utils/__init__.py#l643&gt;</span></tt> 関数に合わせて下線の長さを修正するだけなんだけど，思ったより難しかった．</p>
+<p>最近は，文字コードの世界は Unicode という規格で統一されつつあるわけだけど，この規格が結構罠が多い (正確には文字の世界は複雑すぎるということなんだけど) ．で，よく槍玉に上がるのが</p>
+<dl class="docutils">
+<dt>East Asian Width</dt>
+<dd><a class="reference external" href="https://www.unicode.org/reports/tr11/">https://www.unicode.org/reports/tr11/</a> で規定されている，文字幅の参考特性．半角とか全角とか，半角相当・全角相当みたいな感じのクラス分けをしている． (ただこの特性値自体も罠がある <a class="footnote-reference" href="#eaw-problem" id="auto-id-5">[2]</a>)</dd>
+<dt>Combining Character</dt>
+<dd>「ă」は2文字 U+0074 U+0306 で表現される．このうちの後ろの文字 U+0306 が Combining Character と呼ばれるもので，前後の文字にかかったり，異次元に飛んでったりして，単体ではあまり意味を持たないやつ．日本人的には濁点が一番親しみやすそう． Unicode のデータベースでは Combining class というパラメータが提供されていて，どういう Combining を行うかが分かるようになっている． 0 だと Combining Character ではない．それぞれの値の意味は， <a class="reference external" href="http://www.unicode.org/reports/tr44/#Canonical_Combining_Class_Values">http://www.unicode.org/reports/tr44/#Canonical_Combining_Class_Values</a> を参照．</dd>
+<dt>Surrogate Pair</dt>
+<dd><p class="first">UTF-16 という Unicode のエンコード方式が，世界の文字の固定サイズ表現を目指して大敗北した話は有名だけど，大敗北の余波を自分たちが存分に受けてることを知らない人は結構多い． JavaScript という言語は諸にこの余波を受けている． JavaScript の文字列の内部は 16bit 非負整数の配列だ．これだけだと他の言語も事情が同じものが多いわけだけど，問題は 文字列の長さ = <tt class="docutils literal">String.prototype.length</tt> が返してくる数値 = 配列の長さ と規定してしまった点だ．実際には Unicode 規格に含まれる文字は 16bit などでは納まりきらず， 16bit 2つを組み合わせて1つの文字を表す表現を併用することとなった．この組が Surrogate Pair だ．もし文字列の長さを「Unicodeにおける文字単位でいくつ分か」として取得したいなら， <tt class="docutils literal"><span class="pre">'おすし🍣'.length</span></tt> としてはいけない．「🍣」は Surrogate Pair で表現される文字で，この結果は</p>
+<pre class="literal-block">
+'おすし🍣'.length == 5
+</pre>
+<p>となる．最近の JavaScript での Surrogate Pair を考慮する場合のイディオムは，</p>
+<pre class="literal-block">
+[...'おすし🍣'].length == 4
+</pre>
+<p class="last">だ．文字列のイテレータは，Unicode 単位で文字を分解してくれるようになっているので，こちらだと Surrogate Pair に関する問題は起きない．</p>
+</dd>
+</dl>
+<p>それぞれの特性規定自体は，そこまで大きな問題は孕んでいないと思う (詳しくないので知らない) けど，問題はこれらが日々アルファベット以外の文字を扱う人たちの間でしか発現しないこと，そして結果実装者が規格の存在を知っているかによって実装が大きく異なることであり，それによって実装の差異を吸収するための規格が実装によって大きな差異を生み出してしまうことにある．この辺の話は詳しい人に聞くと (外野から見てる分には) 中々面白いが，僕はあまり知識も経験もないのでここら辺でやめとく．ついでに今回は，この三つの役満だった．</p>
+<p><tt class="docutils literal">docutils</tt> の <a class="reference external" href="https://sourceforge.net/p/docutils/code/HEAD/tree/tags/docutils-0.14/docutils/utils/__init__.py#l643">実装</a> は East Asian Width と Combining Character を考慮した実装になっていて， East Asian Width での文字の長さを換算した後， Combining Character の分を差し引いて，最終結果を出している．それに対して，プラグインの実装は単に <tt class="docutils literal">length</tt> で長さを計っていた．</p>
+<p>これを， <a class="reference external" href="https://github.com/susisu/meaw">meaw</a> というライブラリのお世話になって修正した． <tt class="docutils literal">meaw.computeWidth</tt> という関数は <tt class="docutils literal">for</tt>-<tt class="docutils literal">of</tt> で文字列の文字それぞれの East Asian Width を合計してくれる． <tt class="docutils literal">for</tt>-<tt class="docutils literal">of</tt> は文字列のイテレータで要素を回すため， spread operator を使う場合と同じく Unicode 単位で文字を分解してくれる．</p>
+<p>Combining Character に関しては，色々調べたんだけど，文字を与えると Unicode データベースを単に返してくれるライブラリが見つからなかったので断念した (この辺はライブラリの大きさとのトレードオフなので仕方ないとも思うがうーんって感じ． Python は標準サポートが入っていて強いなあって思った．) ．なんかいい感じの方法知ってたら教えてもらいたい．ただ，下線は長い分には問題ないので，そこまで影響はないはず．一応， <tt class="docutils literal">normalize</tt> で1つの文字にまとめられる系はまとめるようにしておいたし．</p>
+<p>もう既に修正は取り込まれてるので，時期バージョンで治るのかな？</p>
+</div>
+<div class="section" id="auto-id-7">
+<h2>プライバシーポリシーの変更<a class="headerlink" href="#auto-id-7" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ちょこっと修正した．個人情報は匿名化されるって言ってたけど， Google Analytics とか GitHub Pages とかは中で何やってるか分からないので，そっちでは特定とかやってるかもしれない的なことを足した．</p>
+<p>特定しても個人的には特にメリットがないので，うちはしないです．</p>
+</div>
+<div class="section" id="auto-id-8">
+<h2>シェアボタンの追加のための調査<a class="headerlink" href="#auto-id-8" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>シェアボタンを追加したくて色々調査してた．最終的には， JavaScript でシェアボタン追加すればよくねってなったんだけど，そもそも自前の JavaScript を呼ぶ機構がテーマになさそう．プラグインでがんばって挿入とかできないかなとか試したけどよく分からんかった．</p>
+<p>なので，もうちょっと後になりそう．</p>
+</div>
+<div class="section" id="auto-id-9">
+<h2>今後について<a class="headerlink" href="#auto-id-9" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ちょっと最近忙しいので，次の記事投稿まで期間開くかもだけど，落ち着いたら色々書くかも．こちらからは，以上です．</p>
+<table class="docutils footnote" frame="void" id="circleci-python-images" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td><a class="reference external" href="https://circleci.com/docs/2.0/circleci-images/#python">https://circleci.com/docs/2.0/circleci-images/#python</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="eaw-problem" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-5">[2]</a></td><td><a class="reference external" href="https://github.com/hamano/locale-eaw">https://github.com/hamano/locale-eaw</a></td></tr>
+</tbody>
+</table>
+</div>
+
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/circleci.html">CircleCI</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/">ブログ始めました</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

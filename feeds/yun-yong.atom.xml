@@ -1,5 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-03-29T19:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>ブログ始めました</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/" rel="alternate"></link><published>2019-03-29T19:00:00+09:00</published><updated>2019-03-29T19:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-03-29:/blog/posts/2019/03/start-blog/</id><summary type="html">&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-02T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>ブログのデザイン調整</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/" rel="alternate"></link><published>2019-04-02T00:00:00+09:00</published><updated>2019-04-02T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-02:/blog/posts/2019/04/fix-blog-config/</id><summary type="html">&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
+&lt;div class="section" id="circle-ci"&gt;
+&lt;h2&gt;Circle CI での謎の警告解消&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;今まで Circle CI 上だと以下の警告が出てた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system.
+&lt;/pre&gt;
+&lt;p&gt;ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた．&lt;/p&gt;
+&lt;p&gt;この警告は Pelican が出してるもので，以下が該当部分:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# https …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
+&lt;div class="section" id="circle-ci"&gt;
+&lt;h2&gt;Circle CI での謎の警告解消&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;今まで Circle CI 上だと以下の警告が出てた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system.
+&lt;/pre&gt;
+&lt;p&gt;ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた．&lt;/p&gt;
+&lt;p&gt;この警告は Pelican が出してるもので，以下が該当部分:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# https://github.com/getpelican/pelican/blob/4.0.1/pelican/settings.py#L500&lt;/span&gt;
+
+&lt;span class="c1"&gt;# try to set the different locales, fallback on the default.&lt;/span&gt;
+&lt;span class="n"&gt;locales&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;settings&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;LOCALE&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;DEFAULT_CONFIG&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;LOCALE&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;locale_&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;locales&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;locale&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setlocale&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;locale&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;LC_ALL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;locale_&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="k"&gt;break&lt;/span&gt;  &lt;span class="c1"&gt;# break if it is successful&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="n"&gt;locale&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Error&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;pass&lt;/span&gt;
+&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;Locale could not be set. Check the LOCALE setting, ensuring it &amp;quot;&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;is valid and available on your system.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;どうやら &lt;tt class="docutils literal"&gt;locale.setlocale&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;ja_JP&lt;/tt&gt; を設定しようとするとエラーを出してるっぽい．&lt;/p&gt;
+&lt;p&gt;Circle CI の良いところは Docker イメージをそのまま使ってくれるのでエラーの特定が楽ってところ．
+というわけで，実際にどういうエラーを吐いて警告が出るに至ってるのか， Docker で調べてみた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ docker run -it circleci/python:3.7 bash
+circleci:/$ python -c 'import locale; locale.setlocale(locale.LC_ALL, &amp;quot;ja_JP&amp;quot;)'
+Traceback (most recent call last):
+  File &amp;quot;&amp;lt;string&amp;gt;&amp;quot;, line 1, in &amp;lt;module&amp;gt;
+  File &amp;quot;/usr/local/lib/python3.7/locale.py&amp;quot;, line 604, in setlocale
+    return _setlocale(category, locale)
+locale.Error: unsupported locale setting
+&lt;/pre&gt;
+&lt;p&gt;てことで， &lt;tt class="docutils literal"&gt;locale.setlocale&lt;/tt&gt; が失敗してるって時点で何となく予想はついてたけど， &lt;tt class="docutils literal"&gt;ja_JP&lt;/tt&gt; のロケール情報がインストールされてないのが問題っぽい．そこまでは予想がついたんだけど，じゃあ具体的にどう対処すればいいんだろうってとこがちょっと分からなくて，色々調べた．&lt;/p&gt;
+&lt;p&gt;Circle CI は通常 Debian を使ってるっぽい．一応 Debian であることを明示する為， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-stretch&lt;/span&gt;&lt;/tt&gt; とかいう接尾辞が付けられるっぽいので付けといた &lt;a class="footnote-reference" href="#circleci-python-images" id="auto-id-2"&gt;[1]&lt;/a&gt;． 現在インストールされてるロケールは， &lt;tt class="docutils literal"&gt;locale&lt;/tt&gt; コマンドで調べられるらしい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+circleci:/$ locale -a
+C
+C.UTF-8
+POSIX
+&lt;/pre&gt;
+&lt;p&gt;ここに &lt;tt class="docutils literal"&gt;ja_JP&lt;/tt&gt; が表示されれば勝ち．でロケールをインストールするには，インストールしたいロケールを &lt;tt class="docutils literal"&gt;/etc/locale.gen&lt;/tt&gt; で見つけてそこのコメントを外し， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;locale-gen&lt;/span&gt;&lt;/tt&gt; コマンドを走らせるか， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;dpkg-reconfigure&lt;/span&gt; locales&lt;/tt&gt; をすればいいらしい．なので，以下のコマンドを Circle CI の設定に追加した:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
+sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
+DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
+&lt;/pre&gt;
+&lt;p&gt;これで完璧やろw とか思ってプッシュしたがなんかエラーが治らない．試しに Docker 上でやってみると，以下のようになった:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+circleci:/$ locale -a
+C
+C.UTF-8
+POSIX
+ja_JP.utf8
+&lt;/pre&gt;
+&lt;p&gt;は？ &lt;tt class="docutils literal"&gt;ja_JP.utf8&lt;/tt&gt; だけしか追加されとらんやんけ．どういうこっちゃって感じ．でさらに調べると，どうやら，ロケールのエイリアス情報が &lt;tt class="docutils literal"&gt;/usr/share/locale/locale.alias&lt;/tt&gt; って場所にあるらしく，ロケールのインストールの時はそこの名前も登録されるらしい．で，そこを見てみると，以下のようになってた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+circleci:/$ cat /usr/share/locale/locale.alias | grep ja_JP
+japanese        ja_JP.eucJP
+japanese.euc    ja_JP.eucJP
+ja_JP           ja_JP.eucJP
+ja_JP.ujis      ja_JP.eucJP
+japanese.sjis   ja_JP.SJIS
+&lt;/pre&gt;
+&lt;p&gt;あ，ふーん．今は2019年， UTF-8 標準の時代やぞ．というわけで閉廷した．と言いたいとこだが，閉廷しても警告は治らないので，以下のコマンドを追加することにした:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo sed -i 's/ja_JP\s.*$/ja_JP ja_JP.utf8/g' /usr/share/locale/locale.alias
+&lt;/pre&gt;
+&lt;p&gt;本来は Pelican の設定を変えるか， &lt;tt class="docutils literal"&gt;ja_JP.eucJP&lt;/tt&gt; を使うべきなんだろうが，ロケール情報は &lt;tt class="docutils literal"&gt;gettext&lt;/tt&gt; も使うと思われるのでマップ情報があるのは好ましくないだろうし，かといって eucJP を使うのは敗北感が強かったので間をとって（？）こうした．これにより，ちゃんとロケールが認識されるようになった:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+circleci:/$ locale -a
+C
+C.UTF-8
+POSIX
+ja_JP
+ja_JP.utf8
+&lt;/pre&gt;
+&lt;p&gt;ついでに， cache のバージョニングもするようにして，壊れた cache が生成された時にバージョンを上げることで古いキャッシュを捨てられるようにした．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;アンカーリンクの追加&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;各節に飛ぶリンクを表示するようにした．これは， &lt;a class="reference external" href="https://github.com/getpelican/pelican-plugins/tree/master/headerid"&gt;headerid&lt;/a&gt; というプラグインがありこれを使った．単に &lt;tt class="docutils literal"&gt;pelicanconf.py&lt;/tt&gt; に&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+HEADERID_LINK_CHAR = '&amp;lt;i class=&amp;quot;fas fa-link anchor-link&amp;quot;&amp;gt;&amp;lt;/i&amp;gt;'
+&lt;/pre&gt;
+&lt;p&gt;を足して，ちょっとデザインとかをいじっただけ．&lt;/p&gt;
+&lt;p&gt;(ところで幾つかプラグインの実装を見てたんだけど，みんな HTML を Beautiful Soup でパースしてゴリ押ししてたりするんだが，大丈夫なんか... こういうもんなんだろうか...)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="vscode"&gt;
+&lt;h2&gt;VSCode のプラグインの修正&lt;a class="headerlink" href="#vscode" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/#auto-id-10"&gt;前の記事&lt;/a&gt; で言ってた， reStructuredText の VSCode プラグインのバグを修正した: &lt;a class="reference external" href="https://github.com/vscode-restructuredtext/vscode-restructuredtext/pull/153"&gt;https://github.com/vscode-restructuredtext/vscode-restructuredtext/pull/153&lt;/a&gt; ．&lt;/p&gt;
+&lt;p&gt;内容は， &lt;tt class="docutils literal"&gt;docutils&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;column_width &lt;span class="pre"&gt;&amp;lt;https://sourceforge.net/p/docutils/code/HEAD/tree/tags/docutils-0.14/docutils/utils/__init__.py#l643&amp;gt;&lt;/span&gt;&lt;/tt&gt; 関数に合わせて下線の長さを修正するだけなんだけど，思ったより難しかった．&lt;/p&gt;
+&lt;p&gt;最近は，文字コードの世界は Unicode という規格で統一されつつあるわけだけど，この規格が結構罠が多い (正確には文字の世界は複雑すぎるということなんだけど) ．で，よく槍玉に上がるのが&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;East Asian Width&lt;/dt&gt;
+&lt;dd&gt;&lt;a class="reference external" href="https://www.unicode.org/reports/tr11/"&gt;https://www.unicode.org/reports/tr11/&lt;/a&gt; で規定されている，文字幅の参考特性．半角とか全角とか，半角相当・全角相当みたいな感じのクラス分けをしている． (ただこの特性値自体も罠がある &lt;a class="footnote-reference" href="#eaw-problem" id="auto-id-5"&gt;[2]&lt;/a&gt;)&lt;/dd&gt;
+&lt;dt&gt;Combining Character&lt;/dt&gt;
+&lt;dd&gt;「ă」は2文字 U+0074 U+0306 で表現される．このうちの後ろの文字 U+0306 が Combining Character と呼ばれるもので，前後の文字にかかったり，異次元に飛んでったりして，単体ではあまり意味を持たないやつ．日本人的には濁点が一番親しみやすそう． Unicode のデータベースでは Combining class というパラメータが提供されていて，どういう Combining を行うかが分かるようになっている． 0 だと Combining Character ではない．それぞれの値の意味は， &lt;a class="reference external" href="http://www.unicode.org/reports/tr44/#Canonical_Combining_Class_Values"&gt;http://www.unicode.org/reports/tr44/#Canonical_Combining_Class_Values&lt;/a&gt; を参照．&lt;/dd&gt;
+&lt;dt&gt;Surrogate Pair&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;UTF-16 という Unicode のエンコード方式が，世界の文字の固定サイズ表現を目指して大敗北した話は有名だけど，大敗北の余波を自分たちが存分に受けてることを知らない人は結構多い． JavaScript という言語は諸にこの余波を受けている． JavaScript の文字列の内部は 16bit 非負整数の配列だ．これだけだと他の言語も事情が同じものが多いわけだけど，問題は 文字列の長さ = &lt;tt class="docutils literal"&gt;String.prototype.length&lt;/tt&gt; が返してくる数値 = 配列の長さ と規定してしまった点だ．実際には Unicode 規格に含まれる文字は 16bit などでは納まりきらず， 16bit 2つを組み合わせて1つの文字を表す表現を併用することとなった．この組が Surrogate Pair だ．もし文字列の長さを「Unicodeにおける文字単位でいくつ分か」として取得したいなら， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;'おすし🍣'.length&lt;/span&gt;&lt;/tt&gt; としてはいけない．「🍣」は Surrogate Pair で表現される文字で，この結果は&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+'おすし🍣'.length == 5
+&lt;/pre&gt;
+&lt;p&gt;となる．最近の JavaScript での Surrogate Pair を考慮する場合のイディオムは，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[...'おすし🍣'].length == 4
+&lt;/pre&gt;
+&lt;p class="last"&gt;だ．文字列のイテレータは，Unicode 単位で文字を分解してくれるようになっているので，こちらだと Surrogate Pair に関する問題は起きない．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;それぞれの特性規定自体は，そこまで大きな問題は孕んでいないと思う (詳しくないので知らない) けど，問題はこれらが日々アルファベット以外の文字を扱う人たちの間でしか発現しないこと，そして結果実装者が規格の存在を知っているかによって実装が大きく異なることであり，それによって実装の差異を吸収するための規格が実装によって大きな差異を生み出してしまうことにある．この辺の話は詳しい人に聞くと (外野から見てる分には) 中々面白いが，僕はあまり知識も経験もないのでここら辺でやめとく．ついでに今回は，この三つの役満だった．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;docutils&lt;/tt&gt; の &lt;a class="reference external" href="https://sourceforge.net/p/docutils/code/HEAD/tree/tags/docutils-0.14/docutils/utils/__init__.py#l643"&gt;実装&lt;/a&gt; は East Asian Width と Combining Character を考慮した実装になっていて， East Asian Width での文字の長さを換算した後， Combining Character の分を差し引いて，最終結果を出している．それに対して，プラグインの実装は単に &lt;tt class="docutils literal"&gt;length&lt;/tt&gt; で長さを計っていた．&lt;/p&gt;
+&lt;p&gt;これを， &lt;a class="reference external" href="https://github.com/susisu/meaw"&gt;meaw&lt;/a&gt; というライブラリのお世話になって修正した． &lt;tt class="docutils literal"&gt;meaw.computeWidth&lt;/tt&gt; という関数は &lt;tt class="docutils literal"&gt;for&lt;/tt&gt;-&lt;tt class="docutils literal"&gt;of&lt;/tt&gt; で文字列の文字それぞれの East Asian Width を合計してくれる． &lt;tt class="docutils literal"&gt;for&lt;/tt&gt;-&lt;tt class="docutils literal"&gt;of&lt;/tt&gt; は文字列のイテレータで要素を回すため， spread operator を使う場合と同じく Unicode 単位で文字を分解してくれる．&lt;/p&gt;
+&lt;p&gt;Combining Character に関しては，色々調べたんだけど，文字を与えると Unicode データベースを単に返してくれるライブラリが見つからなかったので断念した (この辺はライブラリの大きさとのトレードオフなので仕方ないとも思うがうーんって感じ． Python は標準サポートが入っていて強いなあって思った．) ．なんかいい感じの方法知ってたら教えてもらいたい．ただ，下線は長い分には問題ないので，そこまで影響はないはず．一応， &lt;tt class="docutils literal"&gt;normalize&lt;/tt&gt; で1つの文字にまとめられる系はまとめるようにしておいたし．&lt;/p&gt;
+&lt;p&gt;もう既に修正は取り込まれてるので，時期バージョンで治るのかな？&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-7"&gt;
+&lt;h2&gt;プライバシーポリシーの変更&lt;a class="headerlink" href="#auto-id-7" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ちょこっと修正した．個人情報は匿名化されるって言ってたけど， Google Analytics とか GitHub Pages とかは中で何やってるか分からないので，そっちでは特定とかやってるかもしれない的なことを足した．&lt;/p&gt;
+&lt;p&gt;特定しても個人的には特にメリットがないので，うちはしないです．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-8"&gt;
+&lt;h2&gt;シェアボタンの追加のための調査&lt;a class="headerlink" href="#auto-id-8" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;シェアボタンを追加したくて色々調査してた．最終的には， JavaScript でシェアボタン追加すればよくねってなったんだけど，そもそも自前の JavaScript を呼ぶ機構がテーマになさそう．プラグインでがんばって挿入とかできないかなとか試したけどよく分からんかった．&lt;/p&gt;
+&lt;p&gt;なので，もうちょっと後になりそう．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-9"&gt;
+&lt;h2&gt;今後について&lt;a class="headerlink" href="#auto-id-9" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ちょっと最近忙しいので，次の記事投稿まで期間開くかもだけど，落ち着いたら色々書くかも．こちらからは，以上です．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="circleci-python-images" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://circleci.com/docs/2.0/circleci-images/#python"&gt;https://circleci.com/docs/2.0/circleci-images/#python&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="eaw-problem" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-5"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://github.com/hamano/locale-eaw"&gt;https://github.com/hamano/locale-eaw&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+</content><category term="Python"></category><category term="Pelican"></category><category term="ブログ"></category><category term="CircleCI"></category></entry><entry><title>ブログ始めました</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/" rel="alternate"></link><published>2019-03-29T19:00:00+09:00</published><updated>2019-03-29T19:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-03-29:/blog/posts/2019/03/start-blog/</id><summary type="html">&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
 今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが，
 ちゃんとしてないやつも書いていこうかなってことで．&lt;/p&gt;
 &lt;p&gt;ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが，

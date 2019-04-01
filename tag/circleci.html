@@ -47,7 +47,7 @@
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog"/>
 <meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
 
-  <title>続くといいな日記 &ndash;     Tags
+  <title>続くといいな日記 &ndash;     Tag CircleCI
 </title>
 
 </head>
@@ -117,20 +117,56 @@
 </a>
     </nav>
 
-<article class="single">
+
+
+<article>
   <header>
-    <h1>    Tags
-</h1>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/#fix-blog-config">ブログのデザイン調整</a></h2>
+    <p>
+          Posted on 火 02 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/circleci.html">CircleCI</a>
+    </p>
   </header>
   <div>
-    <ul class="list">          <li><a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a> (2)</li>
-          <li><a href="https://mizunashi-mana.github.io/blog/tag/circleci.html">CircleCI</a> (1)</li>
-          <li><a href="https://mizunashi-mana.github.io/blog/tag/github.html">GitHub</a> (1)</li>
-          <li><a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a> (2)</li>
-          <li><a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a> (2)</li>
-    </ul>
+      <p>ブログの改良をちょっと色々やってたので，そのご報告．</p>
+<div class="section" id="circle-ci">
+<h2>Circle CI での謎の警告解消<a class="headerlink" href="#circle-ci" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>今まで Circle CI 上だと以下の警告が出てた:</p>
+<pre class="literal-block">
+WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system.
+</pre>
+<p>ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた．</p>
+<p>この警告は Pelican が出してるもので，以下が該当部分:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># https …</span></pre></div></td></tr></table></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/#fix-blog-config">    Continue reading
+</a>
   </div>
 </article>
+
+  <div class="pagination">
+  </div>
+
+
+
 
     <footer>
 <p>
