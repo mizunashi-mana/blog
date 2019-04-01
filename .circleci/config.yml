@@ -9,11 +9,10 @@ jobs:
       - run: git submodule update --init
 
       - run: |
-        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-          locales
-        update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
-        locale-gen ja_JP.UTF-8
-        DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
+          sudo sed -i 's/ja_JP\s.*$/ja_JP ja_JP.utf8/g' /usr/share/locale/locale.alias
+          sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
+          sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
+          DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
 
       - run: |
           [[ ! -d /usr/local/bin ]] || \
@@ -45,11 +44,10 @@ jobs:
       - run: git submodule update --init
 
       - run: |
-        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-          locales
-        update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
-        locale-gen ja_JP.UTF-8
-        DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
+          sudo sed -i 's/ja_JP\s.*$/ja_JP ja_JP.utf8/g' /usr/share/locale/locale.alias
+          sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
+          sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
+          DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
 
       - run: |
           [[ ! -d /usr/local/bin ]] || \
