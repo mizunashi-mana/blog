@@ -20,13 +20,13 @@ jobs:
           [[ ! -d /usr/local/lib/python3.6/site-packages ]] || \
             sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v1
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v2
       - run: |
           sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
       - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v1
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v2
           paths:
             - ".venv"
             - "/usr/local/bin"
@@ -54,7 +54,7 @@ jobs:
           [[ ! -d /usr/local/lib/python3.6/site-packages ]] || \
             sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v1
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v2
       - run: |
           sudo pip install --upgrade pip
           sudo pip install pipenv
