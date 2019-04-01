@@ -6,7 +6,7 @@
 調査不足だったり，よく分からない系とか徒然なるままな感じのことだったりとか，あと主に自分のためにしたこととかを書いていこっかなって感じです．&lt;/p&gt;
 &lt;p&gt;で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていく．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
-&lt;h2&gt;サイトジェネレータの選定基準&lt;/h2&gt;
+&lt;h2&gt;サイトジェネレータの選定基準&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， &lt;a class="reference external" href="https://www.staticgen.com/"&gt;https://www.staticgen.com/&lt;/a&gt; から見れるっぽい．だいたい人気の上位陣は，&lt;/p&gt;
 &lt;ul class="simple"&gt;
 &lt;li&gt;Jekyll&lt;/li&gt;
@@ -24,7 +24,7 @@
 調査不足だったり，よく分からない系とか徒然なるままな感じのことだったりとか，あと主に自分のためにしたこととかを書いていこっかなって感じです．&lt;/p&gt;
 &lt;p&gt;で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていく．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
-&lt;h2&gt;サイトジェネレータの選定基準&lt;/h2&gt;
+&lt;h2&gt;サイトジェネレータの選定基準&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， &lt;a class="reference external" href="https://www.staticgen.com/"&gt;https://www.staticgen.com/&lt;/a&gt; から見れるっぽい．だいたい人気の上位陣は，&lt;/p&gt;
 &lt;ul class="simple"&gt;
 &lt;li&gt;Jekyll&lt;/li&gt;
@@ -42,10 +42,10 @@
 &lt;p&gt;テーマも良さそうなのがあったし，設定も結構簡単だったので，とりあえず満足してる．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="pelican"&gt;
-&lt;h2&gt;Pelican の設定&lt;/h2&gt;
+&lt;h2&gt;Pelican の設定&lt;a class="headerlink" href="#pelican" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;a class="reference external" href="https://docs.getpelican.com/en/stable/quickstart.html"&gt;https://docs.getpelican.com/en/stable/quickstart.html&lt;/a&gt; を見ながら，適当に自分の必要な感じでカスタマイズしてやった．&lt;/p&gt;
 &lt;div class="section" id="pipenv"&gt;
-&lt;h3&gt;Pipenv の設定&lt;/h3&gt;
+&lt;h3&gt;Pipenv の設定&lt;a class="headerlink" href="#pipenv" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;まずは， Pipenv を使って依存ライブラリを入れてく:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
 pip install pipenv
@@ -53,7 +53,7 @@ pipenv install pelican
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-3"&gt;
-&lt;h3&gt;Pelican の設定&lt;/h3&gt;
+&lt;h3&gt;Pelican の設定&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
 &lt;pre class="literal-block"&gt;
 pipenv run pelican-quickstart
 &lt;/pre&gt;
@@ -91,7 +91,7 @@ pipenv install ghp-import
 &lt;p&gt;みたいな構成にした (&lt;tt class="docutils literal"&gt;asset&lt;/tt&gt; 以外は標準の配置) ．後 &lt;tt class="docutils literal"&gt;asset&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;STATIC_PATHS&lt;/tt&gt; に指定して Pelican にコピーしてもらう必要があるので，それもやった．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-4"&gt;
-&lt;h3&gt;テーマの選別&lt;/h3&gt;
+&lt;h3&gt;テーマの選別&lt;a class="headerlink" href="#auto-id-4" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;だいぶ見にくいけど， &lt;a class="reference external" href="http://www.pelicanthemes.com/"&gt;http://www.pelicanthemes.com/&lt;/a&gt; からテーマが色々見れるっぽい．とりあえず良さそうで開発も活発そうな &lt;a class="reference external" href="https://github.com/alexandrevicenzi/Flex"&gt;Flex&lt;/a&gt; を使うことにした．&lt;/p&gt;
 &lt;p&gt;Git submodule を使ってテーマをリポジトリに追加する:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
@@ -104,7 +104,7 @@ THEME = './themes/Flex'
 &lt;p&gt;&lt;a class="reference external" href="https://github.com/alexandrevicenzi/Flex/tree/master/docs"&gt;https://github.com/alexandrevicenzi/Flex/tree/master/docs&lt;/a&gt; を参考に &lt;tt class="docutils literal"&gt;pelicanconf.py&lt;/tt&gt; を色々修正．後，気になったデザインを修正して， &lt;tt class="docutils literal"&gt;content/asset/custom.css&lt;/tt&gt; に置いた．これを &lt;tt class="docutils literal"&gt;CUSTOM_CSS&lt;/tt&gt; パラメータに指定すると Flex テーマが読み込んでくれる．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-5"&gt;
-&lt;h3&gt;プラグインの設定&lt;/h3&gt;
+&lt;h3&gt;プラグインの設定&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;公式プラグインが全て1つのリポジトリで管理されてるっぽい．とりあえずそれを， Git submodule で追加:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
 git submodule add https://github.com/getpelican/pelican-plugins.git plugins
@@ -121,7 +121,7 @@ PLUGIN_PATHS = ['plugins']
 &lt;p&gt;の2つを導入しといた．まあ，機を見て他にも導入したり導入やめたりするかも．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-6"&gt;
-&lt;h3&gt;プライバシーポリシーとか諸々の設置&lt;/h3&gt;
+&lt;h3&gt;プライバシーポリシーとか諸々の設置&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;左にある諸々を書いた． &lt;tt class="docutils literal"&gt;pages&lt;/tt&gt; 以下に置くと自動で認識して表示される．順番を制御したかったので， &lt;tt class="docutils literal"&gt;pelicanconf.py&lt;/tt&gt; に以下の記述を足した:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
 PAGES_SORT_ATTRIBUTE = 'source_path'
@@ -154,15 +154,15 @@ PAGES_SORT_ATTRIBUTE = 'source_path'
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class="section" id="github-pages"&gt;
-&lt;h2&gt;GitHub Pages の設定&lt;/h2&gt;
+&lt;h2&gt;GitHub Pages の設定&lt;a class="headerlink" href="#github-pages" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;div class="section" id="auto-id-9"&gt;
-&lt;h3&gt;GitHub Pages の有効化&lt;/h3&gt;
+&lt;h3&gt;GitHub Pages の有効化&lt;a class="headerlink" href="#auto-id-9" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;リポジトリの Settings から &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;gh-pages&lt;/span&gt;&lt;/tt&gt; ブランチの内容を GitHub Pages で表示させるようにした．&lt;/p&gt;
 &lt;p&gt;後，パーソナルサイトは今の所作る予定がないので， &lt;a class="reference external" href="https://mizunashi-mana.github.io/"&gt;https://mizunashi-mana.github.io/&lt;/a&gt; は &lt;a class="reference external" href="https://mizunashi-mana.github.io/blog/"&gt;https://mizunashi-mana.github.io/blog/&lt;/a&gt; にリダイレクトされるようにした．内容は &lt;a class="reference external" href="https://github.com/mizunashi-mana/mizunashi-mana.github.io/blob/ed6aebc132267360a7ccd95717d7b5fe64ec7fa2/index.html"&gt;https://github.com/mizunashi-mana/mizunashi-mana.github.io/blob/ed6aebc132267360a7ccd95717d7b5fe64ec7fa2/index.html&lt;/a&gt; にあるけど，単純に &lt;tt class="docutils literal"&gt;refresh&lt;/tt&gt; でリダイレクト指定して，それでだめなら JavaScript にフォールバックする感じ．&lt;/p&gt;
 &lt;p&gt;これで， &lt;tt class="docutils literal"&gt;make github&lt;/tt&gt; すると GitHub Pages にデプロイされるようになる．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="circle-ci"&gt;
-&lt;h3&gt;Circle CI による自動デプロイ環境&lt;/h3&gt;
+&lt;h3&gt;Circle CI による自動デプロイ環境&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;事故を防ぐため， PR で記事を追加していくことにした． &lt;tt class="docutils literal"&gt;master&lt;/tt&gt; はプロテクトして基本プッシュせず， PR がマージされた時に Circle CI を回すようにした．&lt;/p&gt;
 &lt;p&gt;Circle CI は &lt;a class="reference external" href="https://circleci.com/docs/2.0/language-python/"&gt;https://circleci.com/docs/2.0/language-python/&lt;/a&gt; を参考に Python のバージョンを 3.7 にして，色々書くみたいなことやった．最終的な内容は， &lt;a class="reference external" href="https://github.com/mizunashi-mana/blog/blob/master/.circleci/config.yml"&gt;https://github.com/mizunashi-mana/blog/blob/master/.circleci/config.yml&lt;/a&gt; から見れるので気になったらどうぞ．&lt;/p&gt;
 &lt;p&gt;後， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;gh-pages&lt;/span&gt;&lt;/tt&gt; の方はビルドを止めるため，何のタスクもない設定ファイルを追加した:&lt;/p&gt;
@@ -176,7 +176,7 @@ workflows:
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-10"&gt;
-&lt;h2&gt;他にやりたいこと&lt;/h2&gt;
+&lt;h2&gt;他にやりたいこと&lt;a class="headerlink" href="#auto-id-10" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;現状幾つか解決したい問題と追加したい機能もあって，&lt;/p&gt;
 &lt;ul class="simple"&gt;
 &lt;li&gt;VSCode の reStructuredText プラグインのアンダーライン補完が日本語だとうまく動かないので，これを修正したい．&lt;/li&gt;
@@ -200,7 +200,7 @@ docutils の方は East-Asian Width を考慮して換算してるっぽくて &
 &lt;p&gt;(やるとは言っていない)&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-14"&gt;
-&lt;h2&gt;あまり乗り気じゃないもの&lt;/h2&gt;
+&lt;h2&gt;あまり乗り気じゃないもの&lt;a class="headerlink" href="#auto-id-14" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;以下は一応考えてはいるけど，現状あんまり乗り気じゃないもの．&lt;/p&gt;
 &lt;ul class="simple"&gt;
 &lt;li&gt;広告表示&lt;/li&gt;
@@ -215,7 +215,7 @@ docutils の方は East-Asian Width を考慮して換算してるっぽくて &
 &lt;p&gt;GDPR (ePrivacy) 対応は現状は特に Cookie を使用していないので問題ないはず．今後 Google Analytics や Google Adsense を導入する場合どうなるかの話だけど，正直どういう対応をすればいいか分からないので保留中．まあ， Cookie の制限については， ポップアップで Cookie の同意をとってから Google Analytics のコードとかを起動すればいいだけだし，その他については Google Analytics は修正条項が適用されたモードで起動すれば大丈夫っぽい．ただそもそも日本語で書かれたマイナーコンテンツを EU 圏がそこまで見るかって話だし，熱心に対応する予定はない．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-15"&gt;
-&lt;h2&gt;まとめ&lt;/h2&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-15" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;雑に続けていければなと思うので，よろしくお願いします．&lt;/p&gt;
 &lt;table class="docutils footnote" frame="void" id="docutils-column-width" rules="none"&gt;
 &lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;

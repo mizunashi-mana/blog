@@ -5,3 +5,12 @@ article.single {
 dl.docutils dt {
   padding: .5em;
 }
+
+i.fa-link.anchor-link {
+  margin-left: 1em;
+  font-size: 90%;
+}
+
+i.fa-link.anchor-link:not(:hover) {
+  color: lightgray;
+}
