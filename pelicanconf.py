@@ -44,8 +44,8 @@ MAIN_MENU = True
 TIMEZONE = 'Asia/Tokyo'
 
 DEFAULT_LANG = 'ja'
-OG_LOCALE = 'ja_JP'
 LOCALE = 'ja_JP'
+OG_LOCALE = DEFAULT_LANG
 
 # Feed generation is usually not desired when developing
 FEED_ALL_RSS = 'feeds/all.rss.xml'
@@ -96,10 +96,15 @@ PYGMENTS_RST_OPTIONS = {
   'linenos': 'table',
 }
 
-PLUGIN_PATHS = ['plugins']
+PLUGIN_PATHS = [
+  'plugins/official',
+  'plugins/custom',
+]
 PLUGINS = [
   'tipue_search',
   'related_posts',
+  'headerid',
+  # 'article-sharebutton',
 ]
 
 RELATIVE_URLS = True
@@ -107,3 +112,5 @@ RELATIVE_URLS = True
 DOCUTILS_SETTINGS = {
   'auto_id_prefix': 'auto-id-',
 }
+
+HEADERID_LINK_CHAR = '<i class="fas fa-link anchor-link"></i>'
