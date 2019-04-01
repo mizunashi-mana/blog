@@ -31,7 +31,6 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
-            - "/var/lib/apt/lists"
 
       - run: make html
       - run: make publish
