@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguramingu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-03T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Python の datetime が難しい</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/" rel="alternate"></link><published>2019-04-03T00:00:00+09:00</published><updated>2019-04-03T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-03:/blog/posts/2019/04/python-datetime/</id><summary type="html">&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+&lt;div class="section" id="aware-naive"&gt;
+&lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;
+&lt;p&gt;そもそもドキュメントをちゃんと読めという話なんだけど， &lt;a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html"&gt;https://docs.python.org/ja/3/library/datetime.html&lt;/a&gt; で普通に説明されている．端的に言えば，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;aware: 実時刻を表し，タイムゾーンや夏時間情報を持つ．&lt;/li&gt;
+&lt;li&gt;naive: 時刻情報だけを表現する．タイムゾーンなどの情報は持たず，その時刻がどういう意味を持つかは処理する側に委ねられる．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;の2種類があるらしい． aware か naive かは， &lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; プロパティが &lt;tt class="docutils literal"&gt;None …&lt;/tt&gt;&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+&lt;div class="section" id="aware-naive"&gt;
+&lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;
+&lt;p&gt;そもそもドキュメントをちゃんと読めという話なんだけど， &lt;a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html"&gt;https://docs.python.org/ja/3/library/datetime.html&lt;/a&gt; で普通に説明されている．端的に言えば，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;aware: 実時刻を表し，タイムゾーンや夏時間情報を持つ．&lt;/li&gt;
+&lt;li&gt;naive: 時刻情報だけを表現する．タイムゾーンなどの情報は持たず，その時刻がどういう意味を持つかは処理する側に委ねられる．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;の2種類があるらしい． aware か naive かは， &lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; プロパティが &lt;tt class="docutils literal"&gt;None&lt;/tt&gt; かどうかで判定できる． &lt;tt class="docutils literal"&gt;None&lt;/tt&gt; なら naive になる．ところで，ほとんどの場合 &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールの API は naive なオブジェクトを製造する． &lt;tt class="docutils literal"&gt;datetime.datetime.now()&lt;/tt&gt; でさえ naive な &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトを返す． aware なオブジェクトを取得したい場合明確にタイムゾーン情報を指定する必要がある．例えば，現在時刻を UTC で取得したい場合， &lt;tt class="docutils literal"&gt;datetime.datetime.utcnow()&lt;/tt&gt; ではなく， &lt;tt class="docutils literal"&gt;datetime.datetime.now(datetime.timezone.utc)&lt;/tt&gt; と書く．前者は naive なオブジェクトになり，後者は aware なオブジェクトになる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="aware-naive-tzinfo"&gt;
+&lt;h2&gt;aware / naive の相互変換と tzinfo&lt;a class="headerlink" href="#aware-naive-tzinfo" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;それぞれのオブジェクトの相互変換は， &lt;tt class="docutils literal"&gt;replace&lt;/tt&gt; を使うことで以下のように可能:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+def aware_to_naive(d):
+  return d.replace(tzinfo=None)
+
+def naive_to_aware(d, tzinfo):
+  return d.replace(tzinfo=tzinfo)
+&lt;/pre&gt;
+&lt;p&gt;3.5 までは， naive と aware の区別はかなり厳密で，例えば &lt;tt class="docutils literal"&gt;astimezone&lt;/tt&gt; は naive に対しては呼べなかった．これは， 3.6 で実行環境のローカルなタイムゾーンによる時刻だと解釈して呼ばれるよう変更されている．&lt;/p&gt;
+&lt;p&gt;なお，呼び方によって naive と aware のどちらが返ってくるかが別れる API も幾つかある． &lt;tt class="docutils literal"&gt;strptime&lt;/tt&gt; はタイムゾーン指定があると aware なオブジェクトを返し，ないと naive なオブジェクトを返す:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; datetime.datetime.strptime('2019-01-01T00:00:00Z', '%Y-%m-%dT%H:%M:%S%z')
+datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
+&amp;gt;&amp;gt;&amp;gt; datetime.datetime.strptime('2019-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S')
+datetime.datetime(2019, 1, 1, 0, 0)
+&lt;/pre&gt;
+&lt;p&gt;ロケール込みの情報としてパースしたい場合，タイムゾーン情報を明示的に付与して aware に変換する必要がある:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; datetime.datetime.strptime('2019-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S') \
+...   .replace(tzinfo=datetime.timezone.utc)
+datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; は抽象クラスになっていて，自分でカスタムしたオブジェクトを作れるようになっている．標準的にはタイムゾーン情報を元にした &lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; オブジェクトの実装を提供する &lt;tt class="docutils literal"&gt;timezone&lt;/tt&gt; クラスを使っておけば問題ない． &lt;tt class="docutils literal"&gt;timezone&lt;/tt&gt; オブジェクトは UTC からの時間差から作成できる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; datetime.datetime.strptime('2019-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S') \
+...   .replace(tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=32400)))
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ちゃんとドキュメントは読もうと思いました (まる) ． &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュール， 3.5 - 3.7 の間に結構変わってて厳しい気持ちになる． &lt;tt class="docutils literal"&gt;fromisoformat&lt;/tt&gt; が使えるのは 3.7 からだし， &lt;tt class="docutils literal"&gt;strptime&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;%Z&lt;/tt&gt; で「:」付きの表現をパースしてくれるのも 3.7 からっぽい．&lt;/p&gt;
+&lt;p&gt;世の中は厳しいなあって感じでした．&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="Python"></category><category term="標準ライブラリ"></category></entry></feed>

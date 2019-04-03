@@ -47,7 +47,7 @@
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog"/>
 <meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
 
-  <title>続くといいな日記 &ndash;     Categories
+  <title>続くといいな日記 &ndash;     Tag 標準ライブラリ
 </title>
 
 </head>
@@ -117,18 +117,42 @@
 </a>
     </nav>
 
-<article class="single">
+
+
+<article>
   <header>
-    <h1>    Categories
-</h1>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/#python-datetime">Python の datetime が難しい</a></h2>
+    <p>
+          Posted on 水 03 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguramingu.html">プログラミング</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/biao-zhun-raiburari.html">標準ライブラリ</a>
+    </p>
   </header>
   <div>
-    <ul class="list">
-      <li><a href="https://mizunashi-mana.github.io/blog/category/puroguramingu.html">プログラミング</a> (1)</li>
-      <li><a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a> (2)</li>
-    </ul>
+      <p>色々ハマったので，メモをしておく．</p>
+<div class="section" id="aware-naive">
+<h2>aware と naive<a class="headerlink" href="#aware-naive" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Python の <tt class="docutils literal">datetime</tt> モジュールでは，日付情報を表現する <tt class="docutils literal">date</tt> オブジェクト，日中時間を表現する <tt class="docutils literal">time</tt> オブジェクト，そしてその両方の組である <tt class="docutils literal">datetime</tt> オブジェクトが提供されている．そして，実は <tt class="docutils literal">datetime</tt> オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．</p>
+<p>そもそもドキュメントをちゃんと読めという話なんだけど， <a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html">https://docs.python.org/ja/3/library/datetime.html</a> で普通に説明されている．端的に言えば，</p>
+<ul class="simple">
+<li>aware: 実時刻を表し，タイムゾーンや夏時間情報を持つ．</li>
+<li>naive: 時刻情報だけを表現する．タイムゾーンなどの情報は持たず，その時刻がどういう意味を持つかは処理する側に委ねられる．</li>
+</ul>
+<p>の2種類があるらしい． aware か naive かは， <tt class="docutils literal">tzinfo</tt> プロパティが <tt class="docutils literal">None …</tt></p></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/#python-datetime">    Continue reading
+</a>
   </div>
 </article>
+
+  <div class="pagination">
+  </div>
+
+
+
 
     <footer>
 <p>
