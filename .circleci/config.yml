@@ -3,7 +3,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/python:3.7-stretch
+      - image: circleci/python:3.7-node
     steps:
       - checkout
       - run: git submodule update --init
@@ -20,24 +20,26 @@ jobs:
           [[ ! -d /usr/local/lib/python3.6/site-packages ]] || \
             sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v2
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v3
       - run: |
           sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
+          npm install -D
       - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v2
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v3
           paths:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
+            - "./node_modules"
 
       - run: make html
       - run: make publish
 
   deploy:
     docker:
-      - image: circleci/python:3.7-stretch
+      - image: circleci/python:3.7-node
     steps:
       - checkout
       - run: git submodule update --init
@@ -54,11 +56,12 @@ jobs:
           [[ ! -d /usr/local/lib/python3.6/site-packages ]] || \
             sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v2
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v3
       - run: |
           sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
+          npm install -D
 
       - run: |
           git config user.name "release-bot"
