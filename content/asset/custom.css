@@ -14,3 +14,28 @@ i.fa-link.anchor-link {
 i.fa-link.anchor-link:not(:hover) {
   color: lightgray;
 }
+
+div.sharebuttons {
+  display: flex;
+}
+
+div.sharebuttons ul.social li {
+  margin-left: 5px;
+}
+
+div.sharebuttons ul.social a {
+  color: #ffffff;
+}
+
+
+ul.social a.sc-clipboard {
+  background-color: lightslategray;
+}
+
+ul.social a.sc-get-pocket {
+  background-color: lightcoral;
+}
+
+ul.social a.sc-code {
+  background-color: gray;
+}

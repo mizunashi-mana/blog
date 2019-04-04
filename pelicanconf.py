@@ -24,10 +24,12 @@ PATH = 'content'
 STATIC_PATHS = [
   '.circleci',
   'asset',
+  'dist-asset',
 ]
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
 CUSTOM_CSS = 'asset/custom.css'
+JS_FILE = '/dist-asset/bundle.js'
 
 BROWSER_COLOR = '#333'
 ROBOTS = 'index, follow'
@@ -104,7 +106,7 @@ PLUGINS = [
   'tipue_search',
   'related_posts',
   'headerid',
-  # 'article-sharebutton',
+  'embed_customjs',
 ]
 
 RELATIVE_URLS = True

@@ -1,0 +1,3 @@
+import 'katex';
+
+import './main';
