@@ -20,7 +20,7 @@ export function addShareButtons(metadata) {
               <i v-bind:class="[
                 ['envelope', 'rss', 'code', 'clipboard'].includes(item.name) ? 'fas' : 'fab',
                 'fa-' + item.name
-              ]">
+              ]"></i>
             </a>
           </li>
         </ul>
