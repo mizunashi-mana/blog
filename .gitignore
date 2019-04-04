@@ -10,7 +10,11 @@
 
 # for pelican
 /output/
+/content/dist-asset/
 
 # for python
 __pycache__/
 *.pyc
+
+# for npm
+/node_modules/
