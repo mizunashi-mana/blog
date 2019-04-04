@@ -165,7 +165,7 @@ WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid
 15</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># https://github.com/getpelican/pelican/blob/4.0.1/pelican/settings.py#L500</span>
 
 <span class="c1"># try to set the different locales, fallback on the default.</span>
-<span class="n">locales</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;LOCALE&#39;</span><span class="p">,</span> <span class="n">DEFAULT_CONFIG</span><span class="p">[</span><span class="s1">&#39;LOCALE&#39;</span><span class="p">])</span>
+<span class="n">locales</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'LOCALE'</span><span class="p">,</span> <span class="n">DEFAULT_CONFIG</span><span class="p">[</span><span class="s1">'LOCALE'</span><span class="p">])</span>
 
 <span class="k">for</span> <span class="n">locale_</span> <span class="ow">in</span> <span class="n">locales</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
@@ -175,18 +175,18 @@ WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid
         <span class="k">pass</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="s2">&quot;Locale could not be set. Check the LOCALE setting, ensuring it &quot;</span>
-        <span class="s2">&quot;is valid and available on your system.&quot;</span><span class="p">)</span>
+        <span class="s2">"Locale could not be set. Check the LOCALE setting, ensuring it "</span>
+        <span class="s2">"is valid and available on your system."</span><span class="p">)</span>
 </pre></div>
 </td></tr></table><p>どうやら <tt class="docutils literal">locale.setlocale</tt> が <tt class="docutils literal">ja_JP</tt> を設定しようとするとエラーを出してるっぽい．</p>
 <p>Circle CI の良いところは Docker イメージをそのまま使ってくれるのでエラーの特定が楽ってところ．
 というわけで，実際にどういうエラーを吐いて警告が出るに至ってるのか， Docker で調べてみた:</p>
 <pre class="literal-block">
 $ docker run -it circleci/python:3.7 bash
-circleci:/$ python -c 'import locale; locale.setlocale(locale.LC_ALL, &quot;ja_JP&quot;)'
+circleci:/$ python -c 'import locale; locale.setlocale(locale.LC_ALL, "ja_JP")'
 Traceback (most recent call last):
-  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
-  File &quot;/usr/local/lib/python3.7/locale.py&quot;, line 604, in setlocale
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+  File "/usr/local/lib/python3.7/locale.py", line 604, in setlocale
     return _setlocale(category, locale)
 locale.Error: unsupported locale setting
 </pre>
@@ -240,7 +240,7 @@ ja_JP.utf8
 <h2>アンカーリンクの追加<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>各節に飛ぶリンクを表示するようにした．これは， <a class="reference external" href="https://github.com/getpelican/pelican-plugins/tree/master/headerid">headerid</a> というプラグインがありこれを使った．単に <tt class="docutils literal">pelicanconf.py</tt> に</p>
 <pre class="literal-block">
-HEADERID_LINK_CHAR = '&lt;i class=&quot;fas fa-link anchor-link&quot;&gt;&lt;/i&gt;'
+HEADERID_LINK_CHAR = '&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;'
 </pre>
 <p>を足して，ちょっとデザインとかをいじっただけ．</p>
 <p>(ところで幾つかプラグインの実装を見てたんだけど，みんな HTML を Beautiful Soup でパースしてゴリ押ししてたりするんだが，大丈夫なんか... こういうもんなんだろうか...)</p>
@@ -287,19 +287,27 @@ HEADERID_LINK_CHAR = '&lt;i class=&quot;fas fa-link anchor-link&quot;&gt;&lt;/i&
 <h2>今後について<a class="headerlink" href="#auto-id-9" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>ちょっと最近忙しいので，次の記事投稿まで期間開くかもだけど，落ち着いたら色々書くかも．こちらからは，以上です．</p>
 <table class="docutils footnote" frame="void" id="circleci-python-images" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
+<colgroup><col class="label"/><col/></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td><a class="reference external" href="https://circleci.com/docs/2.0/circleci-images/#python">https://circleci.com/docs/2.0/circleci-images/#python</a></td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="eaw-problem" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
+<colgroup><col class="label"/><col/></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#auto-id-5">[2]</a></td><td><a class="reference external" href="https://github.com/hamano/locale-eaw">https://github.com/hamano/locale-eaw</a></td></tr>
 </tbody>
 </table>
 </div>
-
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/fix-blog-config.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/fix-blog-config.rst'
+}
+</script><script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
   </div>
   <div class="tag-cloud">
     <p>

@@ -55,4 +55,12 @@ datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(
 &lt;p&gt;ちゃんとドキュメントは読もうと思いました (まる) ． &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュール， 3.5 - 3.7 の間に結構変わってて厳しい気持ちになる． &lt;tt class="docutils literal"&gt;fromisoformat&lt;/tt&gt; が使えるのは 3.7 からだし， &lt;tt class="docutils literal"&gt;strptime&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;%Z&lt;/tt&gt; で「:」付きの表現をパースしてくれるのも 3.7 からっぽい．&lt;/p&gt;
 &lt;p&gt;世の中は厳しいなあって感じでした．&lt;/p&gt;
 &lt;/div&gt;
-</content><category term="Python"></category><category term="標準ライブラリ"></category></entry></feed>
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/python-datetime.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/python-datetime.rst'
+}
+&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Python"></category><category term="標準ライブラリ"></category></entry></feed>
