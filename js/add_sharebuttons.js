@@ -1,47 +1,4 @@
 import Vue from 'vue';
-import Handlebars from 'handlebars';
-
-Handlebars.registerHelper('includeitems', function (item, options) {
-  let delim = options.hash['delimiter'];
-  if (delim === undefined) {
-    delim = ' ';
-  }
-
-  let name = options.hash['name'];
-  if (name === undefined) {
-    name = 'condition';
-  }
-
-  const items = options.hash['items'].split(delim);
-
-  const context = Object.assign({}, this);
-  context[name] = items.includes(item);
-
-  return options.fn(context, {
-    data: options.data,
-    blockParams: [context]
-  });
-});
-
-const shareButtonsTemplate = Handlebars.compile(`
-<div class="sharebuttons">
-  <ul class="social">
-  {{#each linkitems}}
-    <li>
-      {{#includeitems name name='isme' items='mastodon'}}
-      <a {{#if isme}}rel="me"{{/if}} class="sc-{{name}}" href="{{link}}" title="{{title}}" target="_blank">
-      {{/includeitems}}
-      {{#includeitems name name='isfas' items='envelope rss code clipboard'}}
-        <i class="{{#if isfas}}fas{{else}}fab{{/if}} fa-{{name}}">
-      {{/includeitems}}
-      </a>
-    </li>
-  {{/each}}
-  </ul>
-</div>
-`, {
-  noEscape: true,
-});
 
 export function addShareButtons(metadata) {
   const title = metadata.title;
@@ -49,8 +6,28 @@ export function addShareButtons(metadata) {
   const github_url = metadata.github_url;
 
   const componentShareButtons = new Vue({
-    template: shareButtonsTemplate({
-      linkitems: [
+    template: `
+      <div class="sharebuttons">
+        <ul class="social">
+          <li v-for="item in items">
+            <a
+              v-bind:rel="['mastodon'].includes(item.name) ? 'me' : ''"
+              v-bind:class="'sc-' + item.name"
+              v-bind:href="item.link"
+              v-bind:title="item.title"
+              target="_blank"
+              >
+              <i v-bind:class="[
+                ['envelope', 'rss', 'code', 'clipboard'].includes(item.name) ? 'fas' : 'fab',
+                'fa-' + item.name
+              ]">
+            </a>
+          </li>
+        </ul>
+      </div>
+      `,
+    data: {
+      items: [
         {
           name: 'code',
           title: 'Lookup raw code to GitHub',
@@ -77,7 +54,7 @@ export function addShareButtons(metadata) {
           link: '#'
         }*/
       ]
-    }),
+    },
   }).$mount();
   const content = document.querySelector("article.single div");
   content.parentNode.insertBefore(

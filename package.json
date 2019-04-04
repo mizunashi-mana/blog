@@ -5,7 +5,6 @@
   "description": "blog's frontend",
   "main": "js/index.js",
   "dependencies": {
-    "handlebars": "^4.1.1",
     "katex": "^0.10.1",
     "vue": "^2.6.10"
   },
