@@ -30,7 +30,7 @@ export function addShareButtons(metadata) {
       items: [
         {
           name: 'code',
-          title: 'Lookup raw code to GitHub',
+          title: 'Lookup the raw code of this post on GitHub',
           link: github_url,
         },
         {
@@ -51,7 +51,7 @@ export function addShareButtons(metadata) {
         /*{
           name: 'clipboard',
           title: 'Copy post summary to Clipboard for share',
-          link: '#'
+          link: ''
         }*/
       ]
     },
