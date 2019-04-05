@@ -25,7 +25,7 @@ jobs:
           sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
-          npm install -D
+          npm install
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v3
           paths:
@@ -61,7 +61,7 @@ jobs:
           sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
-          npm install -D
+          npm install
 
       - run: |
           git config user.name "release-bot"
