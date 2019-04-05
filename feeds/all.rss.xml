@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Wed, 03 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>Python の datetime が難しい</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/</link><description>&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Fri, 05 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>ブログに共有ボタンを追加した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/</link><description>&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;
+&lt;p&gt;また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう．&lt;/p&gt;
+&lt;p&gt;で，結構色々大変だったので，記事にまとめておくことにした．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="pelican"&gt;
+&lt;h2&gt;Pelican のプラグイン追加&lt;a class="headerlink" href="#pelican" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした．&lt;/p&gt;
+&lt;p&gt;プラグインの作り方は， &lt;a class="reference external" href="https://docs.getpelican.com/en/stable/plugins.html#how-to-create-plugins"&gt;https://docs.getpelican.com/en/stable/plugins.html …&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Fri, 05 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-05:/blog/posts/2019/04/add-share-button/</guid><category>Pelican</category><category>ブログ</category><category>Python</category><category>JavaScript</category></item><item><title>Python の datetime が難しい</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/</link><description>&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
 &lt;div class="section" id="aware-naive"&gt;
 &lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;

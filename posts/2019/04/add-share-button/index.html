@@ -1,0 +1,323 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/asset/custom.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#333">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#333">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#333">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="ブログに共有ボタンを追加して， JavaScript を呼べるようにした． 導入までの経緯 Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした． また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう． で，結構色々大変だったので，記事にまとめておくことにした． Pelican のプラグイン追加 まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした． プラグインの作り方は， https://docs.getpelican.com/en/stable/plugins.html …" />
+<meta name="keywords" content="Pelican, ブログ, Python, JavaScript">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="ブログに共有ボタンを追加した"/>
+<meta property="og:description" content="ブログに共有ボタンを追加して， JavaScript を呼べるようにした． 導入までの経緯 Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした． また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう． で，結構色々大変だったので，記事にまとめておくことにした． Pelican のプラグイン追加 まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした． プラグインの作り方は， https://docs.getpelican.com/en/stable/plugins.html …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-04-05 00:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="Pelican"/>
+<meta property="article:tag" content="ブログ"/>
+<meta property="article:tag" content="Python"/>
+<meta property="article:tag" content="JavaScript"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; ブログに共有ボタンを追加した</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="add-share-button">ブログに共有ボタンを追加した</h1>
+    <p>
+          Posted on 金 05 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>ブログに共有ボタンを追加して， JavaScript を呼べるようにした．</p>
+<div class="section" id="auto-id-2">
+<h2>導入までの経緯<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．</p>
+<p>また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう．</p>
+<p>で，結構色々大変だったので，記事にまとめておくことにした．</p>
+</div>
+<div class="section" id="pelican">
+<h2>Pelican のプラグイン追加<a class="headerlink" href="#pelican" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした．</p>
+<p>プラグインの作り方は， <a class="reference external" href="https://docs.getpelican.com/en/stable/plugins.html#how-to-create-plugins">https://docs.getpelican.com/en/stable/plugins.html#how-to-create-plugins</a> を見れば概要は載ってるが，正直分からない．基本的には， <tt class="docutils literal">signals</tt> をインポートして， <tt class="docutils literal">register</tt> 関数でフックしたいイベントを登録する．イベントが呼ばれる位置は， Pelican のソースを見るしかない．そして見ても分からない．</p>
+<p>しょうがないので， <a class="reference external" href="https://docs.getpelican.com/en/stable/plugins.html#how-to-create-plugins">プラグインのソース</a> を見ながらニュアンスでやっていくしかない．とりあえず， <a class="reference external" href="https://github.com/getpelican/pelican-plugins/blob/master/better_tables/better_tables.py">better_tables プラグインのソース</a> を見てみると， <tt class="docutils literal">content_object_init</tt> をフックするとそれぞれのページ内容がレンダリングされた HTML を弄れることが分かる．主に，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">convert_content</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+  <span class="n">content</span><span class="o">.</span><span class="n">_content</span> <span class="o">=</span> <span class="n">some_process</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">_content</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">register</span><span class="p">():</span>
+  <span class="n">signals</span><span class="o">.</span><span class="n">content_object_init</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert_content</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>的なことを書くと，それぞれのページ内容に対して <tt class="docutils literal">convert_content</tt> が呼ばれ， <tt class="docutils literal">content._content</tt> にレンダリングされた内容が文字列で入っているためそれを弄ることができるようだ．気をつけて欲しいのは，レンダリングされた内容はあくまで reStructuredText などを HTML に変換した内容であってそれぞれのテーマの全 HTML がとれるわけではないことだ．</p>
+<p>今回はこの <tt class="docutils literal">content_object_init</tt> を使って適当に HTML を BeautifulSoup を使ってパースし，最後の方にページのメタ情報と JavaScript ファイルを埋め込んでいる．かなり雑だがソースは， <a class="reference external" href="https://github.com/mizunashi-mana/blog/tree/master/plugins/custom/embed_customjs">https://github.com/mizunashi-mana/blog/tree/master/plugins/custom/embed_customjs</a> から見れる． <tt class="docutils literal">pelicanconf.py</tt> に <tt class="docutils literal">JS_FILE</tt> で埋め込みたい JavaScript ファイルを指定するとそのファイルを埋め込むようになっている．あと，ページ内容ごとのメタデータを埋め込んでいる．</p>
+</div>
+<div class="section" id="js">
+<h2>共有ボタン追加の JS コード<a class="headerlink" href="#js" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>後は共有ボタン追加の JavaScript を書くだけだ．まず適当に webpack の設定を以下のように書いた</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">webpack</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'webpack'</span><span class="p">);</span>
+<span class="kr">const</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'path'</span><span class="p">);</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">mode</span><span class="o">:</span> <span class="s1">'production'</span><span class="p">,</span>
+
+  <span class="nx">entry</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">bundle</span><span class="o">:</span> <span class="s1">'./js/index.js'</span><span class="p">,</span>
+  <span class="p">},</span>
+
+  <span class="nx">output</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">filename</span><span class="o">:</span> <span class="s1">'[name].js'</span><span class="p">,</span>
+    <span class="nx">path</span><span class="o">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'content/dist-asset'</span><span class="p">)</span>
+  <span class="p">},</span>
+
+  <span class="nx">resolve</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">alias</span><span class="o">:</span> <span class="p">{</span>
+      <span class="nx">vue$</span><span class="o">:</span> <span class="s1">'vue/dist/vue.esm.js'</span><span class="p">,</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+
+  <span class="nx">performance</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">maxEntrypointSize</span><span class="o">:</span> <span class="mi">400</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="nx">maxAssetSize</span><span class="o">:</span> <span class="mi">400</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>
+  <span class="p">},</span>
+<span class="p">};</span>
+</pre></div>
+</td></tr></table><p>バンドル後のスクリプトは vue を埋め込むと webpack 標準のサイズ上限を超えるので，適当に増やす．後，必要なものをインストールする:</p>
+<pre class="literal-block">
+npm init # 質問にいい感じに答える
+npm install -D webpack webpack-cli
+npm install -S vue
+</pre>
+<p>後は， DOM の読み込みイベントにリスナー追加して，そこで共有ボタンの DOM を追加するコードを走らせる． DOM は Vue.js で生成して追加．コードは， <a class="reference external" href="https://github.com/mizunashi-mana/blog/blob/master/js/add_sharebuttons.js">https://github.com/mizunashi-mana/blog/blob/master/js/add_sharebuttons.js</a> においてある．まあなんてことはない Vue のコードです，はい．</p>
+<p>生成したコードは， Flex テーマの <a class="reference external" href="https://github.com/alexandrevicenzi/Flex/blob/v2.2.0/templates/base.html#L122">Social の部分</a> を借りた．と言っても微調整は必要で，デザインをちょっちいじった．</p>
+</div>
+<div class="section" id="auto-id-4">
+<h2>まとめ<a class="headerlink" href="#auto-id-4" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ドキュメントがあまりない分野をいじるのはしんどかった．まあしゃあないね．</p>
+<p>JavaScript を任意に追加できるようになったので，数式環境を KaTeX でやるやつとかも近いうちにやりたい．ただ， KaTeX サポートは実はテーマの方でやってもらう方が良いのでは？ とも思っている．一度導入してみて，それを切り出して Flex テーマの方に PR 送ろうかな．</p>
+<p>てことで，今回は以上．</p>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/add-share-button.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/add-share-button.rst'
+}
+</script><script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/">ブログのデザイン調整</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/">ブログ始めました</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/">Python の datetime が難しい</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>
