@@ -14,9 +14,8 @@ https://mizunashi-mana.github.io/blog/
 ## Installation
 
 ```bash
-git clone https://github.com/mizunashi-mana/blog.git
+git clone --recurse-submodules https://github.com/mizunashi-mana/blog.git
 cd blog
-git submodule update --init
 pipenv install
 npm install
 make publish
