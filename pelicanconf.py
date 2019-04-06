@@ -31,7 +31,7 @@ FAVICON = '/asset/favicon.ico'
 CUSTOM_CSS = 'asset/custom.css'
 JS_FILE = '/dist-asset/bundle.js'
 
-BROWSER_COLOR = '#333'
+BROWSER_COLOR = '#555'
 ROBOTS = 'index, follow'
 
 CC_LICENSE = {
