@@ -7,7 +7,7 @@ dl.docutils dt {
 }
 
 i.fa-link.anchor-link {
-  margin-left: 1em;
+  margin-left: 0.8em;
   font-size: 90%;
 }
 
@@ -23,7 +23,24 @@ div.sharebuttons ul.social li {
   margin-left: 0.4em;
 }
 
-div.sharebuttons ul.social a {
+body {
+  color: #454545;
+}
+
+aside {
+  color: #222;
+  background-color: #eee;
+}
+
+aside a {
+  color: #222;
+}
+
+aside a:hover {
+  color: #444;
+}
+
+ul.social a {
   color: #ffffff;
 }
 
@@ -38,8 +55,4 @@ ul.social a.sc-get-pocket {
 
 ul.social a.sc-code {
   background-color: gray;
-}
-
-aside {
-  background-color: #555;
 }
