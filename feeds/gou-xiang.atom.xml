@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 構想</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/gou-xiang.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-07T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>GHC のノートコメントについてのあれこれ</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/ghc-compiler-notes/" rel="alternate"></link><published>2019-04-07T00:00:00+09:00</published><updated>2019-04-07T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-07:/blog/posts/2019/04/ghc-compiler-notes/</id><summary type="html">&lt;p&gt;&lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes"&gt;https://github.com/myuon/ghc-compiler-notes&lt;/a&gt; にコントリビュートしたので，それについてと考えてることとか書く．&lt;/p&gt;
+&lt;p&gt;なお， myuon さんによる紹介記事も参照: &lt;a class="reference external" href="https://myuon.github.io/posts/ghc-compiler-notes/"&gt;https://myuon.github.io/posts/ghc-compiler-notes/&lt;/a&gt;&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;GHC のノートコメント&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/coding-style#comments-in-the-source-code"&gt;GHC のコーディングガイド&lt;/a&gt; にも書いてあるが， GHC では長いコメントを書くとき，以下のように主要部分を切り出す運用をしている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;someFunc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt; &lt;span class="c1"&gt;-- See Note [The Answer To Life]&lt;/span&gt;
+  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;
+
+&lt;span class="cm"&gt;{- Note [The Answer To …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes"&gt;https://github.com/myuon/ghc-compiler-notes&lt;/a&gt; にコントリビュートしたので，それについてと考えてることとか書く．&lt;/p&gt;
+&lt;p&gt;なお， myuon さんによる紹介記事も参照: &lt;a class="reference external" href="https://myuon.github.io/posts/ghc-compiler-notes/"&gt;https://myuon.github.io/posts/ghc-compiler-notes/&lt;/a&gt;&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;GHC のノートコメント&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/coding-style#comments-in-the-source-code"&gt;GHC のコーディングガイド&lt;/a&gt; にも書いてあるが， GHC では長いコメントを書くとき，以下のように主要部分を切り出す運用をしている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;someFunc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt; &lt;span class="c1"&gt;-- See Note [The Answer To Life]&lt;/span&gt;
+  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;
+
+&lt;span class="cm"&gt;{- Note [The Answer To Life]&lt;/span&gt;
+&lt;span class="cm"&gt;~~~~~~~~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;
+
+&lt;span class="cm"&gt;"The Answer to the Ultimate Question of Life, the Universe, and Everything" is 42.&lt;/span&gt;
+&lt;span class="cm"&gt;After seven and a half million years of calculation, deep thoughts finally output the answer.&lt;/span&gt;
+&lt;span class="cm"&gt;-}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;例えば， &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/prelude/TysPrim.hs#L593"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/prelude/TysPrim.hs#L593&lt;/a&gt; のような感じ．内容は，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;実装上の注意事項やアドバイス&lt;/li&gt;
+&lt;li&gt;形式的なアルゴリズムの説明&lt;/li&gt;
+&lt;li&gt;API の使い方や使われ方&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;を含む色々． GHC 開発チーム向け以外にも， GHC で Haskell を書く上で重要なことが書いてある．例に挙げた type equality のまとめの他，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;The rules for map&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;&lt;tt class="docutils literal"&gt;map&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;RULES&lt;/tt&gt; がどういう挙動をするかの話&lt;/p&gt;
+&lt;p class="last"&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/libraries/base/GHC/Base.hs#L1119"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/libraries/base/GHC/Base.hs#L1119&lt;/a&gt;&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;The oneShot function&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;&lt;tt class="docutils literal"&gt;oneShot&lt;/tt&gt; 関数の概要&lt;/p&gt;
+&lt;p class="last"&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/basicTypes/MkId.hs#L1473"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/basicTypes/MkId.hs#L1473&lt;/a&gt;&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;Call Arity: The goal&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;call arity 解析の概要&lt;/p&gt;
+&lt;p class="last"&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/CallArity.hs#L35"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/CallArity.hs#L35&lt;/a&gt;&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;Choosing loop breakers&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;loop breaker をどのように選ぶかの話&lt;/p&gt;
+&lt;p class="last"&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/OccurAnal.hs#L279"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/OccurAnal.hs#L279&lt;/a&gt;&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;Join points&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;join points の概要&lt;/p&gt;
+&lt;p class="last"&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/FloatOut.hs#L112"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/FloatOut.hs#L112&lt;/a&gt;&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;など，より Haskell を理解する上で役に立つコメントも多い．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ghc-compiler-notes"&gt;
+&lt;h2&gt;GHC Compiler Notes&lt;a class="headerlink" href="#ghc-compiler-notes" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC のノートコメントは有用なことが書いてあり， GHC のリポジトリで管理されているためコードとの乖離も少ない．ただ，コードと一緒に書いてある分ノイズも多い． GHC の利用者としてはノートコメントだけを参照したい場合も多く，そこだけ抽出して見やすくできないかとは思っていた．で，半年前くらいに &lt;a class="reference external" href="https://twitter.com/myuon_myon"&gt;myuon さん&lt;/a&gt; と &lt;a class="reference external" href="https://twitter.com/waddlaw"&gt;waddlaw&lt;/a&gt; さんが，そういうプロジェクトを作っていると言う話を聞いて気になっていた．そのプロジェクトが上で挙げた &lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes"&gt;https://github.com/myuon/ghc-compiler-notes&lt;/a&gt; になる．&lt;/p&gt;
+&lt;p&gt;でちょっと前にノートコメントを参照することがあって，どうせならそのプロジェクトを利用してみるかという感じだったんだが，作りかけで止まっていたっぽかった．やる気と時間があったのでひとまず，完成させてみることにした．最初は結構簡単にいくやろと思っていたが結構難しかった．内部の仕組みは主に，&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;GHC API を利用して Haskell コードをトークン解析する．&lt;/li&gt;
+&lt;li&gt;トークンをパースして，ノートコメントに分割する．&lt;/li&gt;
+&lt;li&gt;分割されたノートコメントを統合して， reStructuredText 形式で吐き出す (この辺結構怪しい)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;という感じ．手間がかかったのが GHC API を利用する部分で， &lt;tt class="docutils literal"&gt;Show&lt;/tt&gt; インスタンスがないデータを使わされたり， &lt;tt class="docutils literal"&gt;DynFlags&lt;/tt&gt; が色んなとこにでてきたり， lazy I/O を気にしなきゃいけなかったり， export されてない関数を使う必要があったり，まあ色々大変だった．特に今回これをやるまで分かってなかったんだけど， GHC は Haskell ファイルを大体以下の手順で解析するらしい．&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;Lexer をヘッド部分 &lt;a class="footnote-reference" href="#get-options-range" id="auto-id-3"&gt;[1]&lt;/a&gt; まで走らせ，&lt;tt class="docutils literal"&gt;LANGUAGE&lt;/tt&gt; プラグマや &lt;tt class="docutils literal"&gt;OPTIONS_XXX&lt;/tt&gt; プラグマを読み込む．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;CPP&lt;/tt&gt; 拡張が指定されていれば， &lt;tt class="docutils literal"&gt;cpp&lt;/tt&gt; を走らせる．&lt;/li&gt;
+&lt;li&gt;Lexer によるトークン解析をする．&lt;/li&gt;
+&lt;li&gt;トークンをパースして， AST に変換する &lt;a class="footnote-reference" href="#parsing-hs" id="auto-id-4"&gt;[2]&lt;/a&gt;．&lt;/li&gt;
+&lt;li&gt;後は色々する．&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;後，通常 GHC はコメントを読み飛ばすが，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;Haddock モード&lt;/dt&gt;
+&lt;dd&gt;Haddock のドキュメントコメントを解析し，それもトークンに含める．&lt;/dd&gt;
+&lt;dt&gt;生のトークンを残すモード&lt;/dt&gt;
+&lt;dd&gt;本来なら削除するコメントトークンを，出力するトークンに含める．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;という2つのモードも提供されている．今回はこのどちらもを使用した．トークンに分割した後は， &lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes/blob/master/doc/ParsingNotes.md"&gt;https://github.com/myuon/ghc-compiler-notes/blob/master/doc/ParsingNotes.md&lt;/a&gt; に沿って大体 regular なパーシングをしていった．&lt;/p&gt;
+&lt;p&gt;最終的な成果物だが， PR を送った結果， myuon さんが解析結果をいい感じに整形するコードと Sphinx の設定を追加して Read the docs に上げてくれて，今は &lt;a class="reference external" href="https://ghc-compiler-notes.readthedocs.io/en/latest/"&gt;https://ghc-compiler-notes.readthedocs.io/en/latest/&lt;/a&gt; から見れるようになっている．検索もできるので，ぜひ参照してほしい．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-5"&gt;
+&lt;h2&gt;ノートコメントの文法&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ところでここからが本題なんだが，予想していたことではあるものの，解析は現状あまり上手くいっていない．ノートコメントの範囲を厳密に解析できていないのもそうなんだが，主に文法解釈が壊滅している． GHC のノートコメントは今まで何となく reStructuredText だと思っていたんだけど，少なくとも reStructuredText ではないっぽい．というか，何か形式化されている文法には則っていないんじゃないかと思っている．ちょっと調べた感じでは，この文法に従えというのは特に明記されておらず，事実ノートコメントは色んな文法に則って書かれている．&lt;/p&gt;
+&lt;p&gt;LaTeX の文法やHaskell Wiki の文法も度々散見されるが，多くはある一定の慣習 (これも時期と書く人によってかなりブレているんだが) に則って書かれてはいるようだ．&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;Section&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;*******&lt;/span&gt;&lt;/tt&gt; で両側を囲んで，それをさらに &lt;tt class="docutils literal"&gt;*&lt;/tt&gt; で囲み，その内側に題を書く．&lt;/dd&gt;
+&lt;dt&gt;Sub section&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;-&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;~&lt;/tt&gt; などで下線を引く．&lt;/dd&gt;
+&lt;dt&gt;Code block&lt;/dt&gt;
+&lt;dd&gt;インデントする．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;という感じだ．大体は reStructuredText より Markdown の文法に近いようであるが， &lt;a class="reference external" href="https://daringfireball.net/projects/markdown/syntax"&gt;古典的な Markdown&lt;/a&gt; では &lt;tt class="docutils literal"&gt;~&lt;/tt&gt; による下線を認めてない辺り，古き良き Markdown 寄り独自のマークアップの感じがする．この辺何か知っている人がいれば，色々教えてもらいたい．&lt;/p&gt;
+&lt;p&gt;さて，せっかく労力をかけたのにこのザマではちょっと悲しい．なので，この問題をなんとかする手を色々考え中だ．基本的な方針は変えようがなくて，「 GHC チームとコンタクトを取り， GHC のソースを修正する」だ．ただ，どのような提案をするかが問題になる．現状考えていることは，&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;形式的な仕様があるのか，形式的な仕様を策定 (既存のに乗っかる / 新たなマークアップ定義をする) しないかと提案する．&lt;ul&gt;
+&lt;li&gt;特に，コードブロックと引用，サブコンテンツは区別してほしい．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;明らかな現状の間違い (下線がないノートコメント / コードブロック表記が独自) を修正するリクエストを投げる．&lt;/li&gt;
+&lt;li&gt;形式的な仕様が策定されたらそれに合わせて GHC Compiler Notes を修正．既存の GHC コードもちょっとずつ修正するリクエストを投げていく．&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;という感じだ．これを Haskell Cafe か ghcdev のメーリングリストに投げてみようかなと考えている．気がかりなのは，これはあくまでプログラムによる自動解析のための修正だということだ．本来コメントは分かりやすさが正義だし，見栄えを気にするならそれこそ GHC Wiki に書くべきだろう．その辺の兼ね合いはどうなんだろうという気はしなくもない．&lt;/p&gt;
+&lt;p&gt;まあ，提案が reject されればそれはそれだし，とりあえず提案してみようかなという気にはなっている．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-6"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;というわけで， GHC Compiler Notes にコントリビュートして，あれこれ考えた話を書いた．時間があれば，提案の文面考えて適当に投げていきたい．以上．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="get-options-range" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-3"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;ほぼ &lt;tt class="docutils literal"&gt;module&lt;/tt&gt; キーワードまでと思って良い．厳密には， &lt;tt class="docutils literal"&gt;CPP&lt;/tt&gt; とかが入ったりすると違ったりするんだが．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="parsing-hs" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;この時完全に構文が解析されるわけではなくて，演算子の優先順位の解決とかはリネーム時に行われる．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/ghc-compiler-notes.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/ghc-compiler-notes.rst'
+}
+&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category></entry></feed>

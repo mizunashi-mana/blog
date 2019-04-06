@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/asset/custom.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="https://github.com/myuon/ghc-compiler-notes にコントリビュートしたので，それについてと考えてることとか書く． なお， myuon さんによる紹介記事も参照: https://myuon.github.io/posts/ghc-compiler-notes/ GHC のノートコメント GHC のコーディングガイド にも書いてあるが， GHC では長いコメントを書くとき，以下のように主要部分を切り出す運用をしている: 1 2 3 4 5 6 7 8 9 10someFunc = let v = 42 -- See Note [The Answer To Life] in v {- Note [The Answer To …" />
+<meta name="keywords" content="Haskell, GHC">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="GHC のノートコメントについてのあれこれ"/>
+<meta property="og:description" content="https://github.com/myuon/ghc-compiler-notes にコントリビュートしたので，それについてと考えてることとか書く． なお， myuon さんによる紹介記事も参照: https://myuon.github.io/posts/ghc-compiler-notes/ GHC のノートコメント GHC のコーディングガイド にも書いてあるが， GHC では長いコメントを書くとき，以下のように主要部分を切り出す運用をしている: 1 2 3 4 5 6 7 8 9 10someFunc = let v = 42 -- See Note [The Answer To Life] in v {- Note [The Answer To …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/ghc-compiler-notes/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-04-07 00:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="構想"/>
+<meta property="article:tag" content="Haskell"/>
+<meta property="article:tag" content="GHC"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; GHC のノートコメントについてのあれこれ</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="ghc-compiler-notes">GHC のノートコメントについてのあれこれ</h1>
+    <p>
+          Posted on 日 07 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/gou-xiang.html">構想</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p><a class="reference external" href="https://github.com/myuon/ghc-compiler-notes">https://github.com/myuon/ghc-compiler-notes</a> にコントリビュートしたので，それについてと考えてることとか書く．</p>
+<p>なお， myuon さんによる紹介記事も参照: <a class="reference external" href="https://myuon.github.io/posts/ghc-compiler-notes/">https://myuon.github.io/posts/ghc-compiler-notes/</a></p>
+<div class="section" id="auto-id-1">
+<h2>GHC のノートコメント<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p><a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/coding-style#comments-in-the-source-code">GHC のコーディングガイド</a> にも書いてあるが， GHC では長いコメントを書くとき，以下のように主要部分を切り出す運用をしている:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">someFunc</span> <span class="ow">=</span>
+  <span class="kr">let</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">42</span> <span class="c1">-- See Note [The Answer To Life]</span>
+  <span class="kr">in</span> <span class="n">v</span>
+
+<span class="cm">{- Note [The Answer To Life]</span>
+<span class="cm">~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="cm">"The Answer to the Ultimate Question of Life, the Universe, and Everything" is 42.</span>
+<span class="cm">After seven and a half million years of calculation, deep thoughts finally output the answer.</span>
+<span class="cm">-}</span>
+</pre></div>
+</td></tr></table><p>例えば， <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/prelude/TysPrim.hs#L593">https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/prelude/TysPrim.hs#L593</a> のような感じ．内容は，</p>
+<ul class="simple">
+<li>実装上の注意事項やアドバイス</li>
+<li>形式的なアルゴリズムの説明</li>
+<li>API の使い方や使われ方</li>
+</ul>
+<p>を含む色々． GHC 開発チーム向け以外にも， GHC で Haskell を書く上で重要なことが書いてある．例に挙げた type equality のまとめの他，</p>
+<dl class="docutils">
+<dt>The rules for map</dt>
+<dd><p class="first"><tt class="docutils literal">map</tt> の <tt class="docutils literal">RULES</tt> がどういう挙動をするかの話</p>
+<p class="last"><a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/libraries/base/GHC/Base.hs#L1119">https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/libraries/base/GHC/Base.hs#L1119</a></p>
+</dd>
+<dt>The oneShot function</dt>
+<dd><p class="first"><tt class="docutils literal">oneShot</tt> 関数の概要</p>
+<p class="last"><a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/basicTypes/MkId.hs#L1473">https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/basicTypes/MkId.hs#L1473</a></p>
+</dd>
+<dt>Call Arity: The goal</dt>
+<dd><p class="first">call arity 解析の概要</p>
+<p class="last"><a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/CallArity.hs#L35">https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/CallArity.hs#L35</a></p>
+</dd>
+<dt>Choosing loop breakers</dt>
+<dd><p class="first">loop breaker をどのように選ぶかの話</p>
+<p class="last"><a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/OccurAnal.hs#L279">https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/OccurAnal.hs#L279</a></p>
+</dd>
+<dt>Join points</dt>
+<dd><p class="first">join points の概要</p>
+<p class="last"><a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/FloatOut.hs#L112">https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/simplCore/FloatOut.hs#L112</a></p>
+</dd>
+</dl>
+<p>など，より Haskell を理解する上で役に立つコメントも多い．</p>
+</div>
+<div class="section" id="ghc-compiler-notes">
+<h2>GHC Compiler Notes<a class="headerlink" href="#ghc-compiler-notes" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>GHC のノートコメントは有用なことが書いてあり， GHC のリポジトリで管理されているためコードとの乖離も少ない．ただ，コードと一緒に書いてある分ノイズも多い． GHC の利用者としてはノートコメントだけを参照したい場合も多く，そこだけ抽出して見やすくできないかとは思っていた．で，半年前くらいに <a class="reference external" href="https://twitter.com/myuon_myon">myuon さん</a> と <a class="reference external" href="https://twitter.com/waddlaw">waddlaw</a> さんが，そういうプロジェクトを作っていると言う話を聞いて気になっていた．そのプロジェクトが上で挙げた <a class="reference external" href="https://github.com/myuon/ghc-compiler-notes">https://github.com/myuon/ghc-compiler-notes</a> になる．</p>
+<p>でちょっと前にノートコメントを参照することがあって，どうせならそのプロジェクトを利用してみるかという感じだったんだが，作りかけで止まっていたっぽかった．やる気と時間があったのでひとまず，完成させてみることにした．最初は結構簡単にいくやろと思っていたが結構難しかった．内部の仕組みは主に，</p>
+<ol class="arabic simple">
+<li>GHC API を利用して Haskell コードをトークン解析する．</li>
+<li>トークンをパースして，ノートコメントに分割する．</li>
+<li>分割されたノートコメントを統合して， reStructuredText 形式で吐き出す (この辺結構怪しい)</li>
+</ol>
+<p>という感じ．手間がかかったのが GHC API を利用する部分で， <tt class="docutils literal">Show</tt> インスタンスがないデータを使わされたり， <tt class="docutils literal">DynFlags</tt> が色んなとこにでてきたり， lazy I/O を気にしなきゃいけなかったり， export されてない関数を使う必要があったり，まあ色々大変だった．特に今回これをやるまで分かってなかったんだけど， GHC は Haskell ファイルを大体以下の手順で解析するらしい．</p>
+<ol class="arabic simple">
+<li>Lexer をヘッド部分 <a class="footnote-reference" href="#get-options-range" id="auto-id-3">[1]</a> まで走らせ，<tt class="docutils literal">LANGUAGE</tt> プラグマや <tt class="docutils literal">OPTIONS_XXX</tt> プラグマを読み込む．</li>
+<li><tt class="docutils literal">CPP</tt> 拡張が指定されていれば， <tt class="docutils literal">cpp</tt> を走らせる．</li>
+<li>Lexer によるトークン解析をする．</li>
+<li>トークンをパースして， AST に変換する <a class="footnote-reference" href="#parsing-hs" id="auto-id-4">[2]</a>．</li>
+<li>後は色々する．</li>
+</ol>
+<p>後，通常 GHC はコメントを読み飛ばすが，</p>
+<dl class="docutils">
+<dt>Haddock モード</dt>
+<dd>Haddock のドキュメントコメントを解析し，それもトークンに含める．</dd>
+<dt>生のトークンを残すモード</dt>
+<dd>本来なら削除するコメントトークンを，出力するトークンに含める．</dd>
+</dl>
+<p>という2つのモードも提供されている．今回はこのどちらもを使用した．トークンに分割した後は， <a class="reference external" href="https://github.com/myuon/ghc-compiler-notes/blob/master/doc/ParsingNotes.md">https://github.com/myuon/ghc-compiler-notes/blob/master/doc/ParsingNotes.md</a> に沿って大体 regular なパーシングをしていった．</p>
+<p>最終的な成果物だが， PR を送った結果， myuon さんが解析結果をいい感じに整形するコードと Sphinx の設定を追加して Read the docs に上げてくれて，今は <a class="reference external" href="https://ghc-compiler-notes.readthedocs.io/en/latest/">https://ghc-compiler-notes.readthedocs.io/en/latest/</a> から見れるようになっている．検索もできるので，ぜひ参照してほしい．</p>
+</div>
+<div class="section" id="auto-id-5">
+<h2>ノートコメントの文法<a class="headerlink" href="#auto-id-5" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ところでここからが本題なんだが，予想していたことではあるものの，解析は現状あまり上手くいっていない．ノートコメントの範囲を厳密に解析できていないのもそうなんだが，主に文法解釈が壊滅している． GHC のノートコメントは今まで何となく reStructuredText だと思っていたんだけど，少なくとも reStructuredText ではないっぽい．というか，何か形式化されている文法には則っていないんじゃないかと思っている．ちょっと調べた感じでは，この文法に従えというのは特に明記されておらず，事実ノートコメントは色んな文法に則って書かれている．</p>
+<p>LaTeX の文法やHaskell Wiki の文法も度々散見されるが，多くはある一定の慣習 (これも時期と書く人によってかなりブレているんだが) に則って書かれてはいるようだ．</p>
+<dl class="docutils">
+<dt>Section</dt>
+<dd><tt class="docutils literal"><span class="pre">*******</span></tt> で両側を囲んで，それをさらに <tt class="docutils literal">*</tt> で囲み，その内側に題を書く．</dd>
+<dt>Sub section</dt>
+<dd><tt class="docutils literal">-</tt> / <tt class="docutils literal">~</tt> などで下線を引く．</dd>
+<dt>Code block</dt>
+<dd>インデントする．</dd>
+</dl>
+<p>という感じだ．大体は reStructuredText より Markdown の文法に近いようであるが， <a class="reference external" href="https://daringfireball.net/projects/markdown/syntax">古典的な Markdown</a> では <tt class="docutils literal">~</tt> による下線を認めてない辺り，古き良き Markdown 寄り独自のマークアップの感じがする．この辺何か知っている人がいれば，色々教えてもらいたい．</p>
+<p>さて，せっかく労力をかけたのにこのザマではちょっと悲しい．なので，この問題をなんとかする手を色々考え中だ．基本的な方針は変えようがなくて，「 GHC チームとコンタクトを取り， GHC のソースを修正する」だ．ただ，どのような提案をするかが問題になる．現状考えていることは，</p>
+<ol class="arabic simple">
+<li>形式的な仕様があるのか，形式的な仕様を策定 (既存のに乗っかる / 新たなマークアップ定義をする) しないかと提案する．<ul>
+<li>特に，コードブロックと引用，サブコンテンツは区別してほしい．</li>
+</ul>
+</li>
+<li>明らかな現状の間違い (下線がないノートコメント / コードブロック表記が独自) を修正するリクエストを投げる．</li>
+<li>形式的な仕様が策定されたらそれに合わせて GHC Compiler Notes を修正．既存の GHC コードもちょっとずつ修正するリクエストを投げていく．</li>
+</ol>
+<p>という感じだ．これを Haskell Cafe か ghcdev のメーリングリストに投げてみようかなと考えている．気がかりなのは，これはあくまでプログラムによる自動解析のための修正だということだ．本来コメントは分かりやすさが正義だし，見栄えを気にするならそれこそ GHC Wiki に書くべきだろう．その辺の兼ね合いはどうなんだろうという気はしなくもない．</p>
+<p>まあ，提案が reject されればそれはそれだし，とりあえず提案してみようかなという気にはなっている．</p>
+</div>
+<div class="section" id="auto-id-6">
+<h2>まとめ<a class="headerlink" href="#auto-id-6" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>というわけで， GHC Compiler Notes にコントリビュートして，あれこれ考えた話を書いた．時間があれば，提案の文面考えて適当に投げていきたい．以上．</p>
+<table class="docutils footnote" frame="void" id="get-options-range" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-3">[1]</a></td><td>ほぼ <tt class="docutils literal">module</tt> キーワードまでと思って良い．厳密には， <tt class="docutils literal">CPP</tt> とかが入ったりすると違ったりするんだが．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="parsing-hs" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-4">[2]</a></td><td>この時完全に構文が解析されるわけではなくて，演算子の優先順位の解決とかはリネーム時に行われる．</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/ghc-compiler-notes.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/ghc-compiler-notes.rst'
+}
+</script><script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

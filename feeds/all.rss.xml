@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Fri, 05 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>ブログに共有ボタンを追加した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/</link><description>&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 07 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>GHC のノートコメントについてのあれこれ</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/ghc-compiler-notes/</link><description>&lt;p&gt;&lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes"&gt;https://github.com/myuon/ghc-compiler-notes&lt;/a&gt; にコントリビュートしたので，それについてと考えてることとか書く．&lt;/p&gt;
+&lt;p&gt;なお， myuon さんによる紹介記事も参照: &lt;a class="reference external" href="https://myuon.github.io/posts/ghc-compiler-notes/"&gt;https://myuon.github.io/posts/ghc-compiler-notes/&lt;/a&gt;&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;GHC のノートコメント&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/coding-style#comments-in-the-source-code"&gt;GHC のコーディングガイド&lt;/a&gt; にも書いてあるが， GHC では長いコメントを書くとき，以下のように主要部分を切り出す運用をしている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;someFunc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt; &lt;span class="c1"&gt;-- See Note [The Answer To Life]&lt;/span&gt;
+  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;
+
+&lt;span class="cm"&gt;{- Note [The Answer To …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Sun, 07 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-07:/blog/posts/2019/04/ghc-compiler-notes/</guid><category>Haskell</category><category>GHC</category></item><item><title>ブログに共有ボタンを追加した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/</link><description>&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;

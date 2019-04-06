@@ -28,14 +28,14 @@
 
 
     <!-- Chrome, Firefox OS and Opera -->
-    <meta name="theme-color" content="#333">
+    <meta name="theme-color" content="#555">
     <!-- Windows Phone -->
-    <meta name="msapplication-navbutton-color" content="#333">
+    <meta name="msapplication-navbutton-color" content="#555">
     <!-- iOS Safari -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <!-- Microsoft EDGE -->
-    <meta name="msapplication-TileColor" content="#333">
+    <meta name="msapplication-TileColor" content="#555">
 
 <meta name="author" content="Mizunashi Mana" />
 <meta name="description" content="色々ハマったので，メモをしておく． aware と naive Python の datetime モジュールでは，日付情報を表現する date オブジェクト，日中時間を表現する time オブジェクト，そしてその両方の組である datetime オブジェクトが提供されている．そして，実は datetime オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた． そもそもドキュメントをちゃんと読めという話なんだけど， https://docs.python.org/ja/3/library/datetime.html で普通に説明されている．端的に言えば， aware: 実時刻を表し，タイムゾーンや夏時間情報を持つ． naive: 時刻情報だけを表現する．タイムゾーンなどの情報は持たず，その時刻がどういう意味を持つかは処理する側に委ねられる． の2種類があるらしい． aware か naive かは， tzinfo プロパティが None …" />
