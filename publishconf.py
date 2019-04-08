@@ -42,7 +42,4 @@ LINKS = add_site_url_to_items(LINKS)
 SOCIAL = add_site_url_to_items(SOCIAL)
 MENUITEMS = add_site_url_to_items(MENUITEMS)
 
-# Following items are often useful when publishing
-
-#DISQUS_SITENAME = ""
-#GOOGLE_ANALYTICS = ""
+GOOGLE_ANALYTICS = "UA-110810716-2"
