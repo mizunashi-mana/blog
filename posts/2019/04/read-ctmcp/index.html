@@ -167,11 +167,11 @@
 <h2>Mozart/Oz の使い方<a class="headerlink" href="#auto-id-6" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>まずは， Mozart をインストールして，動かしてみる．インストールは macOS で行ったので，他の環境でどうなるのかは分からないが，ひとまず <a class="reference external" href="https://github.com/mozart/mozart2/releases/tag/v2.0.1">リリースページ</a> をみる限り macOS / Debian / RedHat / Windows 向けのインストーラは提供されていそう．今回は，macOS 向けの <tt class="docutils literal"><span class="pre">mozart2-2.0.1-x86_64-darwin.dmg</span></tt> をダウンロードして起動した．で，アプリケーションフォルダに <tt class="docutils literal">Mozart2.app</tt> をインストールする．後 Emacs が必要なので， <a class="reference external" href="https://emacsformacosx.com/">https://emacsformacosx.com/</a> とかから適当に入れる．</p>
 <p>で，起動すると以下の画面が出てくる:</p>
-<img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-emacs-screenshot.png"/>
+<img alt="上下に分かれた Emacs 画面が表示される．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-emacs-screenshot.png"/>
 <p>上のバッファがプログラミングする部分，下のバッファがコンパイラの出力画面になる．上のバッファで例えば次のようにプログラミングを行える．</p>
-<img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-programming-sample.png"/>
+<img alt="``{Browse 42}`` と書くと 42 を表示するプログラムになる．コンパイルに成功し， accepted と表示されているのが分かる．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-programming-sample.png"/>
 <p>ここではプログラム <tt class="docutils literal">{Browse 42}</tt> をコンパイルしている．コンパイルは <tt class="docutils literal">Oz</tt> メニューの「Feed Buffer」という項目から行え， <tt class="docutils literal"><span class="pre">C-.</span> <span class="pre">C-b</span></tt> が割り当てられている．なおカーソル位置までを実行したかったら「Feed Region (<tt class="docutils literal"><span class="pre">C-.</span> <span class="pre">C-r</span></tt>) 」で行える．対話的なデバッグの際有用だ．「Feed Buffer」後はコンパイラの出力画面に accepted / rejected が表示され， accepted の場合今回の例だと，次のような出力ウィンドウが表示される:</p>
-<img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-output-screenshot.png"/>
+<img alt="42 と表示されたウィンドウが表示される．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-output-screenshot.png"/>
 <p>ついでに， Emacs のこの GUI でなく普通のプログラミングスタイルでやりたいなら， <tt class="docutils literal">/Applications/Mozart2.app/Contents/Resources/bin</tt> の中に色々ツールが入ってるのでそれを使う．例えば，簡単な Hello World プログラムは次のように作れる:</p>
 <pre class="literal-block">
 $ export PATH=$PATH:/Applications/Mozart2.app/Contents/Resources/bin
@@ -190,7 +190,7 @@ Hello World!
 </pre>
 <p>CTMCP を読む分には， Emacs の実行環境で問題なさそうなので，僕はそれでやる．なお，本書で紹介されてる <tt class="docutils literal">oz</tt> コマンドでの起動はうまくいかなかった．なんでだろね． <tt class="docutils literal">Mozart2.app</tt> から起動すればいいので特に困ることはないんだけど．</p>
 <p>後， <tt class="docutils literal">Browse</tt> で一々別のウィンドウが立ち上がるのがめんどいという人は， Oz Emulator というバッファが用意されているので，それを表示して， <tt class="docutils literal">Browse</tt> を適宜 <tt class="docutils literal">Show</tt> 関数に読み替えると良いっぽい．そうすると別ウィンドウが立ち上がる代わりに， Emulator の方に出力が表示される．僕は以下の画面構成で書いてる:</p>
-<img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-my-screen.png"/>
+<img alt="下の画面を分割して，左にコンパイラ出力，右にエミュレータ出力が見えるようにしている．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-my-screen.png"/>
 </div>
 <div class="section" id="ctmcp-1">
 <h2>CTMCP 1章の内容<a class="headerlink" href="#ctmcp-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>

@@ -22,11 +22,11 @@
 &lt;h2&gt;Mozart/Oz の使い方&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;まずは， Mozart をインストールして，動かしてみる．インストールは macOS で行ったので，他の環境でどうなるのかは分からないが，ひとまず &lt;a class="reference external" href="https://github.com/mozart/mozart2/releases/tag/v2.0.1"&gt;リリースページ&lt;/a&gt; をみる限り macOS / Debian / RedHat / Windows 向けのインストーラは提供されていそう．今回は，macOS 向けの &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;mozart2-2.0.1-x86_64-darwin.dmg&lt;/span&gt;&lt;/tt&gt; をダウンロードして起動した．で，アプリケーションフォルダに &lt;tt class="docutils literal"&gt;Mozart2.app&lt;/tt&gt; をインストールする．後 Emacs が必要なので， &lt;a class="reference external" href="https://emacsformacosx.com/"&gt;https://emacsformacosx.com/&lt;/a&gt; とかから適当に入れる．&lt;/p&gt;
 &lt;p&gt;で，起動すると以下の画面が出てくる:&lt;/p&gt;
-&lt;img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-emacs-screenshot.png"/&gt;
+&lt;img alt="上下に分かれた Emacs 画面が表示される．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-emacs-screenshot.png"/&gt;
 &lt;p&gt;上のバッファがプログラミングする部分，下のバッファがコンパイラの出力画面になる．上のバッファで例えば次のようにプログラミングを行える．&lt;/p&gt;
-&lt;img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-programming-sample.png"/&gt;
+&lt;img alt="``{Browse 42}`` と書くと 42 を表示するプログラムになる．コンパイルに成功し， accepted と表示されているのが分かる．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-programming-sample.png"/&gt;
 &lt;p&gt;ここではプログラム &lt;tt class="docutils literal"&gt;{Browse 42}&lt;/tt&gt; をコンパイルしている．コンパイルは &lt;tt class="docutils literal"&gt;Oz&lt;/tt&gt; メニューの「Feed Buffer」という項目から行え， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;C-.&lt;/span&gt; &lt;span class="pre"&gt;C-b&lt;/span&gt;&lt;/tt&gt; が割り当てられている．なおカーソル位置までを実行したかったら「Feed Region (&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;C-.&lt;/span&gt; &lt;span class="pre"&gt;C-r&lt;/span&gt;&lt;/tt&gt;) 」で行える．対話的なデバッグの際有用だ．「Feed Buffer」後はコンパイラの出力画面に accepted / rejected が表示され， accepted の場合今回の例だと，次のような出力ウィンドウが表示される:&lt;/p&gt;
-&lt;img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-output-screenshot.png"/&gt;
+&lt;img alt="42 と表示されたウィンドウが表示される．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-output-screenshot.png"/&gt;
 &lt;p&gt;ついでに， Emacs のこの GUI でなく普通のプログラミングスタイルでやりたいなら， &lt;tt class="docutils literal"&gt;/Applications/Mozart2.app/Contents/Resources/bin&lt;/tt&gt; の中に色々ツールが入ってるのでそれを使う．例えば，簡単な Hello World プログラムは次のように作れる:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
 $ export PATH=$PATH:/Applications/Mozart2.app/Contents/Resources/bin
@@ -45,7 +45,7 @@ Hello World!
 &lt;/pre&gt;
 &lt;p&gt;CTMCP を読む分には， Emacs の実行環境で問題なさそうなので，僕はそれでやる．なお，本書で紹介されてる &lt;tt class="docutils literal"&gt;oz&lt;/tt&gt; コマンドでの起動はうまくいかなかった．なんでだろね． &lt;tt class="docutils literal"&gt;Mozart2.app&lt;/tt&gt; から起動すればいいので特に困ることはないんだけど．&lt;/p&gt;
 &lt;p&gt;後， &lt;tt class="docutils literal"&gt;Browse&lt;/tt&gt; で一々別のウィンドウが立ち上がるのがめんどいという人は， Oz Emulator というバッファが用意されているので，それを表示して， &lt;tt class="docutils literal"&gt;Browse&lt;/tt&gt; を適宜 &lt;tt class="docutils literal"&gt;Show&lt;/tt&gt; 関数に読み替えると良いっぽい．そうすると別ウィンドウが立ち上がる代わりに， Emulator の方に出力が表示される．僕は以下の画面構成で書いてる:&lt;/p&gt;
-&lt;img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-my-screen.png"/&gt;
+&lt;img alt="下の画面を分割して，左にコンパイラ出力，右にエミュレータ出力が見えるようにしている．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-my-screen.png"/&gt;
 &lt;/div&gt;
 &lt;div class="section" id="ctmcp-1"&gt;
 &lt;h2&gt;CTMCP 1章の内容&lt;a class="headerlink" href="#ctmcp-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
