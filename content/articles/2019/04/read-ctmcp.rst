@@ -32,14 +32,17 @@ Mozart/Oz の使い方
 で，起動すると以下の画面が出てくる:
 
 .. image:: {attach}read-ctmcp/oz-emacs-screenshot.png
+   :alt: 上下に分かれた Emacs 画面が表示される．
 
 上のバッファがプログラミングする部分，下のバッファがコンパイラの出力画面になる．上のバッファで例えば次のようにプログラミングを行える．
 
 .. image:: {attach}read-ctmcp/oz-programming-sample.png
+   :alt: ``{Browse 42}`` と書くと 42 を表示するプログラムになる．コンパイルに成功し， accepted と表示されているのが分かる．
 
 ここではプログラム ``{Browse 42}`` をコンパイルしている．コンパイルは ``Oz`` メニューの「Feed Buffer」という項目から行え， ``C-. C-b`` が割り当てられている．なおカーソル位置までを実行したかったら「Feed Region (``C-. C-r``) 」で行える．対話的なデバッグの際有用だ．「Feed Buffer」後はコンパイラの出力画面に accepted / rejected が表示され， accepted の場合今回の例だと，次のような出力ウィンドウが表示される:
 
 .. image:: {attach}read-ctmcp/oz-output-screenshot.png
+   :alt: 42 と表示されたウィンドウが表示される．
 
 ついでに， Emacs のこの GUI でなく普通のプログラミングスタイルでやりたいなら， ``/Applications/Mozart2.app/Contents/Resources/bin`` の中に色々ツールが入ってるのでそれを使う．例えば，簡単な Hello World プログラムは次のように作れる::
 
@@ -62,6 +65,7 @@ CTMCP を読む分には， Emacs の実行環境で問題なさそうなので�
 後， ``Browse`` で一々別のウィンドウが立ち上がるのがめんどいという人は， Oz Emulator というバッファが用意されているので，それを表示して， ``Browse`` を適宜 ``Show`` 関数に読み替えると良いっぽい．そうすると別ウィンドウが立ち上がる代わりに， Emulator の方に出力が表示される．僕は以下の画面構成で書いてる:
 
 .. image:: {attach}read-ctmcp/oz-my-screen.png
+   :alt: 下の画面を分割して，左にコンパイラ出力，右にエミュレータ出力が見えるようにしている．
 
 CTMCP 1章の内容
 ---------------
