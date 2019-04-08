@@ -28,16 +28,16 @@ body {
 }
 
 aside {
-  color: #222;
+  color: #444;
   background-color: #eee;
 }
 
 aside a {
-  color: #222;
+  color: inherit;
 }
 
 aside a:hover {
-  color: #444;
+  color: #555;
 }
 
 ul.social a {

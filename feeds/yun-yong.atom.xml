@@ -1,5 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-05T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>ブログに共有ボタンを追加した</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/" rel="alternate"></link><published>2019-04-05T00:00:00+09:00</published><updated>2019-04-05T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-05:/blog/posts/2019/04/add-share-button/</id><summary type="html">&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-08T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Google Analytics の導入</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/" rel="alternate"></link><published>2019-04-08T00:00:00+09:00</published><updated>2019-04-08T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/add-google-analytics/</id><summary type="html">&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
+&lt;div class="section" id="id"&gt;
+&lt;h2&gt;トラッキング ID の設定&lt;a class="headerlink" href="#id" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://analytics.google.com/analytics"&gt;https://analytics.google.com/analytics&lt;/a&gt; の管理ページ表示&lt;/li&gt;
+&lt;li&gt;「プロパティを作成」ボタンを押す．&lt;/li&gt;
+&lt;li&gt;プロパティの項目を埋めていく．大体以下の感じ:&lt;ul&gt;
+&lt;li&gt;ウェブサイトの名前: GitHub Pages&lt;/li&gt;
+&lt;li&gt;ウェブサイトの URL: &lt;a class="reference external" href="https://mizunashi-mana.github"&gt;https://mizunashi-mana.github&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;ウェブサイトの業種: その他&lt;ul&gt;
+&lt;li&gt;なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， &lt;a class="reference external" href="https://support.google.com/analytics/answer/1032415"&gt;https://support.google.com/analytics/answer/1032415&lt;/a&gt; を参照．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;ウェブサイトのタイムゾーン: 日本 (+09:00)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;そうするとトラッキング …&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
+&lt;div class="section" id="id"&gt;
+&lt;h2&gt;トラッキング ID の設定&lt;a class="headerlink" href="#id" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://analytics.google.com/analytics"&gt;https://analytics.google.com/analytics&lt;/a&gt; の管理ページ表示&lt;/li&gt;
+&lt;li&gt;「プロパティを作成」ボタンを押す．&lt;/li&gt;
+&lt;li&gt;プロパティの項目を埋めていく．大体以下の感じ:&lt;ul&gt;
+&lt;li&gt;ウェブサイトの名前: GitHub Pages&lt;/li&gt;
+&lt;li&gt;ウェブサイトの URL: &lt;a class="reference external" href="https://mizunashi-mana.github"&gt;https://mizunashi-mana.github&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;ウェブサイトの業種: その他&lt;ul&gt;
+&lt;li&gt;なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， &lt;a class="reference external" href="https://support.google.com/analytics/answer/1032415"&gt;https://support.google.com/analytics/answer/1032415&lt;/a&gt; を参照．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;ウェブサイトのタイムゾーン: 日本 (+09:00)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;そうするとトラッキング ID のページに移動する．表示されているコードは無視して，トラッキング ID だけメモる．&lt;ul&gt;
+&lt;li&gt;Pelican の Flex テーマが対応しているため，特にコードの埋め込みとかは必要ない．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;後はメモった トラッキング ID を Pelican 側で設定するだけ． publish した時のみ設定されるよう &lt;tt class="docutils literal"&gt;publichconf.py&lt;/tt&gt; に以下を足す:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+GOOGLE_ANALYTICS = "UA-XXXXXXXXX-X"
+&lt;/pre&gt;
+&lt;p&gt;これで Google Analytics が動くようになる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;プライバシーポリシーの変更&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Google Analytics の &lt;a class="reference external" href="https://www.google.com/analytics/terms/jp.html"&gt;利用規約&lt;/a&gt; には，「7. プライバシー」の節に以下のような定めがある．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;導入するサイトのプライバシーポリシーを公開すること．&lt;/li&gt;
+&lt;li&gt;プライバシーポリシーで，データ収集のため Cookie を使用していることを必ず通知すること．&lt;/li&gt;
+&lt;li&gt;プライバシーポリシーで，Google Analytics を使用していること及び Google Analytics でデータが収集、処理される仕組みについても必ず開示すること．これは， &lt;a class="reference external" href="https://www.google.com/intl/ja/policies/privacy/partners/"&gt;https://www.google.com/intl/ja/policies/privacy/partners/&lt;/a&gt; などのリンクを目立つように示すことで可能．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;事前に公開通知する旨も出していたので，それを実施する形で，プライバシーポリシーに以上の事柄に違反しないよう Google Analytics の説明を追加した．ついでに整形も行なった．差分は， &lt;a class="reference external" href="https://github.com/mizunashi-mana/blog/pull/20/commits/8da9a0c91ee5d52e9d0fa62204adadede726493b#diff-ad32853aff6dff0fd8fb93798300aec0"&gt;https://github.com/mizunashi-mana/blog/pull/20/commits/8da9a0c91ee5d52e9d0fa62204adadede726493b#diff-ad32853aff6dff0fd8fb93798300aec0&lt;/a&gt; から確認できる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Google Analytics をブログに導入した．後は，検索ワードとかを随時見ながら， Google Analytics の知見をためて，ブログを改善していけたらと思う．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/add-google-analytics.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/add-google-analytics.rst'
+}
+&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Pelican"></category><category term="ブログ"></category><category term="Google Analytics"></category><category term="SEO"></category></entry><entry><title>ブログに共有ボタンを追加した</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/" rel="alternate"></link><published>2019-04-05T00:00:00+09:00</published><updated>2019-04-05T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-05:/blog/posts/2019/04/add-share-button/</id><summary type="html">&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;

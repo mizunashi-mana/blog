@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Fri, 05 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>ブログに共有ボタンを追加した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/</link><description>&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 08 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>Google Analytics の導入</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/</link><description>&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
+&lt;div class="section" id="id"&gt;
+&lt;h2&gt;トラッキング ID の設定&lt;a class="headerlink" href="#id" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://analytics.google.com/analytics"&gt;https://analytics.google.com/analytics&lt;/a&gt; の管理ページ表示&lt;/li&gt;
+&lt;li&gt;「プロパティを作成」ボタンを押す．&lt;/li&gt;
+&lt;li&gt;プロパティの項目を埋めていく．大体以下の感じ:&lt;ul&gt;
+&lt;li&gt;ウェブサイトの名前: GitHub Pages&lt;/li&gt;
+&lt;li&gt;ウェブサイトの URL: &lt;a class="reference external" href="https://mizunashi-mana.github"&gt;https://mizunashi-mana.github&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;ウェブサイトの業種: その他&lt;ul&gt;
+&lt;li&gt;なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， &lt;a class="reference external" href="https://support.google.com/analytics/answer/1032415"&gt;https://support.google.com/analytics/answer/1032415&lt;/a&gt; を参照．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;ウェブサイトのタイムゾーン: 日本 (+09:00)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;そうするとトラッキング …&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 08 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/add-google-analytics/</guid><category>Pelican</category><category>ブログ</category><category>Google Analytics</category><category>SEO</category></item><item><title>ブログに共有ボタンを追加した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/</link><description>&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;
