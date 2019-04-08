@@ -25,7 +25,9 @@ STATIC_PATHS = [
   '.circleci',
   'asset',
   'dist-asset',
+  'articles', # mixed content
 ]
+ARTICLE_PATHS = ['articles']
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
 CUSTOM_CSS = 'asset/custom.css'
