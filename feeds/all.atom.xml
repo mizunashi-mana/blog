@@ -1,5 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-08T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Google Analytics の導入</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/" rel="alternate"></link><published>2019-04-08T00:00:00+09:00</published><updated>2019-04-08T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/add-google-analytics/</id><summary type="html">&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-08T19:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>CTMCP のために Mozart/Oz を動かす</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/" rel="alternate"></link><published>2019-04-08T19:00:00+09:00</published><updated>2019-04-08T19:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/read-ctmcp/</id><summary type="html">&lt;p&gt;ゼミの輪読で， &lt;a class="reference external" href="https://www.amazon.co.jp/dp/0262220695"&gt;Concepts, Techniques, and Models of Computer Programming (MIT Press)&lt;/a&gt; ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．&lt;/p&gt;
+&lt;div class="section" id="mozart-oz"&gt;
+&lt;h2&gt;Mozart/Oz&lt;a class="headerlink" href="#mozart-oz" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である Mozart に完全に焦点を当てている． Oz 自体は名前を聞いたことはあったが今まで触ったことはなかった． &lt;a class="reference external" href="https://mozart.github.io/mozart-v1/doc-1.4.0/tutorial/index.html"&gt;公式ドキュメント&lt;/a&gt; によると&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"Oz is a multi-paradigm language that is designed for advanced, concurrent, networked, soft real-time, and reactive applications."&lt;/p&gt;
+&lt;p&gt;"Oz はマルチパラダイムな言語で …&lt;/p&gt;&lt;/blockquote&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ゼミの輪読で， &lt;a class="reference external" href="https://www.amazon.co.jp/dp/0262220695"&gt;Concepts, Techniques, and Models of Computer Programming (MIT Press)&lt;/a&gt; ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．&lt;/p&gt;
+&lt;div class="section" id="mozart-oz"&gt;
+&lt;h2&gt;Mozart/Oz&lt;a class="headerlink" href="#mozart-oz" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である Mozart に完全に焦点を当てている． Oz 自体は名前を聞いたことはあったが今まで触ったことはなかった． &lt;a class="reference external" href="https://mozart.github.io/mozart-v1/doc-1.4.0/tutorial/index.html"&gt;公式ドキュメント&lt;/a&gt; によると&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"Oz is a multi-paradigm language that is designed for advanced, concurrent, networked, soft real-time, and reactive applications."&lt;/p&gt;
+&lt;p&gt;"Oz はマルチパラダイムな言語で，高度で，並行で，ネットワークを使用し，ソフトリアルタイム &lt;a class="footnote-reference" href="#about-soft-realtime" id="auto-id-2"&gt;[1]&lt;/a&gt; でリアクティブ &lt;a class="footnote-reference" href="#about-reactive" id="auto-id-3"&gt;[2]&lt;/a&gt; なアプリケーションのために設計されています．"&lt;/p&gt;
+&lt;p class="attribution"&gt;—Tutorial of Oz by Seif Haridi and Nils Franzén&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;という言語らしい． Mozart は UCL の PLDC 研究グループによって開発が続けられている Oz の主要実装ということになる．&lt;/p&gt;
+&lt;p&gt;ところで， Mozart/Oz でググると一番最初に出てくる &lt;a class="reference external" href="https://qiita.com/mshioda/items/9de1399db486107f1c30"&gt;「Mozart/Oz について話します」&lt;/a&gt; という記事の中で述べられているように，あまり積極的な開発体制が整っているわけではないようだ．また，メジャーバージョン1から現在のメジャーバージョン2に移る時に，開発体制の大規模な移行があったのか，本書で出てくるサイト &lt;a class="reference external" href="http://www.mozart-oz.org"&gt;http://www.mozart-oz.org&lt;/a&gt; は稼働しておらず， &lt;a class="reference external" href="https://mozart.github.io/"&gt;https://mozart.github.io/&lt;/a&gt; に方に移っている．&lt;/p&gt;
+&lt;p&gt;ただ，開発自体は続いているようで，半年前ぐらいにメジャーバージョン2の初の安定板， &lt;a class="reference external" href="https://github.com/mozart/mozart2/releases/tag/v2.0.1"&gt;2.0.1&lt;/a&gt; がリリースされている．とりあえずこれをインストールしたが，今の所 (1章までしか読んでない) 本書のサンプルは問題なく動く．今後に期待という感じだろうか．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-6"&gt;
+&lt;h2&gt;Mozart/Oz の使い方&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;まずは， Mozart をインストールして，動かしてみる．インストールは macOS で行ったので，他の環境でどうなるのかは分からないが，ひとまず &lt;a class="reference external" href="https://github.com/mozart/mozart2/releases/tag/v2.0.1"&gt;リリースページ&lt;/a&gt; をみる限り macOS / Debian / RedHat / Windows 向けのインストーラは提供されていそう．今回は，macOS 向けの &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;mozart2-2.0.1-x86_64-darwin.dmg&lt;/span&gt;&lt;/tt&gt; をダウンロードして起動した．で，アプリケーションフォルダに &lt;tt class="docutils literal"&gt;Mozart2.app&lt;/tt&gt; をインストールする．後 Emacs が必要なので， &lt;a class="reference external" href="https://emacsformacosx.com/"&gt;https://emacsformacosx.com/&lt;/a&gt; とかから適当に入れる．&lt;/p&gt;
+&lt;p&gt;で，起動すると以下の画面が出てくる:&lt;/p&gt;
+&lt;img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-emacs-screenshot.png"/&gt;
+&lt;p&gt;上のバッファがプログラミングする部分，下のバッファがコンパイラの出力画面になる．上のバッファで例えば次のようにプログラミングを行える．&lt;/p&gt;
+&lt;img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-programming-sample.png"/&gt;
+&lt;p&gt;ここではプログラム &lt;tt class="docutils literal"&gt;{Browse 42}&lt;/tt&gt; をコンパイルしている．コンパイルは &lt;tt class="docutils literal"&gt;Oz&lt;/tt&gt; メニューの「Feed Buffer」という項目から行え， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;C-.&lt;/span&gt; &lt;span class="pre"&gt;C-b&lt;/span&gt;&lt;/tt&gt; が割り当てられている．なおカーソル位置までを実行したかったら「Feed Region (&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;C-.&lt;/span&gt; &lt;span class="pre"&gt;C-r&lt;/span&gt;&lt;/tt&gt;) 」で行える．対話的なデバッグの際有用だ．「Feed Buffer」後はコンパイラの出力画面に accepted / rejected が表示され， accepted の場合今回の例だと，次のような出力ウィンドウが表示される:&lt;/p&gt;
+&lt;img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-output-screenshot.png"/&gt;
+&lt;p&gt;ついでに， Emacs のこの GUI でなく普通のプログラミングスタイルでやりたいなら， &lt;tt class="docutils literal"&gt;/Applications/Mozart2.app/Contents/Resources/bin&lt;/tt&gt; の中に色々ツールが入ってるのでそれを使う．例えば，簡単な Hello World プログラムは次のように作れる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ export PATH=$PATH:/Applications/Mozart2.app/Contents/Resources/bin
+$ cat &amp;gt; helloworld.oz
+functor
+import
+  System
+define
+  {System.showInfo "Hello World!"}
+end
+$ ozc -x helloworld.oz
+$ ls
+helloworld  helloworld.oz
+$ ozengine helloworld
+Hello World!
+&lt;/pre&gt;
+&lt;p&gt;CTMCP を読む分には， Emacs の実行環境で問題なさそうなので，僕はそれでやる．なお，本書で紹介されてる &lt;tt class="docutils literal"&gt;oz&lt;/tt&gt; コマンドでの起動はうまくいかなかった．なんでだろね． &lt;tt class="docutils literal"&gt;Mozart2.app&lt;/tt&gt; から起動すればいいので特に困ることはないんだけど．&lt;/p&gt;
+&lt;p&gt;後， &lt;tt class="docutils literal"&gt;Browse&lt;/tt&gt; で一々別のウィンドウが立ち上がるのがめんどいという人は， Oz Emulator というバッファが用意されているので，それを表示して， &lt;tt class="docutils literal"&gt;Browse&lt;/tt&gt; を適宜 &lt;tt class="docutils literal"&gt;Show&lt;/tt&gt; 関数に読み替えると良いっぽい．そうすると別ウィンドウが立ち上がる代わりに， Emulator の方に出力が表示される．僕は以下の画面構成で書いてる:&lt;/p&gt;
+&lt;img alt="" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-my-screen.png"/&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ctmcp-1"&gt;
+&lt;h2&gt;CTMCP 1章の内容&lt;a class="headerlink" href="#ctmcp-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;準備できたので，早速読んでいく．内容の詳細説明はしないので，内容が気になる方とか Oz の文法が知りたい方は普通に読んでくれ．&lt;/p&gt;
+&lt;p&gt;1章の内容は， Oz の説明と簡単な文法，それから取り入れられてる機能の説明っぽい．まあ概要だしね．これからやってく内容を，サンプルプログラムを元にちょっとずつ説明していく感じ．全くプログラミングをやったことない人にはきついが，どれかのプログラミング言語の入門書を読んだくらいのレベルなら読めそう．大体は以下の内容:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;最初は簡単なプログラムから，ちょっと複雑なプログラムまで，徐々に Oz に慣らしていく．&lt;/li&gt;
+&lt;li&gt;プログラムの正しさの検証の話．&lt;ul&gt;
+&lt;li&gt;数学的な推論に基づくプログラム検証の話．&lt;/li&gt;
+&lt;li&gt;目次を見る限り， 13 章でやるのかな？ 後でやるとは言っているが，どれくらい後なのかは特に本文では言及されてない．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;計算の複雑性の話．&lt;ul&gt;
+&lt;li&gt;主に，プログラムの計算量の話かな．&lt;/li&gt;
+&lt;li&gt;これも特に本文では述べられていないが， 3.5 とかで出てきてそう．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;遅延評価の話．&lt;ul&gt;
+&lt;li&gt;2.0.1 では表示が本文と違うが，多分気にしちゃいけないやつ．&lt;/li&gt;
+&lt;li&gt;Oz は遅延評価関数がサポートされていて，それを使ってどういうことができるかという話．&lt;/li&gt;
+&lt;li&gt;これは， 4.5 に書いてあるのかな． 3.6 とかにもありそうだし飛び飛びって感じそう．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;高階プログラミングの話．&lt;ul&gt;
+&lt;li&gt;関数を引数にとる高階関数を使ったプログラミングの話．&lt;/li&gt;
+&lt;li&gt;これは， 3.6 に説明があるのかな．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;並行性の話&lt;ul&gt;
+&lt;li&gt;Oz は並行プログラミングがサポートされていて，それを使ってどういうことができるかの話．&lt;/li&gt;
+&lt;li&gt;これは， 4 / 5 あたりが主にこの内容になってそう．あと 8 もそうだしそこかしこに出てきそう．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;データフローの話&lt;ul&gt;
+&lt;li&gt;Oz でサポートされている，データフローに基づく並行実行のアーキテクチャの説明．&lt;/li&gt;
+&lt;li&gt;これは， 4.2 / 4.9 とかなんかな．よく分からん．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;明示的状態の話&lt;ul&gt;
+&lt;li&gt;Oz は可変な変数がサポートされていて，それを使ってどういうことができるかの話．&lt;/li&gt;
+&lt;li&gt;これも同じく後で詳しくやるって言って具体的な章番号は書いていないが，多分 6 がその内容っぽい．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;オブジェクトの話&lt;ul&gt;
+&lt;li&gt;オブジェクト指向の話っぽい． Oz では，カプセル化ができるという話が出てくる．&lt;/li&gt;
+&lt;li&gt;てか，次で諸にオブジェクト指向の話が出てきた．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;クラスの話&lt;ul&gt;
+&lt;li&gt;オブジェクトのクラスを， record と factory という機能を使って作れるよって話．&lt;/li&gt;
+&lt;li&gt;後，オブジェクト指向の用語の説明とかが書いてある．&lt;/li&gt;
+&lt;li&gt;何故かここでは，オブジェクト指向プログラミングは 7 章でやると書いてある．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;非決定性の話&lt;ul&gt;
+&lt;li&gt;並行性と可変な変数による非決定性の話．&lt;/li&gt;
+&lt;li&gt;レースコンディションって怖いねって話．&lt;/li&gt;
+&lt;li&gt;これは， 4.7 とかなのかな．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;不可分性の話&lt;ul&gt;
+&lt;li&gt;Oz は排他制御をサポートしていて，それを使ってどう言うことができるかの話．&lt;/li&gt;
+&lt;li&gt;これは， 8.3 っぽい．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;後は，演習問題って感じ．まだ 1 章しか読んでなくて，目次だけ見て「ここに出てきそう」って言ってるので出現場所の精度は期待しないでくれ．&lt;/p&gt;
+&lt;p&gt;演習問題もざっと目を通したけど，自分で考えるための脚注みたいな感じだった．本文に書かれてないけど，考えておいた方がいいことを，答えを伏せて書くみたいな，行間を目に見える形にしたみたいな感じ．知識の確認にはあまり使えなそう．まあ今回はそこまでちゃんとした話ではなかったのもあるかもしれないけど．ただ，もしこの形式で演習問題が続くなら，最後に確認のためやるというよりは，それぞれの節を読んだら演習問題を見に行くぐらいの方が良さそう．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-8"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-8" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;CTMCP を読むための準備とか諸々をした．トピックがかなり網羅的で面白そうではあるが，内容が古そうなのは気になる． Mozart 2.0.1 だと動かないサンプルとか出てこないか心配．頑張っていくか．なお，一応 1 章のまとめは書いたが，これ以降の章は多分特にまとめとか書かない気がする．今回は環境構築メモるついでって感じだし．というわけで，よろしく．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="about-soft-realtime" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;ソフトリアルタイム (soft realtime) とは，制御工学の用語の一つで，リアルタイムシステムのクラスの 1 つを表す．リアルタイムシステムの中でも処理時間の期限に求める制約が一番緩いクラスで，処理時間の期限をすぎると徐々に処理結果の価値が下がっていくようなシステムのことを指す．プログラミング言語がそのようなアプリケーションに対応しているということはつまり，高度なスケジューリングシステムを備えていると言いたいのだと思う．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="about-reactive" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-3"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;一口にリアクティブ (reactive) と言っても，正直システムによって定義はかなり異なるが，一般的にはユーザからの入力に対して即座に出力を返すようなシステムのことを指す．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/read-ctmcp.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/read-ctmcp.rst'
+}
+&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Mozart"></category><category term="Oz"></category><category term="Emacs"></category><category term="本"></category><category term="環境構築"></category></entry><entry><title>Google Analytics の導入</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/" rel="alternate"></link><published>2019-04-08T12:30:00+09:00</published><updated>2019-04-08T12:30:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/add-google-analytics/</id><summary type="html">&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
 &lt;div class="section" id="id"&gt;
 &lt;h2&gt;トラッキング ID の設定&lt;a class="headerlink" href="#id" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:&lt;/p&gt;
