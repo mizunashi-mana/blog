@@ -109,6 +109,7 @@ PLUGINS = [
   'related_posts',
   'headerid',
   'embed_customjs',
+  'sitemap',
 ]
 
 RELATIVE_URLS = True
