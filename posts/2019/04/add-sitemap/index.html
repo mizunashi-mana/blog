@@ -47,18 +47,27 @@
     <!-- Microsoft EDGE -->
     <meta name="msapplication-TileColor" content="#555">
 
-    <meta name="author" content="Mizunashi Mana" />
-    <meta name="description" content="Mizunashi Mana's Blog" />
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="sitemap とかを追加してみたので，それの備忘録． sitemap 周辺ファイルの追加 まず Pelican で sitemap を生成させる．これは sitemap プラグインを追加するだけでいい: 1 2 3 4 PLUGINS = [ ... + &#39;sitemap&#39;, ] 後は SITEMAP に設定を書く．以下の感じのことを書いた: SITEMAP = { &#39;format&#39;: &#39;xml&#39;, &#39;priorities&#39;: { &#39;articles&#39;: 0.7, &#39;indexes&#39;: 0.5, &#39;pages&#39;: 0.6, }, &#39;changefreqs&#39;: { &#39;articles&#39;: &#39;monthly&#39;, &#39;indexes&#39;: &#39;daily&#39;, &#39;pages&#39;: &#39;monthly&#39;, } } これで，ビルドすると output/sitemap.xml が作成される．後は …" />
+<meta name="keywords" content="SEO, ブログ, Pelican, Google Analytics">
+
 <meta property="og:site_name" content="続くといいな日記"/>
-<meta property="og:type" content="blog"/>
-<meta property="og:title" content="続くといいな日記"/>
-<meta property="og:description" content="Mizunashi Mana's Blog"/>
+<meta property="og:title" content="sitemap の追加"/>
+<meta property="og:description" content="sitemap とかを追加してみたので，それの備忘録． sitemap 周辺ファイルの追加 まず Pelican で sitemap を生成させる．これは sitemap プラグインを追加するだけでいい: 1 2 3 4 PLUGINS = [ ... + &#39;sitemap&#39;, ] 後は SITEMAP に設定を書く．以下の感じのことを書いた: SITEMAP = { &#39;format&#39;: &#39;xml&#39;, &#39;priorities&#39;: { &#39;articles&#39;: 0.7, &#39;indexes&#39;: 0.5, &#39;pages&#39;: 0.6, }, &#39;changefreqs&#39;: { &#39;articles&#39;: &#39;monthly&#39;, &#39;indexes&#39;: &#39;daily&#39;, &#39;pages&#39;: &#39;monthly&#39;, } } これで，ビルドすると output/sitemap.xml が作成される．後は …"/>
 <meta property="og:locale" content="ja"/>
-<meta property="og:url" content="https://mizunashi-mana.github.io/blog"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-04-10 00:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="SEO"/>
+<meta property="article:tag" content="ブログ"/>
+<meta property="article:tag" content="Pelican"/>
+<meta property="article:tag" content="Google Analytics"/>
 <meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
 
-  <title>続くといいな日記 &ndash;     Tag SEO
-</title>
+  <title>続くといいな日記 &ndash; sitemap の追加</title>
 
 </head>
 <body>
@@ -127,22 +136,20 @@
 </a>
     </nav>
 
-
-
-<article>
+<article class="single">
   <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">sitemap の追加</a></h2>
+      
+    <h1 id="add-sitemap">sitemap の追加</h1>
     <p>
           Posted on 水 10 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
 
 
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/seo.html">SEO</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/google-analytics.html">Google Analytics</a>
     </p>
   </header>
+
+
   <div>
-      <p>sitemap とかを追加してみたので，それの備忘録．</p>
+    <p>sitemap とかを追加してみたので，それの備忘録．</p>
 <div class="section" id="auto-id-1">
 <h2>sitemap 周辺ファイルの追加<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>まず Pelican で sitemap を生成させる．これは <tt class="docutils literal">sitemap</tt> プラグインを追加するだけでいい:</p>
@@ -170,55 +177,61 @@ SITEMAP = {
   }
 }
 </pre>
-<p>これで，ビルドすると <tt class="docutils literal">output/sitemap.xml</tt> が作成される．後は …</p></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">    Continue reading
-</a>
+<p>これで，ビルドすると <tt class="docutils literal">output/sitemap.xml</tt> が作成される．後は， <tt class="docutils literal">robots.txt</tt> で sitemap の場所を通知してやる． <tt class="docutils literal">robots.txt</tt> は直下に置かなければいけないので， <a class="reference external" href="https://github.com/mizunashi-mana/mizunashi-mana.github.io">https://github.com/mizunashi-mana/mizunashi-mana.github.io</a> の方に追加した．普通に以下の感じのことを書く:</p>
+<pre class="literal-block">
+User-agent: *
+Disallow:
+Allow:
+
+Sitemap: https://mizunashi-mana.github.io/blog/sitemap.xml
+</pre>
+<p>これでおk．</p>
+</div>
+<div class="section" id="google-search-console">
+<h2>Google Search Console の登録<a class="headerlink" href="#google-search-console" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>後 Google Search Console に登録する． Search Console のページに行って <a class="reference external" href="https://mizunashi-mana.github.io">https://mizunashi-mana.github.io</a> でプロパティを追加すると，所有の確認画面が出てくる．そのサイトを所有しているかの確認方法はいくつかあって，一番簡単なのは Google Analytics が既に導入されているならそれでやるのがいいっぽい．<a class="reference external" href="https://mizunashi-mana.github.io">https://mizunashi-mana.github.io</a> は Google Analytics は動いてないので，別の方法でやる必要がある．簡単なのは HTML タグに meta 情報を追加する方法だったけどなんかうまくいかなかったので， HTML ファイルを追加するやつを試した．</p>
+<p>所有の確認画面から HTML ファイルをダウンロードしてその名前でアップロードするだけ．それで確認ボタンを押せばいける．ついでに， <tt class="docutils literal">robots.txt</tt> の更新リクエストも送っておく．これは， <a class="reference external" href="https://www.google.com/webmasters/tools/robots-testing-tool">robots.txt テスター</a> から行える．更新したいサイトを選んで，送信ボタンを押すと，更新される．後， sitemap の送信もしておく． Google Search Console の「インデックス」 &gt; 「サイトマップ」に行って，画面に sitemap の URL を入力すればいい．後は数日待つ．</p>
+<p>後， Google Analytics と Google Search Console を連携できるので，連携しておく． Google Analytics の集客メニューに Search Console ページへのリンクがあるので，それを踏んで Search Console のプロパティを対応づけする (どういうことやったのか忘れた) ．</p>
+<p>数日後には Google Search Console で色々な情報が見れるようになっている．なお，このページは検索対象にちゃんと含まれているのか？ みたいな疑問があれば， URL 検査からチェックしてみるといい．そうすると， Google 検索のためにインデックスされているページ情報が見れる．</p>
+</div>
+<div class="section" id="auto-id-2">
+<h2>まとめ<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>正直 SEO 対策しても改善に取り組む姿勢が僕に無いんで，グーグルに情報提供してるだけみたいにもなってるが，まあ何もしなくてもグーグルに情報行ってるんで多少はね？ それにこういう系は見たいって思った時に導入して即見れるとかでは無いし，自分でやらないと知見溜まらないしね．たまには覗いていくか〜みたいな感じ．</p>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/add-sitemap.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/add-sitemap.rst'
+}
+</script><script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
   </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/#add-google-analytics">Google Analytics の導入</a></h2>
+  <div class="tag-cloud">
     <p>
-          Posted on 月 08 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/google-analytics.html">Google Analytics</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/seo.html">SEO</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/seo.html">SEO</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/google-analytics.html">Google Analytics</a>
     </p>
-  </header>
-  <div>
-      <p>Google Analytics を導入したので，やったことをまとめた．</p>
-<div class="section" id="id">
-<h2>トラッキング ID の設定<a class="headerlink" href="#id" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:</p>
-<ol class="arabic simple">
-<li><a class="reference external" href="https://analytics.google.com/analytics">https://analytics.google.com/analytics</a> の管理ページ表示</li>
-<li>「プロパティを作成」ボタンを押す．</li>
-<li>プロパティの項目を埋めていく．大体以下の感じ:<ul>
-<li>ウェブサイトの名前: GitHub Pages</li>
-<li>ウェブサイトの URL: <a class="reference external" href="https://mizunashi-mana.github">https://mizunashi-mana.github</a></li>
-<li>ウェブサイトの業種: その他<ul>
-<li>なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， <a class="reference external" href="https://support.google.com/analytics/answer/1032415">https://support.google.com/analytics/answer/1032415</a> を参照．</li>
-</ul>
-</li>
-<li>ウェブサイトのタイムゾーン: 日本 (+09:00)</li>
-</ul>
-</li>
-<li>そうするとトラッキング …</li></ol></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/#add-google-analytics">    Continue reading
-</a>
   </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/">Google Analytics の導入</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/">ブログに共有ボタンを追加した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/">ブログのデザイン調整</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/">ブログ始めました</a></li>
+    </ul>
+  </div>
+
+
 </article>
-
-  <div class="pagination">
-  </div>
-
-
-
 
     <footer>
 <p>

@@ -131,6 +131,54 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">sitemap の追加</a></h2>
+    <p>
+          Posted on 水 10 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/seo.html">SEO</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/google-analytics.html">Google Analytics</a>
+    </p>
+  </header>
+  <div>
+      <p>sitemap とかを追加してみたので，それの備忘録．</p>
+<div class="section" id="auto-id-1">
+<h2>sitemap 周辺ファイルの追加<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まず Pelican で sitemap を生成させる．これは <tt class="docutils literal">sitemap</tt> プラグインを追加するだけでいい:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span>  PLUGINS = [
+    ...
+<span class="gi">+   'sitemap',</span>
+  ]
+</pre></div>
+</td></tr></table><p>後は <tt class="docutils literal">SITEMAP</tt> に設定を書く．以下の感じのことを書いた:</p>
+<pre class="literal-block">
+SITEMAP = {
+  'format': 'xml',
+  'priorities': {
+    'articles': 0.7,
+    'indexes': 0.5,
+    'pages': 0.6,
+  },
+  'changefreqs': {
+    'articles': 'monthly',
+    'indexes': 'daily',
+    'pages': 'monthly',
+  }
+}
+</pre>
+<p>これで，ビルドすると <tt class="docutils literal">output/sitemap.xml</tt> が作成される．後は …</p></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/#read-ctmcp">CTMCP のために Mozart/Oz を動かす</a></h2>
     <p>
           Posted on 月 08 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/xue-xi.html">学習</a>

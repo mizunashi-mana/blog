@@ -15,7 +15,7 @@
 &lt;p class="attribution"&gt;—Tutorial of Oz by Seif Haridi and Nils Franzén&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;という言語らしい． Mozart は UCL の PLDC 研究グループによって開発が続けられている Oz の主要実装ということになる．&lt;/p&gt;
-&lt;p&gt;ところで， Mozart/Oz でググると一番最初に出てくる &lt;a class="reference external" href="https://qiita.com/mshioda/items/9de1399db486107f1c30"&gt;「Mozart/Oz について話します」&lt;/a&gt; という記事の中で述べられているように，あまり積極的な開発体制が整っているわけではないようだ．また，メジャーバージョン1から現在のメジャーバージョン2に移る時に，開発体制の大規模な移行があったのか，本書で出てくるサイト &lt;a class="reference external" href="http://www.mozart-oz.org"&gt;http://www.mozart-oz.org&lt;/a&gt; は稼働しておらず， &lt;a class="reference external" href="https://mozart.github.io/"&gt;https://mozart.github.io/&lt;/a&gt; に方に移っている．&lt;/p&gt;
+&lt;p&gt;ところで， Mozart/Oz でググると一番最初に出てくる &lt;a class="reference external" href="https://qiita.com/mshioda/items/9de1399db486107f1c30"&gt;「Mozart/Oz について話します」&lt;/a&gt; という記事の中で述べられているように，あまり積極的な開発体制が整っているわけではないようだ．また，メジャーバージョン1から現在のメジャーバージョン2に移る時に，開発体制の大規模な移行があったのか，本書で出てくるサイト &lt;a class="reference external" href="http://www.mozart-oz.org"&gt;http://www.mozart-oz.org&lt;/a&gt; は稼働しておらず， &lt;a class="reference external" href="https://mozart.github.io/"&gt;https://mozart.github.io/&lt;/a&gt; の方に移っている．&lt;/p&gt;
 &lt;p&gt;ただ，開発自体は続いているようで，半年前ぐらいにメジャーバージョン2の初の安定板， &lt;a class="reference external" href="https://github.com/mozart/mozart2/releases/tag/v2.0.1"&gt;2.0.1&lt;/a&gt; がリリースされている．とりあえずこれをインストールしたが，今の所 (1章までしか読んでない) 本書のサンプルは問題なく動く．今後に期待という感じだろうか．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-6"&gt;
