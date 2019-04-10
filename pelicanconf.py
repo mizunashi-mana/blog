@@ -37,9 +37,9 @@ BROWSER_COLOR = '#555'
 ROBOTS = 'index, follow'
 
 CC_LICENSE = {
-    'name': 'Creative Commons Attribution-ShareAlike',
-    'version': '4.0',
-    'slug': 'by-sa'
+  'name': 'Creative Commons Attribution-ShareAlike',
+  'version': '4.0',
+  'slug': 'by-sa',
 }
 COPYRIGHT_YEAR = 2019
 
@@ -81,17 +81,17 @@ MENUITEMS = (
 )
 
 SITEMAP = {
-    'format': 'xml',
-    'priorities': {
-        'articles': 0.6,
-        'indexes': 0.6,
-        'pages': 0.5,
-    },
-    'changefreqs': {
-        'articles': 'monthly',
-        'indexes': 'daily',
-        'pages': 'monthly',
-    }
+  'format': 'xml',
+  'priorities': {
+    'articles': 0.7,
+    'indexes': 0.5,
+    'pages': 0.6,
+  },
+  'changefreqs': {
+    'articles': 'monthly',
+    'indexes': 'daily',
+    'pages': 'monthly',
+  }
 }
 
 DEFAULT_PAGINATION = 10
