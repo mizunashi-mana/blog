@@ -57,7 +57,7 @@
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog"/>
 <meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
 
-  <title>続くといいな日記 &ndash;     Tag Emacs
+  <title>続くといいな日記 &ndash;     Category 直感
 </title>
 
 </head>
@@ -131,25 +131,29 @@
 
 <article>
   <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/#read-ctmcp">CTMCP のために Mozart/Oz を動かす</a></h2>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/#generalizing-transformation">Functor / Applicative / Monad が表すもの</a></h2>
     <p>
-          Posted on 月 08 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/xue-xi.html">学習</a>
+          Posted on 土 13 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/zhi-gan.html">直感</a>
 
 
           &#8226;     Tagged with
 
-              <a href="https://mizunashi-mana.github.io/blog/tag/mozart.html">Mozart</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/oz.html">Oz</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/emacs.html">Emacs</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ben.html">本</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/huan-jing-gou-zhu.html">環境構築</a>
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghckuo-zhang.html">GHC拡張</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/biao-zhun-raiburari.html">標準ライブラリ</a>
     </p>
   </header>
   <div>
-      <p>ゼミの輪読で， <a class="reference external" href="https://www.amazon.co.jp/dp/0262220695">Concepts, Techniques, and Models of Computer Programming (MIT Press)</a> ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．</p>
-<div class="section" id="mozart-oz">
-<h2>Mozart/Oz<a class="headerlink" href="#mozart-oz" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である Mozart に完全に焦点を当てている． Oz 自体は名前を聞いたことはあったが今まで触ったことはなかった． <a class="reference external" href="https://mozart.github.io/mozart-v1/doc-1.4.0/tutorial/index.html">公式ドキュメント</a> によると</p>
-<blockquote>
-<p>"Oz is a multi-paradigm language that is designed for …</p></blockquote></div>
+      <p><a class="reference external" href="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238">https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238</a> の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい．</p>
+<p>Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス Functor / Applicative / Monad の個人的な捉え方を書いておこうと思う．なお，あくまで個人的な捉え方なので，形式的でないし，広く受け入れられている考え方とは乖離している可能性があるので，そこは注意してほしい．</p>
+<div class="section" id="auto-id-1">
+<h2>概要<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>それぞれの型クラスが表すものは端的に言えば，</p>
+<dl class="docutils">
+<dt>Functor</dt>
+<dd>変換の一般化</dd>
+<dt>Applicative</dt>
+<dd>関数適用の一般化 …</dd></dl></div>
         <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/#read-ctmcp">    Continue reading
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/#generalizing-transformation">    Continue reading
 </a>
   </div>
 </article>

@@ -6,9 +6,7 @@
 &lt;p&gt;そもそもドキュメントをちゃんと読めという話なんだけど， &lt;a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html"&gt;https://docs.python.org/ja/3/library/datetime.html&lt;/a&gt; で普通に説明されている．端的に言えば，&lt;/p&gt;
 &lt;ul class="simple"&gt;
 &lt;li&gt;aware: 実時刻を表し，タイムゾーンや夏時間情報を持つ．&lt;/li&gt;
-&lt;li&gt;naive: 時刻情報だけを表現する．タイムゾーンなどの情報は持たず，その時刻がどういう意味を持つかは処理する側に委ねられる．&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;の2種類があるらしい． aware か naive かは， &lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; プロパティが &lt;tt class="docutils literal"&gt;None …&lt;/tt&gt;&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+&lt;li&gt;naive: 時刻情報だけを表現する …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
 &lt;div class="section" id="aware-naive"&gt;
 &lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;

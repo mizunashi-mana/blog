@@ -1,5 +1,525 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-10T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>sitemap の追加</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/" rel="alternate"></link><published>2019-04-10T00:00:00+09:00</published><updated>2019-04-10T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-10:/blog/posts/2019/04/add-sitemap/</id><summary type="html">&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-13T20:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Functor / Applicative / Monad が表すもの</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/" rel="alternate"></link><published>2019-04-13T20:00:00+09:00</published><updated>2019-04-13T20:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-13:/blog/posts/2019/04/generalizing-transformation/</id><summary type="html">&lt;p&gt;&lt;a class="reference external" href="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238"&gt;https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238&lt;/a&gt; の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい．&lt;/p&gt;
+&lt;p&gt;Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス Functor / Applicative / Monad の個人的な捉え方を書いておこうと思う．なお，あくまで個人的な捉え方なので，形式的でないし，広く受け入れられている考え方とは乖離している可能性があるので，そこは注意してほしい．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;概要&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;それぞれの型クラスが表すものは端的に言えば，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;Functor&lt;/dt&gt;
+&lt;dd&gt;変換の一般化&lt;/dd&gt;
+&lt;dt&gt;Applicative&lt;/dt&gt;
+&lt;dd&gt;関数適用の一般化 …&lt;/dd&gt;&lt;/dl&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238"&gt;https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238&lt;/a&gt; の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい．&lt;/p&gt;
+&lt;p&gt;Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス Functor / Applicative / Monad の個人的な捉え方を書いておこうと思う．なお，あくまで個人的な捉え方なので，形式的でないし，広く受け入れられている考え方とは乖離している可能性があるので，そこは注意してほしい．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;概要&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;それぞれの型クラスが表すものは端的に言えば，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;Functor&lt;/dt&gt;
+&lt;dd&gt;変換の一般化&lt;/dd&gt;
+&lt;dt&gt;Applicative&lt;/dt&gt;
+&lt;dd&gt;関数適用の一般化&lt;/dd&gt;
+&lt;dt&gt;Monad&lt;/dt&gt;
+&lt;dd&gt;手続きの結合の一般化&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;だと思う．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;手続きの結合の特殊な場合が，関数適用 (&lt;tt class="docutils literal"&gt;Monad m =&amp;gt; Applicative m&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;一般的な関数適用の特殊な場合が，変換の一般化 (&lt;tt class="docutils literal"&gt;Applicative m =&amp;gt; Functor m&lt;/tt&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;という関係になっている．なお， Haskell 2010 では &lt;tt class="docutils literal"&gt;Monad m =&amp;gt; Functor m&lt;/tt&gt; は強制されていなかったが， Haskell 2020 では &lt;tt class="docutils literal"&gt;Monad m =&amp;gt; Applicative m&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;Applicative m =&amp;gt; Functor m&lt;/tt&gt; の階層がクラスに指定されるようになる &lt;a class="footnote-reference" href="#amp-proposal-for-haskell2020" id="auto-id-2"&gt;[2]&lt;/a&gt; ．&lt;/p&gt;
+&lt;p&gt;では，それぞれの型クラスを見ていく．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="functor"&gt;
+&lt;h2&gt;Functor 型クラス&lt;a class="headerlink" href="#functor" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Functor クラスは，以下のようになる &lt;a class="footnote-reference" href="#minimal-class-definition" id="auto-id-3"&gt;[3]&lt;/a&gt; :&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;-- |  The 'Functor' class can generalize a transformation.&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- Instances of 'Functor' should satisfy the following laws:&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/identity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--     @'fmap' 'id' = 'id'@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/composition/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--     @'fmap' (f . g) = 'fmap' f . 'fmap' g@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- A given type has at most one valid instance of 'Functor'.&lt;/span&gt;
+&lt;span class="c1"&gt;-- And, if the identity law is satisfied, the composition law is also satisfied.&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Functor&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;任意の変換 &lt;tt class="docutils literal"&gt;f :: a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; b&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;fmap f :: m a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; m b&lt;/tt&gt; という変換に一般化できるのが， Functor だ．ただ，型が合ってれば何でもいいかというと，それだけではあまりにも治安が悪い．なので，コメントに書いてある通り&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;恒等関数の保存 (preserve identity)&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;何もしない変換 (&lt;tt class="docutils literal"&gt;id :: a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; a = \x &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; x&lt;/tt&gt;) を一般化すると，やっぱり何もしない変換になる:&lt;/p&gt;
+&lt;pre class="last literal-block"&gt;
+fmap id = id
+&lt;/pre&gt;
+&lt;/dd&gt;
+&lt;dt&gt;合成の保存 (preserve composition)&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;一般化する前に合成しても，後で合成しても，結果が同じになる:&lt;/p&gt;
+&lt;pre class="last literal-block"&gt;
+fmap (f . g) = fmap f . fmap g
+&lt;/pre&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;を満たす必要がある．俗に言われる &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; 則である．ただ実は，恒等関数の保存を満たせば合成の保存も自動的に満たせることが分かっている &lt;a class="footnote-reference" href="#slim-functor-law-by-free" id="auto-id-4"&gt;[1]&lt;/a&gt; ．恒等関数の保存はモチベーションとしてはかなり理解しやすい．何もしない変換を一般化すると，意味のある変換になるというのは少し許容しがたい．そして，ただそれだけを条件に課すだけで， &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; の実装が唯一に決まるというのは不思議で面白い．これは，見過ごされがちだが， &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; が多相であることがかなり効いている．ほぼ全ての高次なデータ型は， Functor になり，その実装も唯一に決まる．&lt;/p&gt;
+&lt;p&gt;ところで， Functor に課す条件は本当にこれだけで妥当なのだろうか？ 確かに多くのデータ型で一貫した実装を提供できるということは何かしら意味を持ちそうだが，それにしても条件が，多相的で「何もしない変換を一般化すると，何もしない変換になる」というだけではそれほど強い制約にはなりそうにない．この実装が具体的に意味を持つのかは別のトピックで，横道に逸れそうなので後述の &lt;a class="reference internal" href="#auto-id-7"&gt;Functor の妥当性&lt;/a&gt; で述べることにする．少なくとも，実装が唯一に決まる変換の一般化の1つの形が， &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; であるという見方はできるだろう．ここでは，そこまで抽象的な制約に意味があるかについては，確かに議論の余地があるとだけ言っておく．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="applicative"&gt;
+&lt;h2&gt;Applicative 型クラス&lt;a class="headerlink" href="#applicative" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Applicative クラスは，以下のようになる &lt;a class="footnote-reference" href="#minimal-class-definition" id="auto-id-5"&gt;[3]&lt;/a&gt; :&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;-- |  The 'Applicative' class provides general function application.&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- Instances of 'Applicative' should satisfy the following laws:&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/identity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'pure' 'id' '&amp;lt;*&amp;gt;' x = x@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/composition/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'pure' (.) '&amp;lt;*&amp;gt;' u '&amp;lt;*&amp;gt;' v '&amp;lt;*&amp;gt;' w = u '&amp;lt;*&amp;gt;' (v '&amp;lt;*&amp;gt;' w)@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/homomorphism/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'pure' f '&amp;lt;*&amp;gt;' 'pure' x = 'pure' (f x)@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/interchange/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @u '&amp;lt;*&amp;gt;' 'pure' y = 'pure' ('$' y) '&amp;lt;*&amp;gt;' u@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- As a consequence of these laws, the 'Functor' instance for @m@ will satisfy&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt; pure f &amp;lt;*&amp;gt; x = fmap f x&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Functor&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Applicative&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;Applicative クラスは，実は提唱論文では idiom と呼ばれる Applicative を用いた言語と，その為のブラケット記法というものがセットになっていた．これは今日では Applicative style と言う名前で親しまれている． Applicative style は以下の形でプログラムを書いていく手法だ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+pure f &amp;lt;*&amp;gt; x1 &amp;lt;*&amp;gt; x2 &amp;lt;*&amp;gt; ...
+&lt;/pre&gt;
+&lt;p&gt;この手法において必要なのは， Applicative クラスのメソッドだけだ．また GHC では取り込まれなかった為，忘れ去られてしまったが，論文中では次の記法も提唱されていた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[| f x1 x2 ... |]
+&lt;/pre&gt;
+&lt;p&gt;これは上の &lt;tt class="docutils literal"&gt;pure&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;&amp;lt;*&amp;gt;&lt;/tt&gt; で書かれた式の糖衣構文になっている．かなり関数適用の一般化として直感的な記法だ． Applicative はこの idiom に特化した Functor と Monad の中間と位置づけられたクラスだ．&lt;/p&gt;
+&lt;p&gt;もちろん Applicative もただ型があっているだけでは治安が悪いので，法則が用意されている．ただ使い方と裏腹に，その法則はかなりややこしい． Applicative が満たすべき法則， &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; 則は以下のものになる．&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;恒等関数の保存 (preserve identity)&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;何もしない変換 (&lt;tt class="docutils literal"&gt;id :: a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; a = \x &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; x&lt;/tt&gt;) を &lt;tt class="docutils literal"&gt;pure id :: m (a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; a)&lt;/tt&gt; に埋め込んで一般化された関数適用するのは，何もしないのと同じ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+pure id &amp;lt;*&amp;gt; x = x
+&lt;/pre&gt;
+&lt;p&gt;これは，ブラケット表記を使うと以下のように書ける:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[| id x |] = x
+&lt;/pre&gt;
+&lt;p class="last"&gt;こうすると，関数適用の一般化という感じはある．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;合成の保存 (preserve composition)&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;一般化された関数に合成関数を適用した結果は，一般化された関数での合成に一致する:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+pure (.) &amp;lt;*&amp;gt; u &amp;lt;*&amp;gt; v &amp;lt;*&amp;gt; w = u &amp;lt;*&amp;gt; (v &amp;lt;*&amp;gt; w)
+&lt;/pre&gt;
+&lt;p&gt;これは，ブラケット表記を使うと以下のように書ける:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[| (\f g x -&amp;gt; f (g x)) u v w |] = u &amp;lt;*&amp;gt; (v &amp;lt;*&amp;gt; w)
+&lt;/pre&gt;
+&lt;p class="last"&gt;これも右側の &lt;tt class="docutils literal"&gt;&amp;lt;*&amp;gt;&lt;/tt&gt; を無視するといい感じに関数適用の一般化をしてそうな感じは出てる．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;準同型 (homomorphism)&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;埋め込んだ後で一般化された関数適用をした結果と，関数適用してから埋め込んだ結果が一致する:&lt;/p&gt;
+&lt;pre class="last literal-block"&gt;
+pure f &amp;lt;*&amp;gt; pure x = pure (f x)
+&lt;/pre&gt;
+&lt;/dd&gt;
+&lt;dt&gt;交替律 (interchange property)&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;&lt;tt class="docutils literal"&gt;pure&lt;/tt&gt; が右にある場合に，それを左に移すことができる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+u &amp;lt;*&amp;gt; pure x = pure ($ x) &amp;lt;*&amp;gt; u
+&lt;/pre&gt;
+&lt;p&gt;右固定というのが交替っぽい．もう少し交替っぽく書くと以下の感じ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+u &amp;lt;*&amp;gt; pure x = fmap (\f -&amp;gt; f x) u
+&lt;/pre&gt;
+&lt;p class="last"&gt;ここでは &lt;tt class="docutils literal"&gt;pure f &amp;lt;*&amp;gt; x = fmap f x&lt;/tt&gt; を使っている．左が一般化された関数適用を使っていて，右が関数適用を &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; で一般化している．要は関数適用と一般化が交替していて，左は一般化してから関数適用なのが，右は関数適用してから一般化みたいな感じ．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;親の &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; インスタンスとの整合性&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;&lt;tt class="docutils literal"&gt;pure&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;&amp;lt;*&amp;gt;&lt;/tt&gt; から決定される &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; の実装が，元の &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; と整合性が取れている:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+pure f &amp;lt;*&amp;gt; x = fmap f x
+&lt;/pre&gt;
+&lt;p&gt;ところで実は，これは前の4つが満たされていれば，自動的に満たされる．まず，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;id&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="c1"&gt;-- Applicative の恒等関数の保存&lt;/span&gt;
+
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="c1"&gt;-- Applicative の合成の保存&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;                   &lt;span class="c1"&gt;-- 準同型&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p class="last"&gt;から &lt;tt class="docutils literal"&gt;\f &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (pure f &lt;span class="pre"&gt;&amp;lt;*&amp;gt;)&lt;/span&gt;&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; 則を満たす．さらに， &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; のインスタンスは一意なので，この実装は &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; と一致する．よって， &lt;tt class="docutils literal"&gt;pure f &amp;lt;*&amp;gt; x = fmap f x&lt;/tt&gt; が成り立つことになる．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;一体このような法則はどこからきたのだろうか？ 提唱論文では，実は &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; と同じ能力を持つ別のクラスも紹介されている．それは以下のクラスだ:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;-- |  The 'Monoidal' class is generalized 'Monoid'.&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- Instances of 'Monoidal' should satisfy the following laws:&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/naturality/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'fmap' (\(x, y) -&amp;gt; (f x, g y)) (u '&amp;gt;*&amp;lt;' v) = 'fmap' f u '&amp;gt;*&amp;lt;' 'fmap' g v@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/left identity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'fmap' 'snd' ('unit' &amp;gt;*&amp;lt; v) = v@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/right identity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'fmap' 'fst' (u '&amp;gt;*&amp;lt;' 'unit') = u@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/associativity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @&lt;/span&gt;
+&lt;span class="c1"&gt;--      'fmap' (\((x, y), z) -&amp;gt; (x, y, z)) ((u '&amp;gt;*&amp;lt;' v) '&amp;gt;*&amp;lt;' w)&lt;/span&gt;
+&lt;span class="c1"&gt;--         = 'fmap' (\(x, (y, z)) -&amp;gt; (x, y, z)) (u '&amp;gt;*&amp;lt;' (v '&amp;gt;*&amp;lt;' w))&lt;/span&gt;
+&lt;span class="c1"&gt;--      @&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Functor&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Monoidal&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;unit&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;&amp;lt;*&amp;gt;&lt;/tt&gt; が左は一般化された関数，右は一般化された引数のように，主と従が決まっていた． &lt;tt class="docutils literal"&gt;Monoidal&lt;/tt&gt; の場合，引数は同じレベルになっていて対称性がある． &lt;tt class="docutils literal"&gt;Monoidal&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; ，その逆はそれぞれ次のように書ける:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+pure x = fmap (const x) unit
+f &amp;lt;*&amp;gt; x = fmap (\(f, x) -&amp;gt; f x) $ f &amp;gt;*&amp;lt; x
+
+unit = pure ()
+x &amp;gt;*&amp;lt; y = (,) &amp;lt;$&amp;gt; x &amp;lt;*&amp;gt; y
+&lt;/pre&gt;
+&lt;p&gt;なお，各法則が成り立つかはめんどくさいのでやらない．各自で試してみてくれ． &lt;tt class="docutils literal"&gt;Monoidal&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; の交替律を導くとこだけやっとくと，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;u&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;const&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt;        &lt;span class="c1"&gt;-- Monoidal のメソッド使って書き直し&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;id&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;const&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt;                  &lt;span class="c1"&gt;-- Functor の恒等関数の保存&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;id&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;const&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt; &lt;span class="c1"&gt;-- naturality&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt;                      &lt;span class="c1"&gt;-- 単純化&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;fst&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;fst&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;                 &lt;span class="c1"&gt;-- Functor の合成の保存&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;                                       &lt;span class="c1"&gt;-- right identity&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;snd&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;unit&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;                 &lt;span class="c1"&gt;-- left identity&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;snd&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;                    &lt;span class="c1"&gt;-- Functor の合成の保存&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;const&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;id&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;const&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;id&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;              &lt;span class="c1"&gt;-- naturality&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;const&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="n"&gt;unit&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;*&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;    &lt;span class="c1"&gt;-- Functor の恒等関数の保存&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;u&lt;/span&gt;                                         &lt;span class="c1"&gt;-- Applicative のメソッドに書き直し&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいな感じになる．証明が結構対称的になっていて，中間で &lt;tt class="docutils literal"&gt;fmap ($ x) u&lt;/tt&gt; が出てくる．関数適用の一般化が，こういう綺麗な構造から出てくると言うのは結構不思議だ．まあでも， &lt;tt class="docutils literal"&gt;f &amp;lt;*&amp;gt; x = fmap &lt;span class="pre"&gt;(\(f,&lt;/span&gt; x) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; f x) $ f &amp;gt;*&amp;lt; x&lt;/tt&gt; という定義から考えてみると，関数適用は 1 つの変換なので &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; によって一般化できるので，後は 2 つの一般化された値 &lt;tt class="docutils literal"&gt;f :: m (a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; b)&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;x :: m a&lt;/tt&gt; を1つの一般化された値にまとめることができれば勝ちで，実はこのまとめる操作こそ本質だったという話だろう．そして結合する話になってくると大事になってくるのが， Monoid でその法則を入れた結果，非対称な &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; のメソッドに法則を翻訳するとぱっと見よく分からない規則が出てくると言うわけだ．&lt;/p&gt;
+&lt;p&gt;まあ実装する際に， &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; であるが &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; でないみたいなのを実装することはあんまないはずなので，通常は法則など気にせずともいいはずだ． &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; は使う分にはかなり直感的で， Applicative style によってまるで通常の関数適用のごとくプログラムが書ける．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="monad"&gt;
+&lt;h2&gt;Monad 型クラス&lt;a class="headerlink" href="#monad" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Monad クラスは，以下のようになる &lt;a class="footnote-reference" href="#minimal-class-definition" id="auto-id-6"&gt;[3]&lt;/a&gt; :&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;-- |  The 'Monad' class can combine two actions.&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- Instances of 'Monad' should satisfy the following laws:&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/left identity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'pure' x '&amp;gt;&amp;gt;=' k = k x@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/right identity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @m '&amp;gt;&amp;gt;=' 'pure' = m@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/associativity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @(m '&amp;gt;&amp;gt;=' f) '&amp;gt;&amp;gt;=' g = m '&amp;gt;&amp;gt;=' (\x -&amp;gt; f x '&amp;gt;&amp;gt;=' g)@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- Furthermore, the 'Monad' and 'Applicative' operations should relate as follows:&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt; mf &amp;lt;*&amp;gt; mx = mf &amp;gt;&amp;gt;= \f -&amp;gt; mx &amp;gt;&amp;gt;= f&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- As a consequence of these laws, the 'Functor' instance for @m@ will satisfy&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt; fmap f x = x &amp;gt;&amp;gt;= pure . f&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Applicative&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; については色んな人が記事を書いてるし，それを参照しろってことで (そろそろ飽きてきた)．&lt;/p&gt;
+&lt;p&gt;一応いくつか言っておくと，まず Haskell2020 の RFC で進んでる &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; のプロポーサルでは， no return プロポーサルも取り込まれていて， &lt;tt class="docutils literal"&gt;return = pure&lt;/tt&gt; のデフォルト実装が取り込まれる予定．後， &lt;tt class="docutils literal"&gt;join&lt;/tt&gt; も &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; のメソッドとして入ることになっている．なので， &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; クラスはこうも書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;-- |  The 'Monad' class can combine two actions.&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- Instances of 'Monad' should satisfy the following laws:&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/associativity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'join' . 'fmap' 'join' = 'join' . 'join'@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- [/identity/]&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;--      @'join' . 'fmap' 'pure' = 'join' . 'pure' = 'id'@&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- Furthermore, the 'Monad' and 'Applicative' operations should relate as follows:&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt; mf &amp;lt;*&amp;gt; mx = join . fmap (\f -&amp;gt; fmap f mx) $ mf&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Applicative&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;join&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;お馴染みの coherence condition だ． &lt;tt class="docutils literal"&gt;join . fmap join = join . join :: m (m (m a)) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; m a&lt;/tt&gt; は中身を先にまとめるか外側を先にまとめるかでの coherence を表し，結合律 (associativity) と対応する． &lt;tt class="docutils literal"&gt;join . fmap pure = join . pure = id :: m a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; m a&lt;/tt&gt; は中身を埋め込んでまとめるか，外側を埋め込んでまとめるかの coherence を表す．で，この合成は最終的に何もしない変換と一致し，単位元律 (identity) と対応することになる．&lt;/p&gt;
+&lt;p&gt;後 &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; が手続きの結合を表すについてだが，実は単に 2 つの独立した手続きがあった時，それを結合するのは &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; で十分だ．手続きを繋げる時は &lt;tt class="docutils literal"&gt;const id&lt;/tt&gt; を一般化して適用すればいい．例えば，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+pure (const id) &amp;lt;*&amp;gt; putStrLn "Hello" &amp;lt;*&amp;gt; putStrLn "World"
+&lt;/pre&gt;
+&lt;p&gt;こうすると &lt;tt class="docutils literal"&gt;putStrLn "Hello"&lt;/tt&gt; は計算されるものの結果は無視されることになる．これは， C 言語のコンマ (,) 演算子と発想は同じだ．なお， &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; のモジュールではこれに相当する演算子 &lt;tt class="docutils literal"&gt;*&amp;gt;&lt;/tt&gt; が用意されていて，次のように書ける:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+putStrLn "Hello" *&amp;gt; putStrLn "World"
+&lt;/pre&gt;
+&lt;p&gt;Applicative が Monoidal の非対称版であることを思い出すとこの結果は納得できる． 2 つの一般化された値を 1 つの一般化された値にまとめる力は， Applicative で十分手に入るのだ．では，なぜ &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; が必要かと言うと，手続きを結合するのには 1 つの一般化された値にまとめるだけでは不十分で，前の手続きの結果を次の手続きで流用する力が必要になってくるときがあるからだ．具体的には条件分岐で，前の結果をもとに条件判断して，その判断に応じてそれぞれ別の計算を行いたい場合などだ．なので， &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; は 2 つの一般化された値を 1 つの一般化された値にまとめるのではなく，手続きを一般化された継続と見てそれをまとめる力を持つ．この点で見た時は，以下の演算子での法則の方が覚えやすい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+f &amp;gt;=&amp;gt; g = \x -&amp;gt; f x &amp;gt;&amp;gt;= g
+
+-- identity
+f &amp;gt;=&amp;gt; pure = pure &amp;gt;=&amp;gt; f = f
+
+-- associativity
+(f &amp;gt;=&amp;gt; g) &amp;gt;=&amp;gt; h = f &amp;gt;=&amp;gt; (g &amp;gt;=&amp;gt; h)
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;&amp;lt;*&amp;gt;&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;&amp;gt;*&amp;lt;&lt;/tt&gt; の関係と同じく， &lt;tt class="docutils literal"&gt;&amp;gt;&amp;gt;=&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;&amp;gt;=&amp;gt;&lt;/tt&gt; の関係は非対称 / 対称ということになる．最終的に Applicative も Monad も単位元律と結合律に落ち着いて，単に対象が違うだけと言う感じだ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-7"&gt;
+&lt;h2&gt;Functor の妥当性&lt;a class="headerlink" href="#auto-id-7" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;さて，最後に &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; クラスは妥当なのかについて触れておこうと思う．と言ってもなんかソースがあるわけでなく (てかこの記事全般そうだし，ちゃんとした記事ならブログには書かないんだよなあ) 勝手に自分で考えたことだ．&lt;/p&gt;
+&lt;p&gt;まず，現状の &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; クラスで良く見過ごされがちだがかなり大きな役割を担っているのがパラメトリック多相な &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; の定義だ．この多相性のおかげで， &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; が唯一の実装を持つことが保証される．どう言う風に証明を書くかは， &lt;a class="reference external" href="https://www.schoolofhaskell.com/user/edwardk/snippets/fmap"&gt;https://www.schoolofhaskell.com/user/edwardk/snippets/fmap&lt;/a&gt; とかをのぞいてみるのがいいと思う．&lt;/p&gt;
+&lt;p&gt;実装が固定できるのはいいことなのだが，逆に制約が弱すぎて大抵の高次なデータ型は &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; を実装できてしまう．むしろ，高次のデータ型に対して一貫して提供されるユーティリティの1つと考える方が自然だと思う．事実， GHC では &lt;tt class="docutils literal"&gt;DeriveFunctor&lt;/tt&gt; という拡張が提供されている．この拡張により， &lt;tt class="docutils literal"&gt;deriving&lt;/tt&gt; で &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; のインスタンスを導出できる．例えば，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;RecData&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;RecBound1&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;RecBound2&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;RecNode&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;RecData&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;RecData&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Functor&lt;/span&gt; &lt;span class="kt"&gt;RecData&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="kt"&gt;RecBound1&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;RecBound1&lt;/span&gt;
+  &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;RecBound2&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;RecBound2&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;RecNode&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="n"&gt;r1&lt;/span&gt; &lt;span class="n"&gt;r2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;RecNode&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;r1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;r2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいなインスタンスを自動的に作ってくれる．これは，以下のかなり単純な規則で作られている:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;変換を適用する対象に適用する．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; のインスタンス部分には，変換を一般化して適用する．&lt;/li&gt;
+&lt;li&gt;それ以外の部分はそのまま出力する．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;DeriveFunctor&lt;/tt&gt; という拡張があることから分かる通り， &lt;tt class="docutils literal"&gt;Show&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;Eq&lt;/tt&gt; 並みに広い範囲に適用できるし， free functor というのも巷では流行っていて， &lt;tt class="docutils literal"&gt;DeriveFunctor&lt;/tt&gt; する代わりに同じ構造を無名で取り出すみたいなことができる．この free functor の売りが，「どんなデータ型でも &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; にできる」だから， &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; 制約がどれくらい無意味かは分かると思う．じゃあもう少し意味のある制約にできないだろうか？&lt;/p&gt;
+&lt;p&gt;例えば，単調性の保存も入れてみるとどうか？ つまり，&lt;/p&gt;
+&lt;div class="formula"&gt;
+(∀&lt;i&gt;x&lt;/i&gt;, &lt;i&gt;y&lt;/i&gt;. &lt;i&gt;x&lt;/i&gt; ≤ &lt;i&gt;y&lt;/i&gt;  ⇒  &lt;i&gt;f&lt;/i&gt;(&lt;i&gt;x&lt;/i&gt;) ≤ &lt;i&gt;f&lt;/i&gt;(&lt;i&gt;y&lt;/i&gt;))  ⇒  (∀&lt;i&gt;x&lt;/i&gt;, &lt;i&gt;y&lt;/i&gt;. &lt;i&gt;x&lt;/i&gt; ≤ &lt;i&gt;y&lt;/i&gt;  ⇒  &lt;span class="mathrm"&gt;fmap&lt;/span&gt;(&lt;i&gt;f&lt;/i&gt;)(&lt;i&gt;x&lt;/i&gt;) ≤ &lt;span class="mathrm"&gt;fmap&lt;/span&gt;(&lt;i&gt;f&lt;/i&gt;)(&lt;i&gt;y&lt;/i&gt;))
+&lt;/div&gt;
+&lt;p&gt;という法則を足す．これだと何が嬉しいかと言うと， &lt;tt class="docutils literal"&gt;f :: Int &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; String = \n &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; replicate n 'a'&lt;/tt&gt; に対し， &lt;tt class="docutils literal"&gt;sort [fmap f n1, fmap f n2, &lt;span class="pre"&gt;...]&lt;/span&gt;&lt;/tt&gt; みたいなのを &lt;tt class="docutils literal"&gt;[fmap f n | n &amp;lt;- sort [n1, n2, &lt;span class="pre"&gt;...]]&lt;/span&gt;&lt;/tt&gt; とすることができる．リストの比較より &lt;tt class="docutils literal"&gt;Int&lt;/tt&gt; の比較の方が効率がかなり良いことから，良い最適化になると考えられる．この法則を満たさないが，既存の &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; になるインスタンスには次のものがある:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;Down&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Down&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Ord&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Ord&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Down&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;compare&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Down&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Down&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;compare&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Functor&lt;/span&gt; &lt;span class="kt"&gt;Down&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;fmap&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Down&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Down&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なのでちょっと微妙かもしれない．他には， &lt;tt class="docutils literal"&gt;Foldable&lt;/tt&gt; 的な方向性の拡張で， &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; は再帰的にデータを辿る方法の 1 つというのも考えられるかもしれない．実際 &lt;tt class="docutils literal"&gt;DeriveFoldable&lt;/tt&gt; という拡張があるのだが，この実装方法は &lt;tt class="docutils literal"&gt;DeriveFunctor&lt;/tt&gt; と良く似ている．ただ，その場合もあんまり良く考えてないけど，作り方によってはインスタンスが複数あるみたいなことが起こりそうだ．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; が Haskell 界で広く用いられていることは，現状の &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; クラスを支持する大きな根拠となる．ただ，制約として考えた場合にもっと意味のある区分を設けたいというのは自然なことだろう．その1つの方向性が， &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; につながる， &lt;tt class="docutils literal"&gt;m a&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;a&lt;/tt&gt; を一般化した高次のデータと見て， &lt;tt class="docutils literal"&gt;m&lt;/tt&gt; が付かない世界の計算を &lt;tt class="docutils literal"&gt;m&lt;/tt&gt; が付く世界にどれだけ持っていけるかを，制約として表すということだと思う．その点で， &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;a&lt;/tt&gt; の世界の計算を単純に &lt;tt class="docutils literal"&gt;m&lt;/tt&gt; が付く世界に持っていく， &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; を前提とした見方で使う場合が多いと思う．本来ならその見方で使うのは &lt;tt class="docutils literal"&gt;liftA&lt;/tt&gt; とかなのかもしれない．&lt;/p&gt;
+&lt;p&gt;ただ単調性の保存の追加で挙げたように， &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; から制約を作っていく方向性は &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; だけではない．変換の一般化というのはもっと広い範囲で適用できて，というか出来すぎて，単体では意味がない場合が多い．でも逆に言えば，意味をかなり色んな方向から付与できる．その中でデータ型一般に適用できて，実装も単一に定まり，型クラスの仕様的にも表しやすい，最大公約数的な変換の一般化を表すクラスが，現状の &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; だとも捉えられるかもしれない．そう考えると &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; の見方で &lt;tt class="docutils literal"&gt;fmap&lt;/tt&gt; を使うのも約数的な使い方ということで，ある程度妥当とも言えるかもしれない．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-8"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-8" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; が Haskell2020 に入りそうだったので，それを記念する意味も込めて (？) ，個人的な &lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; の直感をまとめてみた．まあ，備忘録みたいな意味もあるかも．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; が Haskell2020 に入って， no return プロポーサルも入り，治安が良くなってきそう &lt;a class="footnote-reference" href="#ghc-status" id="auto-id-9"&gt;[4]&lt;/a&gt; ．なお， Haskell2020 が 2020 年に出るかどうかは 🙏&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="slim-functor-law-by-free" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://www.schoolofhaskell.com/user/edwardk/snippets/fmap"&gt;https://www.schoolofhaskell.com/user/edwardk/snippets/fmap&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="amp-proposal-for-haskell2020" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://github.com/haskell/rfcs/pull/1"&gt;https://github.com/haskell/rfcs/pull/1&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="minimal-class-definition" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;[3]&lt;/td&gt;&lt;td&gt;&lt;em&gt;(&lt;a class="fn-backref" href="#auto-id-3"&gt;1&lt;/a&gt;, &lt;a class="fn-backref" href="#auto-id-5"&gt;2&lt;/a&gt;, &lt;a class="fn-backref" href="#auto-id-6"&gt;3&lt;/a&gt;)&lt;/em&gt; なお，スペースと分かりやすさの都合上， minimal なメソッドだけを書くようにしている．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="ghc-status" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-9"&gt;[4]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;GHC には既に入ってる．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/generalizing-transformation.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/generalizing-transformation.rst'
+}
+&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category><category term="GHC拡張"></category><category term="標準ライブラリ"></category></entry><entry><title>sitemap の追加</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/" rel="alternate"></link><published>2019-04-10T00:00:00+09:00</published><updated>2019-04-10T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-10:/blog/posts/2019/04/add-sitemap/</id><summary type="html">&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;sitemap 周辺ファイルの追加&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;まず Pelican で sitemap を生成させる．これは &lt;tt class="docutils literal"&gt;sitemap&lt;/tt&gt; プラグインを追加するだけでいい:&lt;/p&gt;
@@ -22,12 +542,7 @@ SITEMAP = {
   },
   'changefreqs': {
     'articles': 'monthly',
-    'indexes': 'daily',
-    'pages': 'monthly',
-  }
-}
-&lt;/pre&gt;
-&lt;p&gt;これで，ビルドすると &lt;tt class="docutils literal"&gt;output/sitemap.xml&lt;/tt&gt; が作成される．後は …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
+    'indexes' …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;sitemap 周辺ファイルの追加&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;まず Pelican で sitemap を生成させる．これは &lt;tt class="docutils literal"&gt;sitemap&lt;/tt&gt; プラグインを追加するだけでいい:&lt;/p&gt;
@@ -89,8 +604,7 @@ var contentMetadataForCustomJS = {
 &lt;h2&gt;Mozart/Oz&lt;a class="headerlink" href="#mozart-oz" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である Mozart に完全に焦点を当てている． Oz 自体は名前を聞いたことはあったが今まで触ったことはなかった． &lt;a class="reference external" href="https://mozart.github.io/mozart-v1/doc-1.4.0/tutorial/index.html"&gt;公式ドキュメント&lt;/a&gt; によると&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;"Oz is a multi-paradigm language that is designed for advanced, concurrent, networked, soft real-time, and reactive applications."&lt;/p&gt;
-&lt;p&gt;"Oz はマルチパラダイムな言語で …&lt;/p&gt;&lt;/blockquote&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ゼミの輪読で， &lt;a class="reference external" href="https://www.amazon.co.jp/dp/0262220695"&gt;Concepts, Techniques, and Models of Computer Programming (MIT Press)&lt;/a&gt; ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．&lt;/p&gt;
+&lt;p&gt;"Oz is a multi-paradigm language that is designed for …&lt;/p&gt;&lt;/blockquote&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ゼミの輪読で， &lt;a class="reference external" href="https://www.amazon.co.jp/dp/0262220695"&gt;Concepts, Techniques, and Models of Computer Programming (MIT Press)&lt;/a&gt; ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．&lt;/p&gt;
 &lt;div class="section" id="mozart-oz"&gt;
 &lt;h2&gt;Mozart/Oz&lt;a class="headerlink" href="#mozart-oz" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である Mozart に完全に焦点を当てている． Oz 自体は名前を聞いたことはあったが今まで触ったことはなかった． &lt;a class="reference external" href="https://mozart.github.io/mozart-v1/doc-1.4.0/tutorial/index.html"&gt;公式ドキュメント&lt;/a&gt; によると&lt;/p&gt;
@@ -235,13 +749,7 @@ var contentMetadataForCustomJS = {
 &lt;li&gt;ウェブサイトの名前: GitHub Pages&lt;/li&gt;
 &lt;li&gt;ウェブサイトの URL: &lt;a class="reference external" href="https://mizunashi-mana.github"&gt;https://mizunashi-mana.github&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;ウェブサイトの業種: その他&lt;ul&gt;
-&lt;li&gt;なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， &lt;a class="reference external" href="https://support.google.com/analytics/answer/1032415"&gt;https://support.google.com/analytics/answer/1032415&lt;/a&gt; を参照．&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;ウェブサイトのタイムゾーン: 日本 (+09:00)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;そうするとトラッキング …&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
+&lt;li&gt;なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， &lt;a class="reference external" href="https://support.google.com/analytics/answer/1032415"&gt;https://support.google …&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
 &lt;div class="section" id="id"&gt;
 &lt;h2&gt;トラッキング ID の設定&lt;a class="headerlink" href="#id" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:&lt;/p&gt;
@@ -306,10 +814,7 @@ var contentMetadataForCustomJS = {
  8
  9
 10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;someFunc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
-  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt; &lt;span class="c1"&gt;-- See Note [The Answer To Life]&lt;/span&gt;
-  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;
-
-&lt;span class="cm"&gt;{- Note [The Answer To …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes"&gt;https://github.com/myuon/ghc-compiler-notes&lt;/a&gt; にコントリビュートしたので，それについてと考えてることとか書く．&lt;/p&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt; &lt;span class="c1"&gt;-- See Note …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes"&gt;https://github.com/myuon/ghc-compiler-notes&lt;/a&gt; にコントリビュートしたので，それについてと考えてることとか書く．&lt;/p&gt;
 &lt;p&gt;なお， myuon さんによる紹介記事も参照: &lt;a class="reference external" href="https://myuon.github.io/posts/ghc-compiler-notes/"&gt;https://myuon.github.io/posts/ghc-compiler-notes/&lt;/a&gt;&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;GHC のノートコメント&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
@@ -450,8 +955,7 @@ var contentMetadataForCustomJS = {
 &lt;/div&gt;
 &lt;div class="section" id="pelican"&gt;
 &lt;h2&gt;Pelican のプラグイン追加&lt;a class="headerlink" href="#pelican" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした．&lt;/p&gt;
-&lt;p&gt;プラグインの作り方は， &lt;a class="reference external" href="https://docs.getpelican.com/en/stable/plugins.html#how-to-create-plugins"&gt;https://docs.getpelican.com/en/stable/plugins.html …&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
+&lt;p&gt;まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;
@@ -561,9 +1065,7 @@ var contentMetadataForCustomJS = {
 &lt;p&gt;そもそもドキュメントをちゃんと読めという話なんだけど， &lt;a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html"&gt;https://docs.python.org/ja/3/library/datetime.html&lt;/a&gt; で普通に説明されている．端的に言えば，&lt;/p&gt;
 &lt;ul class="simple"&gt;
 &lt;li&gt;aware: 実時刻を表し，タイムゾーンや夏時間情報を持つ．&lt;/li&gt;
-&lt;li&gt;naive: 時刻情報だけを表現する．タイムゾーンなどの情報は持たず，その時刻がどういう意味を持つかは処理する側に委ねられる．&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;の2種類があるらしい． aware か naive かは， &lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; プロパティが &lt;tt class="docutils literal"&gt;None …&lt;/tt&gt;&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+&lt;li&gt;naive: 時刻情報だけを表現する …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
 &lt;div class="section" id="aware-naive"&gt;
 &lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;
@@ -632,16 +1134,7 @@ WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid
  3
  4
  5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# https …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
+ 6 …&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
 &lt;div class="section" id="circle-ci"&gt;
 &lt;h2&gt;Circle CI での謎の警告解消&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;今まで Circle CI 上だと以下の警告が出てた:&lt;/p&gt;
@@ -824,10 +1317,7 @@ var contentMetadataForCustomJS = {
 &lt;li&gt;Hugo&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;っぽい． Hugo は使ったことあって，割と使いやすくはあったんだけど，今回は見送った．理由は Markdown しか基本的に書けないから．
-常々， Markdown は明示的に拡張記法を導入できないし，脚注とかが拡張だったりして機能的にたりない面があったりで，ちょっと辛いなあと思ってた．
-なのでブログでは， Org-mode か reStructuredText を使いたいなと思ってた．&lt;/p&gt;
-&lt;ul class="simple"&gt;
-&lt;li&gt;Org-mode …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
+常々 …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
 今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが，
 ちゃんとしてないやつも書いていこうかなってことで．&lt;/p&gt;
 &lt;p&gt;ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが，

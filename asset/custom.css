@@ -6,6 +6,10 @@ dl.docutils dt {
   padding: .5em;
 }
 
+article.single table.highlighttable td {
+  border-style: none;
+}
+
 i.fa-link.anchor-link {
   margin-left: 0.8em;
   font-size: 90%;

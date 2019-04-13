@@ -22,12 +22,7 @@ SITEMAP = {
   },
   'changefreqs': {
     'articles': 'monthly',
-    'indexes': 'daily',
-    'pages': 'monthly',
-  }
-}
-&lt;/pre&gt;
-&lt;p&gt;これで，ビルドすると &lt;tt class="docutils literal"&gt;output/sitemap.xml&lt;/tt&gt; が作成される．後は …&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Wed, 10 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-10:/blog/posts/2019/04/add-sitemap/</guid><category>SEO</category><category>ブログ</category><category>Pelican</category><category>Google Analytics</category></item><item><title>Google Analytics の導入</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/</link><description>&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
+    'indexes' …&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Wed, 10 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-10:/blog/posts/2019/04/add-sitemap/</guid><category>SEO</category><category>ブログ</category><category>Pelican</category><category>Google Analytics</category></item><item><title>Google Analytics の導入</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/</link><description>&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
 &lt;div class="section" id="id"&gt;
 &lt;h2&gt;トラッキング ID の設定&lt;a class="headerlink" href="#id" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:&lt;/p&gt;
@@ -38,13 +33,7 @@ SITEMAP = {
 &lt;li&gt;ウェブサイトの名前: GitHub Pages&lt;/li&gt;
 &lt;li&gt;ウェブサイトの URL: &lt;a class="reference external" href="https://mizunashi-mana.github"&gt;https://mizunashi-mana.github&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;ウェブサイトの業種: その他&lt;ul&gt;
-&lt;li&gt;なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， &lt;a class="reference external" href="https://support.google.com/analytics/answer/1032415"&gt;https://support.google.com/analytics/answer/1032415&lt;/a&gt; を参照．&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;ウェブサイトのタイムゾーン: 日本 (+09:00)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;そうするとトラッキング …&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 08 Apr 2019 12:30:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/add-google-analytics/</guid><category>Pelican</category><category>ブログ</category><category>Google Analytics</category><category>SEO</category></item><item><title>ブログに共有ボタンを追加した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/</link><description>&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
+&lt;li&gt;なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， &lt;a class="reference external" href="https://support.google.com/analytics/answer/1032415"&gt;https://support.google …&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 08 Apr 2019 12:30:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/add-google-analytics/</guid><category>Pelican</category><category>ブログ</category><category>Google Analytics</category><category>SEO</category></item><item><title>ブログに共有ボタンを追加した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/</link><description>&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;
@@ -53,8 +42,7 @@ SITEMAP = {
 &lt;/div&gt;
 &lt;div class="section" id="pelican"&gt;
 &lt;h2&gt;Pelican のプラグイン追加&lt;a class="headerlink" href="#pelican" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした．&lt;/p&gt;
-&lt;p&gt;プラグインの作り方は， &lt;a class="reference external" href="https://docs.getpelican.com/en/stable/plugins.html#how-to-create-plugins"&gt;https://docs.getpelican.com/en/stable/plugins.html …&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Fri, 05 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-05:/blog/posts/2019/04/add-share-button/</guid><category>Pelican</category><category>ブログ</category><category>Python</category><category>JavaScript</category></item><item><title>ブログのデザイン調整</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/</link><description>&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
+&lt;p&gt;まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript …&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Fri, 05 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-05:/blog/posts/2019/04/add-share-button/</guid><category>Pelican</category><category>ブログ</category><category>Python</category><category>JavaScript</category></item><item><title>ブログのデザイン調整</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/</link><description>&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
 &lt;div class="section" id="circle-ci"&gt;
 &lt;h2&gt;Circle CI での謎の警告解消&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;今まで Circle CI 上だと以下の警告が出てた:&lt;/p&gt;
@@ -68,16 +56,7 @@ WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid
  3
  4
  5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# https …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Tue, 02 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-02:/blog/posts/2019/04/fix-blog-config/</guid><category>Python</category><category>Pelican</category><category>ブログ</category><category>CircleCI</category></item><item><title>ブログ始めました</title><link>https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/</link><description>&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
+ 6 …&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Tue, 02 Apr 2019 00:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-02:/blog/posts/2019/04/fix-blog-config/</guid><category>Python</category><category>Pelican</category><category>ブログ</category><category>CircleCI</category></item><item><title>ブログ始めました</title><link>https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/</link><description>&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
 今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが，
 ちゃんとしてないやつも書いていこうかなってことで．&lt;/p&gt;
 &lt;p&gt;ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが，
@@ -92,7 +71,4 @@ WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid
 &lt;li&gt;Hugo&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;っぽい． Hugo は使ったことあって，割と使いやすくはあったんだけど，今回は見送った．理由は Markdown しか基本的に書けないから．
-常々， Markdown は明示的に拡張記法を導入できないし，脚注とかが拡張だったりして機能的にたりない面があったりで，ちょっと辛いなあと思ってた．
-なのでブログでは， Org-mode か reStructuredText を使いたいなと思ってた．&lt;/p&gt;
-&lt;ul class="simple"&gt;
-&lt;li&gt;Org-mode …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Fri, 29 Mar 2019 19:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-03-29:/blog/posts/2019/03/start-blog/</guid><category>Python</category><category>Pelican</category><category>ブログ</category><category>GitHub</category></item></channel></rss>
+常々 …&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Fri, 29 Mar 2019 19:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-03-29:/blog/posts/2019/03/start-blog/</guid><category>Python</category><category>Pelican</category><category>ブログ</category><category>GitHub</category></item></channel></rss>

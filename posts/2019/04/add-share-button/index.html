@@ -48,12 +48,12 @@
     <meta name="msapplication-TileColor" content="#555">
 
 <meta name="author" content="Mizunashi Mana" />
-<meta name="description" content="ブログに共有ボタンを追加して， JavaScript を呼べるようにした． 導入までの経緯 Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした． また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう． で，結構色々大変だったので，記事にまとめておくことにした． Pelican のプラグイン追加 まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした． プラグインの作り方は， https://docs.getpelican.com/en/stable/plugins.html …" />
+<meta name="description" content="ブログに共有ボタンを追加して， JavaScript を呼べるようにした． 導入までの経緯 Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした． また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう． で，結構色々大変だったので，記事にまとめておくことにした． Pelican のプラグイン追加 まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript …" />
 <meta name="keywords" content="Pelican, ブログ, Python, JavaScript">
 
 <meta property="og:site_name" content="続くといいな日記"/>
 <meta property="og:title" content="ブログに共有ボタンを追加した"/>
-<meta property="og:description" content="ブログに共有ボタンを追加して， JavaScript を呼べるようにした． 導入までの経緯 Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした． また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう． で，結構色々大変だったので，記事にまとめておくことにした． Pelican のプラグイン追加 まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした． プラグインの作り方は， https://docs.getpelican.com/en/stable/plugins.html …"/>
+<meta property="og:description" content="ブログに共有ボタンを追加して， JavaScript を呼べるようにした． 導入までの経緯 Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした． また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう． で，結構色々大変だったので，記事にまとめておくことにした． Pelican のプラグイン追加 まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript …"/>
 <meta property="og:locale" content="ja"/>
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/"/>
 <meta property="og:type" content="article"/>

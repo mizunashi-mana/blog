@@ -131,6 +131,35 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/#generalizing-transformation">Functor / Applicative / Monad が表すもの</a></h2>
+    <p>
+          Posted on 土 13 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/zhi-gan.html">直感</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghckuo-zhang.html">GHC拡張</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/biao-zhun-raiburari.html">標準ライブラリ</a>
+    </p>
+  </header>
+  <div>
+      <p><a class="reference external" href="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238">https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238</a> の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい．</p>
+<p>Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス Functor / Applicative / Monad の個人的な捉え方を書いておこうと思う．なお，あくまで個人的な捉え方なので，形式的でないし，広く受け入れられている考え方とは乖離している可能性があるので，そこは注意してほしい．</p>
+<div class="section" id="auto-id-1">
+<h2>概要<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>それぞれの型クラスが表すものは端的に言えば，</p>
+<dl class="docutils">
+<dt>Functor</dt>
+<dd>変換の一般化</dd>
+<dt>Applicative</dt>
+<dd>関数適用の一般化 …</dd></dl></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/#generalizing-transformation">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">sitemap の追加</a></h2>
     <p>
           Posted on 水 10 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
@@ -165,12 +194,7 @@ SITEMAP = {
   },
   'changefreqs': {
     'articles': 'monthly',
-    'indexes': 'daily',
-    'pages': 'monthly',
-  }
-}
-</pre>
-<p>これで，ビルドすると <tt class="docutils literal">output/sitemap.xml</tt> が作成される．後は …</p></div>
+    'indexes' …</pre></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">    Continue reading
 </a>
@@ -195,8 +219,7 @@ SITEMAP = {
 <h2>Mozart/Oz<a class="headerlink" href="#mozart-oz" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である Mozart に完全に焦点を当てている． Oz 自体は名前を聞いたことはあったが今まで触ったことはなかった． <a class="reference external" href="https://mozart.github.io/mozart-v1/doc-1.4.0/tutorial/index.html">公式ドキュメント</a> によると</p>
 <blockquote>
-<p>"Oz is a multi-paradigm language that is designed for advanced, concurrent, networked, soft real-time, and reactive applications."</p>
-<p>"Oz はマルチパラダイムな言語で …</p></blockquote></div>
+<p>"Oz is a multi-paradigm language that is designed for …</p></blockquote></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/#read-ctmcp">    Continue reading
 </a>
@@ -227,13 +250,7 @@ SITEMAP = {
 <li>ウェブサイトの名前: GitHub Pages</li>
 <li>ウェブサイトの URL: <a class="reference external" href="https://mizunashi-mana.github">https://mizunashi-mana.github</a></li>
 <li>ウェブサイトの業種: その他<ul>
-<li>なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， <a class="reference external" href="https://support.google.com/analytics/answer/1032415">https://support.google.com/analytics/answer/1032415</a> を参照．</li>
-</ul>
-</li>
-<li>ウェブサイトのタイムゾーン: 日本 (+09:00)</li>
-</ul>
-</li>
-<li>そうするとトラッキング …</li></ol></div>
+<li>なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， <a class="reference external" href="https://support.google.com/analytics/answer/1032415">https://support.google …</a></li></ul></li></ul></li></ol></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/#add-google-analytics">    Continue reading
 </a>
@@ -268,10 +285,7 @@ SITEMAP = {
  8
  9
 10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">someFunc</span> <span class="ow">=</span>
-  <span class="kr">let</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">42</span> <span class="c1">-- See Note [The Answer To Life]</span>
-  <span class="kr">in</span> <span class="n">v</span>
-
-<span class="cm">{- Note [The Answer To …</span></pre></div></td></tr></table></div>
+  <span class="kr">let</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">42</span> <span class="c1">-- See Note …</span></pre></div></td></tr></table></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/ghc-compiler-notes/#ghc-compiler-notes">    Continue reading
 </a>
@@ -300,8 +314,7 @@ SITEMAP = {
 </div>
 <div class="section" id="pelican">
 <h2>Pelican のプラグイン追加<a class="headerlink" href="#pelican" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript を埋め込むことにした．</p>
-<p>プラグインの作り方は， <a class="reference external" href="https://docs.getpelican.com/en/stable/plugins.html#how-to-create-plugins">https://docs.getpelican.com/en/stable/plugins.html …</a></p></div>
+<p>まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript …</p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/#add-share-button">    Continue reading
 </a>
@@ -328,9 +341,7 @@ SITEMAP = {
 <p>そもそもドキュメントをちゃんと読めという話なんだけど， <a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html">https://docs.python.org/ja/3/library/datetime.html</a> で普通に説明されている．端的に言えば，</p>
 <ul class="simple">
 <li>aware: 実時刻を表し，タイムゾーンや夏時間情報を持つ．</li>
-<li>naive: 時刻情報だけを表現する．タイムゾーンなどの情報は持たず，その時刻がどういう意味を持つかは処理する側に委ねられる．</li>
-</ul>
-<p>の2種類があるらしい． aware か naive かは， <tt class="docutils literal">tzinfo</tt> プロパティが <tt class="docutils literal">None …</tt></p></div>
+<li>naive: 時刻情報だけを表現する …</li></ul></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/#python-datetime">    Continue reading
 </a>
@@ -364,16 +375,7 @@ WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid
  3
  4
  5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># https …</span></pre></div></td></tr></table></div>
+ 6 …</pre></div></td></tr></table></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/#fix-blog-config">    Continue reading
 </a>
@@ -408,10 +410,7 @@ WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid
 <li>Hugo</li>
 </ul>
 <p>っぽい． Hugo は使ったことあって，割と使いやすくはあったんだけど，今回は見送った．理由は Markdown しか基本的に書けないから．
-常々， Markdown は明示的に拡張記法を導入できないし，脚注とかが拡張だったりして機能的にたりない面があったりで，ちょっと辛いなあと思ってた．
-なのでブログでは， Org-mode か reStructuredText を使いたいなと思ってた．</p>
-<ul class="simple">
-<li>Org-mode …</li></ul></div>
+常々 …</p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/#start-blog">    Continue reading
 </a>
