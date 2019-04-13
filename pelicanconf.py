@@ -35,7 +35,7 @@ JS_FILE = '/dist-asset/bundle.js'
 
 BROWSER_COLOR = '#555'
 ROBOTS = 'index, follow'
-SUMMARY_MAX_LENGTH = 40
+SUMMARY_MAX_LENGTH = 25
 
 CC_LICENSE = {
   'name': 'Creative Commons Attribution-ShareAlike',
