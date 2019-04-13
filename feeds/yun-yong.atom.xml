@@ -14,15 +14,7 @@
 &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;後は &lt;tt class="docutils literal"&gt;SITEMAP&lt;/tt&gt; に設定を書く．以下の感じのことを書いた:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
 SITEMAP = {
-  'format': 'xml',
-  'priorities': {
-    'articles': 0.7,
-    'indexes': 0.5,
-    'pages': 0.6,
-  },
-  'changefreqs': {
-    'articles': 'monthly',
-    'indexes' …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
+  'format' …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;sitemap 周辺ファイルの追加&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;まず Pelican で sitemap を生成させる．これは &lt;tt class="docutils literal"&gt;sitemap&lt;/tt&gt; プラグインを追加するだけでいい:&lt;/p&gt;
@@ -87,10 +79,7 @@ var contentMetadataForCustomJS = {
 &lt;li&gt;&lt;a class="reference external" href="https://analytics.google.com/analytics"&gt;https://analytics.google.com/analytics&lt;/a&gt; の管理ページ表示&lt;/li&gt;
 &lt;li&gt;「プロパティを作成」ボタンを押す．&lt;/li&gt;
 &lt;li&gt;プロパティの項目を埋めていく．大体以下の感じ:&lt;ul&gt;
-&lt;li&gt;ウェブサイトの名前: GitHub Pages&lt;/li&gt;
-&lt;li&gt;ウェブサイトの URL: &lt;a class="reference external" href="https://mizunashi-mana.github"&gt;https://mizunashi-mana.github&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;ウェブサイトの業種: その他&lt;ul&gt;
-&lt;li&gt;なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， &lt;a class="reference external" href="https://support.google.com/analytics/answer/1032415"&gt;https://support.google …&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
+&lt;li&gt;ウェブサイトの名前 …&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
 &lt;div class="section" id="id"&gt;
 &lt;h2&gt;トラッキング ID の設定&lt;a class="headerlink" href="#id" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:&lt;/p&gt;
@@ -144,12 +133,7 @@ var contentMetadataForCustomJS = {
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;
-&lt;p&gt;また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう．&lt;/p&gt;
-&lt;p&gt;で，結構色々大変だったので，記事にまとめておくことにした．&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="section" id="pelican"&gt;
-&lt;h2&gt;Pelican のプラグイン追加&lt;a class="headerlink" href="#pelican" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
+&lt;p&gt;また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;
@@ -257,16 +241,7 @@ var contentMetadataForCustomJS = {
 &lt;h2&gt;Circle CI での謎の警告解消&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;今まで Circle CI 上だと以下の警告が出てた:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
-WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system.
-&lt;/pre&gt;
-&lt;p&gt;ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた．&lt;/p&gt;
-&lt;p&gt;この警告は Pelican が出してるもので，以下が該当部分:&lt;/p&gt;
-&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
- 2
- 3
- 4
- 5
- 6 …&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
+WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
 &lt;div class="section" id="circle-ci"&gt;
 &lt;h2&gt;Circle CI での謎の警告解消&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;今まで Circle CI 上だと以下の警告が出てた:&lt;/p&gt;
@@ -442,14 +417,7 @@ var contentMetadataForCustomJS = {
 &lt;p&gt;で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていく．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;サイトジェネレータの選定基準&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， &lt;a class="reference external" href="https://www.staticgen.com/"&gt;https://www.staticgen.com/&lt;/a&gt; から見れるっぽい．だいたい人気の上位陣は，&lt;/p&gt;
-&lt;ul class="simple"&gt;
-&lt;li&gt;Jekyll&lt;/li&gt;
-&lt;li&gt;Next&lt;/li&gt;
-&lt;li&gt;Hugo&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;っぽい． Hugo は使ったことあって，割と使いやすくはあったんだけど，今回は見送った．理由は Markdown しか基本的に書けないから．
-常々 …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
+&lt;p&gt;まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， &lt;a class="reference external" href="https://www.staticgen.com/"&gt;https://www.staticgen …&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
 今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが，
 ちゃんとしてないやつも書いていこうかなってことで．&lt;/p&gt;
 &lt;p&gt;ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが，

@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 直感</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/zhi-gan.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-13T20:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Functor / Applicative / Monad が表すもの</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/" rel="alternate"></link><published>2019-04-13T20:00:00+09:00</published><updated>2019-04-13T20:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-13:/blog/posts/2019/04/generalizing-transformation/</id><summary type="html">&lt;p&gt;&lt;a class="reference external" href="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238"&gt;https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238&lt;/a&gt; の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい．&lt;/p&gt;
-&lt;p&gt;Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス Functor / Applicative / Monad の個人的な捉え方を書いておこうと思う．なお，あくまで個人的な捉え方なので，形式的でないし，広く受け入れられている考え方とは乖離している可能性があるので，そこは注意してほしい．&lt;/p&gt;
-&lt;div class="section" id="auto-id-1"&gt;
-&lt;h2&gt;概要&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;それぞれの型クラスが表すものは端的に言えば，&lt;/p&gt;
-&lt;dl class="docutils"&gt;
-&lt;dt&gt;Functor&lt;/dt&gt;
-&lt;dd&gt;変換の一般化&lt;/dd&gt;
-&lt;dt&gt;Applicative&lt;/dt&gt;
-&lt;dd&gt;関数適用の一般化 …&lt;/dd&gt;&lt;/dl&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238"&gt;https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238&lt;/a&gt; の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい．&lt;/p&gt;
+&lt;p&gt;Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス …&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238"&gt;https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238&lt;/a&gt; の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい．&lt;/p&gt;
 &lt;p&gt;Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス Functor / Applicative / Monad の個人的な捉え方を書いておこうと思う．なお，あくまで個人的な捉え方なので，形式的でないし，広く受け入れられている考え方とは乖離している可能性があるので，そこは注意してほしい．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;概要&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;

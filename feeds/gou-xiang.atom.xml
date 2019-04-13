@@ -4,17 +4,7 @@
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;GHC のノートコメント&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/coding-style#comments-in-the-source-code"&gt;GHC のコーディングガイド&lt;/a&gt; にも書いてあるが， GHC では長いコメントを書くとき，以下のように主要部分を切り出す運用をしている:&lt;/p&gt;
-&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;someFunc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
-  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt; &lt;span class="c1"&gt;-- See Note …&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes"&gt;https://github.com/myuon/ghc-compiler-notes&lt;/a&gt; にコントリビュートしたので，それについてと考えてることとか書く．&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1 …&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;&lt;a class="reference external" href="https://github.com/myuon/ghc-compiler-notes"&gt;https://github.com/myuon/ghc-compiler-notes&lt;/a&gt; にコントリビュートしたので，それについてと考えてることとか書く．&lt;/p&gt;
 &lt;p&gt;なお， myuon さんによる紹介記事も参照: &lt;a class="reference external" href="https://myuon.github.io/posts/ghc-compiler-notes/"&gt;https://myuon.github.io/posts/ghc-compiler-notes/&lt;/a&gt;&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;GHC のノートコメント&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;

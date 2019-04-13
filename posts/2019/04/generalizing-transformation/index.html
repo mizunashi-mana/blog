@@ -48,12 +48,12 @@
     <meta name="msapplication-TileColor" content="#555">
 
 <meta name="author" content="Mizunashi Mana" />
-<meta name="description" content="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238 の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい． Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス Functor / Applicative / Monad の個人的な捉え方を書いておこうと思う．なお，あくまで個人的な捉え方なので，形式的でないし，広く受け入れられている考え方とは乖離している可能性があるので，そこは注意してほしい． 概要 それぞれの型クラスが表すものは端的に言えば， Functor 変換の一般化 Applicative 関数適用の一般化 …" />
+<meta name="description" content="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238 の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい． Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス …" />
 <meta name="keywords" content="Haskell, GHC, GHC拡張, 標準ライブラリ">
 
 <meta property="og:site_name" content="続くといいな日記"/>
 <meta property="og:title" content="Functor / Applicative / Monad が表すもの"/>
-<meta property="og:description" content="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238 の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい． Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス Functor / Applicative / Monad の個人的な捉え方を書いておこうと思う．なお，あくまで個人的な捉え方なので，形式的でないし，広く受け入れられている考え方とは乖離している可能性があるので，そこは注意してほしい． 概要 それぞれの型クラスが表すものは端的に言えば， Functor 変換の一般化 Applicative 関数適用の一般化 …"/>
+<meta property="og:description" content="https://kazu-yamamoto.hatenablog.jp/entry/2019/04/11/111238 の記事に触発されて，ちょっと書く気になった．こちらも面白い記事なので，ぜひ参照してほしい． Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス …"/>
 <meta property="og:locale" content="ja"/>
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/"/>
 <meta property="og:type" content="article"/>

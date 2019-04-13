@@ -157,15 +157,7 @@
 </td></tr></table><p>後は <tt class="docutils literal">SITEMAP</tt> に設定を書く．以下の感じのことを書いた:</p>
 <pre class="literal-block">
 SITEMAP = {
-  'format': 'xml',
-  'priorities': {
-    'articles': 0.7,
-    'indexes': 0.5,
-    'pages': 0.6,
-  },
-  'changefreqs': {
-    'articles': 'monthly',
-    'indexes' …</pre></div>
+  'format' …</pre></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">    Continue reading
 </a>
@@ -193,10 +185,7 @@ SITEMAP = {
 <li><a class="reference external" href="https://analytics.google.com/analytics">https://analytics.google.com/analytics</a> の管理ページ表示</li>
 <li>「プロパティを作成」ボタンを押す．</li>
 <li>プロパティの項目を埋めていく．大体以下の感じ:<ul>
-<li>ウェブサイトの名前: GitHub Pages</li>
-<li>ウェブサイトの URL: <a class="reference external" href="https://mizunashi-mana.github">https://mizunashi-mana.github</a></li>
-<li>ウェブサイトの業種: その他<ul>
-<li>なお，業種を設定すると目標テンプレートというものを利用できるらしい．詳細は， <a class="reference external" href="https://support.google.com/analytics/answer/1032415">https://support.google …</a></li></ul></li></ul></li></ol></div>
+<li>ウェブサイトの名前 …</li></ul></li></ol></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/#add-google-analytics">    Continue reading
 </a>
@@ -220,12 +209,7 @@ SITEMAP = {
 <div class="section" id="auto-id-2">
 <h2>導入までの経緯<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．</p>
-<p>また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript の機能が必要になる共有ボタンもあるので， JavaScript 有効下のみ共有ボタンが表示されることになっても問題ないであろう．しかも，共有ボタンの位置も下の方に設置することにしたので，読み込みの遅延をあまり感じることもないだろう．</p>
-<p>で，結構色々大変だったので，記事にまとめておくことにした．</p>
-</div>
-<div class="section" id="pelican">
-<h2>Pelican のプラグイン追加<a class="headerlink" href="#pelican" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>まず，ブログ独自のプラグインを作って，そのプラグインで JavaScript …</p></div>
+<p>また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript …</p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/#add-share-button">    Continue reading
 </a>
@@ -250,16 +234,7 @@ SITEMAP = {
 <h2>Circle CI での謎の警告解消<a class="headerlink" href="#circle-ci" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>今まで Circle CI 上だと以下の警告が出てた:</p>
 <pre class="literal-block">
-WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available on your system.
-</pre>
-<p>ビルド自体は問題ないんだけど，気になるので修正したいなあと思ってた．</p>
-<p>この警告は Pelican が出してるもので，以下が該当部分:</p>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6 …</pre></div></td></tr></table></div>
+WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available …</pre></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/#fix-blog-config">    Continue reading
 </a>
@@ -287,14 +262,7 @@ WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid
 <p>で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていく．</p>
 <div class="section" id="auto-id-2">
 <h2>サイトジェネレータの選定基準<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， <a class="reference external" href="https://www.staticgen.com/">https://www.staticgen.com/</a> から見れるっぽい．だいたい人気の上位陣は，</p>
-<ul class="simple">
-<li>Jekyll</li>
-<li>Next</li>
-<li>Hugo</li>
-</ul>
-<p>っぽい． Hugo は使ったことあって，割と使いやすくはあったんだけど，今回は見送った．理由は Markdown しか基本的に書けないから．
-常々 …</p></div>
+<p>まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， <a class="reference external" href="https://www.staticgen.com/">https://www.staticgen …</a></p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/#start-blog">    Continue reading
 </a>
