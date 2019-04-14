@@ -1,3 +1,1 @@
-import 'katex';
-
 import './main';

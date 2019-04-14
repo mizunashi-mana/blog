@@ -358,8 +358,8 @@ Functor の妥当性
 
 .. math::
 
-  (\forall x, y.\, x \leq y \implies f(x) \leq f(y))
-  \implies (\forall x, y.\, x \leq y \implies \mathrm{fmap}(f)(x) \leq \mathrm{fmap}(f)(y))
+  \{\forall x, y.\, x \leq y \implies f(x) \leq f(y)\}
+  \implies \{\forall x, y.\, x \leq y \implies \mathrm{fmap}(f)(x) \leq \mathrm{fmap}(f)(y)\}
 
 という法則を足す．これだと何が嬉しいかと言うと， ``f :: Int -> String = \n -> replicate n 'a'`` に対し， ``sort [fmap f n1, fmap f n2, ...]`` みたいなのを ``[fmap f n | n <- sort [n1, n2, ...]]`` とすることができる．リストの比較より ``Int`` の比較の方が効率がかなり良いことから，良い最適化になると考えられる．この法則を満たさないが，既存の ``Functor`` になるインスタンスには次のものがある:
 

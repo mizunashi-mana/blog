@@ -117,6 +117,7 @@ RELATIVE_URLS = True
 
 DOCUTILS_SETTINGS = {
   'auto_id_prefix': 'auto-id-',
+  'math_output': 'MathML',
 }
 
 HEADERID_LINK_CHAR = '<i class="fas fa-link anchor-link"></i>'

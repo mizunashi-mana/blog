@@ -5,7 +5,7 @@
   "description": "blog's frontend",
   "main": "js/index.js",
   "dependencies": {
-    "katex": "^0.10.1",
+    "mathjax3": "^3.0.0-beta.3",
     "vue": "^2.6.10"
   },
   "devDependencies": {
