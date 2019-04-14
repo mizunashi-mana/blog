@@ -599,8 +599,11 @@ f &gt;=&gt; pure = pure &gt;=&gt; f = f
 </ul>
 <p><tt class="docutils literal">DeriveFunctor</tt> という拡張があることから分かる通り， <tt class="docutils literal">Show</tt> や <tt class="docutils literal">Eq</tt> 並みに広い範囲に適用できるし， free functor というのも巷では流行っていて， <tt class="docutils literal">DeriveFunctor</tt> する代わりに同じ構造を無名で取り出すみたいなことができる．この free functor の売りが，「どんなデータ型でも <tt class="docutils literal">Functor</tt> にできる」だから， <tt class="docutils literal">Functor</tt> 制約がどれくらい無意味かは分かると思う．じゃあもう少し意味のある制約にできないだろうか？</p>
 <p>例えば，単調性の保存も入れてみるとどうか？ つまり，</p>
-<div class="formula">
-(∀<i>x</i>, <i>y</i>. <i>x</i> ≤ <i>y</i>  ⇒  <i>f</i>(<i>x</i>) ≤ <i>f</i>(<i>y</i>))  ⇒  (∀<i>x</i>, <i>y</i>. <i>x</i> ≤ <i>y</i>  ⇒  <span class="mathrm">fmap</span>(<i>f</i>)(<i>x</i>) ≤ <span class="mathrm">fmap</span>(<i>f</i>)(<i>y</i>))
+<div>
+<math mode="display" xmlns="http://www.w3.org/1998/Math/MathML">
+<mtable>
+<mtr>
+<mtd><mo>{</mo><mo>∀</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo>.</mo><mspace></mspace><mi>x</mi><mo>≤</mo><mi>y</mi><mo>⟹</mo><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>≤</mo><mi>f</mi><mo>(</mo><mi>y</mi><mo>)</mo><mo>}</mo><mo>⟹</mo><mo>{</mo><mo>∀</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo>.</mo><mspace></mspace><mi>x</mi><mo>≤</mo><mi>y</mi><mo>⟹</mo><mtext>fmap</mtext><mo>(</mo><mi>f</mi><mo>)</mo><mo>(</mo><mi>x</mi><mo>)</mo><mo>≤</mo><mtext>fmap</mtext><mo>(</mo><mi>f</mi><mo>)</mo><mo>(</mo><mi>y</mi><mo>)</mo><mo>}</mo></mtd></mtr></mtable></math>
 </div>
 <p>という法則を足す．これだと何が嬉しいかと言うと， <tt class="docutils literal">f :: Int <span class="pre">-&gt;</span> String = \n <span class="pre">-&gt;</span> replicate n 'a'</tt> に対し， <tt class="docutils literal">sort [fmap f n1, fmap f n2, <span class="pre">...]</span></tt> みたいなのを <tt class="docutils literal">[fmap f n | n &lt;- sort [n1, n2, <span class="pre">...]]</span></tt> とすることができる．リストの比較より <tt class="docutils literal">Int</tt> の比較の方が効率がかなり良いことから，良い最適化になると考えられる．この法則を満たさないが，既存の <tt class="docutils literal">Functor</tt> になるインスタンスには次のものがある:</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1

@@ -1,5 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-10T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>sitemap の追加</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/" rel="alternate"></link><published>2019-04-10T00:00:00+09:00</published><updated>2019-04-10T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-10:/blog/posts/2019/04/add-sitemap/</id><summary type="html">&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-14T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>MathML で数式を表示する</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/" rel="alternate"></link><published>2019-04-14T00:00:00+09:00</published><updated>2019-04-14T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-14:/blog/posts/2019/04/fix-math-settings/</id><summary type="html">&lt;p&gt;reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="math-docutils"&gt;
+&lt;h2&gt;math ディレクティブと docutils の設定&lt;a class="headerlink" href="#math-docutils" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;reStructuredText には math ディレクティブというものが標準で搭載されていて &lt;a class="footnote-reference" href="#math-directive-spec" id="auto-id-1"&gt;[1]&lt;/a&gt; ， &lt;tt class="docutils literal"&gt;TeX&lt;/tt&gt; の記法を使って以下のように数式が埋め込める:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+.. math::
+
+  \forall a, b \in \mathbb{N}.\, a \leq …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="math-docutils"&gt;
+&lt;h2&gt;math ディレクティブと docutils の設定&lt;a class="headerlink" href="#math-docutils" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;reStructuredText には math ディレクティブというものが標準で搭載されていて &lt;a class="footnote-reference" href="#math-directive-spec" id="auto-id-1"&gt;[1]&lt;/a&gt; ， &lt;tt class="docutils literal"&gt;TeX&lt;/tt&gt; の記法を使って以下のように数式が埋め込める:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+.. math::
+
+  \forall a, b \in \mathbb{N}.\, a \leq b \implies \sqrt{a} \leq \sqrt{b}
+&lt;/pre&gt;
+&lt;p&gt;これは特に何もしなくても &lt;tt class="docutils literal"&gt;docutils&lt;/tt&gt; でコンパイルして HTML にしてくれる．なので， reStructuredText を使っている場合は簡単な数式なら Pelican のブログ記事で普通に使える．これ自体は素晴らしいんだが，出される HTML は数学記号を Unicode 表現にして変数をイタリックにしただけで，空白制御とかはあまり考慮されておらず，フォントもあまり良くない．なので，もうちょっと何とか出来ないかということで，色々調べた．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;docutils&lt;/tt&gt; の出力オプションとして &lt;a class="reference external" href="http://docutils.sourceforge.net/docs/user/config.html#math-output"&gt;math_output&lt;/a&gt; というオプションがあり色々弄れるらしい．ここに指定できる出力の仕方は，以下の 4 通り:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;HTML&lt;/dt&gt;
+&lt;dd&gt;デフォルトの出力方法． &lt;tt class="docutils literal"&gt;i&lt;/tt&gt; タグや &lt;tt class="docutils literal"&gt;sup&lt;/tt&gt; タグなどを駆使して簡単な数式レンダリングを行う．カスタムCSSファイルを引数として指定すると， CSS が必要な時だけ埋め込んでくれる．&lt;/dd&gt;
+&lt;dt&gt;MathJax&lt;/dt&gt;
+&lt;dd&gt;MathJax を使ってレンダリングを行う．引数に MathJax のライブラリファイルの指定が必須．&lt;/dd&gt;
+&lt;dt&gt;MathML&lt;/dt&gt;
+&lt;dd&gt;MathML を使ってレンダリングを行う．引数にコマンドを指定すると，そのコマンドでコンパイルしてくれる．&lt;/dd&gt;
+&lt;dt&gt;LaTeX&lt;/dt&gt;
+&lt;dd&gt;数式表現をそのまま埋め込む．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;で，今回は気になったので MathML を使ってみた．引数にコマンドを指定しない場合標準のコンパイラで MathML に変換してくれる．なお，標準のは &lt;tt class="docutils literal"&gt;\ldotp&lt;/tt&gt; が使えなかったりちょっと不便なところがあるが， &lt;tt class="docutils literal"&gt;latexml&lt;/tt&gt; などを使うと使える記号をもうちょっと増やせるみたい．今回は，妥協してフルに &lt;tt class="docutils literal"&gt;LaTeX&lt;/tt&gt; 使いたかったら PDF で埋め込めばええやろという気持ちで，標準のをそのまま使うことにした．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;pelicanconf.py&lt;/tt&gt; に次の設定を足すだけで， MathML が使えるようになる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;  DOCUTILS_SETTINGS = {
+    ...
+&lt;span class="gi"&gt;+   'math_output': 'MathML',&lt;/span&gt;
+  }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;MathML のフォールバック&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ところで， MathML を使う場合気になるのが，ブラウザの対応状況だ．というわけで， &lt;a class="reference external" href="https://caniuse.com/#feat=mathml"&gt;サポート状況&lt;/a&gt; を覗きに行ってみると，見事に壊滅状態にあってサポートしてるの Firefox / Safari ぐらいやんってなった． Edge は現状サポート予定はなくて， Chrome は提案は出てるもののやっぱりサポート予定はないっぽい．&lt;/p&gt;
+&lt;p&gt;なので， MathML のフォールバックを行うことを考えたい． MathJax が MathML での入力に対応してるので導入してみたのだが，これが webpack とかなり相性が悪い構成になっているっぽい．本家にも &lt;a class="reference external" href="https://github.com/mathjax/MathJax/issues/1629"&gt;イシュー&lt;/a&gt; が立っているわけだが，現状の構成でとても対応できるとは思えない．で，色々探っていたら，次期 MathJax v3 では TypeScript を使って書いていていい感じにモジュール構成を取り入れているため， webpack にももちろん対応できるという話が上がっていた．で，まだ正式リリースじゃなくてベータ版なんだけど，使ってみるかってなった．どうせレンダリング失敗しても， MathML 見れる環境なら問題ないはずだし．&lt;/p&gt;
+&lt;p&gt;まず， npm で &lt;tt class="docutils literal"&gt;mathjax3&lt;/tt&gt; をインストールする:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+npm install -S mathjax3
+&lt;/pre&gt;
+&lt;p&gt;で， &lt;tt class="docutils literal"&gt;webpack.config.js&lt;/tt&gt; に以下の設定を足す:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;  resolve: {
+    alias: {
+      ...
+&lt;span class="gi"&gt;+     mathjax3$: 'mathjax3/mathjax3/mathjax.js',&lt;/span&gt;
+&lt;span class="gi"&gt;+     mathjax3: 'mathjax3/mathjax3',&lt;/span&gt;
+    }
+  }
+  ...
+  plugins: [
+    ...
+&lt;span class="gi"&gt;+   // to disable asyncLoad()&lt;/span&gt;
+&lt;span class="gi"&gt;+   new webpack.NormalModuleReplacementPlugin(&lt;/span&gt;
+&lt;span class="gi"&gt;+     /AsyncLoad\.js/,&lt;/span&gt;
+&lt;span class="gi"&gt;+     (resource) =&amp;gt; {&lt;/span&gt;
+&lt;span class="gi"&gt;+       if (resource.context.endsWith('mathjax3/util')) {&lt;/span&gt;
+&lt;span class="gi"&gt;+         resource.request = resource.request.replace(/AsyncLoad/,"AsyncLoad-disabled");&lt;/span&gt;
+&lt;span class="gi"&gt;+       }&lt;/span&gt;
+&lt;span class="gi"&gt;+     }&lt;/span&gt;
+&lt;span class="gi"&gt;+   )&lt;/span&gt;
+  ],
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;最初の設定はいいとして，2番目の設定についてだけど， webpack はコード解析して依存関係を解決してるんだけどその解析が MathJax v3 の &lt;tt class="docutils literal"&gt;AsyncLoad&lt;/tt&gt; モジュールで死ぬという問題があるらしい．で， webpack 使ってバンドルする場合そもそも非同期 import いらないねって話があって， MathJax v3 では webpack 向けに &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;AsyncLoad-disabled.js&lt;/span&gt;&lt;/tt&gt; というモジュールを提供することにしたらしい &lt;a class="footnote-reference" href="#mathjax3-issue-88" id="auto-id-5"&gt;[2]&lt;/a&gt; ．で， webpack を使う場合は &lt;tt class="docutils literal"&gt;AsyncLoad&lt;/tt&gt; モジュールを &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;AsyncLoad-disabled&lt;/span&gt;&lt;/tt&gt; モジュールに置換することでその問題を解決できる．それをやるのが上のコード．&lt;/p&gt;
+&lt;p&gt;後は， JavaScript で，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;MathJax&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'mathjax3'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;MathML&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'mathjax3/input/mathml'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;CHTML&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'mathjax3/output/chtml'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;browserAdaptor&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'mathjax3/adaptors/browserAdaptor'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;RegisterHTMLHandler&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'mathjax3/handlers/html'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="nx"&gt;RegisterHTMLHandler&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;browserAdaptor&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
+
+&lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;MathJaxDocument&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;InputJax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;MathML&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;
+  &lt;span class="nx"&gt;OutputJax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;CHTML&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+    &lt;span class="nx"&gt;fontURL&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;'https://cdn.rawgit.com/mathjax/mathjax-v3/3.0.0-beta.3/mathjax2/css'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="p"&gt;}),&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="kr"&gt;export&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;loadMathJaxDocument&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;MathJaxDocument&lt;/span&gt;
+    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;findMath&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;compile&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getMetrics&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;typeset&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;updateDocument&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいなんを書いて， DOM のロード後のタイミングで &lt;tt class="docutils literal"&gt;loadMathJaxDocument&lt;/tt&gt; 関数を呼び出せば良い． MathJax v3 は結構モジュールの導入のおかげで治安が良くなってて良い．以下が最終的なレンダリング結果になる:&lt;/p&gt;
+&lt;div&gt;
+&lt;math mode="display" xmlns="http://www.w3.org/1998/Math/MathML"&gt;
+&lt;mtable&gt;
+&lt;mtr&gt;
+&lt;mtd&gt;&lt;mo&gt;∀&lt;/mo&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mo&gt;,&lt;/mo&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mo&gt;∈&lt;/mo&gt;&lt;mi&gt;ℕ&lt;/mi&gt;&lt;mo&gt;.&lt;/mo&gt;&lt;mspace&gt;&lt;/mspace&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mo&gt;≤&lt;/mo&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mo&gt;⟹&lt;/mo&gt;&lt;msqrt&gt;
+&lt;mrow&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;/mrow&gt;&lt;/msqrt&gt;&lt;mo&gt;≤&lt;/mo&gt;&lt;msqrt&gt;
+&lt;mrow&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;/mrow&gt;&lt;/msqrt&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;/mtable&gt;&lt;/math&gt;
+&lt;/div&gt;
+&lt;p&gt;レンダリングがちゃんと出来ていなかったら，ぜひ使ってるブラウザを教えて欲しい．修正するかは分からないけど．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-6"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ブログの数式表示を改善した． MathJax v3 がまだベータ版なので，ちょっとまめに更新は確認していきたい．&lt;/p&gt;
+&lt;p&gt;後ちょっとレンダリングが遅めなのが気になるがまあしゃーないね． MathML 標準対応してほちい．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="math-directive-spec" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="http://docutils.sourceforge.net/docs/ref/rst/directives.html#math"&gt;http://docutils.sourceforge.net/docs/ref/rst/directives.html#math&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="mathjax3-issue-88" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-5"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://github.com/mathjax/mathjax-v3/issues/88"&gt;https://github.com/mathjax/mathjax-v3/issues/88&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/fix-math-settings.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/fix-math-settings.rst'
+}
+&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Pelican"></category><category term="MathML"></category><category term="ブログ"></category><category term="reStructuredText"></category><category term="MathJax"></category><category term="JavaScript"></category></entry><entry><title>sitemap の追加</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/" rel="alternate"></link><published>2019-04-10T00:00:00+09:00</published><updated>2019-04-10T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-10:/blog/posts/2019/04/add-sitemap/</id><summary type="html">&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;sitemap 周辺ファイルの追加&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;まず Pelican で sitemap を生成させる．これは &lt;tt class="docutils literal"&gt;sitemap&lt;/tt&gt; プラグインを追加するだけでいい:&lt;/p&gt;
