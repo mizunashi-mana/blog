@@ -1,11 +1,9 @@
 article.single {
   line-height: 2.0;
 }
-
 article.single pre {
   line-height: 1.5em;
 }
-
 dl.docutils dt {
   padding: .5em;
 }
@@ -19,25 +17,20 @@ article.single table.docutils.footnote {
   width: 100%;
   table-layout: fixed;
 }
-
 article.single table.docutils.footnote td.label {
   width: 2em;
 }
-
 article.single table.highlighttable {
   width: 100%;
   table-layout: fixed;
 }
-
 article.single table.highlighttable td {
   border-style: none;
   padding: 0px;
 }
-
 article.single table.highlighttable td.linenos {
   width: 2.5em;
 }
-
 article.single table.highlighttable td.linenos pre {
   border-left: 0px;
   padding-right: 0.8em;
@@ -54,36 +47,32 @@ i.fa-link.anchor-link {
   margin-left: 0.8em;
   font-size: 90%;
 }
-
 i.fa-link.anchor-link:not(:hover) {
   color: lightgray;
 }
 
+
 div.sharebuttons {
   display: flex;
 }
-
 div.sharebuttons ul.social li {
   margin-left: 0.4em;
 }
 
+
 body {
   color: #454545;
 }
-
 aside {
   color: #444;
   background-color: #eee;
 }
-
 aside a {
   color: inherit;
 }
-
 aside a:hover {
   color: #555;
 }
-
 ul.social a {
   color: #ffffff;
 }
@@ -92,11 +81,87 @@ ul.social a {
 ul.social a.sc-clipboard {
   background-color: lightslategray;
 }
-
 ul.social a.sc-get-pocket {
   background-color: lightcoral;
 }
-
 ul.social a.sc-code {
   background-color: gray;
+}
+
+
+.tooltip {
+  background-color: #ffffff;
+  border: solid 1px gray;
+  border-radius: 5px;
+}
+
+.tooltip .tooltip-arrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  position: absolute;
+  margin: 5px;
+  border-color: gray;
+}
+
+.tooltip[x-placement^="top"] {
+  margin-bottom: 5px;
+}
+.tooltip[x-placement^="top"] .tooltip-arrow {
+  border-width: 5px 5px 0 5px;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  bottom: -5px;
+  left: calc(50% - 5px);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.tooltip[x-placement^="bottom"] {
+  margin-top: 5px;
+}
+.tooltip[x-placement^="bottom"] .tooltip-arrow {
+  border-width: 0 5px 5px 5px;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  top: -5px;
+  left: calc(50% - 5px);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.tooltip[x-placement^="right"] {
+  margin-left: 5px;
+}
+.tooltip[x-placement^="right"] .tooltip-arrow {
+  border-width: 5px 5px 5px 0;
+  border-left-color: transparent;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  left: -5px;
+  top: calc(50% - 5px);
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.tooltip[x-placement^="left"] {
+  margin-right: 5px;
+}
+.tooltip[x-placement^="left"] .tooltip-arrow {
+  border-width: 5px 0 5px 5px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  right: -5px;
+  top: calc(50% - 5px);
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.tooltip .footnote-tooltip-content {
+  padding: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
