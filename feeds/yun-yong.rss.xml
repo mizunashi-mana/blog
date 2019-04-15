@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 14 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>MathML で数式を表示する</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/</link><description>&lt;p&gt;reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 15 Apr 2019 13:00:00 +0900</lastBuildDate><item><title>ブログの overflow 時のスタイル設定を見直す</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/</link><description>&lt;p&gt;ブログの CSS で，幅がはみ出るような要素のスタイルを幾つか修正したので，その対応記録．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;経緯&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;うちのブログではタイプライタ体や数式をよく使う．これは僕がプログラミングと数学寄りの記事を良く書くからだけど，ちょっと問題も起きていた．パソコンでの閲覧時はそれほど大きな問題にはならないんだが，スマフォなどの画面幅が短いモバイル端末ではタイプライタ体の文字が画面幅からはみ出て表示されて，閲覧の快適さがあまりなかった (誰から言われたとかではなく，単に僕が見る時不便だと感じていた)．&lt;/p&gt;
+&lt;p&gt;問題となっていた要素は，以下のもの:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;インラインリテラル&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;``inline literal``&lt;/tt&gt; で書けるやつ．プログラム片とかを書くのに使っていて， &lt;tt class="docutils literal"&gt;tt&lt;/tt&gt; タグを使って変換される．&lt;/dd&gt;
+&lt;dt&gt;数式&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;以下の記法で書けるやつ …&lt;/p&gt;&lt;/dd&gt;&lt;/dl&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 15 Apr 2019 13:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/fix-overflow-settings/</guid><category>Pelican</category><category>ブログ</category><category>CSS</category></item><item><title>MathML で数式を表示する</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/</link><description>&lt;p&gt;reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録．&lt;/p&gt;
 &lt;div class="section" id="math-docutils"&gt;
 &lt;h2&gt;math ディレクティブと docutils の設定&lt;a class="headerlink" href="#math-docutils" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;reStructuredText には math ディレクティブというものが標準で搭載されていて &lt;a class="footnote-reference" href="#math-directive-spec" id="auto-id-1"&gt;[1]&lt;/a&gt; ， &lt;tt class="docutils literal"&gt;TeX&lt;/tt&gt; の記法を使って以下のように数式が埋め込める:&lt;/p&gt;

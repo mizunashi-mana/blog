@@ -1,5 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-14T00:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>MathML で数式を表示する</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/" rel="alternate"></link><published>2019-04-14T00:00:00+09:00</published><updated>2019-04-14T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-14:/blog/posts/2019/04/fix-math-settings/</id><summary type="html">&lt;p&gt;reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-15T13:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>ブログの overflow 時のスタイル設定を見直す</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/" rel="alternate"></link><published>2019-04-15T13:00:00+09:00</published><updated>2019-04-15T13:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/fix-overflow-settings/</id><summary type="html">&lt;p&gt;ブログの CSS で，幅がはみ出るような要素のスタイルを幾つか修正したので，その対応記録．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;経緯&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;うちのブログではタイプライタ体や数式をよく使う．これは僕がプログラミングと数学寄りの記事を良く書くからだけど，ちょっと問題も起きていた．パソコンでの閲覧時はそれほど大きな問題にはならないんだが，スマフォなどの画面幅が短いモバイル端末ではタイプライタ体の文字が画面幅からはみ出て表示されて，閲覧の快適さがあまりなかった (誰から言われたとかではなく，単に僕が見る時不便だと感じていた)．&lt;/p&gt;
+&lt;p&gt;問題となっていた要素は，以下のもの:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;インラインリテラル&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;``inline literal``&lt;/tt&gt; で書けるやつ．プログラム片とかを書くのに使っていて， &lt;tt class="docutils literal"&gt;tt&lt;/tt&gt; タグを使って変換される．&lt;/dd&gt;
+&lt;dt&gt;数式&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;以下の記法で書けるやつ …&lt;/p&gt;&lt;/dd&gt;&lt;/dl&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ブログの CSS で，幅がはみ出るような要素のスタイルを幾つか修正したので，その対応記録．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;経緯&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;うちのブログではタイプライタ体や数式をよく使う．これは僕がプログラミングと数学寄りの記事を良く書くからだけど，ちょっと問題も起きていた．パソコンでの閲覧時はそれほど大きな問題にはならないんだが，スマフォなどの画面幅が短いモバイル端末ではタイプライタ体の文字が画面幅からはみ出て表示されて，閲覧の快適さがあまりなかった (誰から言われたとかではなく，単に僕が見る時不便だと感じていた)．&lt;/p&gt;
+&lt;p&gt;問題となっていた要素は，以下のもの:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;インラインリテラル&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;``inline literal``&lt;/tt&gt; で書けるやつ．プログラム片とかを書くのに使っていて， &lt;tt class="docutils literal"&gt;tt&lt;/tt&gt; タグを使って変換される．&lt;/dd&gt;
+&lt;dt&gt;数式&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;以下の記法で書けるやつ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+.. math::
+
+  \forall x.\, x = x
+&lt;/pre&gt;
+&lt;p class="last"&gt;これは，うちのブログだと MathML に変換して， MathJax でもフォールバック描画している．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;ハイライト付きコードブロック&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;以下の記法で書けるやつ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+.. code-block::
+
+  some code
+&lt;/pre&gt;
+&lt;p class="last"&gt;うちのブログだと，デフォルトで行番号を付けている．行番号は，  &lt;tt class="docutils literal"&gt;table&lt;/tt&gt; タグで付けるのとインラインに付加するのの 2 通りが選べ，このブログでは &lt;tt class="docutils literal"&gt;table&lt;/tt&gt; タグを使っている．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;これらは，表示範囲内に収まらない場合でも関係なく，表示枠を超えて表示される．特に，ハイライト付きコードブロックと数式は，テーマで対応されていないため問題が起きている．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="css"&gt;
+&lt;h2&gt;CSS で表示範囲を超える場合のスタイルを指定する&lt;a class="headerlink" href="#css" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;CSS には内容が表示範囲を超える場合の挙動を設定するプロパティがある．&lt;/p&gt;
+&lt;p&gt;まず表示範囲を超える場合の改行制御を指定する， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;overflow-wrap&lt;/span&gt;&lt;/tt&gt; プロパティがある． &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;overflow-wrap&lt;/span&gt;&lt;/tt&gt; では，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;normal&lt;/dt&gt;
+&lt;dd&gt;空白などの通常の単語分割位置で分割する．&lt;/dd&gt;
+&lt;dt&gt;anywhere&lt;/dt&gt;
+&lt;dd&gt;任意の場所で分割を行うが，一応最小固有寸法を計算する時折り返し可能位置というものが考慮されるらしい．ブラウザの対応状況がよろしくないので，ないものと思って良さそう．&lt;/dd&gt;
+&lt;dt&gt;break-word&lt;/dt&gt;
+&lt;dd&gt;anywhere と同じだが，最小固有寸法を計算する時に折り返し可能位置を考慮しない．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;正直固有寸法とか良く分からんがとりあえず， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;break-word&lt;/span&gt;&lt;/tt&gt; を指定しておけば良さそう．デフォルトでは &lt;tt class="docutils literal"&gt;normal&lt;/tt&gt; になる．インラインリテラルの方はこのプロパティを使った:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+article.single tt {
+  overflow-wrap: break-word;
+}
+&lt;/pre&gt;
+&lt;p&gt;これで，折り返しを強制的にできる．&lt;/p&gt;
+&lt;p&gt;もう1つ，ブロック単位で使えるのが， overflow プロパティだ．特に今回は，左右の境界に関する条件で，これは &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;overflow-x&lt;/span&gt;&lt;/tt&gt; で指定できる． &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;overflow-x&lt;/span&gt;&lt;/tt&gt; では，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;visible&lt;/dt&gt;
+&lt;dd&gt;表示範囲を超える場合でも，そのまま表示する．&lt;/dd&gt;
+&lt;dt&gt;hidden&lt;/dt&gt;
+&lt;dd&gt;表示範囲を超える部分は，切り取って表示しない．&lt;/dd&gt;
+&lt;dt&gt;scroll&lt;/dt&gt;
+&lt;dd&gt;hidden と同じく内容を切り取るが，スクロールバーで内容をスクロールできるようにする．&lt;/dd&gt;
+&lt;dt&gt;auto&lt;/dt&gt;
+&lt;dd&gt;ブラウザごとの仕様に任せる．大抵は scroll と同じになる．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;を指定できるらしい．デフォルトは， &lt;tt class="docutils literal"&gt;visible&lt;/tt&gt; になっている．今回は， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;overflow-x:&lt;/span&gt; auto&lt;/tt&gt; を使うことにした．数式の方はこのプロパティが特に指定されていなかったので，指定するようにした．また，ハイライト付きコードブロックには既にこのプロパティは指定されていて，とある事情でこのプロパティが機能していなかった．なのでその事情をなんとかした．&lt;/p&gt;
+&lt;p&gt;数式の方は以下のスタイルを追加した:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+article.single mjx-container,
+article.single math {
+  overflow-x: auto;
+}
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;math&lt;/tt&gt; タグは MathML のブロック， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;mjx-container&lt;/span&gt;&lt;/tt&gt; は MathJax が MathML を解釈後に挿入するブロックだ．これで，スクロールされるようになる．&lt;/p&gt;
+&lt;p&gt;さて，問題のハイライト付きコードブロックだが， &lt;tt class="docutils literal"&gt;table&lt;/tt&gt; タグは表示幅がデフォルトで固定じゃないため，いい感じに表示幅が広がってしまうらしい．そのため，テーブルの中のコードブロックでは &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;overflow-x&lt;/span&gt;&lt;/tt&gt; プロパティが指定されているんだが，そのコードブロックの表示幅に合わせてテーブルが広がってしまうため，結果表示幅を超えてしまうっぽい．で，テーブルの表示幅を固定したい場合， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;table-layout:&lt;/span&gt; fixed; width: 100%;&lt;/tt&gt; を使うといいらしい．このプロパティ自体は，表の列幅をいい感じに調整しないで固定幅にするプロパティらしいのだが，結果的にテーブルの幅も固定されるらしい．このままだと，行番号はいい感じに表示してくれないので，最終的に次のスタイルを指定した:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+article.single table.highlighttable {
+  width: 100%;
+  table-layout: fixed;
+}
+
+article.single table.highlighttable td {
+  border-style: none;
+  padding: 0px;
+}
+
+article.single table.highlighttable td.linenos {
+  width: 2.5em;
+}
+
+article.single table.highlighttable td.linenos pre {
+  border-left: 0px;
+  padding-right: 0.8em;
+  background-color: inherit;
+  text-align: right;
+}
+&lt;/pre&gt;
+&lt;p&gt;まあテーマの元々のテーブル設定を無効にするため色々やった．この対応は，本家に &lt;a class="reference external" href="https://github.com/alexandrevicenzi/Flex/pull/173"&gt;PR&lt;/a&gt; も投げておいた．マージされれば修正されるだろう．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;画面幅が短い時にもいい感じになるよう， Flex テーマの CSS に修正を加えた．これで，スマフォの閲覧体験は改善されるはずだ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/fix-overflow-settings.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/fix-overflow-settings.rst'
+}
+&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Pelican"></category><category term="ブログ"></category><category term="CSS"></category></entry><entry><title>MathML で数式を表示する</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/" rel="alternate"></link><published>2019-04-14T00:00:00+09:00</published><updated>2019-04-14T00:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-14:/blog/posts/2019/04/fix-math-settings/</id><summary type="html">&lt;p&gt;reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録．&lt;/p&gt;
 &lt;div class="section" id="math-docutils"&gt;
 &lt;h2&gt;math ディレクティブと docutils の設定&lt;a class="headerlink" href="#math-docutils" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;reStructuredText には math ディレクティブというものが標準で搭載されていて &lt;a class="footnote-reference" href="#math-directive-spec" id="auto-id-1"&gt;[1]&lt;/a&gt; ， &lt;tt class="docutils literal"&gt;TeX&lt;/tt&gt; の記法を使って以下のように数式が埋め込める:&lt;/p&gt;
