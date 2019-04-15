@@ -136,4 +136,4 @@ var contentMetadataForCustomJS = {
   'source_path': 'articles/2019/04/read-ctmcp.rst',
   'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/read-ctmcp.rst'
 }
-&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Mozart"></category><category term="Oz"></category><category term="Emacs"></category><category term="本"></category><category term="環境構築"></category></entry></feed>
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Mozart"></category><category term="Oz"></category><category term="Emacs"></category><category term="本"></category><category term="環境構築"></category></entry></feed>

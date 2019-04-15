@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 15 Apr 2019 14:00:00 +0900</lastBuildDate><item><title>ブログの overflow 時のスタイル設定を見直す</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/</link><description>&lt;p&gt;ブログの CSS で，幅がはみ出るような要素のスタイルを幾つか修正したので，その対応記録．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 15 Apr 2019 22:00:00 +0900</lastBuildDate><item><title>脚注のためのツールチップ追加</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/</link><description>&lt;p&gt;脚注をツールチップで見れるようにしたので，それについて．&lt;/p&gt;
+&lt;div class="section" id="restructuredtext"&gt;
+&lt;h2&gt;reStructuredText の脚注&lt;a class="headerlink" href="#restructuredtext" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;reStructuredText では脚注が使える．これは，以下のように書けばいい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+some text[#footnote-ref]_ .
+
+.. [#footnote-ref] some footnote content.
+&lt;/pre&gt;
+&lt;p&gt;こうすると，自動でナンバリングが行われ，それぞれ脚注へのリンクと元の文書へのバックリンクが生成される．分かりづらいがバックリンクは，数字の部分に当てがわれ，それをクリックすることで戻れる．ただ，これをクリックするのがめんどかったので，ツールチップで表示してみることにした …&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 15 Apr 2019 22:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/add-tooltip-for-footnote/</guid><category>ブログ</category><category>Pelican</category><category>JavaScript</category><category>CSS</category></item><item><title>ブログの overflow 時のスタイル設定を見直す</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/</link><description>&lt;p&gt;ブログの CSS で，幅がはみ出るような要素のスタイルを幾つか修正したので，その対応記録．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;経緯&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;うちのブログではタイプライタ体や数式をよく使う．これは僕がプログラミングと数学寄りの記事を良く書くからだけど，ちょっと問題も起きていた．パソコンでの閲覧時はそれほど大きな問題にはならないんだが，スマフォなどの画面幅が短いモバイル端末ではタイプライタ体の文字が画面幅からはみ出て表示されて，閲覧の快適さがあまりなかった (誰から言われたとかではなく，単に僕が見る時不便だと感じていた)．&lt;/p&gt;

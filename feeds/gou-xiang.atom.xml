@@ -136,4 +136,4 @@ var contentMetadataForCustomJS = {
   'source_path': 'articles/2019/04/ghc-compiler-notes.rst',
   'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/ghc-compiler-notes.rst'
 }
-&lt;/script&gt;&lt;script src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category></entry></feed>
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category></entry></feed>
