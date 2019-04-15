@@ -1,6 +1,13 @@
+import * as DeviceUtil from '../util/device';
+
 import Tooltip from 'tooltip.js';
 
 export function addFootnoteTooltip() {
+  // disable tooltips on touch-enabled device
+  if (DeviceUtil.isTouchDevice()) {
+    return;
+  }
+
   let footnoteTitles = {};
   for (const e of document.querySelectorAll("table.docutils.footnote")) {
     const eid = e.getAttribute("id");

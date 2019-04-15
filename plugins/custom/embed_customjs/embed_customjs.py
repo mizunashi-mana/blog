@@ -42,6 +42,7 @@ def embed_customjs(content):
 
   jsfile_script = soup_body.new_tag('script')
   jsfile_script['src'] = content.settings.get('JS_FILE')
+  jsfile_script['async'] = None
   soup_body.append(jsfile_script)
 
   content._content = soup.decode()
