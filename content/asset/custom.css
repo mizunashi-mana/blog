@@ -2,6 +2,10 @@ article.single {
   line-height: 2.0;
 }
 
+article.single pre {
+  line-height: 1.5em;
+}
+
 dl.docutils dt {
   padding: .5em;
 }
@@ -11,8 +15,13 @@ article.single a {
   overflow-wrap: break-word;
 }
 
-article.single pre {
-  line-height: 1.5em;
+article.single table.docutils.footnote {
+  width: 100%;
+  table-layout: fixed;
+}
+
+article.single table.docutils.footnote td.label {
+  width: 2em;
 }
 
 article.single table.highlighttable {
