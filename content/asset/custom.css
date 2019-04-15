@@ -6,8 +6,38 @@ dl.docutils dt {
   padding: .5em;
 }
 
+article.single tt {
+  overflow-wrap: break-word;
+}
+
+article.single pre {
+  line-height: 1.5em;
+}
+
+article.single table.highlighttable {
+  width: 100%;
+  table-layout: fixed;
+}
+
 article.single table.highlighttable td {
   border-style: none;
+  padding: 0px;
+}
+
+article.single table.highlighttable td.linenos {
+  width: 2.5em;
+}
+
+article.single table.highlighttable td.linenos pre {
+  border-left: 0px;
+  padding-right: 0.8em;
+  background-color: inherit;
+  text-align: right;
+}
+
+article.single mjx-container,
+article.single math {
+  overflow-x: auto;
 }
 
 i.fa-link.anchor-link {
