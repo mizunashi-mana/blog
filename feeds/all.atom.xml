@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-15T13:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>ブログの overflow 時のスタイル設定を見直す</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/" rel="alternate"></link><published>2019-04-15T13:00:00+09:00</published><updated>2019-04-15T13:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/fix-overflow-settings/</id><summary type="html">&lt;p&gt;ブログの CSS で，幅がはみ出るような要素のスタイルを幾つか修正したので，その対応記録．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-15T13:30:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>ブログの overflow 時のスタイル設定を見直す</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/" rel="alternate"></link><published>2019-04-15T13:00:00+09:00</published><updated>2019-04-15T13:30:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/fix-overflow-settings/</id><summary type="html">&lt;p&gt;ブログの CSS で，幅がはみ出るような要素のスタイルを幾つか修正したので，その対応記録．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;経緯&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;うちのブログではタイプライタ体や数式をよく使う．これは僕がプログラミングと数学寄りの記事を良く書くからだけど，ちょっと問題も起きていた．パソコンでの閲覧時はそれほど大きな問題にはならないんだが，スマフォなどの画面幅が短いモバイル端末ではタイプライタ体の文字が画面幅からはみ出て表示されて，閲覧の快適さがあまりなかった (誰から言われたとかではなく，単に僕が見る時不便だと感じていた)．&lt;/p&gt;
@@ -104,6 +104,10 @@ article.single table.highlighttable td.linenos pre {
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;画面幅が短い時にもいい感じになるよう， Flex テーマの CSS に修正を加えた．これで，スマフォの閲覧体験は改善されるはずだ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;追記 (2019/04/15)&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Chrome だと， &lt;tt class="docutils literal"&gt;a&lt;/tt&gt; タグもうまく改行されないっぽいので， &lt;tt class="docutils literal"&gt;a&lt;/tt&gt; タグにも &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;overflow-wrap:&lt;/span&gt; &lt;span class="pre"&gt;break-word;&lt;/span&gt;&lt;/tt&gt; を追加する必要があるっぽかった．&lt;/p&gt;
 &lt;/div&gt;
 &lt;script&gt;
 var contentMetadataForCustomJS = {

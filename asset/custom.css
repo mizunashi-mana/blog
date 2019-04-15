@@ -6,7 +6,8 @@ dl.docutils dt {
   padding: .5em;
 }
 
-article.single tt {
+article.single tt,
+article.single a {
   overflow-wrap: break-word;
 }
 
