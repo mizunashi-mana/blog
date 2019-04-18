@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - ツール</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/tsuru.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-18T22:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>unified 形式パッチの文法について</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/about-unified-diff-style/" rel="alternate"></link><published>2019-04-18T22:00:00+09:00</published><updated>2019-04-18T22:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-18:/blog/posts/2019/04/about-unified-diff-style/</id><summary type="html">&lt;p&gt;パッチファイルの形式にはいくつかあるわけだが， &lt;cite&gt;git&lt;/cite&gt; の &lt;cite&gt;diff&lt;/cite&gt; で使われている形式について，ちょっと調べたのでそのメモ．&lt;/p&gt;
+&lt;div class="section" id="diff"&gt;
+&lt;h2&gt;diff 形式&lt;a class="headerlink" href="#diff" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;diff コマンドが吐き出す形式は色々ある．主に以下のものがあるらしい &lt;a class="footnote-reference" href="#diffutils-manual-output-formats" id="auto-id-1"&gt;[1]&lt;/a&gt; :&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;通常の形式&lt;/dt&gt;
+&lt;dd&gt;差分部分だけを表示する， diff のデフォルトの表示形式&lt;/dd&gt;
+&lt;dt&gt;コンテキスト形式&lt;/dt&gt;
+&lt;dd&gt;差分部分周辺も含めて，どういう風に変わったかが分かるようになっている，表示形式&lt;/dd&gt;
+&lt;dt&gt;side by side 形式&lt;/dt&gt;
+&lt;dd&gt;2列で差分を表示する形式 …&lt;/dd&gt;&lt;/dl&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;パッチファイルの形式にはいくつかあるわけだが， &lt;cite&gt;git&lt;/cite&gt; の &lt;cite&gt;diff&lt;/cite&gt; で使われている形式について，ちょっと調べたのでそのメモ．&lt;/p&gt;
+&lt;div class="section" id="diff"&gt;
+&lt;h2&gt;diff 形式&lt;a class="headerlink" href="#diff" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;diff コマンドが吐き出す形式は色々ある．主に以下のものがあるらしい &lt;a class="footnote-reference" href="#diffutils-manual-output-formats" id="auto-id-1"&gt;[1]&lt;/a&gt; :&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;通常の形式&lt;/dt&gt;
+&lt;dd&gt;差分部分だけを表示する， diff のデフォルトの表示形式&lt;/dd&gt;
+&lt;dt&gt;コンテキスト形式&lt;/dt&gt;
+&lt;dd&gt;差分部分周辺も含めて，どういう風に変わったかが分かるようになっている，表示形式&lt;/dd&gt;
+&lt;dt&gt;side by side 形式&lt;/dt&gt;
+&lt;dd&gt;2列で差分を表示する形式&lt;/dd&gt;
+&lt;dt&gt;スクリプト形式&lt;/dt&gt;
+&lt;dd&gt;ed コマンドなどでそのまま実行すれば，差分を適用できる形式&lt;/dd&gt;
+&lt;dt&gt;if-then-else 形式&lt;/dt&gt;
+&lt;dd&gt;CPP のマクロで，両方を切り替えられるようにした形式．差分部分を &lt;tt class="docutils literal"&gt;#ifdef&lt;/tt&gt; で囲って出してくれ，指定したマクロ変数を定義すると古いのに切り替えられる．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;色々あるけど，パッチを送信する際よく使用されるのは，プレーンテキストでも差分を確認しやすいコンテキスト形式だ．コンテキスト形式の中でもいくつか種類があって，主に以下のものがある &lt;a class="footnote-reference" href="#diffutils-manual-contexts" id="auto-id-2"&gt;[2]&lt;/a&gt; :&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;(狭義の) コンテキスト形式&lt;/dt&gt;
+&lt;dd&gt;patch コマンドの標準形式っぽい．追加 / 削除に加えて，変更を表す表記がある．&lt;/dd&gt;
+&lt;dt&gt;unified 形式&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;git diff&lt;/tt&gt; で使われている形式．追加 / 削除しかないやつ．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;他にもオプションを指定することで表示を変えられるが，主要なのは上の 2 通りだと考えていいと思う．今回は， unified 形式のみを見ていく．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;unified 形式の構文&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;コンテキスト形式の差分は，ヘッダ情報とハンク (hunk) と呼ばれる差分を表すコードブロックの集まりから為っている．ヘッダ情報は，以下の形式になる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+--- from-file from-file-modification-time
++++ to-file to-file-modification-time
+&lt;/pre&gt;
+&lt;p&gt;まあ書いてある通り．例えば，以下のような感じ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+--- dir/test.c.orig     2019-04-15 16:48:32.000000000 +0900
++++ dir/test.c          2019-04-08 12:40:22.000000000 +0900
+&lt;/pre&gt;
+&lt;p&gt;なお， &lt;tt class="docutils literal"&gt;diffutils&lt;/tt&gt; のマニュアルには書いてないんだが， &lt;tt class="docutils literal"&gt;git diff&lt;/tt&gt; は変更時間を出さないので，変更時間は書かなくてもいいのかもしれない．ハンクは以下の形式になる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+@@ from-file-line-numbers to-file-line-numbers @@
+line-from-either-file
+line-from-either-file
+...
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;file-line-numbers&lt;/span&gt;&lt;/tt&gt; は， &lt;tt class="docutils literal"&gt;start, count&lt;/tt&gt; の形式をしている． &lt;tt class="docutils literal"&gt;start&lt;/tt&gt; は開始位置， &lt;tt class="docutils literal"&gt;count&lt;/tt&gt; は開始行からの表示行数になる．それぞれの行は，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;特に変更がないところは空白 1 つ&lt;/li&gt;
+&lt;li&gt;追加した行は &lt;tt class="docutils literal"&gt;+&lt;/tt&gt;&lt;/li&gt;
+&lt;li&gt;削除した行は &lt;tt class="docutils literal"&gt;-&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;を先頭につける．例えば，以下のような感じ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+@@ -1,5 +1,5 @@
+ #include &amp;lt;stdio.h&amp;gt;
+
+ int main(void) {
+-  printf("Hello, World!\n");
++  puts("Hello, World!");
+ }
+&lt;/pre&gt;
+&lt;p&gt;注意して欲しいのは，位置も行数も差分ではなく表示されている行から換算するってこと．上の例だと，差分があるのは4行目だけど &lt;tt class="docutils literal"&gt;start&lt;/tt&gt; は 1 で， &lt;tt class="docutils literal"&gt;count&lt;/tt&gt; も変更される前のファイルの表示されてる行数 5 になる．なお，この行数を間違えると，パッチコマンドでは以下のエラーが出る:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cat test.c.patch
+--- test.c.orig 2019-04-18 21:45:33.000000000 +0900
++++ test.c      2019-04-18 21:45:07.000000000 +0900
+@@ -1,4 +1,5 @@
+ #include &amp;lt;stdio.h&amp;gt;
+
+ int main(void) {
+-  printf("Hello, World!\n");
++  puts("Hello, World!");
+ }
+$ patch test.c.orig &amp;lt; test.c.patch
+patching file test.c.orig
+patch: **** malformed patch at line 9:  }
+&lt;/pre&gt;
+&lt;p&gt;エラーメッセージは分かりにくいが， 9 行目の &lt;tt class="docutils literal"&gt;}&lt;/tt&gt; でエラーが出ているのは， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;from-file-line-numbers&lt;/span&gt;&lt;/tt&gt; で 4 行のハンクだと言っているのに 5 行目があるじゃないかと怒っているんだと思う．なお，一行以下のハンクの場合，カウントの部分は書かなくていいらしい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+@@ -1 +1 @@
+-aaa
++aaaa
+&lt;/pre&gt;
+&lt;p&gt;それから空ハンクはそこでハンクが終了することを示すらしい．これは何処で使われてるんだろね．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-4"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-4" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;git diff&lt;/tt&gt; で使われてるパッチ形式を調べた．これで手動でパッチ作成とかできそう．また一つ賢くなってしまった．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="diffutils-manual-output-formats" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://www.gnu.org/software/diffutils/manual/diffutils.html#Output-Formats"&gt;https://www.gnu.org/software/diffutils/manual/diffutils.html#Output-Formats&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="diffutils-manual-contexts" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://www.gnu.org/software/diffutils/manual/diffutils.html#Context"&gt;https://www.gnu.org/software/diffutils/manual/diffutils.html#Context&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/about-unified-diff-style.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/about-unified-diff-style.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="diff"></category><category term="パッチ"></category></entry></feed>
