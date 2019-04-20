@@ -30,7 +30,7 @@ STATIC_PATHS = [
 ARTICLE_PATHS = ['articles']
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
-CUSTOM_CSS = 'asset/custom.css'
+CUSTOM_CSS = 'dist-asset/bundle.css'
 JS_FILE = '/dist-asset/bundle.js'
 
 BROWSER_COLOR = '#555'
@@ -117,7 +117,7 @@ RELATIVE_URLS = True
 
 DOCUTILS_SETTINGS = {
   'auto_id_prefix': 'auto-id-',
-  'math_output': 'MathML',
+  'math_output': 'LaTeX',
 }
 
 HEADERID_LINK_CHAR = '<i class="fas fa-link anchor-link"></i>'
