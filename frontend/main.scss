@@ -135,12 +135,10 @@ ul.social {
     height: 0;
     margin: 5px;
     position: absolute;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #ffffff;
+    border: 5px solid #ffffff;
     overflow: hidden;
 
-    ::after {
+    &::after {
       content: "";
       position: absolute;
       width: 5px;
@@ -152,7 +150,7 @@ ul.social {
     }
   }
 
-  [x-placement^="bottom"] {
+  &[x-placement^="bottom"] {
     margin-top: 5px;
 
     .tooltip-arrow {
@@ -165,7 +163,6 @@ ul.social {
       margin-bottom: 0;
     }
   }
-
 
   .footnote-tooltip-content {
     padding: 4px 10px;

@@ -35,7 +35,11 @@ module.exports = {
             options: {
               plugins: function () {
                 return [
-                  require('cssnano'),
+                  require('cssnano')({
+                    preset: ['default', {
+                      mergeRules: false,
+                    }]
+                  }),
                   require('precss'),
                   require('autoprefixer')
                 ];
