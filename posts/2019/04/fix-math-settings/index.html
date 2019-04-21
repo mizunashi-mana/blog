@@ -17,7 +17,7 @@
   <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
   <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
 
-    <link href="https://mizunashi-mana.github.io/blog/asset/custom.css" rel="stylesheet">
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
 
     <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
 
@@ -283,14 +283,9 @@ npm install -S mathjax3
 <span class="p">}</span>
 </pre></div>
 </td></tr></table><p>みたいなんを書いて， DOM のロード後のタイミングで <tt class="docutils literal">loadMathJaxDocument</tt> 関数を呼び出せば良い． MathJax v3 は結構モジュールの導入のおかげで治安が良くなってて良い．以下が最終的なレンダリング結果になる:</p>
-<div>
-<math mode="display" xmlns="http://www.w3.org/1998/Math/MathML">
-<mtable>
-<mtr>
-<mtd><mo>∀</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo>∈</mo><mi>ℕ</mi><mo>.</mo><mspace></mspace><mi>a</mi><mo>≤</mo><mi>b</mi><mo>⟹</mo><msqrt>
-<mrow><mi>a</mi></mrow></msqrt><mo>≤</mo><msqrt>
-<mrow><mi>b</mi></mrow></msqrt></mtd></mtr></mtable></math>
-</div>
+<pre class="math">
+\forall a, b \in \mathbb{N}.\, a \leq b \implies \sqrt{a} \leq \sqrt{b}
+</pre>
 <p>レンダリングがちゃんと出来ていなかったら，ぜひ使ってるブラウザを教えて欲しい．修正するかは分からないけど．</p>
 </div>
 <div class="section" id="auto-id-6">

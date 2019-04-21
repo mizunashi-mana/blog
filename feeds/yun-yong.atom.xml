@@ -479,14 +479,9 @@ npm install -S mathjax3
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいなんを書いて， DOM のロード後のタイミングで &lt;tt class="docutils literal"&gt;loadMathJaxDocument&lt;/tt&gt; 関数を呼び出せば良い． MathJax v3 は結構モジュールの導入のおかげで治安が良くなってて良い．以下が最終的なレンダリング結果になる:&lt;/p&gt;
-&lt;div&gt;
-&lt;math mode="display" xmlns="http://www.w3.org/1998/Math/MathML"&gt;
-&lt;mtable&gt;
-&lt;mtr&gt;
-&lt;mtd&gt;&lt;mo&gt;∀&lt;/mo&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mo&gt;,&lt;/mo&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mo&gt;∈&lt;/mo&gt;&lt;mi&gt;ℕ&lt;/mi&gt;&lt;mo&gt;.&lt;/mo&gt;&lt;mspace&gt;&lt;/mspace&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mo&gt;≤&lt;/mo&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mo&gt;⟹&lt;/mo&gt;&lt;msqrt&gt;
-&lt;mrow&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;/mrow&gt;&lt;/msqrt&gt;&lt;mo&gt;≤&lt;/mo&gt;&lt;msqrt&gt;
-&lt;mrow&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;/mrow&gt;&lt;/msqrt&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;/mtable&gt;&lt;/math&gt;
-&lt;/div&gt;
+&lt;pre class="math"&gt;
+\forall a, b \in \mathbb{N}.\, a \leq b \implies \sqrt{a} \leq \sqrt{b}
+&lt;/pre&gt;
 &lt;p&gt;レンダリングがちゃんと出来ていなかったら，ぜひ使ってるブラウザを教えて欲しい．修正するかは分からないけど．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-6"&gt;

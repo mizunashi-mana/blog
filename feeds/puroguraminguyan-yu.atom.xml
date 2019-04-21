@@ -1,0 +1,1195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-19T22:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>STG Version 2.5 の動作</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/haskell-old-stg-syntax/" rel="alternate"></link><published>2019-04-19T22:00:00+09:00</published><updated>2019-04-19T22:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-19:/blog/posts/2019/04/haskell-old-stg-syntax/</id><summary type="html">&lt;p&gt;先日 STG の動作について説明する機会があったんだが，ちゃんと説明できなかった．で，ちょっとこれじゃまずいって思って，色々読み直してる．で，いざっていう時のためにまとめとくかみたいな気分になっており，この記事が錬成された．なお，今の GHC の STG では色々変わってるので通用しないとこも多い．そこは注意．&lt;/p&gt;
+&lt;div class="section" id="stg"&gt;
+&lt;h2&gt;この記事での STG について&lt;a class="headerlink" href="#stg" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;この記事での STG は， Spineless Tagless …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;先日 STG の動作について説明する機会があったんだが，ちゃんと説明できなかった．で，ちょっとこれじゃまずいって思って，色々読み直してる．で，いざっていう時のためにまとめとくかみたいな気分になっており，この記事が錬成された．なお，今の GHC の STG では色々変わってるので通用しないとこも多い．そこは注意．&lt;/p&gt;
+&lt;div class="section" id="stg"&gt;
+&lt;h2&gt;この記事での STG について&lt;a class="headerlink" href="#stg" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;この記事での STG は， Spineless Tagless G-machine Version 2.5 の事を指している．内容としては，SPJ が出した 1992年 JFP の&lt;/p&gt;
+&lt;blockquote&gt;
+Jones, S. L. P. (1992). Implementing lazy functional languages on stock hardware: the Spineless Tagless G-machine. Journal of Functional Programming, 2(02), 127–202. &lt;a class="reference external" href="https://doi.org/10.1017/S0956796800000319"&gt;https://doi.org/10.1017/S0956796800000319&lt;/a&gt;&lt;/blockquote&gt;
+&lt;p&gt;を基にしている． Microsoft Research のページから PDF は見れる: &lt;a class="reference external" href="https://www.microsoft.com/en-us/research/publication/implementing-lazy-functional-languages-on-stock-hardware-the-spineless-tagless-g-machine/"&gt;https://www.microsoft.com/en-us/research/publication/implementing-lazy-functional-languages-on-stock-hardware-the-spineless-tagless-g-machine/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;STG の名前は，&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;G-machine (graph reduction machine): Johnsson, T. (1987). Compiling Lazy Functional Languages: An introduction. PhD thesis, Chalmers University.&lt;/li&gt;
+&lt;li&gt;Spineless G-machine: Burn, G. L., Peyton Jones, S. L., &amp;amp; Robson, J. D. (1988). The spineless G-machine. In Proceedings of the 1988 ACM conference on LISP and functional programming - LFP ’88 (pp. 244–258). New York, New York, USA: ACM Press. &lt;a class="reference external" href="https://doi.org/10.1145/62678.62717"&gt;https://doi.org/10.1145/62678.62717&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Spineless Tagless G-machine&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;みたいな変遷をたどっている．今となっては， pointer tagging が採用されたため tagless というワードは通用しなくなったり，実行モデルが変わったりという感じだが &lt;a class="footnote-reference" href="#spineless-is-still" id="auto-id-1"&gt;[1]&lt;/a&gt; ，今でも STG という名前が使われている．まあ大枠は G-machine の拡張なので，いけるでしょ &lt;a class="footnote-reference" href="#shared-term-graph" id="auto-id-2"&gt;[2]&lt;/a&gt;．&lt;/p&gt;
+&lt;p&gt;てなわけで， STG Version 2.5 について見ていこうと思う．お気持ちの部分はかなりすっ飛ばすので，もっと詳しく知りたいとかちゃんとした情報が知りたい人は上の論文を読んでくれって感じ．今の STG に受け継がれてるとこは多いというか，多分上のやつ読まないとその後の話の大部分分からない気がするので，読んでみるのはオススメ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;STG の概要&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC では，&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;Haskell: これはみなさんご存知の通りのやつ&lt;/li&gt;
+&lt;li&gt;Core: 複雑な構文 (型クラスとかも) の脱糖，型の明記などが行われたやつ&lt;/li&gt;
+&lt;li&gt;STG: 抽象機械，大体の実行時の動作を表す表現&lt;/li&gt;
+&lt;li&gt;C--: C のサブセット&lt;/li&gt;
+&lt;li&gt;バックエンド: LLVM / アセンブリなど&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;みたいなフローでコンパイルが行われていて，大体は Core-to-Core で最適化が行われて， STG として吐き出された後操作的意味論に合うように C-- が吐き出される，いわば低レベル動作から離れた位置の高尚な言語から，低レベル動作がある程度考慮された言語への橋渡しみたいな位置にいるのが， STG になる．&lt;/p&gt;
+&lt;p&gt;Haskell は &lt;tt class="docutils literal"&gt;case&lt;/tt&gt; であっても評価が起きなかったり，式中でヒープ割り当てが発生して位置を特定しにくいとか，正直コードの動作が追えたものじゃない &lt;a class="footnote-reference" href="#haskell-optimizing-community" id="auto-id-4"&gt;[3]&lt;/a&gt; ． STG は Haskell の文法に寄せながらも動作が分かりやすいようになっている型無しの言語で，主要な構文とその操作的意味論が大体以下のように対応する:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="58%"/&gt;
+&lt;col width="42%"/&gt;
+&lt;/colgroup&gt;
+&lt;thead valign="bottom"&gt;
+&lt;tr&gt;&lt;th class="head"&gt;構文&lt;/th&gt;
+&lt;th class="head"&gt;操作的意味論&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;関数適用&lt;/td&gt;
+&lt;td&gt;末尾呼び出し&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;let 式&lt;/td&gt;
+&lt;td&gt;ヒープ割り当て&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;case 式&lt;/td&gt;
+&lt;td&gt;評価&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;コンストラクタへの適用&lt;/td&gt;
+&lt;td&gt;継続への復帰&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;コンストラクタへの適用が継続への復帰に対応するというのは分かる人には分かると思うけど，分からない人は何を言ってるか分からないと思う．これについては後述するので，今は気にしなくていい．この機能が tagless の由来だったりする．後の対応関係はいいと思う．通常の Haskell だとここまでうまく対応しないけど， STG は対応させるため構文に色々制約を設けてる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-5"&gt;
+&lt;h2&gt;STG の構文&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;実際の構文は以下の感じ:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;基本要素&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{ll}
+\mathit{vars} \mathrel{::=} \{\mathit{var}_1, \ldots, \mathit{var}_n\} &amp;amp; (n \geq 0) \\
+\mathit{var} \in \mathit{VAR} &amp;amp; (\text{\(\mathit{VAR}\) は変数集合}) \\
+\\
+\mathit{atoms} \mathrel{::=} \{\mathit{atom}_1, \ldots, \mathit{atom}_n\} &amp;amp; (n \geq 0) \\
+\mathit{atom}  \mathrel{::=} \mathit{var} \mid \mathit{literal} \\
+\\
+\mathit{literal} \in \mathit{LIT} &amp;amp; (\text{\(\mathit{LIT}\) はリテラル集合}) \\
+\mathit{prim} \in \mathit{PRIM} &amp;amp;(\text{\(\mathit{PRIM}\) はプリミティブ演算子の集合}) \\
+\mathit{constr} \in \mathit{CON} &amp;amp;(\text{\(\mathit{CON}\) はコンストラクタの集合})
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;基本要素は以上のやつになる．リテラルは， unboxed な値を想定してて， &lt;tt class="math"&gt;\mathit{LIT} = \{\text{\tt 0\#}, \text{\tt 1\#}, \ldots\}&lt;/tt&gt; みたいなのが書ける．また，プリミティブ演算子も同じく， &lt;tt class="math"&gt;\mathit{PRIM} = \{\text{\tt +\#}, \text{\tt *\#}, \ldots\}&lt;/tt&gt; みたいなのが書ける．変数とコンストラクタは Haskell と同じ習慣に従ってて，アルファベットの場合変数は先頭小文字，コンストラクタは大文字で始まる．ただ，ここら辺は本質情報じゃなくてもちろん取り換え可能．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;ラムダ式&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{l}
+\mathit{lf} \mathrel{::=} \mathit{vars}_f \mathrel{\text{\tt \textbackslash} \pi} \mathit{vars}_a \mathrel{\text{\tt -&amp;gt;}} \mathit{expr} \\
+\\
+\pi \mathrel{::=} \mathtt{u} \mid \mathtt{n}
+\end{array}
+&lt;/pre&gt;
+&lt;p&gt;この式はクロージャを表し， &lt;tt class="math"&gt;\mathit{vars}_f&lt;/tt&gt; が自由変数， &lt;tt class="math"&gt;\mathit{vars}_a&lt;/tt&gt; がクロージャの引数になる． &lt;tt class="math"&gt;\pi&lt;/tt&gt; は更新フラグで，更新できるかどうかを表す． &lt;tt class="docutils literal"&gt;u&lt;/tt&gt; が更新可能， &lt;tt class="docutils literal"&gt;n&lt;/tt&gt; が更新不要を表し， &lt;tt class="docutils literal"&gt;u&lt;/tt&gt; の場合要はサンクを表す．後更新フラグは以下のように決める:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;以下に該当するものは &lt;tt class="docutils literal"&gt;n&lt;/tt&gt; をセットする:&lt;ul&gt;
+&lt;li&gt;引数が 1 以上のクロージャ: &lt;tt class="docutils literal"&gt;{f} \n {x} &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; case 1# of v &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; f {v, x}&lt;/tt&gt;&lt;/li&gt;
+&lt;li&gt;中身がコンストラクタ適用となっているクロージャ: &lt;tt class="docutils literal"&gt;{x, l} \n {} &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Cons {x, l}&lt;/tt&gt;&lt;/li&gt;
+&lt;li&gt;(オプショナル) 部分適用&lt;/li&gt;
+&lt;li&gt;(オプショナル) 一度しか使われないことが分かっているクロージャ&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;それ以外の場合は， &lt;tt class="docutils literal"&gt;u&lt;/tt&gt; をセットする．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;これは本質的な制約じゃなくて，更新フラグを全部 &lt;tt class="docutils literal"&gt;u&lt;/tt&gt; から始めてもいい．ただ， STG は抽象機械を想定してるので，最初から更新不要と分かってるとこには &lt;tt class="docutils literal"&gt;n&lt;/tt&gt; を書いておいた方が都合がいい．なので，後ろに載せた意味論はこの制約を守ってる前提で書かれてる．なお，オプショナルになっている制約は，実はやらなくても意味論は機能する．特に，クロージャが一度しか使われないかを完全に解析することは困難なので，一度しか使われないクロージャでも &lt;tt class="docutils literal"&gt;u&lt;/tt&gt; がセットされることはある．&lt;/p&gt;
+&lt;p class="last"&gt;&lt;tt class="math"&gt;\mathit{expr}&lt;/tt&gt; はまだ説明してないが主要な構文と &lt;tt class="math"&gt;atom&lt;/tt&gt; ぐらいが書ける．この後に書いてあるので，気になったら適当にフライングしてくれ．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;束縛&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{ll}
+\mathit{program} \mathrel{::=} \mathit{binds} \\
+\\
+\mathit{binds} \mathrel{::=} \mathit{var}_1 = \mathit{lf}_1 \mathpunct{;} \cdots \mathpunct{;} \mathit{var}_n = \mathit{lf}_n &amp;amp;(n \geq 1)
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;束縛は， let 式で使われる他， STG のプログラムも束縛で表現される． Haskell と違って， STG では束縛でパターンマッチとかできないし，クロージャしか束縛できない．なお， STG にはもう 1 つ束縛の仕方があって， case 式を使えば評価結果を束縛できる．なので，この束縛はヒープ割り当て用， case は式の評価値束縛用みたいな感じ．束縛はクロージャしかできないので，プリミティブな値を束縛したい時とかも case を使う必要がある．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;let (rec) 式&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{rl}
+\mathit{letexpr}
+\mathrel{::=}&amp;amp; \text{\tt let} \,\mathit{binds}\,\text{\tt in}\, \mathit{expr} \\
+\mid&amp;amp; \text{\tt letrec} \,\mathit{binds}\,\text{\tt in}\, \mathit{expr}
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;まあこれはいいでしょ． Haskell では let 式中で再帰的な変数が書け，コンパイル時に静的に再帰的かどうか解析されるが， STG では再帰的に書けるかどうかが構文レベルで区別されている．もちろん， let は素直に実装できるが， letrec は循環参照を含む場合があるのでちょっと工夫が必要．後，今回は説明しないが letrec は無限ループチェックのためブラックホールという機能が搭載されるので，重いみたいなんもある．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;case 式&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{l}
+\mathit{caseexpr} \mathrel{::=} \text{\tt case} \, \mathit{expr} \, \text{\tt of} \, \mathit{alts} \\
+\\
+\begin{array}{rll}
+\mathit{alts}
+\mathrel{::=}&amp;amp; \mathit{aalt}_1 \mathpunct{;} \cdots \mathpunct{;} \mathit{aalt}_n \mathpunct{;} \mathit{default} &amp;amp;(n \geq 0) \\
+\mid&amp;amp; \mathit{palt}_1 \mathpunct{;} \cdots \mathpunct{;} \mathit{palt}_n \mathpunct{;} \mathit{default} &amp;amp;(n \geq 0)
+\end{array} \\
+\\
+\begin{array}{rl}
+\mathit{aalt} \mathrel{::=}&amp;amp; \mathit{constr}\,\mathit{vars} \mathrel{\text{\tt -&amp;gt;}} \mathit{expr} \\
+\mathit{palt} \mathrel{::=}&amp;amp; \mathit{literal} \mathrel{\text{\tt -&amp;gt;}} \mathit{expr} \\
+\mathit{default} \mathrel{::=}&amp;amp; \mathit{var} \mathrel{\text{\tt -&amp;gt;}} \mathit{expr} \\
+\mid&amp;amp; \text{\tt default} \mathrel{\text{\tt -&amp;gt;}} \mathit{expr}
+\end{array}
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;case 式は，まず一層しかパターンマッチできなくて，しかもリテラルかコンストラクタかで分かれてる (これは当たり前といえばそうか)． でいずれにもマッチしなかった場合のデフォルトで評価値を捨てるか，束縛するかを選べるみたいな感じ．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;関数適用&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{rl}
+\mathit{appexpr}
+\mathrel{::=}&amp;amp; \mathit{var}\, \mathit{atoms} \\
+\mid&amp;amp; \mathit{constr}\, \mathit{atoms} \\
+\mid&amp;amp; \mathit{prim}\, \mathit{atoms}
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;関数適用は適用する対象によって色々分かれてる．動作も違ったりするが，それについては後ほど．あともう一つの特徴として， Haskell と違って，引数は必ず事前にヒープ割り当てしてある変数 &lt;a class="footnote-reference" href="#all-variables-were-heap-allocated" id="auto-id-6"&gt;[4]&lt;/a&gt; かリテラルだけ．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;式&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{l}
+\mathit{expr}
+\mathrel{::=} \mathit{letexpr}
+\mid \mathit{caseexpr}
+\mid \mathit{appexpr}
+\mid \mathit{literal}
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;式は単純に今まで出てきた主要な式 + リテラルが書ける感じ．これは特にいうことないっすね．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;気持ち的には特に最適化を考慮しなければ， Haskell と STG は以下の感じで対応する &lt;a class="footnote-reference" href="#example-by-paper" id="auto-id-7"&gt;[5]&lt;/a&gt; ．&lt;/p&gt;
+&lt;p&gt;Haskell:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+map :: (a -&amp;gt; b) -&amp;gt; [a] -&amp;gt; [b]
+map f []     = []
+map f (x:xs) = f x : map f xs
+&lt;/pre&gt;
+&lt;p&gt;STG:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+map = {} \n {f, xs} -&amp;gt;
+  case xs of
+    Nil {}       -&amp;gt; Nil {}
+    Cons {y, ys} -&amp;gt;
+      let fy   = {f, y} \u {} -&amp;gt; f {y}
+          mfys = {f, ys} \u {} -&amp;gt; map {f, ys}
+      in Cons {fy, mfys}
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;Nil&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;Cons&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;[]&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;:&lt;/tt&gt; に対応する単なるコンストラクタを表す文字列と思ってもらって良い．こいつら自体に特に表現はない．それでどうやってパターンマッチを動作させるのかは，意味論を参照． &lt;tt class="docutils literal"&gt;map = \f xs &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; case xs of ...&lt;/tt&gt; に注意すると，最初の方は良いだろう． &lt;tt class="docutils literal"&gt;map&lt;/tt&gt; はラムダそのままなので既に WHNF であり，サンクにする要素はないので &lt;tt class="docutils literal"&gt;n&lt;/tt&gt; (更新不要) が指定される．逆に &lt;tt class="docutils literal"&gt;fy&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;mfys&lt;/tt&gt; はサンクになっていて，それぞれクロージャとしてヒープ割り当てが行われる．この割り当ては，適用の際引数が変数かリテラルでないとだめという制約に忠実に従うとこう書くしかなくて， STG は構文レベルで実行動作と対応できるようになっている．&lt;/p&gt;
+&lt;p&gt;後論文でもう 1 つ例が挙げられていたので，そちらも紹介しておく．&lt;/p&gt;
+&lt;p&gt;Haskell:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+map1 :: (a -&amp;gt; b) -&amp;gt; [a] -&amp;gt; [b]
+map1 f = mf
+  where
+    mf []     = []
+    mf (x:xs) = f x : mf xs
+&lt;/pre&gt;
+&lt;p&gt;STG:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+map1 = {} \n {f} -&amp;gt;
+  letrec
+    mf = {f, mf} \n {xs} -&amp;gt;
+      case xs of
+        Nil {}       -&amp;gt; Nil {}
+        Cons {y, ys} -&amp;gt;
+          let fy   = {f, y} \u {} -&amp;gt; f {y}
+              mfys = {mf, ys} \u {} -&amp;gt; mf {ys}
+          in Cons {fy, mfys}
+  in mf
+&lt;/pre&gt;
+&lt;p&gt;この例は重要な例ではあるんだけど，とりあえずここでは， STG の構文に慣れてもらえれば良い．分かっている人は， STG のクロージャは自由変数と引数両方持てるよと認識してもらえば良い．今回は &lt;tt class="docutils literal"&gt;mf&lt;/tt&gt; がその例となっている．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-8"&gt;
+&lt;h2&gt;STG の意味論&lt;a class="headerlink" href="#auto-id-8" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;STG の意味論は表示的にはクロージャの自由変数とか更新フラグとか全部無視して Haskell と同じ感じの意味を持たせることができる．ただ抽象機械なので重要なのは操作的な方だよねってことで，操作的意味論をまとめておく．&lt;/p&gt;
+&lt;div class="section" id="auto-id-9"&gt;
+&lt;h3&gt;準備&lt;a class="headerlink" href="#auto-id-9" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;操作的意味論は，状態機械で定義されていて，遷移は評価ステップになっている．基本的な用語として，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;アドレス&lt;/dt&gt;
+&lt;dd&gt;ヒープのアドレス．表現はなんでも良いが，通常の非負整数と思っておいてくれ．&lt;/dd&gt;
+&lt;dt&gt;値&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;以下の 2 種類:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="math"&gt;\mathbf{Addr}\,a&lt;/tt&gt; : アドレス&lt;/li&gt;
+&lt;li&gt;&lt;tt class="math"&gt;\mathbf{Int}\,n&lt;/tt&gt; : プリミティブの整数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="last"&gt;なお，プリミティブな値は増やそうと思えばいくらでも増やせるが，定義を書く上ではめんどいので，整数のみを扱う．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;で使っていくのでよろしく．で，状態機械の状態は以下の要素の組として定義されている:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;引数スタック ( &lt;tt class="math"&gt;\mathit{as}&lt;/tt&gt; )&lt;/dt&gt;
+&lt;dd&gt;値の列．関数の引数として使用されるやつらが入ってる．&lt;/dd&gt;
+&lt;dt&gt;返り値スタック ( &lt;tt class="math"&gt;\mathit{rs}&lt;/tt&gt; )&lt;/dt&gt;
+&lt;dd&gt;継続の列．これが tagless の所以なんだが，返り値スタックが使用されるのは case 式で， case はまず評価が終わった後の分岐 (パターンマッチ) を継続の形で返り値スタックに入れておき，評価値が返り値スタックの分岐から継続を選びそこを実行するみたいな感じになっている．実際の動きは，この後の操作的意味論を見ながら話す．&lt;/dd&gt;
+&lt;dt&gt;更新スタック ( &lt;tt class="math"&gt;\mathit{us}&lt;/tt&gt; )&lt;/dt&gt;
+&lt;dd&gt;サンクを評価する際に，現在のスタック情報を退避させておくためのフレームスタックで，退避させた引数スタックと返り値スタック，更新しているクロージャのアドレスの列が入っている．&lt;/dd&gt;
+&lt;dt&gt;ヒープ ( &lt;tt class="math"&gt;h&lt;/tt&gt; )&lt;/dt&gt;
+&lt;dd&gt;アドレスとクロージャの対応が入ってる．&lt;/dd&gt;
+&lt;dt&gt;グローバル環境 ( &lt;tt class="math"&gt;\sigma&lt;/tt&gt; )&lt;/dt&gt;
+&lt;dd&gt;トップレベルで束縛された変数とクロージャのアドレスの対応が入ってる．&lt;/dd&gt;
+&lt;dt&gt;命令&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;以下の 4 種類の命令:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="math"&gt;\mathbf{Eval}\,e\,\rho&lt;/tt&gt; : STG の式 &lt;tt class="math"&gt;e&lt;/tt&gt; を環境 &lt;tt class="math"&gt;\rho&lt;/tt&gt; で評価する．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="math"&gt;\mathbf{Enter}\,a&lt;/tt&gt; : アドレス &lt;tt class="math"&gt;a&lt;/tt&gt; にあるクロージャに，引数スタックに積まれてるものを引数として適用する．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="math"&gt;\mathbf{ReturnCon}\,c\,\mathit{ws}&lt;/tt&gt; : コンストラクタ &lt;tt class="math"&gt;c&lt;/tt&gt; とその適用された値 &lt;tt class="math"&gt;ws&lt;/tt&gt; から，返り値スタックにある継続を実行する．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="math"&gt;\mathbf{ReturnInt}\,n&lt;/tt&gt; : プリミティブ整数 &lt;tt class="math"&gt;n&lt;/tt&gt; から，返り値スタックにある継続を実行する．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="last"&gt;なお， &lt;tt class="math"&gt;\mathbf{ReturnInt}&lt;/tt&gt; は &lt;tt class="math"&gt;\mathbf{ReturnCon}&lt;/tt&gt; のプリミティブ向け特殊版と考えれば良い．整数は引数無しのコンストラクタと大体同じ．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;カッコ内に書いてあるのはメタ変数．以降はこの系統のメタ変数を使っていく．それから以下の補助関数を用意しておく:&lt;/p&gt;
+&lt;pre class="math"&gt;
+\mathit{val}(\langle \rho, \sigma\rangle, x) = \left\{\begin{array}{ll}
+  \mathbf{Int}\,n &amp;amp;(\text{\(x = n\) は整数}) \\
+  v &amp;amp;(\rho(x) = v) \\
+  \sigma(x) &amp;amp;(\text{otherwise})
+\end{array}\right. \\
+\mathit{vals}(\langle \rho, \sigma\rangle, \{x_1, \ldots, x_n\}) =
+[\mathit{val}(\langle \rho, \sigma\rangle, x_1), \ldots, \mathit{val}(\langle \rho, \sigma\rangle, x_n)]
+&lt;/pre&gt;
+&lt;p&gt;この関数はまずローカルスコープで変数を探して，なかったらグローバルスコープで探し，その変数に対応するクロージャのアドレスを返す．では，実際の意味論を見ていく．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-10"&gt;
+&lt;h3&gt;初期状態&lt;a class="headerlink" href="#auto-id-10" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;まず， STG のプログラム&lt;/p&gt;
+&lt;pre class="math"&gt;
+\begin{array}{c}
+g_1 = \mathit{vs}_1 \mathrel{\text{\tt \textbackslash}\pi_1} \mathit{xs}_1 \mathrel{\text{\tt -&amp;gt;}} e_1 \\
+\vdots \\
+g_n = \mathit{vs}_n \mathrel{\text{\tt \textbackslash}\pi_n} \mathit{xs}_n \mathrel{\text{\tt -&amp;gt;}} e_n
+\end{array}
+&lt;/pre&gt;
+&lt;p&gt;に対して初期状態は次のようになる:&lt;/p&gt;
+&lt;pre class="math"&gt;
+\begin{array}{l}
+\langle \mathbf{Eval}\,(\text{\tt main \{\}})\,[]\rangle(
+  \mathit{as}_\mathit{in},
+  \mathit{rs}_\mathit{in},
+  \mathit{us}_\mathit{in},
+  h_\mathit{in},
+  \sigma
+) \\
+\begin{array}{ll}
+  \mathit{as}_\mathit{in} &amp;amp;= [] \\
+  \mathit{rs}_\mathit{in} &amp;amp;= [] \\
+  \mathit{us}_\mathit{in} &amp;amp;= [] \\
+  h_\mathit{in} &amp;amp;= \left[\begin{matrix}
+    a_1 \mapsto \langle\mathit{vs}_1 \mathrel{\text{\tt \textbackslash}\pi_1} \mathit{xs}_1 \mathrel{\text{\tt -&amp;gt;}} e_1, \mathit{vals}(\langle [], \sigma\rangle, \mathit{vs}_1)\rangle \\
+    \vdots \\
+    a_n \mapsto \langle\mathit{vs}_n \mathrel{\text{\tt \textbackslash}\pi_n} \mathit{xs}_n \mathrel{\text{\tt -&amp;gt;}} e_n, \mathit{vals}(\langle [], \sigma\rangle, \mathit{vs}_n)\rangle
+  \end{matrix}\right] \\
+  \sigma &amp;amp;= [g_1 \mapsto \mathbf{Addr}\,a_1, \ldots, g_n \mapsto  \mathbf{Addr}\,a_n]
+\end{array}
+\end{array}
+&lt;/pre&gt;
+&lt;p&gt;最初はトップレベルの束縛の中に &lt;tt class="docutils literal"&gt;main&lt;/tt&gt; 関数がある前提でそこから評価を始める．ここは本質じゃないので， &lt;tt class="math"&gt;g_1&lt;/tt&gt; とかから始めてもいい．トップレベルの束縛は， letrec 式に相当するので，自由変数の部分にトップレベルから取ってきたものをあてがって，ヒープに入れておく．&lt;/p&gt;
+&lt;p&gt;この状態から状態遷移を始めていく．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-11"&gt;
+&lt;h3&gt;評価&lt;a class="headerlink" href="#auto-id-11" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;まず， &lt;tt class="math"&gt;\mathbf{Eval}&lt;/tt&gt; 命令の遷移から見ていく．基本的に STG のそれぞれの式に対して，それに合う遷移をしていく．その定義は，以下のようになる:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;let (rec) 式&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\langle \mathbf{Eval}\,\left(\begin{array}{lc}
+  \text{\tt let}
+  &amp;amp;x_1 = \mathit{vs}_1 \mathrel{\text{\tt \textbackslash}\pi_1} \mathit{xs}_1 \mathrel{\text{\tt -&amp;gt;}} e_1 \\
+  &amp;amp;\vdots \\
+  &amp;amp;x_n = \mathit{vs}_n \mathrel{\text{\tt \textbackslash}\pi_n} \mathit{xs}_n \mathrel{\text{\tt -&amp;gt;}} e_n \\
+  \text{\tt in}\,e
+  \end{array}\right)\,\rho\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle \mathbf{Eval}\,e\,\rho'\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h',
+  \sigma
+) \\
+(\rho' = \rho\left[\begin{array}{c}
+  x_1 \mapsto \mathbf{Addr}\,a_1 \\
+  \vdots \\
+  x_n \mapsto \mathbf{Addr}\,a_n
+  \end{array}\right]
+, h' = h\left[\begin{array}{c}
+  a_1 \mapsto \langle \mathit{vs}_1 \mathrel{\text{\tt \textbackslash}\pi_1} \mathit{xs}_1 \mathrel{\text{\tt -&amp;gt;}} e_1, \mathit{vals}(\langle \rho_{\mathit{rhs}}, []\rangle, \mathit{vs}_1)\rangle \\
+  \vdots \\
+  a_n \mapsto \langle \mathit{vs}_n \mathrel{\text{\tt \textbackslash}\pi_n} \mathit{xs}_n \mathrel{\text{\tt -&amp;gt;}} e_n, \mathit{vals}(\langle \rho_{\mathit{rhs}}, []\rangle, \mathit{vs}_n)\rangle
+  \end{array}\right]
+, \rho_\mathit{rhs} = \rho
+)
+&lt;/pre&gt;
+&lt;p class="last"&gt;letrec 式の場合は， &lt;tt class="math"&gt;\rho_\mathit{rhs} = \rho'&lt;/tt&gt; とする．この遷移は，単純に let で指定されたローカルのクロージャをヒープに確保し，そのアドレスを変数に結びつけるだけ． let と letrec の違いは作るクロージャでキャプチャするアドレスの違いで， let の場合は前の環境から， letrec の場合は今回確保したアドレスも含めてキャプチャする．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;case 式&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\langle \mathbf{Eval}\,(\text{\tt case}\,e\,\text{\tt of}\,\mathit{alts})\,\rho\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle \mathbf{Eval}\,e\,\rho\rangle(
+  \mathit{as},
+  \langle\mathit{alts}, \rho\rangle\mathbin{:}\mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+&lt;/pre&gt;
+&lt;p class="last"&gt;この遷移では，分岐の継続を返り値スタックに積んだ後，対象の式の評価に移る．最終的に &lt;tt class="math"&gt;\mathbf{ReturnCon}&lt;/tt&gt; とか &lt;tt class="math"&gt;\mathbf{ReturnInt}&lt;/tt&gt; で帰ってきて，元の環境で継続に復帰する．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;適用&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle \mathbf{Eval}\,(f\,\mathit{xs})\,\rho\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle \mathbf{Enter}\,a\rangle(
+  \mathit{as'},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+) \\
+(\mathit{val}(\langle \rho, \sigma\rangle, f) = \mathbf{Addr}\,a, \mathit{as'} = \mathit{vals}(\langle \rho, \sigma\rangle, \mathit{xs}) \mathbin{++} \mathit{as}) \\
+\\
+\langle \mathbf{Eval}\,(v\,\{\})\,\rho\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle \mathbf{ReturnInt}\,n\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+) \\
+(\mathit{val}(\langle \rho, \sigma\rangle, v) = \mathbf{Int}\,n)
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;変数への適用の場合 2 種類あって，クロージャへ引数を適用する場合とプリミティブ整数の評価の場合．クロージャの場合変数には &lt;tt class="math"&gt;\mathbf{Addr}&lt;/tt&gt; が結びついていて，プリミティブ整数の場合 &lt;tt class="math"&gt;\mathbf{Int}&lt;/tt&gt; が結びついてる．クロージャの場合，引数を引数スタックに積み込んで適用に移る．プリミティブ整数の場合，そのまま継続への復帰に遷移する．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;コンストラクタ適用&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\langle \mathbf{Eval}\,(c\,\mathit{xs})\,\rho\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle \mathbf{ReturnCon}\,c\,\mathit{vals}(\langle \rho, \sigma\rangle, \mathit{xs})\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+&lt;/pre&gt;
+&lt;p class="last"&gt;コンストラクタへの適用は，単純に適用された変数から値を持ってきて，継続へ復帰するだけ．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;プリミティブ&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle \mathbf{Eval}\,n\,\rho\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle \mathbf{ReturnInt}\,n\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+) \\
+\\
+\langle \mathbf{Eval}\,(\oplus\,\{x_1, x_2\})\,\rho\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle \mathbf{ReturnInt}\,(i_1 \oplus i_2)\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+) \\
+(\mathit{vals}(\langle \rho, \sigma\rangle, \{x_1, x_2\}) = [\mathbf{Int}\,i_1, \mathbf{Int}\,i_2])
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;プリミティブ整数やプリミティブ演算は，そのまま継続へ復帰するだけ． STG では必ず評価は case 式でのみ行われるので，プリミティブ演算の引数にサンクは入ってこないことに注意．サンクを入れたい場合， case でサンクを潰した後それを束縛して渡してやる必要がある．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-12"&gt;
+&lt;h3&gt;適用&lt;a class="headerlink" href="#auto-id-12" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;次に， &lt;tt class="math"&gt;\mathbf{Enter}&lt;/tt&gt; 命令の遷移から見ていく． &lt;tt class="math"&gt;\mathbf{Enter}&lt;/tt&gt; 命令は，引数が充足してる場合は更新フラグを見て，いい感じに処理をする．その定義は，以下のようになる．&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;更新不要クロージャ&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle\mathbf{Enter}\,a\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle\mathbf{Eval}\,e\,\rho\rangle(
+  \mathit{as'},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+) \\
+( \mathit{ws}_a \mathbin{++} \mathit{as'} = \mathit{as}
+, |\mathit{ws}_a| = |\mathit{xs}|
+, \rho = [\mathit{vs} \mapsto \mathit{ws}_f, \mathit{xs} \mapsto \mathit{ws}_a]
+, h(a) = \langle\mathit{vs} \mathrel{\text{\tt \textbackslash n}} \mathit{xs} \mathrel{\text{\tt -&amp;gt;}} e, \mathit{ws}_f\rangle
+)
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;引数が充足してて更新不要なクロージャの場合，単なる関数適用を行う．環境はキャプチャしておいた自由変数と，引数の変数分を作って渡す．なお，論文中だとヒープからクロージャのアドレスを抜き去ってるように見えるんだが，大丈夫なんだろか．とりあえず，こっちでは修正しといた．ただ，表記法が定義されてないので，解釈違いかもしれん．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;更新可能クロージャ&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle\mathbf{Enter}\,a\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h[a \mapsto \langle\mathit{vs} \mathrel{\text{\tt \textbackslash u}} \{\} \mathrel{\text{\tt -&amp;gt;}} e, \mathit{ws}_f\rangle],
+  \sigma
+)
+\Rightarrow
+\langle\mathbf{Eval}\,e\,\rho\rangle(
+  [],
+  [],
+  \langle\mathit{as}, \mathit{rs}, a\rangle \mathbin{:} \mathit{us},
+  h,
+  \sigma
+) \\
+(\rho = [\mathit{vs} \mapsto \mathit{ws}_f])
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;更新が必要なクロージャ，つまりサンクは，古いクロージャのアドレスをヒープから消し，更新スタックに情報を退避させて，評価を行う．ところで，この時もし古いクロージャのアドレスにアクセスして評価するような STG プログラムがあれば，そのアドレスを消してしまっていると問題が起きる．ただ，更新中に更新してるクロージャに再度アクセスがあるということは，つまり無限ループが発生してるってことでもある．これは論文中ではブラックホールと呼ばれていて，実際の実行マシンではこれを検出し，エラーを出すようにしてる．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;部分適用&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle\mathbf{Enter}\,a\rangle(
+  \mathit{as},
+  [],
+  \langle \mathit{as}_u, \mathit{rs}_u, a_u\rangle\mathbin{:}\mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle\mathbf{Enter}\,a\rangle(
+  \mathit{as} \mathbin{++} \mathit{as}_u,
+  \mathit{rs}_u,
+  \mathit{us},
+  h',
+  \sigma
+) \\
+\left(\begin{array}{c}
+h(a) = \langle \mathit{vs}\mathrel{\text{\tt \textbackslash n}}\mathit{xs}\mathrel{\text{\tt -&amp;gt;}} e, \mathit{ws}_f\rangle,
+|\mathit{as}| &amp;lt; |\mathit{xs}| \\
+\mathit{xs}_1 \mathbin{++} \mathit{xs}_2 = \mathit{xs},
+|\mathit{xs}_1| = |\mathit{as}|,
+h' = h[a_u \mapsto \langle (\mathit{vs} \mathbin{++} \mathit{xs}_1)\mathrel{\text{\tt \textbackslash n}}\mathit{xs}_2\mathrel{\text{\tt -&amp;gt;}} e, \mathit{ws}_f \mathbin{++} \mathit{as}\rangle]
+\end{array}\right)
+\end{array}
+&lt;/pre&gt;
+&lt;p&gt;引数スタックの要素の数が，クロージャに必要な引数の数に満たない時は，クロージャへの適用は部分適用扱いになる．部分適用の場合，部分適用を表すサンクの評価中なはずなので，サンクの内容を既に分かっている部分はキャプチャして，本来の引数の数を受け取る関数を表すクロージャに更新する．そして，サンクに適用されたはずの引数を退避させた更新スタックから取り出してきて，もう一度適用をやり直す．&lt;/p&gt;
+&lt;p&gt;意味論上はこの規則で問題ないのだが，実装する時のことを考えると， &lt;tt class="math"&gt;(\mathit{vs} \mathbin{++} \mathit{xs}_1)\mathrel{\text{\tt \textbackslash n}}\mathit{xs}_2\mathrel{\text{\tt -&amp;gt;}} e&lt;/tt&gt; というクロージャを部分適用の際に作成するのはかなりめんどくさい．クロージャの中身はコンパイル時に通常生成されるわけだが，この場合動的に生成する必要が出てくる．または，全ての部分適用を想定して， &lt;tt class="math"&gt;e&lt;/tt&gt; 度に専用のクロージャコードをコンパイル時に生成するという方法も考えられる (普通はこちらが正攻法になる) ．ただ，もちろんそれはコンパイル時生成コードが大量に出てくるので避けたい．そこで，規則を以下のように変えることが考えられる:&lt;/p&gt;
+&lt;pre class="math"&gt;
+\begin{array}{c}
+\langle\mathbf{Enter}\,a\rangle(
+  \mathit{as},
+  [],
+  \langle \mathit{as}_u, \mathit{rs}_u, a_u\rangle\mathbin{:}\mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle\mathbf{Enter}\,a\rangle(
+  \mathit{as} \mathbin{++} \mathit{as}_u,
+  \mathit{rs}_u,
+  \mathit{us},
+  h',
+  \sigma
+) \\
+\left(\begin{array}{c}
+h(a) = \langle \mathit{vs}\mathrel{\text{\tt \textbackslash n}}\mathit{xs}\mathrel{\text{\tt -&amp;gt;}} e, \mathit{ws}_f\rangle,
+|\mathit{as}| &amp;lt; |\mathit{xs}| \\
+\mathit{xs}_1 \mathbin{++} \mathit{xs}_2 = \mathit{xs},
+|\mathit{xs}_1| = |\mathit{as}|,
+h' = h[a_u \mapsto \langle (f \mathbin{:} \mathit{xs}_1)\mathrel{\text{\tt \textbackslash n}}\text{\tt \{\}}\mathrel{\text{\tt -&amp;gt;}} f\,\mathit{xs}_1, \mathbf{Addr}\,a \mathbin{:} \mathit{as}\rangle],
+\text{\(f\) は fresh な変数}
+\end{array}\right)
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;こうしておくと，部分適用用のクロージャを作っておくだけで，それを共有することができ，コード生成量もその手間も削減することができる．クロージャへのエントリが 1 回増えるが，そこら辺はより低レベルの最適化で消えることも期待できる．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-13"&gt;
+&lt;h3&gt;継続への復帰&lt;a class="headerlink" href="#auto-id-13" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;最後に， &lt;tt class="math"&gt;\mathbf{ReturnCon}&lt;/tt&gt; 命令 / &lt;tt class="math"&gt;\mathbf{ReturnInt}&lt;/tt&gt; 命令の遷移から見ていく．継続への復帰は，両命令でやってることは同じなので，まず &lt;tt class="math"&gt;\mathbf{ReturnCon}&lt;/tt&gt; 命令だけ見ていく．その定義は，以下のようになる．&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;マッチする場合&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle\mathbf{ReturnCon}\,c\,\mathit{ws}\rangle(
+  \mathit{as},
+  \langle \mathit{alts}, \rho\rangle\mathbin{:}\mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle\mathbf{Eval}\,e\,\rho[\mathit{vs} \mapsto \mathit{ws}]\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+) \\
+(\mathit{alts} = \cdots\mathbin{;} c\,\mathit{vs}\mathrel{\text{\tt -&amp;gt;}}e\mathbin{;} \cdots)
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;継続のパターンマッチの中に該当するコンストラクタに対する継続があるときは，その継続に復帰する．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;デフォルトケースの場合&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle\mathbf{ReturnCon}\,c\,\mathit{ws}\rangle(
+  \mathit{as},
+  \langle \mathit{alts}, \rho\rangle\mathbin{:}\mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle\mathbf{Eval}\,e_d\,\rho\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+) \\
+(\mathit{alts} = \left(\begin{array}{c}
+  c_1\,\mathit{vs}_1\mathrel{\text{\tt -&amp;gt;}}e_1\mathbin{;} \\
+  \vdots \\
+  c_n\,\mathit{vs}_n\mathrel{\text{\tt -&amp;gt;}}e_n\mathbin{;} \\
+  \text{\tt default}\mathrel{\text{\tt -&amp;gt;}}e_d
+\end{array}\right), \forall 1 \leq i \leq n\ldotp c \neq c_i)
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;コンストラクタにパターンマッチするものがなくて，デフォルトケースでの継続があるときは，その継続に復帰する．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;デフォルトケースでの束縛&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle\mathbf{ReturnCon}\,c\,\mathit{ws}\rangle(
+  \mathit{as},
+  \langle \mathit{alts}, \rho\rangle\mathbin{:}\mathit{rs},
+  \mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle\mathbf{Eval}\,e_d\,\rho'\rangle(
+  \mathit{as},
+  \mathit{rs},
+  \mathit{us},
+  h',
+  \sigma
+) \\
+\left(\begin{array}{c}
+\mathit{alts} = \left(\begin{array}{c}
+  c_1\,\mathit{vs}_1\mathrel{\text{\tt -&amp;gt;}}e_1\mathbin{;} \\
+  \vdots \\
+  c_n\,\mathit{vs}_n\mathrel{\text{\tt -&amp;gt;}}e_n\mathbin{;} \\
+  v\mathrel{\text{\tt -&amp;gt;}}e_d
+\end{array}\right),
+\forall 1 \leq i \leq n\ldotp c \neq c_i \\
+\rho' = \rho[v \mapsto \mathbf{Addr}\,a],
+h' = h[a \mapsto \langle \mathit{vs}\mathrel{\text{\tt \textbackslash n}}\{\}\mathrel{\text{\tt -&amp;gt;}}c\,\mathit{vs}, \mathit{ws}\rangle] \\
+\text{\(\mathit{vs}\) は \(|\mathit{vs}| = |\mathit{ws}|\) を満たす fresh な変数列}
+\end{array}\right)
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;束縛のないデフォルトケースと同じように，コンストラクタにパターンマッチするものがなくて，束縛が必要なデフォルトケースでの継続があった場合，その継続に復帰する．ただ，結果を束縛する必要があるので，コンストラクタ適用に相当するクロージャを生成して，それを束縛変数に結びつける．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;更新スタックからの復帰&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first math"&gt;
+\begin{array}{c}
+\langle\mathbf{ReturnCon}\,c\,\mathit{ws}\rangle(
+  [],
+  [],
+  \langle \mathit{as}_u, \mathit{rs}_u, a_u\rangle\mathbin{:}\mathit{us},
+  h,
+  \sigma
+)
+\Rightarrow
+\langle\mathbf{ReturnCon}\,c\,\mathit{ws}\rangle(
+  \mathit{as}_u,
+  \mathit{rs}_u,
+  \mathit{us},
+  h',
+  \sigma
+) \\
+(h' = h[a_u \mapsto \langle \mathit{vs}\mathrel{\text{\tt \textbackslash n}}\{\}\mathrel{\text{\tt -&amp;gt;}}c\,\mathit{vs}, \mathit{ws}\rangle],
+\text{\(\mathit{vs}\) は \(|\mathit{vs}| = |\mathit{ws}|\) を満たす fresh な変数列}
+)
+\end{array}
+&lt;/pre&gt;
+&lt;p class="last"&gt;そもそも返り値スタックを使い切ってしまった場合，更新スタックに要素があるなら，それはサンクを評価した結果出てきた評価値ということなので，サンクのあった部分に評価後の結果を表すクロージャを挿入して，元の評価に戻る．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;&lt;tt class="math"&gt;\mathbf{ReturnInt}&lt;/tt&gt; の場合，デフォルトケースでの束縛時にヒープ割り当てを行わないで直接整数を束縛変数に結びつけるぐらいの違いしかない．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-14"&gt;
+&lt;h3&gt;遷移例&lt;a class="headerlink" href="#auto-id-14" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;では，意味論に則って，実際に STG のプログラムを動かしてみる．以下のプログラムを動かしてみる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+main = {} \u {} -&amp;gt;
+  let nil = {} \n {} -&amp;gt; Nil {}
+      mapid = {} \u {} -&amp;gt; map1 {id}
+  in case 1# of
+    v -&amp;gt;
+      let l = {v, nil} \n {} -&amp;gt; Cons {v, nil}
+      in mapid {l}
+
+id = {} \n {x} -&amp;gt; x {}
+
+map1 = {} \n {f, xs} -&amp;gt;
+  letrec mf = {f, mf} \n {ys} -&amp;gt;
+            case ys {} of
+              Nil {}       -&amp;gt; Nil {}
+              Cons {z, zs} -&amp;gt;
+                let fz   = {f, z} \u {} -&amp;gt; f {z}
+                    mfzs = {mf, zs} \u {} -&amp;gt; mf {zs}
+                in Cons {fz, mfzs}
+  in mf {xs}
+&lt;/pre&gt;
+&lt;p&gt;このプログラムを意味論に沿って動かすと，次の動作をする:&lt;/p&gt;
+&lt;pre class="math"&gt;
+\begin{array}{l}
+\langle \mathbf{Eval}\,(\text{\tt main \{\}})\,[]\rangle(
+  [],
+  [],
+  [],
+  \left[\begin{array}{l}
+    a_{\text{\tt main}} \mapsto \cdots \\
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots
+  \end{array}\right],
+  \sigma = \left[\begin{array}{l}
+    \text{\tt main} \mapsto \mathbf{Addr}\,a_{\text{\tt main}} \\
+    \text{\tt id} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+    \text{\tt map1} \mapsto \mathbf{Addr}\,a_{\text{\tt map1}}
+  \end{array}\right]
+) \\
+\Rightarrow
+\langle \mathbf{Enter}\,a_{\text{\tt main}}\rangle(
+  [],
+  [],
+  [],
+  \left[\begin{array}{l}
+    a_{\text{\tt main}} \mapsto \cdots \\
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt let nil =} \cdots)\,[]\rangle(
+  [],
+  [],
+  \langle [], [], a_{\text{\tt main}}\rangle\mathbin{:}[],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt case 1\# of} \cdots)\,\left[\begin{array}{l}
+  \text{\tt nil} \mapsto \mathbf{Addr}\,a_{\text{\tt nil}} \\
+  \text{\tt mapid} \mapsto \mathbf{Addr}\,a_{\text{\tt mapid}}
+\end{array}\right]\rangle(
+  [],
+  [],
+  \langle [], [], a_{\text{\tt main}}\rangle\mathbin{:}[],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,\text{\tt 1\#}\,[\cdots]\rangle(
+  [],
+  [\langle\text{\tt v -&amp;gt; }\cdots, \left[\begin{array}{l}
+  \text{\tt nil} \mapsto \mathbf{Addr}\,a_{\text{\tt nil}} \\
+  \text{\tt mapid} \mapsto \mathbf{Addr}\,a_{\text{\tt mapid}}
+\end{array}\right]\rangle],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{ReturnInt}\,1\rangle(
+  [],
+  [\langle\text{\tt v -&amp;gt; }\cdots, \left[\begin{array}{l}
+  \text{\tt nil} \mapsto \mathbf{Addr}\,a_{\text{\tt nil}} \\
+  \text{\tt mapid} \mapsto \mathbf{Addr}\,a_{\text{\tt mapid}}
+\end{array}\right]\rangle],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt let l = }\cdots)\,\left[\begin{array}{l}
+  \text{\tt nil} \mapsto \mathbf{Addr}\,a_{\text{\tt nil}} \\
+  \text{\tt mapid} \mapsto \mathbf{Addr}\,a_{\text{\tt mapid}} \\
+  \text{\tt v} \mapsto \mathbf{Int}\,1
+\end{array}\right]\rangle(
+  [],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt mapid \{l\}})\,\left[\begin{array}{l}
+  \text{\tt nil} \mapsto \mathbf{Addr}\,a_{\text{\tt nil}} \\
+  \text{\tt mapid} \mapsto \mathbf{Addr}\,a_{\text{\tt mapid}} \\
+  \text{\tt v} \mapsto \mathbf{Int}\,1 \\
+  \text{\tt l} \mapsto \mathbf{Addr}\,a_{\text{\tt l}}
+\end{array}\right]\rangle(
+  [],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Enter}\,a_{\text{\tt mapid}}\rangle(
+  [\mathbf{Addr}\,a_{\text{\tt l}}],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt map1 \{id\}})\,[]\rangle(
+  [],
+  [],
+  [
+    \langle [\mathbf{Addr}\,a_{\text{\tt l}}], [], a_{\text{\tt mapid}}\rangle,
+    \langle [], [], a_{\text{\tt main}}\rangle
+  ],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Enter}\,a_{\text{\tt map1}}\rangle(
+  [\mathbf{Addr}\,a_{\text{\tt id}}],
+  [],
+  [
+    \langle [\mathbf{Addr}\,a_{\text{\tt l}}], [], a_{\text{\tt mapid}}\rangle,
+    \langle [], [], a_{\text{\tt main}}\rangle
+  ],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Enter}\,a_{\text{\tt map1}}\rangle(
+  [\mathbf{Addr}\,a_{\text{\tt id}}, \mathbf{Addr}\,a_{\text{\tt l}}],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \langle \text{\tt \{f\} \textbackslash n \{xs\} -&amp;gt; } \cdots, [\mathbf{Addr}\,a_{\text{\tt id}}]\rangle
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt letrec mf = }\cdots)\,\left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt xs} \mapsto \mathbf{Addr}\,a_{\text{\tt l}}
+\end{array}\right]\rangle(
+  [],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt mf \{xs\}})\,\left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt xs} \mapsto \mathbf{Addr}\,a_{\text{\tt l}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}}
+\end{array}\right]\rangle(
+  [],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Enter}\,a_{\text{\tt mf}}\rangle(
+  [\mathbf{Addr}\,a_{\text{\tt l}}],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt case ys \{\} of} \cdots)\,\left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}} \\
+  \text{\tt ys} \mapsto \mathbf{Addr}\,a_{\text{\tt l}}
+\end{array}\right]\rangle(
+  [],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,\text{\tt ys \{\}}\,\left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}} \\
+  \text{\tt ys} \mapsto \mathbf{Addr}\,a_{\text{\tt l}}
+\end{array}\right]\rangle(
+  [],
+  [\left\langle \begin{array}{l}
+    \text{\tt Nil \{\} -&amp;gt; } \cdots \\
+    \text{\tt Cons \{z, zs\} -&amp;gt; } \cdots
+  \end{array}, \left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}} \\
+  \text{\tt ys} \mapsto \mathbf{Addr}\,a_{\text{\tt l}}
+\end{array}\right]\right\rangle],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Enter}\,a_{\text{\tt l}}\rangle(
+  [],
+  [\left\langle \begin{array}{l}
+    \text{\tt Nil \{\} -&amp;gt; } \cdots \\
+    \text{\tt Cons \{z, zs\} -&amp;gt; } \cdots
+  \end{array}, \left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}} \\
+  \text{\tt ys} \mapsto \mathbf{Addr}\,a_{\text{\tt l}}
+\end{array}\right]\right\rangle],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt Cons \{v, nil\}})\,\left[\begin{array}{l}
+  \text{\tt v} \mapsto \mathbf{Int}\,1 \\
+  \text{\tt nil} \mapsto \mathbf{Addr}\,a_{\text{\tt nil}}
+\end{array}\right]\rangle(
+  [],
+  [\left\langle \begin{array}{l}
+    \text{\tt Nil \{\} -&amp;gt; } \cdots \\
+    \text{\tt Cons \{z, zs\} -&amp;gt; } \cdots
+  \end{array}, \left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}} \\
+  \text{\tt ys} \mapsto \mathbf{Addr}\,a_{\text{\tt l}}
+\end{array}\right]\right\rangle],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{ReturnCon}\,\text{\tt Cons}\,[\mathbf{Int}\,1, \mathbf{Addr}\,a_{\text{\tt nil}}]\rangle(
+  [],
+  [\left\langle \begin{array}{l}
+    \text{\tt Nil \{\} -&amp;gt; } \cdots \\
+    \text{\tt Cons \{z, zs\} -&amp;gt; } \cdots
+  \end{array}, \left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}} \\
+  \text{\tt ys} \mapsto \mathbf{Addr}\,a_{\text{\tt l}}
+\end{array}\right]\right\rangle],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt let fz =} \cdots)\,\left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}} \\
+  \text{\tt ys} \mapsto \mathbf{Addr}\,a_{\text{\tt l}} \\
+  \text{\tt z} \mapsto \mathbf{Int}\,1 \\
+  \text{\tt zs} \mapsto \mathbf{Addr}\,a_{\text{\tt nil}}
+\end{array}\right]\rangle(
+  [],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{Eval}\,(\text{\tt Cons \{fz, mfzs\}})\,\left[\begin{array}{l}
+  \text{\tt f} \mapsto \mathbf{Addr}\,a_{\text{\tt id}} \\
+  \text{\tt mf} \mapsto \mathbf{Addr}\,a_{\text{\tt mf}} \\
+  \text{\tt ys} \mapsto \mathbf{Addr}\,a_{\text{\tt l}} \\
+  \text{\tt z} \mapsto \mathbf{Int}\,1 \\
+  \text{\tt zs} \mapsto \mathbf{Addr}\,a_{\text{\tt nil}} \\
+  \text{\tt fz} \mapsto \mathbf{Addr}\,a_{\text{\tt fz}} \\
+  \text{\tt mfzs} \mapsto \mathbf{Addr}\,a_{\text{\tt mfzs}}
+\end{array}\right]\rangle(
+  [],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots \\
+    a_{\text{\tt fz}} \mapsto \cdots \\
+    a_{\text{\tt mfzs}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{ReturnCon}\,\text{\tt Cons}\,[\mathbf{Addr}\,a_{\text{\tt fz}}, \mathbf{Addr}\,a_{\text{\tt mfzs}}]\rangle(
+  [],
+  [],
+  [\langle [], [], a_{\text{\tt main}}\rangle],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots \\
+    a_{\text{\tt fz}} \mapsto \cdots \\
+    a_{\text{\tt mfzs}} \mapsto \cdots
+  \end{array}\right],
+  \sigma
+) \\
+\Rightarrow
+\langle \mathbf{ReturnCon}\,\text{\tt Cons}\,[\mathbf{Addr}\,a_{\text{\tt fz}}, \mathbf{Addr}\,a_{\text{\tt mfzs}}]\rangle(
+  [],
+  [],
+  [],
+  \left[\begin{array}{l}
+    a_{\text{\tt id}} \mapsto \cdots \\
+    a_{\text{\tt map1}} \mapsto \cdots \\
+    a_{\text{\tt nil}} \mapsto \cdots \\
+    a_{\text{\tt l}} \mapsto \cdots \\
+    a_{\text{\tt mapid}} \mapsto \cdots \\
+    a_{\text{\tt mf}} \mapsto \cdots \\
+    a_{\text{\tt fz}} \mapsto \cdots \\
+    a_{\text{\tt mfzs}} \mapsto \cdots \\
+    a_{\text{\tt main}} \mapsto \langle \text{\tt \{fz, mfzs\} \textbackslash n \{\} -&amp;gt; Cons \{fz, mfzs\}} , [\mathbf{Addr}\,a_{\text{\tt fz}}, \mathbf{Addr}\,a_{\text{\tt mfzs}}]\rangle
+  \end{array}\right],
+  \sigma
+)
+\end{array}
+&lt;/pre&gt;
+&lt;p&gt;ヒープはサンクを潰す時ぐらいしか整理してないので，参照がなくなったものは随時消す GC を実装すれば簡単に実行マシンは作れそう．&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-15"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-15" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;まとめたかったのは主に， Part III の具体的な実装の話だったんだが力尽きた．てことで今日はこれで．続きは書くかもしれないし，書かないかもしれない．&lt;/p&gt;
+&lt;p&gt;機会があればもうちょっと正確を期して，どっかに上げるかもしれない．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="spineless-is-still" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;spineless は僕の認識が正しければ生きてるはずだが，G-machine の実装では spineless は普通だったみたいな話があり， spineless もそこまで気にする用語ではないって事ですね．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="shared-term-graph" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なお，元々 shared term graph という二重の意味が込められてたっぽい: &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/stgSyn/StgSyn.hs#L4"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.4-release/compiler/stgSyn/StgSyn.hs#L4&lt;/a&gt; ．こっちの言い方は今でも通用しそうだが， STG machine はこっちの言い方だと shared term graph machine という感じになりそうで， reduction が抜けてるのはなんかあれですね．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="haskell-optimizing-community" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Haskell 界には， Haskell 最適化委員会なる組織があるらしく，その人たちは Haskell プログラムでもそういうのを見通す力を持ってるらしい．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="all-variables-were-heap-allocated" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-6"&gt;[4]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;厳密には全てがヒープ割り当てされてるとは限らなくて， case での束縛はスタックに積まれるみたいなこともある．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="example-by-paper" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-7"&gt;[5]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;例は論文中から持ってきたもの．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/haskell-old-stg-syntax.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/haskell-old-stg-syntax.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="抽象機械"></category><category term="GHC"></category></entry></feed>
