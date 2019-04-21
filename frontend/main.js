@@ -1,4 +1,4 @@
-import * as addMathJax from './component/mathjax';
+import * as renderMath from './component/render_math';
 import * as addShareButtons from './component/add_sharebuttons';
 import * as addFootnoteTooltip from './component/add_footnote_tooltip';
 
@@ -11,7 +11,7 @@ function onLoad() {
   }
 
   if (['articles', 'pages'].includes(contentMetadata.type)) {
-    addMathJax.loadMathJaxDocument();
+    renderMath.renderMathBlock();
     addFootnoteTooltip.addFootnoteTooltip();
   }
 }

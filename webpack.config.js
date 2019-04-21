@@ -1,11 +1,11 @@
-const webpack = require('webpack');
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'production',
 
   entry: {
-    bundle: './js/index.js',
+    bundle: './frontend/index.js',
   },
 
 	output: {
@@ -16,21 +16,53 @@ module.exports = {
   resolve: {
     alias: {
       vue$: 'vue/dist/vue.esm.js',
-      mathjax3$: 'mathjax3/mathjax3/mathjax.js',
-      mathjax3: 'mathjax3/mathjax3',
+      katex$: 'katex/dist/katex.mjs',
+      katex: 'katex',
     }
   },
 
-  plugins: [
-    // to disable asyncLoad()
-    new webpack.NormalModuleReplacementPlugin(
-      /AsyncLoad\.js/,
-      (resource) => {
-        if (resource.context.endsWith('mathjax3/util')) {
-          resource.request = resource.request.replace(/AsyncLoad/,"AsyncLoad-disabled");
-        }
+  module: {
+    rules: [
+      {
+        test: /\.(scss|css)$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: function () {
+                return [
+                  require('cssnano')({
+                    preset: ['default', {
+                      mergeRules: false,
+                    }]
+                  }),
+                  require('precss'),
+                  require('autoprefixer')
+                ];
+              }
+            }
+          },
+        ]
+      },
+      {
+        test: /\.(ttf|woff2?)$/,
+        use: [
+          {
+            loader: 'file-loader'
+          },
+        ]
       }
-    )
+    ],
+  },
+
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css'
+    })
   ],
 
   performance: {
