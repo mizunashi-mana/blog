@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 15 Apr 2019 22:00:00 +0900</lastBuildDate><item><title>脚注のためのツールチップ追加</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/</link><description>&lt;p&gt;脚注をツールチップで見れるようにしたので，それについて．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 22 Apr 2019 03:00:00 +0900</lastBuildDate><item><title>MathML にバイバイして， KaTeX に移行した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/</link><description>&lt;p&gt;以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="mathml"&gt;
+&lt;h2&gt;MathML に敗北した&lt;a class="headerlink" href="#mathml" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;正確には， MathML は悪くないんだが，現状の MathML + MathJax 環境は色々辛いものがあった．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;\mathit&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;\mathrel&lt;/tt&gt; などの基本的なコマンドに対応していない．&lt;/li&gt;
+&lt;li&gt;MathJax のレンダリングが遅い．&lt;/li&gt;
+&lt;li&gt;MathJax …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 22 Apr 2019 03:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-22:/blog/posts/2019/04/bye-mathml-hello-katex/</guid><category>Pelican</category><category>MathML</category><category>ブログ</category><category>reStructuredText</category><category>JavaScript</category><category>CSS</category></item><item><title>脚注のためのツールチップ追加</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/</link><description>&lt;p&gt;脚注をツールチップで見れるようにしたので，それについて．&lt;/p&gt;
 &lt;div class="section" id="restructuredtext"&gt;
 &lt;h2&gt;reStructuredText の脚注&lt;a class="headerlink" href="#restructuredtext" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;reStructuredText では脚注が使える．これは，以下のように書けばいい:&lt;/p&gt;

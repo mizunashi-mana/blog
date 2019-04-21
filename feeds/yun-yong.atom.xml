@@ -1,5 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-15T22:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>脚注のためのツールチップ追加</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/" rel="alternate"></link><published>2019-04-15T22:00:00+09:00</published><updated>2019-04-15T22:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/add-tooltip-for-footnote/</id><summary type="html">&lt;p&gt;脚注をツールチップで見れるようにしたので，それについて．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-22T03:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>MathML にバイバイして， KaTeX に移行した</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/" rel="alternate"></link><published>2019-04-22T03:00:00+09:00</published><updated>2019-04-22T03:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-22:/blog/posts/2019/04/bye-mathml-hello-katex/</id><summary type="html">&lt;p&gt;以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="mathml"&gt;
+&lt;h2&gt;MathML に敗北した&lt;a class="headerlink" href="#mathml" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;正確には， MathML は悪くないんだが，現状の MathML + MathJax 環境は色々辛いものがあった．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;\mathit&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;\mathrel&lt;/tt&gt; などの基本的なコマンドに対応していない．&lt;/li&gt;
+&lt;li&gt;MathJax のレンダリングが遅い．&lt;/li&gt;
+&lt;li&gt;MathJax …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="mathml"&gt;
+&lt;h2&gt;MathML に敗北した&lt;a class="headerlink" href="#mathml" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;正確には， MathML は悪くないんだが，現状の MathML + MathJax 環境は色々辛いものがあった．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;\mathit&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;\mathrel&lt;/tt&gt; などの基本的なコマンドに対応していない．&lt;/li&gt;
+&lt;li&gt;MathJax のレンダリングが遅い．&lt;/li&gt;
+&lt;li&gt;MathJax がでかい．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;みたいな感じで，もうちょっとなんとかしたかった．基本的なコマンドに対応していない件は， &lt;tt class="docutils literal"&gt;docutils&lt;/tt&gt; のデフォルトトランスパイラを使っているのが悪いだろうと思って， &lt;tt class="docutils literal"&gt;latexml&lt;/tt&gt; を試してみたんだが，こちらは &lt;tt class="docutils literal"&gt;\mathbb&lt;/tt&gt; に対応していなかったり．そもそも，デフォルトの MathML の段階でフォントの制約がある以上，コマンドはかなり限られてくる．そこら辺のつらみが増した結果， MathML は諦めることにした． MathML を諦めるなら，特に MathJax にこだわる必要もないので， MathJax ともおさらばすることにした．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="katex"&gt;
+&lt;h2&gt;KaTeX の導入&lt;a class="headerlink" href="#katex" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;結局 &lt;tt class="docutils literal"&gt;docutils&lt;/tt&gt; には生の LaTeX ソースを吐き出させて， KaTeX でレンダリングする感じに落ち着いた． &lt;tt class="docutils literal"&gt;docutils&lt;/tt&gt; に LaTeX ソースそのままを吐き出させるには， &lt;tt class="docutils literal"&gt;pelicanconf.py&lt;/tt&gt; で以下のように書けばいい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+DOCUTILS_SETTINGS = {
+  ...,
+  'math_output': 'LaTeX',
+}
+&lt;/pre&gt;
+&lt;p&gt;後は， KaTeX をインストールしてレンダリングスクリプトを書いていく:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+npm i -S katex
+&lt;/pre&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nx"&gt;KaTeX&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'katex'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="s1"&gt;'katex/dist/katex.min.css'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="kr"&gt;export&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;renderMathBlock&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;e&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;querySelectorAll&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"article.single pre.math"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;ne&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;createElement&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'div'&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+      &lt;span class="nx"&gt;ne&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;setAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'class'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'math block'&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+      &lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;mathText&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;textContent&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+      &lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;parentNode&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;replaceChild&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;ne&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+      &lt;span class="nx"&gt;KaTeX&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;mathText&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;ne&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;catch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;e&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;querySelectorAll&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"article.single tt.math"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;ne&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;createElement&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'span'&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+      &lt;span class="nx"&gt;ne&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;setAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'class'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'math inline'&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+      &lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;mathText&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;textContent&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+      &lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;parentNode&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;replaceChild&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;ne&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+      &lt;span class="nx"&gt;KaTeX&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;mathText&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;ne&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;catch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;reStructuredText が対応している数式モードは，ディレクティブとロールの 2 種類あり，ディレクティブは &lt;tt class="docutils literal"&gt;pre.math&lt;/tt&gt; ，ロールは &lt;tt class="docutils literal"&gt;tt.math&lt;/tt&gt; の中身に LaTeX ソースを埋め込むので，それを KaTeX でレンダリングするだけ．後は， Webpack で CSS ロードとフォントロードの仕組みを導入してやるだけで良い．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="postcss"&gt;
+&lt;h2&gt;PostCSS の導入&lt;a class="headerlink" href="#postcss" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;KaTeX の為に CSS ローダを追加するついでに， PostCSS を導入することにした．まず， KaTeX のための Alias を追加する:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+resolve: {
+  alias: {
+    ...,
+    katex$: 'katex/dist/katex.mjs',
+    katex: 'katex',
+  }
+},
+&lt;/pre&gt;
+&lt;p&gt;それから， CSS とファイルローダを追加する．CSS を JavaScript と分離するため， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;mini-css-extract-plugin&lt;/span&gt;&lt;/tt&gt; を使っている:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+module: {
+  rules: [
+    {
+      test: /\.(scss|css)$/,
+      use: [
+        MiniCssExtractPlugin.loader,
+        {
+          loader: 'css-loader',
+        },
+        {
+          loader: 'postcss-loader',
+          options: {
+            plugins: function () {
+              return [
+                require('cssnano')({
+                  preset: ['default', {
+                    mergeRules: false,
+                  }]
+                }),
+                require('precss'),
+                require('autoprefixer')
+              ];
+            }
+          }
+        },
+      ]
+    },
+    {
+      test: /\.(ttf|woff2?)$/,
+      use: [
+        {
+          loader: 'file-loader'
+        },
+      ]
+    }
+  ],
+},
+
+plugins: [
+  new MiniCssExtractPlugin({
+    filename: '[name].css'
+  })
+],
+&lt;/pre&gt;
+&lt;p&gt;PostCSS の cssnano で mergeRules を無効にしているのは，マージアルゴリズムがバグって &lt;a class="footnote-reference" href="#cssnano-mergerules-bug" id="auto-id-1"&gt;[1]&lt;/a&gt; ツールチップのために指定した CSS のプロパティが消えたため．後は，既存の CSS ファイルを PostCSS で書き直した．これで適当にベンダープレフィックスとかも入れてくれる．&lt;/p&gt;
+&lt;p&gt;それから，数式のスタイルも少しいじった:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+article.single {
+  div.math.block {
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: center;
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;overflow 時の設定を加えて，センタリングされるようにした． &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;overflow-y:&lt;/span&gt; hidden&lt;/tt&gt; を加えてるのは，なぜか KaTeX の方で数式の下に変な余白が生まれ，謎のスクロールが発生していたため．後はエントリーポイントの JavaScript に CSS をインポートするよう記述を加えるだけ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;これで JavaScript が必須のブログになってしまった (LaTeX の脳内レンダリングできる人なら読めるが) ．ま，今の時代 JavaScript 無効にしてる人なんておらんやろ．&lt;/p&gt;
+&lt;p&gt;PostCSS も導入できたし，大分ブログの管理状況は人権があるものになったんじゃないかな．MathML が使えなくなったのはちょっと残念だけど．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="cssnano-mergerules-bug" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://github.com/cssnano/cssnano/issues/701"&gt;https://github.com/cssnano/cssnano/issues/701&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/bye-mathml-hello-katex.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/bye-mathml-hello-katex.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Pelican"></category><category term="MathML"></category><category term="ブログ"></category><category term="reStructuredText"></category><category term="JavaScript"></category><category term="CSS"></category></entry><entry><title>脚注のためのツールチップ追加</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/" rel="alternate"></link><published>2019-04-15T22:00:00+09:00</published><updated>2019-04-15T22:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/add-tooltip-for-footnote/</id><summary type="html">&lt;p&gt;脚注をツールチップで見れるようにしたので，それについて．&lt;/p&gt;
 &lt;div class="section" id="restructuredtext"&gt;
 &lt;h2&gt;reStructuredText の脚注&lt;a class="headerlink" href="#restructuredtext" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;reStructuredText では脚注が使える．これは，以下のように書けばいい:&lt;/p&gt;
