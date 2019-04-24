@@ -1,5 +1,687 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-22T03:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>MathML にバイバイして， KaTeX に移行した</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/" rel="alternate"></link><published>2019-04-22T03:00:00+09:00</published><updated>2019-04-22T03:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-22:/blog/posts/2019/04/bye-mathml-hello-katex/</id><summary type="html">&lt;p&gt;以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-24T14:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Scala コードの裏側</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/scala-compile-inside/" rel="alternate"></link><published>2019-04-24T14:00:00+09:00</published><updated>2019-04-24T14:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-24:/blog/posts/2019/04/scala-compile-inside/</id><summary type="html">&lt;p&gt;先日， Scala コードの裏側について幾つか話を聞いた．で，気になったので実際に JVM コードを出して，色々見てみることにした．なお，当方 Scala 初心者なので，おそらくかなり間違いを含んでるのと，普段使いの感覚からは離れてる部分はあると思うので，そこら辺は注意して読んでくれって感じ．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;Scala コンパイラの概要&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Scala コンパイラが実際どういう処理をしてるのか知らなかったので，まずはその辺を調べた． Scala は，プログラムを複数のフェーズに分けてコンパイルし，最終的に JVM …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;先日， Scala コードの裏側について幾つか話を聞いた．で，気になったので実際に JVM コードを出して，色々見てみることにした．なお，当方 Scala 初心者なので，おそらくかなり間違いを含んでるのと，普段使いの感覚からは離れてる部分はあると思うので，そこら辺は注意して読んでくれって感じ．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;Scala コンパイラの概要&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Scala コンパイラが実際どういう処理をしてるのか知らなかったので，まずはその辺を調べた． Scala は，プログラムを複数のフェーズに分けてコンパイルし，最終的に JVM のコードを吐き出すっぽい．コンパイルフェーズは，以下のコマンドで見れるっぽい &lt;a class="footnote-reference" href="#how-to-install-scalac" id="auto-id-2"&gt;[1]&lt;/a&gt;:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ scalac -Xshow-phases
+    phase name  id  description
+    ----------  --  -----------
+        parser   1  parse source into ASTs, perform simple desugaring
+         namer   2  resolve names, attach symbols to named trees
+packageobjects   3  load package objects
+         typer   4  the meat and potatoes: type the trees
+        patmat   5  translate match expressions
+superaccessors   6  add super accessors in traits and nested classes
+    extmethods   7  add extension methods for inline classes
+       pickler   8  serialize symbol tables
+     refchecks   9  reference/override checking, translate nested objects
+       uncurry  10  uncurry, translate function values to anonymous classes
+        fields  11  synthesize accessors and fields, add bitmaps for lazy vals
+     tailcalls  12  replace tail calls by jumps
+    specialize  13  @specialized-driven class and method specialization
+ explicitouter  14  this refs to outer pointers
+       erasure  15  erase types, add interfaces for traits
+   posterasure  16  clean up erased inline classes
+    lambdalift  17  move nested functions to top level
+  constructors  18  move field definitions into constructors
+       flatten  19  eliminate inner classes
+         mixin  20  mixin composition
+       cleanup  21  platform-specific cleanups, generate reflective calls
+    delambdafy  22  remove lambdas
+           jvm  23  generate JVM bytecode
+      terminal  24  the last phase during a compilation run
+&lt;/pre&gt;
+&lt;p&gt;各フェーズは， &lt;a class="reference external" href="https://www.scala-lang.org/api/2.12.x/scala-reflect/scala/reflect/api/Trees.html"&gt;scala.reflect.apis.Trees&lt;/a&gt; に定義されている構成子を使って作成された構文木を，変換していく．それぞれのフェーズが出力する木は，次のようにして見れる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cat src/TestSource.scala
+object TestSource {
+  def testSource(a: Long): Long = {
+    val b = a + 1
+    b
+  }
+}
+$ scalac -Ystop-after:parser -Xprint:parser src/TestSource.scala
+[[syntax trees at end of                    parser]] // TestSource.scala
+package &amp;lt;empty&amp;gt; {
+  object TestSource extends scala.AnyRef {
+    def &amp;lt;init&amp;gt;() = {
+      super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def testSource(a: Long): Long = {
+      val b = a.$plus(1);
+      b
+    }
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;また，構文木を GUI で見るためのオプションも用意されている:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cat src/TestSource.scala
+object TestSource {
+  def testSource(a: Long): Long = {
+    val b = a + 1
+    b
+  }
+}
+$ scalac -Ystop-after:parser -Ybrowse:parser src/TestSource.scala
+&lt;/pre&gt;
+&lt;p&gt;こうすると，以下の画面が表示される:&lt;/p&gt;
+&lt;img alt="構文木をツリー表示する GUI 画面．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/scala-compile-inside/scala-compile-inside/scala-browse-example.png"/&gt;
+&lt;p&gt;では， Scala コードが実際にどういう JVM コードを出すのか見ていきたいと思う．なお，試した環境は，以下の通り:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="40%"/&gt;
+&lt;col width="60%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td colspan="2"&gt;Scala のバージョン        | 2.12.8&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td colspan="2"&gt;Java Runtime のバージョン | Java(TM) SE Runtime Environment 1.8.0_131&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td colspan="2"&gt;Java Hotspot のバージョン | Java HotSpot(TM) 64-Bit Server VM 25.131&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;末尾呼び出し最適化&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Java は末尾呼び出し最適化をしないことで有名だ &lt;a class="footnote-reference" href="#why-java-dont-have-tco" id="auto-id-4"&gt;[2]&lt;/a&gt;．だけど， Scala は末尾呼び出し最適化を行う．具体的にコードを見てみる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cat src/TailCallOpt.scala
+object TailCallOpt {
+  def tailCallFunc(a: Long): Long = {
+    if (a &amp;gt; 10) a else tailCallFunc(a + 1)
+  }
+}
+$ scalac -Ystop-after:tailcalls -Xprint:fields,tailcalls src/TailCallOpt.scala
+[[syntax trees at end of                    fields]] // TailCallOpt.scala
+package &amp;lt;empty&amp;gt; {
+  object TailCallOpt extends Object {
+    def &amp;lt;init&amp;gt;(): TailCallOpt.type = {
+      TailCallOpt.super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def tailCallFunc(a: Long): Long = if (a.&amp;gt;(10))
+      a
+    else
+      TailCallOpt.this.tailCallFunc(a.+(1))
+  }
+}
+
+[[syntax trees at end of                 tailcalls]] // TailCallOpt.scala
+package &amp;lt;empty&amp;gt; {
+  object TailCallOpt extends Object {
+    def &amp;lt;init&amp;gt;(): TailCallOpt.type = {
+      TailCallOpt.super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def tailCallFunc(a: Long): Long = {
+      &amp;lt;synthetic&amp;gt; val _$this: TailCallOpt.type = TailCallOpt.this;
+      _tailCallFunc(_$this: TailCallOpt.type, a: Long){
+        if (a.&amp;gt;(10))
+  a
+else
+  _tailCallFunc(TailCallOpt.this, a.+(1).asInstanceOf[Long]()).asInstanceOf[Long]()
+      }
+    }
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;この最適化は名前の通り， &lt;tt class="docutils literal"&gt;tailcalls&lt;/tt&gt; フェーズで行われる．実は Scala 内部では &lt;a class="reference external" href="https://www.scala-lang.org/api/2.12.x/scala-reflect/scala/reflect/api/Trees$LabelDef.html"&gt;ラベル式&lt;/a&gt; という構文が存在する． Scala のプログラム的にはこの式は書けないが，構文木上は用意されていて，最終的にジャンプに変換される．今回のも， &lt;tt class="docutils literal"&gt;tailCallFunc&lt;/tt&gt; の中身はこのラベル式を使って変換されている．以下の部分がそう:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+_tailCallFunc(_$this: TailCallOpt.type, a: Long) {
+  if (a.&amp;gt;(10))
+    a
+  else
+    _tailCallFunc(TailCallOpt.this, a.+(1).asInstanceOf[Long]()).asInstanceOf[Long]()
+}
+&lt;/pre&gt;
+&lt;p&gt;実際に，対応する JVM のバイトコードを見てみる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ scalac src/TailCallOpt.scala
+$ ls -D
+'TailCallOpt$.class' TailCallOpt.class src/
+$ javap -v -c 'TailCallOpt$.class'
+...
+  public long tailCallFunc(long);
+  descriptor: (J)J
+  flags: ACC_PUBLIC
+  Code:
+    stack=4, locals=3, args_size=2
+       0: lload_1
+       1: ldc2_w        #16                 // long 10l
+       4: lcmp
+       5: ifle          12
+       8: lload_1
+       9: goto          19
+      12: lload_1
+      13: lconst_1
+      14: ladd
+      15: lstore_1
+      16: goto          0
+      19: lreturn
+...
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;javap&lt;/tt&gt; は Java の逆アセンブラ． &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-v&lt;/span&gt;&lt;/tt&gt; をつけると詳細に情報を表示してくれる．で，コードの読み方だけど，まずは JVM の基本事項から:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;メソッドごとに &lt;a class="reference external" href="https://docs.oracle.com/javase/specs/jvms/se12/html/jvms-4.html#jvms-4.7.13"&gt;ローカル変数テーブル&lt;/a&gt; が用意されている．初期状態では，メソッドの引数が順番に入る．なお， &lt;tt class="docutils literal"&gt;double&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;long&lt;/tt&gt; はテーブルの 2 行分領域を取る．&lt;/li&gt;
+&lt;li&gt;定数は，クラスそれぞれに用意されている &lt;a class="reference external" href="https://docs.oracle.com/javase/specs/jvms/se12/html/jvms-4.html#jvms-4.4"&gt;定数プール&lt;/a&gt; に，添字と型付きで格納される．添字は， &lt;tt class="docutils literal"&gt;#[数字]&lt;/tt&gt; の形で表される．&lt;/li&gt;
+&lt;li&gt;JVM は 1 スタックで動く．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;他にも重要なことは一杯あるんだけど，とりあえずコードを読むために上のことは押さえておいてくれって感じ．で，具体的な命令の内容だけど，以下のようになる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+// ローカル変数テーブルの 1 番目を， long 値としてスタックに積む
+ 0: lload_1
+// 定数プールから値 (``#16`` にはコメントで書かれてる通り， ``10L`` が入っている) を呼び出し，スタックに積む
+ 1: ldc2_w        #16                 // long 10l
+// スタックから 2 要素取り出し， long 値として比較した結果をスタックに積む
+ 4: lcmp
+// 比較結果が「以下」であれば， 12 バイト目に飛ぶ
+ 5: ifle          12
+// ローカル変数テーブルの 1 番目を， long 値としてスタックに積む
+ 8: lload_1
+// 19 バイト目に飛ぶ
+ 9: goto          19
+// ローカル変数テーブルの 1 番目を， long 値としてスタックに積む
+12: lload_1
+// long 値 1 を，スタックに積む
+13: lconst_1
+// スタックから 2 要素取り出し，加算した結果をスタックに積む
+14: ladd
+// スタックから 1 要素取り出し， long 値としてローカル変数テーブルの 1 番目に格納する
+15: lstore_1
+// 0 バイト目に飛ぶ
+16: goto          0
+// スタックに返り値として long 値を残して，呼び出し元に戻る
+19: lreturn
+&lt;/pre&gt;
+&lt;p&gt;もう少し分かりやすいよう， C 言語風に書き直してみると，以下のようになる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+long tailCallFunc(void *a0, long a1) {
+  const long tmp = 10L;
+
+START:
+  if (a1 &amp;lt;= tmp) {
+    goto END;
+  }
+
+  a1 = a1 + 1;
+  goto START;
+
+END:
+  return a1;
+}
+&lt;/pre&gt;
+&lt;p&gt;完全に一対一対応するわけではないが，大体やってることはこんな感じ．最初の引数は， &lt;tt class="docutils literal"&gt;this&lt;/tt&gt; が入ることに注意．なんしろ，末尾再帰は &lt;tt class="docutils literal"&gt;goto&lt;/tt&gt; を使ってただのループに変換されてることが分かると思う．なお， &lt;tt class="docutils literal"&gt;while&lt;/tt&gt; などもラベル式に変換された後，同じように &lt;tt class="docutils literal"&gt;goto&lt;/tt&gt; を使った JVM コードが出される． Scala だと， &lt;tt class="docutils literal"&gt;tailrec&lt;/tt&gt; アノテーションを使うことで，末尾呼び出し最適化が行われる形になってるかチェックすることもできる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+import scala.annotation.tailrec
+
+object TailCallOpt {
+  @tailrec
+  def tailCallFunc(a: Long): Long = {
+    if (a &amp;gt; 10) a else tailCallFunc(a + 1)
+  }
+}
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-8"&gt;
+&lt;h2&gt;大域脱出&lt;a class="headerlink" href="#auto-id-8" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Scala には，大域リターン(non local return)という機能がある．実は僕はこの機能を知らなかったんだけど，以下のようなやつ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+def func(): Long = {
+  List(1, 2, 3) foreach { x =&amp;gt;
+    if (x &amp;gt; 2) return 1
+  }
+  return 0
+}
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;foreach&lt;/tt&gt; メソッドが受け取っている無名関数の中で &lt;tt class="docutils literal"&gt;return&lt;/tt&gt; を書くと，外側のメソッドが抜ける．ただ， Java では C で言う所の &lt;tt class="docutils literal"&gt;setjmp&lt;/tt&gt;  / &lt;tt class="docutils literal"&gt;longjmp&lt;/tt&gt; 機能がない．これを実際にどう実現するかなんだけど，有名な方法があって，スタックトレースを消した例外をハンドリングする． Scala ではこの方法が用いられてる &lt;a class="footnote-reference" href="#i-knew-it-recently" id="auto-id-9"&gt;[3]&lt;/a&gt; ．実際にコード生成を見てみると以下のようになる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cat src/NonLocalReturn.scala
+object NonLocalReturn {
+  def nonLocalReturn(): Long = {
+    List(1L, 2L, 3L) foreach { x =&amp;gt;
+      if (x &amp;gt; 2) return x
+    }
+
+    return 0
+  }
+}
+$ scalac -Ystop-after:uncurry -Xprint:refchecks,uncurry src/NonLocalReturn.scala
+[[syntax trees at end of                 refchecks]] // NonLocalReturn.scala
+package &amp;lt;empty&amp;gt; {
+  object NonLocalReturn extends scala.AnyRef {
+    def &amp;lt;init&amp;gt;(): NonLocalReturn.type = {
+      NonLocalReturn.super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def nonLocalReturn(): Long = {
+      scala.collection.immutable.List.apply[Long](1L, 2L, 3L).foreach[Unit](((x: Long) =&amp;gt; if (x.&amp;gt;(2))
+        return x
+      else
+        ()));
+      return 0L
+    }
+  }
+}
+
+[[syntax trees at end of                   uncurry]] // NonLocalReturn.scala
+package &amp;lt;empty&amp;gt; {
+  object NonLocalReturn extends Object {
+    def &amp;lt;init&amp;gt;(): NonLocalReturn.type = {
+      NonLocalReturn.super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def nonLocalReturn(): Long = {
+      &amp;lt;synthetic&amp;gt; val nonLocalReturnKey1: Object = new Object();
+      try {
+        scala.collection.immutable.List.apply[Long](scala.Predef.wrapLongArray(Array[Long]{1L, 2L, 3L})).foreach[Unit]({
+          final &amp;lt;artifact&amp;gt; def $anonfun$nonLocalReturn(x: Long): Unit = if (x.&amp;gt;(2))
+            throw new scala.runtime.NonLocalReturnControl[Long](nonLocalReturnKey1, x)
+          else
+            ();
+          ((x: Long) =&amp;gt; $anonfun$nonLocalReturn(x))
+        });
+        return 0L
+      } catch {
+        case (ex @ (_: scala.runtime.NonLocalReturnControl[Long @unchecked])) =&amp;gt; if (ex.key().eq(nonLocalReturnKey1))
+          ex.value()
+        else
+          throw ex
+      }
+    }
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;この変換は &lt;tt class="docutils literal"&gt;uncurry&lt;/tt&gt; フェーズで行われるっぽい．大域リターンが， &lt;tt class="docutils literal"&gt;NonLocalReturnControl&lt;/tt&gt; 例外のハンドリングに変換されていることが分かる． &lt;tt class="docutils literal"&gt;return&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;NonLocalReturnControl&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;throw&lt;/tt&gt; に変換し，外側で &lt;tt class="docutils literal"&gt;catch&lt;/tt&gt; してその値を &lt;tt class="docutils literal"&gt;return&lt;/tt&gt; している． &lt;tt class="docutils literal"&gt;NonLocalReturnControl&lt;/tt&gt; はスタックトレースを生成しないために， &lt;tt class="docutils literal"&gt;fillInStackTrace&lt;/tt&gt; を書き換えてる．定義は以下のようになっている &lt;a class="footnote-reference" href="#non-local-return-control-definition" id="auto-id-10"&gt;[4]&lt;/a&gt;:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+import scala.util.control.ControlThrowable
+
+class NonLocalReturnControl[@specialized T](val key: AnyRef, val value: T) extends ControlThrowable {
+  final override def fillInStackTrace(): Throwable = this
+}
+&lt;/pre&gt;
+&lt;p&gt;ところで余談だけど， Scala の無名関数はこの後ラムダリフティング (lambdalift) によって final method に変換され，ラムダ除去 (delambdafy) によって Java の Single Abstract Method (SAM) が使える形に変換される．今回の例をそのまま使うと，例外ハンドリングによってかなりノイズが大きくなるので，もう少し簡略化した例で示すと以下の感じ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cat src/Lambda.scala
+object Lambda {
+  def func(a: Long) {
+    List(1L, 2L, 3L) foreach { x =&amp;gt; x + a }
+  }
+}
+$ scalac -Ystop-after:jvm -Xprint:uncurry,lambdalift,delambdafy,jvm src/Lambda.scala
+[[syntax trees at end of                   uncurry]] // Lambda.scala
+package &amp;lt;empty&amp;gt; {
+  object Lambda extends Object {
+    def &amp;lt;init&amp;gt;(): Lambda.type = {
+      Lambda.super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def func(a: Long): Unit = scala.collection.immutable.List.apply[Long](scala.Predef.wrapLongArray(Array[Long]{1L, 2L, 3L})).foreach[Long]({
+      final &amp;lt;artifact&amp;gt; def $anonfun$func(x: Long): Long = x.+(a);
+      ((x: Long) =&amp;gt; $anonfun$func(x))
+    })
+  }
+}
+
+[[syntax trees at end of                lambdalift]] // Lambda.scala
+package &amp;lt;empty&amp;gt; {
+  object Lambda extends Object {
+    def &amp;lt;init&amp;gt;(): Lambda.type = {
+      Lambda.super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def func(a: Long): Unit = scala.collection.immutable.List.apply(scala.Predef.wrapLongArray(Array[Long]{1L, 2L, 3L})).foreach({
+      ((x: Long) =&amp;gt; Lambda.this.$anonfun$func$1(a, x))
+    });
+    final &amp;lt;artifact&amp;gt; private[this] def $anonfun$func$1(a$1: Long, x: Long): Long = x.+(a$1)
+  }
+}
+
+[[syntax trees at end of                delambdafy]] // Lambda.scala
+package &amp;lt;empty&amp;gt; {
+  object Lambda extends Object {
+    def func(a: Long): Unit = scala.collection.immutable.List.apply(scala.Predef.wrapLongArray(Array[Long]{1L, 2L, 3L})).foreach({
+      $anonfun(a)
+    });
+    final &amp;lt;static&amp;gt; &amp;lt;artifact&amp;gt; def $anonfun$func$1(a$1: Long, x: Long): Long = x.+(a$1);
+    def &amp;lt;init&amp;gt;(): Lambda.type = {
+      Lambda.super.&amp;lt;init&amp;gt;();
+      ()
+    }
+  }
+}
+
+[[syntax trees at end of                       jvm]] // Lambda.scala: tree is unchanged since delambdafy
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;$anonfun(a)&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;$anonfun$func$1&lt;/tt&gt; final method を使った SAM の呼び出しに置換される．うちの環境だと，最終的に次のような JVM コードが出される:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ javap -p -v -c 'Lambda$.class'
+...
+public void func(long);
+  descriptor: (J)V
+  flags: ACC_PUBLIC
+  Code:
+    stack=7, locals=3, args_size=2
+       0: getstatic     #25                 // Field scala/collection/immutable/List$.MODULE$:Lscala/collection/immutable/List$;
+       3: getstatic     #30                 // Field scala/Predef$.MODULE$:Lscala/Predef$;
+       6: iconst_3
+       7: newarray       long
+       9: dup
+      10: iconst_0
+      11: lconst_1
+      12: lastore
+      13: dup
+      14: iconst_1
+      15: ldc2_w        #31                 // long 2l
+      18: lastore
+      19: dup
+      20: iconst_2
+      21: ldc2_w        #33                 // long 3l
+      24: lastore
+      25: invokevirtual #38                 // Method scala/Predef$.wrapLongArray:([J)Lscala/collection/mutable/WrappedArray;
+      28: invokevirtual #42                 // Method scala/collection/immutable/List$.apply:(Lscala/collection/Seq;)Lscala/collection/immutable/List;
+      31: lload_1
+      32: invokedynamic #64,  0             // InvokeDynamic #0:apply$mcJJ$sp:(J)Lscala/runtime/java8/JFunction1$mcJJ$sp;
+      37: invokevirtual #70                 // Method scala/collection/immutable/List.foreach:(Lscala/Function1;)V
+      40: return
+...
+BootstrapMethods:
+  0: #60 invokestatic java/lang/invoke/LambdaMetafactory.altMetafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #44 (J)J
+      #49 invokestatic Lambda$.$anonfun$func$1:(JJ)J
+      #44 (J)J
+      #50 3
+      #51 1
+      #53 scala/Serializable
+  1: #86 invokestatic scala/runtime/LambdaDeserialize.bootstrap:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/invoke/CallSite;
+...
+&lt;/pre&gt;
+&lt;p&gt;詳しい説明は省略するが，注目して欲しいのは 32 バイト目の &lt;tt class="docutils literal"&gt;invokedynamic&lt;/tt&gt; で呼ばれてるやつ． &lt;tt class="docutils literal"&gt;invokedynamic&lt;/tt&gt; は SAM 向けに Java8 から新たに導入された命令で &lt;a class="footnote-reference" href="#invokedynamic-is-in-java7-yet" id="auto-id-11"&gt;[5]&lt;/a&gt;，1番目に SAM の元となるクラスメソッド，2番目にブートストラップメソッドの番号を受け取って，ブートストラップメソッドから生成したメソッドを呼び出す．なお， 2 回目からはブートストラップメソッドは呼び出されず，作ったメソッドを直接呼び出すことで効率が良くなるとかがあるらしい．なお，ここで SAM の元となるオブジェクトに &lt;tt class="docutils literal"&gt;scala/runtime/java8/JFunction1$mcJJ$sp&lt;/tt&gt; というのが指定されているのが分かると思う． Scala では生成する SAM の型によって幾つかテンプレートを用意しているようで， &lt;a class="reference external" href="scala/runtime/java8/JFunction1$mcJJ$sp"&gt;JFunction1$mcJJ$sp&lt;/a&gt; はメソッドの型が &lt;tt class="docutils literal"&gt;(v1: Long): Long&lt;/tt&gt; となるやつに対するテンプレートになっている．こうすると何が良いのかいまいち分からないけど，きっと効率が良くなるか &lt;tt class="docutils literal"&gt;invokedynamic&lt;/tt&gt; の制約かなんかなんだろうなあ (適当) ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="lazy-val"&gt;
+&lt;h2&gt;lazy val のパフォーマンス&lt;a class="headerlink" href="#lazy-val" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;最後に &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; について．これは，話を聞く前から気になってたんだけど， Scala の &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; は大変遅いという噂をよく聞く．で，具体的にどんくらい遅いのか，何が原因なのかをちょっと調べてみた．まず， &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; は，最終的にどのようなコードに変換されるのかを見てみる．まず， Scala の各フェーズの変換から:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cat src/LazyVal.scala
+object LazyVal {
+  def func(a: Int): Int = {
+    lazy val v = a + 1
+    v + 2
+  }
+}
+$ scalac -Ystop-after:jvm -Xprint:uncurry,fields,jvm src/LazyVal.scala
+[[syntax trees at end of                   uncurry]] // LazyVal.scala
+package &amp;lt;empty&amp;gt; {
+  object LazyVal extends Object {
+    def &amp;lt;init&amp;gt;(): LazyVal.type = {
+      LazyVal.super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def func(a: Int): Int = {
+      &amp;lt;stable&amp;gt; &amp;lt;accessor&amp;gt; lazy val v: Int = a.+(1);
+      v().+(2)
+    }
+  }
+}
+
+[[syntax trees at end of                    fields]] // LazyVal.scala
+package &amp;lt;empty&amp;gt; {
+  object LazyVal extends Object {
+    def &amp;lt;init&amp;gt;(): LazyVal.type = {
+      LazyVal.super.&amp;lt;init&amp;gt;();
+      ()
+    };
+    def func(a: Int): Int = {
+      lazy &amp;lt;artifact&amp;gt; val v$lzy: scala.runtime.LazyInt = new scala.runtime.LazyInt();
+      &amp;lt;artifact&amp;gt; private def v$lzycompute(): Int = v$lzy.synchronized[Int](if (v$lzy.initialized())
+        v$lzy.value()
+      else
+        v$lzy.initialize(a.+(1)));
+      lazy def v(): Int = if (v$lzy.initialized())
+        v$lzy.value()
+      else
+        v$lzycompute();
+      v().+(2)
+    }
+  }
+}
+
+[[syntax trees at end of                       jvm]] // LazyVal.scala
+package &amp;lt;empty&amp;gt; {
+  object LazyVal extends Object {
+    def func(a: Int): Int = {
+      lazy &amp;lt;artifact&amp;gt; val v$lzy: scala.runtime.LazyInt = new scala.runtime.LazyInt();
+      LazyVal.this.v$1(v$lzy, a).+(2)
+    };
+    final &amp;lt;static&amp;gt; &amp;lt;artifact&amp;gt; private[this] def v$lzycompute$1(v$lzy$1: scala.runtime.LazyInt, a$1: Int): Int = v$lzy$1.synchronized(if (v$lzy$1.initialized())
+      v$lzy$1.value()
+    else
+      v$lzy$1.initialize(a$1.+(1)));
+    final &amp;lt;static&amp;gt; lazy private[this] def v$1(v$lzy$1: scala.runtime.LazyInt, a$1: Int): Int = if (v$lzy$1.initialized())
+      v$lzy$1.value()
+    else
+      LazyVal.this.v$lzycompute$1(v$lzy$1, a$1);
+    def &amp;lt;init&amp;gt;(): LazyVal.type = {
+      LazyVal.super.&amp;lt;init&amp;gt;();
+      ()
+    }
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;Int&lt;/tt&gt; 型の &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; の場合素直に，初期化されているかチェックして初期化されていなければ計算を実行し結果を保存して返す，されていれば保存した値をそのまま返すみたいなことをするオブジェクトを返してるっぽい．ただ，初期化は複数のスレッドから呼び出されると競合が起きるので &lt;tt class="docutils literal"&gt;synchronized&lt;/tt&gt; を指定して競合を防いでいる．ただ， &lt;tt class="docutils literal"&gt;synchronized&lt;/tt&gt; は重いので，単に &lt;tt class="docutils literal"&gt;synchronized&lt;/tt&gt; で初期化するわけではなく，まず単に初期化されているかを確認し，されていなければもう一度 &lt;tt class="docutils literal"&gt;synchronized&lt;/tt&gt; で確認を行う test and test-and-set みたいなことをしている．最終的にはラムダリフティングとラムダ除去によって，両方 final method として外に出されるっぽい．まあただこのコードならある程度 JVM で出されるコードは予想がつく．実際にコードを見てみる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ javap -p -v -c 'LazyVal$.class'
+...
+private static final int v$lzycompute$1(scala.runtime.LazyInt, int);
+  descriptor: (Lscala/runtime/LazyInt;I)I
+  flags: ACC_PRIVATE, ACC_STATIC, ACC_FINAL, ACC_SYNTHETIC
+  Code:
+    stack=3, locals=4, args_size=2
+       0: aload_0
+       1: dup
+       2: astore_2
+       3: monitorenter
+       4: aload_0
+       5: invokevirtual #33                 // Method scala/runtime/LazyInt.initialized:()Z
+       8: ifeq          18
+      11: aload_0
+      12: invokevirtual #37                 // Method scala/runtime/LazyInt.value:()I
+      15: goto          25
+      18: aload_0
+      19: iload_1
+      20: iconst_1
+      21: iadd
+      22: invokevirtual #40                 // Method scala/runtime/LazyInt.initialize:(I)I
+      25: istore_3
+      26: aload_2
+      27: monitorexit
+      28: iload_3
+      29: goto          35
+      32: aload_2
+      33: monitorexit
+      34: athrow
+      35: ireturn
+...
+public int func(int);
+  descriptor: (I)I
+  flags: ACC_PUBLIC
+  Code:
+    stack=2, locals=3, args_size=2
+       0: new           #17                 // class scala/runtime/LazyInt
+       3: dup
+       4: invokespecial #18                 // Method scala/runtime/LazyInt."&amp;lt;init&amp;gt;":()V
+       7: astore_2
+       8: aload_2
+       9: iload_1
+      10: invokestatic  #22                 // Method v$1:(Lscala/runtime/LazyInt;I)I
+      13: iconst_2
+      14: iadd
+      15: ireturn
+...
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;v$1&lt;/tt&gt; メソッドについては省略した．気になる人は実際に見てくれって感じ． &lt;tt class="docutils literal"&gt;func&lt;/tt&gt; の中身はほぼそのままって感じだ．問題は， &lt;tt class="docutils literal"&gt;v$lzycompute$1&lt;/tt&gt; で，なんか色々しとる．とりあえず， &lt;tt class="docutils literal"&gt;monitorenter&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;monitorexit&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;synchronized&lt;/tt&gt; に対応するっぽい．で，これらはロック機構を提供するわけだけど計算中に例外が発生することもあるので，例外が起きた場合にちゃんと &lt;tt class="docutils literal"&gt;monitorexit&lt;/tt&gt; を走らせないとデッドロック状態になってしまう可能性があるため，そこらへんを解決するコードも入ってるのかな？&lt;/p&gt;
+&lt;p&gt;さて， &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; の中身を見たところで，パフォーマンス上気になるのは，以下の 3 点だ:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;LazyInt&lt;/tt&gt; を介するため Boxing が挟まる&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;monitorenter&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;monitorexit&lt;/tt&gt; により，ロック処理が挟まる&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;monitorenter&lt;/tt&gt; を挟む際の，例外対処の処理が挟まる&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;このうちどれが大きな問題となるんだろう？ とりあえず，まず大雑把に試してみる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cat src/LazyValBenchmark.scala
+object LazyValBenchmark {
+  def main(args: Array[String]) {
+    createLazyVal(10)
+    createVal(10)
+    refLazyVal(10)
+    refVal(10)
+
+    println("Warmup end")
+
+    {
+      val start = System.nanoTime();
+      val r = createVal(0)
+      val end = System.nanoTime()
+      println((end - start) + ":" + r)
+    }
+    {
+      val start = System.nanoTime();
+      val r = createLazyVal(0)
+      val end = System.nanoTime()
+      println((end - start) + ":" + r)
+    }
+    {
+      val start = System.nanoTime();
+      val r = refLazyVal(0)
+      val end = System.nanoTime()
+      println((end - start) + ":" + r)
+    }
+    {
+      val start = System.nanoTime();
+      val r = refVal(0)
+      val end = System.nanoTime()
+      println((end - start) + ":" + r)
+    }
+  }
+
+  val n1 = 1000000000
+
+  def createLazyVal(i0: Int): Int = {
+    var r = 0
+    while (r &amp;lt; n1) {
+      lazy val i = i0 + 1
+      r += i
+    }
+    r
+  }
+
+  def createVal(i0: Int): Int = {
+    var r = 0
+    while (r &amp;lt; n1) {
+      val i = i0 + 1
+      r += i
+    }
+    r
+  }
+
+  val n2 = n1
+
+  def refLazyVal(i0: Int): Int = {
+    lazy val i = i0 + 1
+
+    var r = 0
+    while (r &amp;lt; n2) {
+      r += i
+    }
+    r
+  }
+
+  def refVal(i0: Int): Int = {
+    val i = i0 + 1
+
+    var r = 0
+    while (r &amp;lt; n2) {
+      r += i
+    }
+    r
+  }
+}
+$ scalac src/LazyValBenchmark.scala
+$ scala LazyValBenchmark
+Warmup end
+631499976:1000000000
+6602310567:1000000000
+792000315:1000000000
+316664620:1000000000
+$ scala LazyValBenchmark
+Warmup end
+635872302:1000000000
+6604901477:1000000000
+793790967:1000000000
+316887105:1000000000
+$ scala LazyValBenchmark
+Warmup end
+635827311:1000000000
+6620801173:1000000000
+795464679:1000000000
+326651550:1000000000
+&lt;/pre&gt;
+&lt;p&gt;だいぶ飽きてきたので， &lt;tt class="docutils literal"&gt;System.nanoTime&lt;/tt&gt; 使って適当に済ませてる．よいこは真似しちゃダメだぞっ．結果はまず， &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; を単に作って参照するだけで，普通の &lt;tt class="docutils literal"&gt;val&lt;/tt&gt; より 10 倍差ぐらい付いてる．また参照するだけでも 2.6 倍差ぐらい．ただ， &lt;tt class="docutils literal"&gt;while&lt;/tt&gt; ループとかカウンタとかの固定処理も入っていて結構ガバガバベンチマークではあるので，その結果でこの差ということはかなり性能差がありそう．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;refLazyVal&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;refVal&lt;/tt&gt; の差は，大体 Boxing の差と言えるだろうから， &lt;tt class="docutils literal"&gt;Int&lt;/tt&gt; 以外で試すともうちょっと結果が変わってくるのかもしれない．疲れたので，今日はそこまでの調査は諦め．まあ， &lt;tt class="docutils literal"&gt;Int&lt;/tt&gt; そのままだと， &lt;tt class="docutils literal"&gt;iload&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;istore&lt;/tt&gt; 命令が使えるのに比べ， &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; は保存してる値を &lt;tt class="docutils literal"&gt;v&lt;/tt&gt; 関数と &lt;tt class="docutils literal"&gt;value&lt;/tt&gt; メソッドを &lt;tt class="docutils literal"&gt;invoke&lt;/tt&gt; して取りに行かなきゃいけないので差が付くのは仕方ない感がある．ただ， &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; を何回も参照するなら一旦結果を &lt;tt class="docutils literal"&gt;val&lt;/tt&gt; に入れた方がいいかもしれないと思うぐらいの差はありそう．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;createLazyVal&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;createVal&lt;/tt&gt; の差に &lt;tt class="docutils literal"&gt;refLazyVal&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;refVal&lt;/tt&gt; の差を考慮して考えても，作成と初期化のコストはかなり重いっぽい．作成か初期化どちらが重いか，どちらも重いのかはもう疲れたのでいつかやれたら計ってみたいけど，多分 &lt;tt class="docutils literal"&gt;synchronized&lt;/tt&gt; が大きく効いてるんだろう．これってスレッドセーフじゃなくていいから，もうちょっと速い &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; を使いたいみたいな需要はないんだろうか？ ガバガバベンチの結果をもとにすれば， &lt;tt class="docutils literal"&gt;lazy val&lt;/tt&gt; 使うより変数複数管理する方が軽そうだけど．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-12"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-12" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Scala のコード生成について，今までちゃんと見たことはなかったので，色々試した結果聞いてた噂と同じところ，違うところが知れて良かった．&lt;/p&gt;
+&lt;p&gt;普段 Haskell 使いの身としては， Haskell は最適化をゴリゴリやるので Scala はあんまり最適化しない印象を受けた．リフレクションのためとかなのかな．後， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-Ybrowse&lt;/span&gt;&lt;/tt&gt; 便利． GUI が Java 上だとプラットフォーム関係なしに書けるの，こういう時にも効いてくるんすね．&lt;/p&gt;
+&lt;p&gt;ちょっと力尽きた感あるので，また時間あったら色々調べてみたいですね&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="how-to-install-scalac" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;tt class="docutils literal"&gt;sbt&lt;/tt&gt; で &lt;tt class="docutils literal"&gt;scalac&lt;/tt&gt; 入れてくれないっぽいので， &lt;tt class="docutils literal"&gt;scalac&lt;/tt&gt; コマンドを使いたかったら Scala コンパイラを別途に入れる必要があるっぽい．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="why-java-dont-have-tco" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;理由はよく分からない． &lt;a class="reference external" href="https://softwareengineering.stackexchange.com/a/272086"&gt;https://softwareengineering.stackexchange.com/a/272086&lt;/a&gt; を読む限りでは，正直特に理由はなくて歴史的事情感がある．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="i-knew-it-recently" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-9"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;という話を最近知った．それまでこんなテクニック，実際使われてるんかと思ってた．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="non-local-return-control-definition" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-10"&gt;[4]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://github.com/scala/scala/blob/v2.12.8/src/library/scala/runtime/NonLocalReturnControl.scala"&gt;https://github.com/scala/scala/blob/v2.12.8/src/library/scala/runtime/NonLocalReturnControl.scala&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="invokedynamic-is-in-java7-yet" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-11"&gt;[5]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;一応 Java7 から存在してはいたらしいけど，本格的に使われ始めたのは Java8 から&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/scala-compile-inside.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/scala-compile-inside.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Scala"></category><category term="Java"></category><category term="JVM"></category><category term="最適化"></category></entry><entry><title>MathML にバイバイして， KaTeX に移行した</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/" rel="alternate"></link><published>2019-04-22T03:00:00+09:00</published><updated>2019-04-22T03:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-22:/blog/posts/2019/04/bye-mathml-hello-katex/</id><summary type="html">&lt;p&gt;以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．&lt;/p&gt;
 &lt;div class="section" id="mathml"&gt;
 &lt;h2&gt;MathML に敗北した&lt;a class="headerlink" href="#mathml" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;正確には， MathML は悪くないんだが，現状の MathML + MathJax 環境は色々辛いものがあった．&lt;/p&gt;

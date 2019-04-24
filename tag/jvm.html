@@ -57,7 +57,7 @@
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog"/>
 <meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
 
-  <title>続くといいな日記 &ndash;     Archives
+  <title>続くといいな日記 &ndash;     Tag JVM
 </title>
 
 </head>
@@ -127,46 +127,36 @@
 </a>
     </nav>
 
-<article class="single">
+
+
+<article>
   <header>
-    <h1>    Archives
-</h1>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/scala-compile-inside/#scala-compile-inside">Scala コードの裏側</a></h2>
+    <p>
+          Posted on 水 24 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/scala.html">Scala</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/java.html">Java</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/jvm.html">JVM</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/zui-shi-hua.html">最適化</a>
+    </p>
   </header>
   <div>
-    <dl>
-      <dt>水 24 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/scala-compile-inside/">Scala コードの裏側</a></dd>
-      <dt>月 22 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/">MathML にバイバイして， KaTeX に移行した</a></dd>
-      <dt>日 21 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/haskell-old-stg-syntax/">STG Version 2.5 の動作</a></dd>
-      <dt>木 18 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/about-unified-diff-style/">unified 形式パッチの文法について</a></dd>
-      <dt>月 15 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/">脚注のためのツールチップ追加</a></dd>
-      <dt>月 15 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/">ブログの overflow 時のスタイル設定を見直す</a></dd>
-      <dt>日 14 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/">MathML で数式を表示する</a></dd>
-      <dt>土 13 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/">Functor / Applicative / Monad が表すもの</a></dd>
-      <dt>水 10 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/">sitemap の追加</a></dd>
-      <dt>月 08 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/">CTMCP のために Mozart/Oz を動かす</a></dd>
-      <dt>月 08 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/">Google Analytics の導入</a></dd>
-      <dt>日 07 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/ghc-compiler-notes/">GHC のノートコメントについてのあれこれ</a></dd>
-      <dt>金 05 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/">ブログに共有ボタンを追加した</a></dd>
-      <dt>水 03 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/">Python の datetime が難しい</a></dd>
-      <dt>火 02 4月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/">ブログのデザイン調整</a></dd>
-    </dl>
+      <p>先日， Scala コードの裏側について幾つか話を聞いた．で，気になったので実際に JVM コードを出して，色々見てみることにした．なお，当方 Scala 初心者なので，おそらくかなり間違いを含んでるのと，普段使いの感覚からは離れてる部分はあると思うので，そこら辺は注意して読んでくれって感じ．</p>
+<div class="section" id="auto-id-1">
+<h2>Scala コンパイラの概要<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Scala コンパイラが実際どういう処理をしてるのか知らなかったので，まずはその辺を調べた． Scala は，プログラムを複数のフェーズに分けてコンパイルし，最終的に JVM …</p></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/scala-compile-inside/#scala-compile-inside">    Continue reading
+</a>
   </div>
 </article>
+
+  <div class="pagination">
+  </div>
+
+
+
 
     <footer>
 <p>
