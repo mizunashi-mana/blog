@@ -11,7 +11,10 @@ def embed_customjs(content):
   if isinstance(content, contents.Static):
     return
 
-  soup = BeautifulSoup(content._content, 'html.parser')
+  if not hasattr(content, 'bs4_soup'):
+    content.bs4_soup = BeautifulSoup(content._content, 'html.parser')
+
+  soup = content.bs4_soup
 
   if isinstance(content, contents.Article):
     content_type = 'articles'
@@ -45,8 +48,8 @@ def embed_customjs(content):
   jsfile_script['async'] = None
   soup_body.append(jsfile_script)
 
+  content.bs4_soup = soup
   content._content = soup.decode()
-
 
 def register():
   signals.content_object_init.connect(embed_customjs)

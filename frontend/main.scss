@@ -42,23 +42,31 @@ table.docutils.footnote {
   }
 }
 
-article.single table.highlighttable {
-  width: 100%;
-  table-layout: fixed;
-
-  td {
-    border-style: none;
-    padding: 0px;
+article.single {
+  .highlight {
+    .bp {
+      color: unset;
+    }
   }
 
-  td.linenos {
-    width: 2.5em;
+  table.highlighttable {
+    width: 100%;
+    table-layout: fixed;
 
-    pre {
-      border-left: 0px;
-      padding-right: 0.8em;
-      background-color: inherit;
-      text-align: right;
+    td {
+      border-style: none;
+      padding: 0px;
+    }
+
+    td.linenos {
+      width: 2.5em;
+
+      pre {
+        border-left: 0px;
+        padding-right: 0.8em;
+        background-color: inherit;
+        text-align: right;
+      }
     }
   }
 }

@@ -111,6 +111,7 @@ PLUGINS = [
   'headerid',
   'embed_customjs',
   'sitemap',
+  'katex_math_render',
 ]
 
 RELATIVE_URLS = True
