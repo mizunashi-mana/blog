@@ -263,6 +263,7 @@ STG の意味論は表示的にはクロージャの自由変数とか更新フ�
 
 .. math::
 
+  \begin{array}{c}
   \mathit{val}(\langle \rho, \sigma\rangle, x) = \left\{\begin{array}{ll}
     \mathbf{Int}\,n &(\text{\(x = n\) は整数}) \\
     v &(\rho(x) = v) \\
@@ -270,6 +271,7 @@ STG の意味論は表示的にはクロージャの自由変数とか更新フ�
   \end{array}\right. \\
   \mathit{vals}(\langle \rho, \sigma\rangle, \{x_1, \ldots, x_n\}) =
   [\mathit{val}(\langle \rho, \sigma\rangle, x_1), \ldots, \mathit{val}(\langle \rho, \sigma\rangle, x_n)]
+  \end{array}
 
 この関数はまずローカルスコープで変数を探して，なかったらグローバルスコープで探し，その変数に対応するクロージャのアドレスを返す．では，実際の意味論を見ていく．
 
@@ -323,6 +325,7 @@ STG の意味論は表示的にはクロージャの自由変数とか更新フ�
 let (rec) 式
   .. math::
 
+    \begin{array}{c}
     \langle \mathbf{Eval}\,\left(\begin{array}{lc}
       \text{\tt let}
       &x_1 = \mathit{vs}_1 \mathrel{\text{\tt \textbackslash}\pi_1} \mathit{xs}_1 \mathrel{\text{\tt ->}} e_1 \\
@@ -356,6 +359,7 @@ let (rec) 式
       \end{array}\right]
     , \rho_\mathit{rhs} = \rho
     )
+    \end{array}
 
   letrec 式の場合は， :math:`\rho_\mathit{rhs} = \rho'` とする．この遷移は，単純に let で指定されたローカルのクロージャをヒープに確保し，そのアドレスを変数に結びつけるだけ． let と letrec の違いは作るクロージャでキャプチャするアドレスの違いで， let の場合は前の環境から， letrec の場合は今回確保したアドレスも含めてキャプチャする．
 
