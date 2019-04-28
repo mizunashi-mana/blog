@@ -1,0 +1,561 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした． KaTeX をサーバサイドレンダリングする 特に難しいことはなくて， KaTeX は Node.js 上で動くっぽく，以下のようにすれば HTML を生成できるっぽい: $ node --eval &#39;const KaTeX = require(&#34;katex&#34;); console.log(KaTeX …" />
+<meta name="keywords" content="KaTeX, Pelican, ブログ, Python, Node.js, JavaScript">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="KaTeX を静的にコンパイルする"/>
+<meta property="og:description" content="ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした． KaTeX をサーバサイドレンダリングする 特に難しいことはなくて， KaTeX は Node.js 上で動くっぽく，以下のようにすれば HTML を生成できるっぽい: $ node --eval &#39;const KaTeX = require(&#34;katex&#34;); console.log(KaTeX …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-04-28 18:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="KaTeX"/>
+<meta property="article:tag" content="Pelican"/>
+<meta property="article:tag" content="ブログ"/>
+<meta property="article:tag" content="Python"/>
+<meta property="article:tag" content="Node.js"/>
+<meta property="article:tag" content="JavaScript"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; KaTeX を静的にコンパイルする</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="to-use-serverside-katex">KaTeX を静的にコンパイルする</h1>
+    <p>
+          Posted on 日 28 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした．</p>
+<div class="section" id="auto-id-1">
+<h2>KaTeX をサーバサイドレンダリングする<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>特に難しいことはなくて， KaTeX は Node.js 上で動くっぽく，以下のようにすれば HTML を生成できるっぽい:</p>
+<pre class="literal-block">
+$ node --eval 'const KaTeX = require("katex"); console.log(KaTeX.renderToString("x"));'
+&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;x&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class="katex-html" aria-hidden="true"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.43056em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault"&gt;x&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;
+</pre>
+<p>これを利用して， Pelican のプラグインから Node.js で KaTeX のレンダリングを行うようにする．まず， JavaScript のコードで，次のようなものを書いた:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env node</span>
+
+<span class="kr">const</span> <span class="nx">KaTeX</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"katex"</span><span class="p">);</span>
+
+<span class="kd">function</span> <span class="nx">katexRenderingPipe</span><span class="p">(</span><span class="nx">instream</span><span class="p">,</span> <span class="nx">outstream</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">chunkrest</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
+
+  <span class="kd">function</span> <span class="nx">onData</span><span class="p">(</span><span class="nx">chunk</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kr">const</span> <span class="nx">chunks</span> <span class="o">=</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s2">"utf8"</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">"\t\n"</span><span class="p">);</span>
+    <span class="nx">chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nx">chunkrest</span> <span class="o">+</span> <span class="nx">chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="kd">let</span> <span class="nx">l</span> <span class="o">=</span> <span class="nx">chunks</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kr">const</span> <span class="nx">str</span> <span class="o">=</span> <span class="nx">chunks</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\t /g</span><span class="p">,</span> <span class="s2">"\t"</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">str</span> <span class="o">!==</span> <span class="s2">"string"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">"not string stream"</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="nx">outstream</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">KaTeX</span><span class="p">.</span><span class="nx">renderToString</span><span class="p">(</span><span class="nx">str</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\t/g</span><span class="p">,</span> <span class="s2">"\t "</span><span class="p">));</span>
+      <span class="nx">outstream</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s2">"\t\n"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">chunkrest</span> <span class="o">=</span> <span class="nx">chunks</span><span class="p">[</span><span class="nx">l</span><span class="p">];</span>
+  <span class="p">}</span>
+
+  <span class="nx">instream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"data"</span><span class="p">,</span> <span class="nx">onData</span><span class="p">);</span>
+  <span class="nx">instream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"end"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">outstream</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s1">''</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="nx">katexRenderingPipe</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">stdin</span><span class="p">,</span> <span class="nx">process</span><span class="p">.</span><span class="nx">stdout</span><span class="p">);</span>
+</pre></div>
+</td></tr></table><p>このプログラムは，区切り文字で区切って送られてくる数式文字列を受け取って，それを <tt class="docutils literal">KaTeX</tt> に渡し，レンダリングされた文字列を返すプログラムになる．データのシリアライズ形式としてめっちゃ単純なものを使っていて，ほぼ文字列そのままでタブ文字はその後に空白を入れる．後はその文字列をタブ文字改行で区切って送るだけ．送った先ではタブ文字空白をタブ文字に変換する．こうすると，区切り文字が一定に決まる． HTTP でも過去には一部のブラウザで似たようなことが行われていた気がする．タブ文字は，送る数式にも返ってくる HTML にも入ってないであろうと想定して，デバッグの時に視覚的に見分けられる文字として選んでる．後は， Pelican 側から，上のスクリプトを立ち上げて随時数式文字列を送り，返ってきた HTML で数式環境を置き換えるだけ．ただそれだけなんだが， Python 初心者なので色々手こずった．なので，以降主に Python についての内容になる．</p>
+</div>
+<div class="section" id="asyncio">
+<h2>asyncio を使う<a class="headerlink" href="#asyncio" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Node.js に合わせて Python も非同期 I/O を使おうと思って， Python 標準の <tt class="docutils literal">asyncio</tt> モジュールを使ってみることにした． Python には， 3.5 から async/await 構文が入っている．感覚的には， JavaScript の async/await と変わらなくて，</p>
+<pre class="literal-block">
+async def f(x):
+  return await g(x)
+</pre>
+<p>は，以下のと大体同じ:</p>
+<pre class="literal-block">
+import asyncio
+
+@asyncio.coroutine
+def f(x):
+  return yield from g(x)
+</pre>
+<p><tt class="docutils literal">@asyncio.coroutine</tt> デコレータは将来消されるらしいけど <a class="footnote-reference" href="#asyncio-coroutine-decolator-deprecated" id="auto-id-2">[1]</a>，イメージ的にはジェネレータの各ステップを適宜 Future に包むながら繋げていく感じ．で，そのデコレータを使わないで，同様のことを簡単に書けるのが async / await 構文で，デコレータに包まれたジェネレータの定義が <tt class="docutils literal">async def</tt> ， <tt class="docutils literal">yield from</tt> が <tt class="docutils literal">await</tt> な感じ．まあ，実は僕もそこまで深く理解してないんだけど．</p>
+<p>Node.js との違いは，イベントループに対する明示的な操作がかなりできることっぽい．イベントループ止めたりもできる．この辺よく分かってないけど，とりあえず</p>
+<pre class="literal-block">
+asyncio.run(f("arg"))
+</pre>
+<p>とかしとけば，</p>
+<ol class="arabic simple">
+<li>イベントループをカレントスレッドに作成する (既にあればエラーになる) ．</li>
+<li>返ってきたコルーチンオブジェクトを，作成したイベントループで処理する．</li>
+<li>処理し終えたら，イベントループを破棄して，結果に応じて値または例外を出す．</li>
+</ol>
+<p>みたいなことをしてくれるっぽい．他にも色々 API があるんだけど，フォークに対応してなかったり <a class="footnote-reference" href="#fork-asyncio-issue" id="auto-id-3">[2]</a>，微妙に使い方分からなかったり．なので，適当に <tt class="docutils literal">run</tt> 使うことにした．</p>
+<p><tt class="docutils literal">asyncio</tt> モジュールでは，この async/await に対応した非同期 I/O API も提供している．今回は， Node.js のスクリプトを立ち上げるため，サブプロセス関係の API を使う． <tt class="docutils literal">asyncio</tt> モジュールのサブプロセス関係の API は，基本的に <tt class="docutils literal">subprocess</tt> モジュールと扱い方は変わらなくって，コルーチンオブジェクトを返すようになってるだけ．以下のように使う:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="n">async</span> <span class="k">def</span> <span class="nf">ls1</span><span class="p">():</span>
+  <span class="n">proc</span> <span class="o">=</span> <span class="n">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
+    <span class="s2">"ls"</span><span class="p">,</span>
+    <span class="s2">"-1"</span><span class="p">,</span>
+    <span class="n">stdin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">stdout</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+    <span class="p">)</span>
+
+  <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">break</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+  <span class="n">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ls1</span><span class="p">())</span>
+</pre></div>
+</td></tr></table><p>ところで，対象が <tt class="docutils literal">ls</tt> コマンドならいいんだけど，今呼び出したいプログラムは EOF を送らないと終了しないようになっているので，呼び出し側で例外が発生すると，そのままプロセスが閉じないで色々あれなことになる．なので，プロセスのリソース管理をして，例外が発生したら呼び出してるプロセスに <tt class="docutils literal">SIGTERM</tt> を送るようにしたい．これには， with 構文の async 版， async with が使える． async with は <tt class="docutils literal">__aenter__</tt> / <tt class="docutils literal">__aexit__</tt> というプロトコルメソッドを使う．サブプロセスの管理は，以下のように書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">STREAM_CHUNK_LIMIT</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">16</span>
+
+<span class="k">class</span> <span class="nc">KaTeXRendererManager</span><span class="p">:</span>
+  <span class="n">async</span> <span class="k">def</span> <span class="nf">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
+      <span class="s1">'node'</span><span class="p">,</span>
+      <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">'katex_render.js'</span><span class="p">),</span>
+      <span class="n">stdin</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+      <span class="n">stdout</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+      <span class="n">limit</span><span class="o">=</span><span class="n">STREAM_CHUNK_LIMIT</span><span class="p">,</span>
+      <span class="p">)</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span>
+
+  <span class="n">async</span> <span class="k">def</span> <span class="nf">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">exc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+      <span class="k">return</span>
+
+    <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+<span class="n">async</span> <span class="k">def</span> <span class="nf">render_math_contents</span><span class="p">(</span><span class="n">contents</span><span class="p">):</span>
+  <span class="n">async</span> <span class="k">with</span> <span class="n">KaTeXRendererManager</span><span class="p">()</span> <span class="k">as</span> <span class="n">proc</span><span class="p">:</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">readuntil_sep</span><span class="p">():</span>
+      <span class="n">chunk</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
+      <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\t\n</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">LimitOverrunError</span><span class="p">:</span>
+          <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">STREAM_CHUNK_LIMIT</span> <span class="o">-</span> <span class="mi">1024</span><span class="p">)</span>
+          <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">break</span>
+
+      <span class="k">return</span> <span class="n">chunk</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1"> '</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
+      <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1"> '</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+      <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\t\n</span><span class="s1">'</span><span class="p">)</span>
+
+      <span class="k">print</span><span class="p">(</span><span class="n">await</span> <span class="n">readuntil_sep</span><span class="p">())</span>
+
+    <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write_eof</span><span class="p">()</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">render_math_contents</span><span class="p">([</span><span class="s1">'f(x) = 2^x'</span><span class="p">,</span> <span class="s1">'n </span><span class="se">\\</span><span class="s1">in </span><span class="se">\\</span><span class="s1">mathbb{N}'</span><span class="p">]))</span>
+</pre></div>
+</td></tr></table><p><tt class="docutils literal">async with</tt> が呼ばれた時に， <tt class="docutils literal">__aenter__</tt> で返されたものが束縛され，処理が終了するか例外が出ると <tt class="docutils literal">__aexit__</tt> が呼ばれる．なお， <tt class="docutils literal">__aexit__</tt> は，正常終了すると引数に <tt class="docutils literal">None</tt> が入れられて呼ばれる．なお，サブプロセスから読み取るチャンクの最大サイズはデフォルトで， 64KB (= <span class="math inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mn>16</mn></msup></mrow><annotation encoding="application/x-tex">2 ^ {16}</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">6</span></span></span></span></span></span></span></span></span></span></span></span></span> B) が指定されてる．これを超えるものを読み取ろうとすると， <tt class="docutils literal">LimitOverrunError</tt> 例外が発生する:</p>
+<pre class="literal-block">
+ValueError: Separator is not found, and chunk exceed the limit
+</pre>
+<p>これを解決するため，例外が発生するとまずちょっと読み取って，それから再度挑戦するみたいなことをしてる．ここまでくれば，後は適当に BeautifulSoup を使って数式 DOM 部分を置換していくプラグインを書くだけだった．</p>
+</div>
+<div class="section" id="python">
+<h2>Python のデバッグをする<a class="headerlink" href="#python" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>プラグインを書く際，結構色々バグってデバッグをたくさんした．特に， Pelican だとエラーはメッセージしか表示されなくて，トレースバックが表示されなくて，色々難航したので，トレースバックを表示する方法を色々調べた．結論としては，以下のようにすればトレースバックを表示できるっぽい:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="o">...</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+  <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">''</span><span class="p">)</span>
+
+  <span class="k">raise</span> <span class="n">e</span>
+</pre></div>
+</td></tr></table><p>Python 3.5 から <tt class="docutils literal">traceback.format_exception</tt> の一番目の引数は勝手に検知してくれるようになったので，特に指定しなくて大丈夫みたい．推測してくれない場合，エラーの型を書く必要がある．後，プロファイルが取りたければ次のようにする:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pstats</span>
+<span class="kn">import</span> <span class="nn">cProfile</span>
+
+<span class="n">pr</span> <span class="o">=</span> <span class="n">cProfile</span><span class="o">.</span><span class="n">Profile</span><span class="p">()</span>
+
+<span class="n">pr</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
+<span class="o">...</span>
+<span class="n">pr</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+
+<span class="sd">"""</span>
+<span class="sd">ファイル出力の場合:</span>
+<span class="sd">pstats.Stats(pr).dump_stats('profile.stats')</span>
+
+<span class="sd">pstats.Stats('profile.stats')</span>
+<span class="sd">"""</span>
+
+<span class="c1"># 累計時間でソートして，上位 10 件表示</span>
+<span class="n">pstats</span><span class="o">.</span><span class="n">Stats</span><span class="p">(</span><span class="n">pr</span><span class="p">)</span><span class="o">.</span><span class="n">sort_stats</span><span class="p">(</span><span class="n">pstats</span><span class="o">.</span><span class="n">SortKey</span><span class="o">.</span><span class="n">CUMULATIVE</span><span class="p">)</span><span class="o">.</span><span class="n">print_stats</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>なんかまあ，そんな感じ．</p>
+</div>
+<div class="section" id="auto-id-4">
+<h2>まとめ<a class="headerlink" href="#auto-id-4" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>サーバサイドレンダリングで， JavaScript をブラウザで動かさずに数式を見れるようにした．でも，結構ビルドが遅くなっちゃった．</p>
+<p>なんか色々調整してみたけど，大体文書 18 個，ページ 3 個で 8 秒ぐらいかかる． KaTeX のビルドをしなければ 3 秒ぐらいで済む．これ何とかしたいんだけど， KaTeX は Node.js 上でしか動かないし， Pelican は Python が必要だし，プラグインの制約も色々あるし，うーんという感じ．多分サブプロセスの立ち上げと， Node.js と Python 間の通信が一番コストになってる．通信は gzip 圧縮でもしてみようかと思ったけど，めんどいのでやめた．まあ，色々対策を考えてみるかという感じ．</p>
+<table class="docutils footnote" frame="void" id="asyncio-coroutine-decolator-deprecated" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td><a class="reference external" href="https://docs.python.org/ja/3.7/library/asyncio-task.html#asyncio.coroutine">https://docs.python.org/ja/3.7/library/asyncio-task.html#asyncio.coroutine</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="fork-asyncio-issue" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-3">[2]</a></td><td><a class="reference external" href="https://bugs.python.org/issue21998">https://bugs.python.org/issue21998</a></td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/to-use-serverside-katex.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/to-use-serverside-katex.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/katex.html">KaTeX</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/nodejs.html">Node.js</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/">ブログに共有ボタンを追加した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/">MathML にバイバイして， KaTeX に移行した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/">脚注のためのツールチップ追加</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/">MathML で数式を表示する</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/">ブログのデザイン調整</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 22 Apr 2019 03:00:00 +0900</lastBuildDate><item><title>MathML にバイバイして， KaTeX に移行した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/</link><description>&lt;p&gt;以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 28 Apr 2019 18:00:00 +0900</lastBuildDate><item><title>KaTeX を静的にコンパイルする</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/</link><description>&lt;p&gt;ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;KaTeX をサーバサイドレンダリングする&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;特に難しいことはなくて， KaTeX は Node.js 上で動くっぽく，以下のようにすれば HTML を生成できるっぽい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ node --eval 'const KaTeX = require("katex"); console.log(KaTeX …&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Sun, 28 Apr 2019 18:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-28:/blog/posts/2019/04/to-use-serverside-katex/</guid><category>KaTeX</category><category>Pelican</category><category>ブログ</category><category>Python</category><category>Node.js</category><category>JavaScript</category></item><item><title>MathML にバイバイして， KaTeX に移行した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/</link><description>&lt;p&gt;以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．&lt;/p&gt;
 &lt;div class="section" id="mathml"&gt;
 &lt;h2&gt;MathML に敗北した&lt;a class="headerlink" href="#mathml" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;正確には， MathML は悪くないんだが，現状の MathML + MathJax 環境は色々辛いものがあった．&lt;/p&gt;

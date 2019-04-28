@@ -57,7 +57,7 @@
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog"/>
 <meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
 
-  <title>続くといいな日記 &ndash;     Authors
+  <title>続くといいな日記 &ndash;     Tag KaTeX
 </title>
 
 </head>
@@ -127,17 +127,38 @@
 </a>
     </nav>
 
-<article class="single">
+
+
+<article>
   <header>
-    <h1>    Authors
-</h1>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/#to-use-serverside-katex">KaTeX を静的にコンパイルする</a></h2>
+    <p>
+          Posted on 日 28 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/katex.html">KaTeX</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/nodejs.html">Node.js</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>
+    </p>
   </header>
   <div>
-    <ul class="list">
-      <li><a href="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">Mizunashi Mana</a> (18)</li>
-    </ul>
+      <p>ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした．</p>
+<div class="section" id="auto-id-1">
+<h2>KaTeX をサーバサイドレンダリングする<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>特に難しいことはなくて， KaTeX は Node.js 上で動くっぽく，以下のようにすれば HTML を生成できるっぽい:</p>
+<pre class="literal-block">
+$ node --eval 'const KaTeX = require("katex"); console.log(KaTeX …</pre></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/#to-use-serverside-katex">    Continue reading
+</a>
   </div>
 </article>
+
+  <div class="pagination">
+  </div>
+
+
+
 
     <footer>
 <p>
