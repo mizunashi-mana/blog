@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 28 Apr 2019 18:00:00 +0900</lastBuildDate><item><title>KaTeX を静的にコンパイルする</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/</link><description>&lt;p&gt;ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 28 Apr 2019 18:00:00 +0900</lastBuildDate><item><title>KaTeX コードを静的にレンダリングする</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/</link><description>&lt;p&gt;ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;KaTeX をサーバサイドレンダリングする&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;特に難しいことはなくて， KaTeX は Node.js 上で動くっぽく，以下のようにすれば HTML を生成できるっぽい:&lt;/p&gt;
