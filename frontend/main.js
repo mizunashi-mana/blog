@@ -1,4 +1,4 @@
-import * as renderMath from './component/render_math';
+import './component/render_math';
 import * as addShareButtons from './component/add_sharebuttons';
 import * as addFootnoteTooltip from './component/add_footnote_tooltip';
 
@@ -11,7 +11,6 @@ function onLoad() {
   }
 
   if (['articles', 'pages'].includes(contentMetadata.type)) {
-    renderMath.renderMathBlock();
     addFootnoteTooltip.addFootnoteTooltip();
   }
 }

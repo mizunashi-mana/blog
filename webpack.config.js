@@ -8,8 +8,8 @@ module.exports = {
     bundle: './frontend/index.js',
   },
 
-	output: {
-		filename: '[name].js',
+  output: {
+    filename: '[name].js',
     path: path.resolve(__dirname, 'content/dist-asset')
   },
 
