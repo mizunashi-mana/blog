@@ -6,31 +6,43 @@ from pelican import signals, contents
 from bs4 import BeautifulSoup
 import asyncio
 import os
-import json
+import subprocess
 
 
 STREAM_CHUNK_LIMIT = 2 ** 16
 
-class KaTeXRendererManager:
-  async def __aenter__(self):
-    self.proc = await asyncio.create_subprocess_exec(
-      'node',
-      os.path.join(os.path.dirname(os.path.abspath(__file__)), 'katex_render.js'),
-      stdin=asyncio.subprocess.PIPE,
-      stdout=asyncio.subprocess.PIPE,
-      limit=STREAM_CHUNK_LIMIT,
+proc = None
+
+def katex_subprocess_get():
+  global proc
+  if proc is None:
+    proc = subprocess.Popen(
+      [
+        'node',
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'katex_render.js'),
+      ],
+      stdin=subprocess.PIPE,
+      stdout=subprocess.PIPE,
       )
 
-    return self.proc
+  return proc
 
-  async def __aexit__(self, exc_type, exc, tb):
-    if exc is not None:
-      self.proc.terminate()
-      return
+def katex_subprocess_finalize(obj):
+  global proc
+  if proc is not None:
+    try:
+      proc.stdin.close()
+      proc.wait(timeout=1)
+    except subprocess.TimeoutExpired:
+      proc.terminate()
+    except Exception:
+      proc.terminate()
 
-    await self.proc.wait()
+    proc = None
 
-async def katex_math_render_async(content):
+def katex_math_render(content):
+  proc = katex_subprocess_get()
+
   if isinstance(content, contents.Static):
     return
 
@@ -46,79 +58,46 @@ async def katex_math_render_async(content):
   if (len(math_block_tags) + len(math_inline_tags)) == 0:
     return
 
-  async with KaTeXRendererManager() as proc:
-    async def push_math_content(tag):
-      proc.stdin.write(tag.string.replace('\t', '\t ').encode())
-      proc.stdin.write(b'\t\n')
+  def push_math_content(tag, mode):
+    proc.stdin.write(mode)
+    proc.stdin.write(tag.string.replace('\t', '\t ').encode())
+    proc.stdin.write(b'\t\n')
+    proc.stdin.flush()
 
-    async def readuntil_sep():
-      chunk = b''
-      while True:
-        try:
-          chunk = chunk + await proc.stdout.readuntil(b'\t\n')
-        except asyncio.LimitOverrunError:
-          chunk = chunk + await proc.stdout.read(STREAM_CHUNK_LIMIT - 1024)
-          continue
-        else:
-          break
+  def replace_math_content(tag, new_tag):
+    chunk = b''
+    while not chunk.endswith(b'\t\n'):
+      chunk = chunk + proc.stdout.readline()
+      retcode = proc.poll()
+      if retcode is not None:
+        raise subprocess.CalledProcessError(retcode, proc.args[0])
 
-      return chunk.replace(b'\t ', b'\t')
+    new_tag.append(
+      BeautifulSoup(
+        chunk.replace(b'\t ', b'\t'),
+        'html.parser',
+        ).span,
+      )
 
-    async def replace_math_block(tag):
-      new_tag = soup_body.new_tag('div')
-      new_tag['class'] = 'math block'
+    tag.replace_with(new_tag)
 
-      math_html = await readuntil_sep()
-      new_tag.append(BeautifulSoup(math_html, 'html.parser').span)
+  for tag in math_block_tags:
+    push_math_content(tag, b'b')
 
-      tag.replace_with(new_tag)
+    new_tag = soup_body.new_tag('div')
+    new_tag['class'] = 'math block'
+    replace_math_content(tag, new_tag)
 
-    async def replace_math_inline(tag):
-      new_tag = soup_body.new_tag('span')
-      new_tag['class'] = 'math inline'
+  for tag in math_inline_tags:
+    push_math_content(tag, b'i')
 
-      math_html = await readuntil_sep()
-      new_tag.append(BeautifulSoup(math_html, 'html.parser').span)
-
-      tag.replace_with(new_tag)
-
-    if len(math_block_tags) > 0:
-      tags = math_block_tags
-
-      await push_math_content(tags[0])
-      pre_tag = tags[0]
-
-      for tag in tags[1:None]:
-        await asyncio.gather(
-          replace_math_block(pre_tag),
-          push_math_content(tag),
-        )
-        pre_tag = tag
-
-      await replace_math_block(pre_tag)
-
-    if len(math_inline_tags) > 0:
-      tags = math_inline_tags
-
-      await push_math_content(tags[0])
-      pre_tag = tags[0]
-
-      for tag in tags[1:None]:
-        await asyncio.gather(
-          replace_math_inline(pre_tag),
-          push_math_content(tag),
-        )
-        pre_tag = tag
-
-      await replace_math_inline(pre_tag)
-
-    proc.stdin.write_eof()
+    new_tag = soup_body.new_tag('span')
+    new_tag['class'] = 'math inline'
+    replace_math_content(tag, new_tag)
 
   content.bs4_soup = soup
   content._content = soup.decode()
 
-def katex_math_render(content):
-  asyncio.run(katex_math_render_async(content))
-
 def register():
+  signals.finalized.connect(katex_subprocess_finalize)
   signals.content_object_init.connect(katex_math_render)

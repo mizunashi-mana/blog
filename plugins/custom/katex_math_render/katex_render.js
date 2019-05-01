@@ -16,7 +16,16 @@ function katexRenderingPipe(instream, outstream) {
         throw new Error("not string stream");
       }
 
-      outstream.write(KaTeX.renderToString(str).replace(/\t/g, "\t "));
+      let opts = {
+        strict: (errorCode, errorMsg, _token) => {
+          console.error(errorCode + ":" + errorMsg + ":" + str.substr(1));
+        },
+      };
+      if (str[0] == 'b') {
+        opts.displayMode = true;
+      }
+
+      outstream.write(KaTeX.renderToString(str.substr(1), opts).replace(/\t/g, "\t "));
       outstream.write("\t\n");
     }
     chunkrest = chunks[l];
