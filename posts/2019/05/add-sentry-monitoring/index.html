@@ -47,18 +47,26 @@
     <!-- Microsoft EDGE -->
     <meta name="msapplication-TileColor" content="#555">
 
-    <meta name="author" content="Mizunashi Mana" />
-    <meta name="description" content="Mizunashi Mana's Blog" />
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="クロスプラットフォームのエラー監視を行う Sentry というサービスがある．ブログに試しに導入してみたので，それについて書く． Sentry について Sentry は，提供されている SDK を PHP コードや JavaScript コードに埋め込むことで，エラーを Sentry に送り，管理画面から確認できるようにするサービスだ．コードが https://github.com/getsentry …" />
+<meta name="keywords" content="ブログ, 監視, JavaScript">
+
 <meta property="og:site_name" content="続くといいな日記"/>
-<meta property="og:type" content="blog"/>
-<meta property="og:title" content="続くといいな日記"/>
-<meta property="og:description" content="Mizunashi Mana's Blog"/>
+<meta property="og:title" content="Sentry でエラー監視"/>
+<meta property="og:description" content="クロスプラットフォームのエラー監視を行う Sentry というサービスがある．ブログに試しに導入してみたので，それについて書く． Sentry について Sentry は，提供されている SDK を PHP コードや JavaScript コードに埋め込むことで，エラーを Sentry に送り，管理画面から確認できるようにするサービスだ．コードが https://github.com/getsentry …"/>
 <meta property="og:locale" content="ja"/>
-<meta property="og:url" content="https://mizunashi-mana.github.io/blog"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/05/add-sentry-monitoring/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-05-02 18:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="ブログ"/>
+<meta property="article:tag" content="監視"/>
+<meta property="article:tag" content="JavaScript"/>
 <meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
 
-  <title>続くといいな日記 &ndash;     Archives
-</title>
+  <title>続くといいな日記 &ndash; Sentry でエラー監視</title>
 
 </head>
 <body>
@@ -129,17 +137,97 @@
 
 <article class="single">
   <header>
-    <h1>    Archives
-</h1>
+      
+    <h1 id="add-sentry-monitoring">Sentry でエラー監視</h1>
+    <p>
+          Posted on 木 02 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+    </p>
   </header>
+
+
   <div>
-    <dl>
-      <dt>木 02 5月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/add-sentry-monitoring/">Sentry でエラー監視</a></dd>
-      <dt>木 02 5月 2019</dt>
-      <dd><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/cpo-related-definitions/">CPO に関連する定義まとめ</a></dd>
-    </dl>
+    <p>クロスプラットフォームのエラー監視を行う Sentry というサービスがある．ブログに試しに導入してみたので，それについて書く．</p>
+<div class="section" id="auto-id-1">
+<h2>Sentry について<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Sentry は，提供されている SDK を PHP コードや JavaScript コードに埋め込むことで，エラーを Sentry に送り，管理画面から確認できるようにするサービスだ．コードが <a class="reference external" href="https://github.com/getsentry/sentry">https://github.com/getsentry/sentry</a> で公開されていて，オンプレでも動かせる． <a class="reference external" href="https://sentry.io/">https://sentry.io/</a> にデプロイされていて，今回はそれを使っている．</p>
+<p>例えば JavaScript でエラーが取れると，以下のような情報が見れる <a class="footnote-reference" href="#hide-ip-address" id="auto-id-2">[1]</a>:</p>
+<img alt="Sentry の Web画面では，エラーが起きた IP / User-Agent などを見れる．" src="https://mizunashi-mana.github.io/blog/posts/2019/05/add-sentry-monitoring/add-sentry-monitoring/sentry-web-image.png"/>
+<p>管理画面ではエラーを共有したり，コメントをつけたり，似たエラーを見れたり，色々充実してる．今回は使用していないが，ユーザーにフィードバックを求めるダイアログを表示し，そのフィードバックを管理したりもできる．</p>
+<p>内部の仕組みは，詳しく見てないけど， JavaScript の場合 <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror">window.onerror</a> とかで監視してるっぽい？</p>
+</div>
+<div class="section" id="auto-id-3">
+<h2>Sentry の導入<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>では， Sentry を導入してみる．と言っても，そこまで複雑なことをする必要はなくて，大体以下の手順をやればいい:</p>
+<ol class="arabic simple">
+<li>(アカウントが無ければ) <a class="reference external" href="https://sentry.io/">https://sentry.io/</a> に Sign Up する．</li>
+<li>プロジェクトを作る．</li>
+<li>SDK をインストールする．</li>
+<li>セキュリティトークンを入手し，設定する．</li>
+</ol>
+<p>アカウントを作ると，プロジェクト作成画面に移るので，監視したいプロジェクトの種類を選択し，名前を入力してプロジェクト作成を行う．後は，</p>
+<pre class="literal-block">
+npm install -D @sentry/browser
+</pre>
+<p>して， Installing Instructions からセキュリティートークンを入手し，書いてある通りに設定する:</p>
+<pre class="literal-block">
+import * as Sentry from "@sentry/browser";
+
+Sentry.init({
+  dsn: 'https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@sentry.io/xxxxxxx',
+});
+</pre>
+<p>試しに，エラーを起こしてちゃんと情報が取れるか確認してみると良い:</p>
+<pre class="literal-block">
+setTimeout(() =&gt; { throw new Error("sample error"); }, 0);
+</pre>
+<p>これで，管理画面の Issues にエラーが表示されれば大丈夫．</p>
+</div>
+<div class="section" id="auto-id-4">
+<h2>まとめ<a class="headerlink" href="#auto-id-4" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まだ本格的に使い始めて無いので，使い勝手は分からないけど，色々便利そうではある．</p>
+<p>世の中色々便利なサービスはあるんだなあって感じだ．こういうの使ってみないと知見溜まらないしね．そういう感じで．</p>
+<table class="docutils footnote" frame="void" id="hide-ip-address" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td>IP アドレスは隠してる．</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/05/add-sentry-monitoring.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/add-sentry-monitoring.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
   </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/jian-shi.html">監視</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/">KaTeX コードを静的にレンダリングする</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/">MathML にバイバイして， KaTeX に移行した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/">脚注のためのツールチップ追加</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/">MathML で数式を表示する</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/">ブログに共有ボタンを追加した</a></li>
+    </ul>
+  </div>
+
+
 </article>
 
     <footer>

@@ -289,7 +289,7 @@ var contentMetadataForCustomJS = {
   'type': 'articles',
   'title': document.title,
   'url': location.protocol + '//' + location.host + location.pathname,
-  'source_path': 'articles/2019/04/cpo-related-definitions.rst',
-  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/cpo-related-definitions.rst'
+  'source_path': 'articles/2019/05/cpo-related-definitions.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/cpo-related-definitions.rst'
 }
 &lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Domain Theory"></category><category term="束論"></category><category term="順序理論"></category><category term="表示的意味論"></category><category term="本"></category></entry></feed>
