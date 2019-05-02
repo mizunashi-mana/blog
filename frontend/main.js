@@ -1,3 +1,4 @@
+import './component/sentry_monitor';
 import './component/render_math';
 import * as addShareButtons from './component/add_sharebuttons';
 import * as addFootnoteTooltip from './component/add_footnote_tooltip';
