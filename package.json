@@ -10,6 +10,7 @@
     "vue": "^2.6.10"
   },
   "devDependencies": {
+    "@sentry/browser": "^5.1.1",
     "autoprefixer": "^9.5.1",
     "css-loader": "^2.1.1",
     "cssnano": "^4.1.10",
