@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 環境構築</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/huan-jing-gou-zhu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-05-17T15:01:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>GHC で LLVM を通したビルドを行う</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/" rel="alternate"></link><published>2019-05-17T15:01:00+09:00</published><updated>2019-05-17T15:01:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-with-llvm/</id><summary type="html">&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="macos-llvm-ghc"&gt;
+&lt;h2&gt;macOS で LLVM を GHC が使えるようにする&lt;a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support"&gt;https …&lt;/a&gt;&lt;/blockquote&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="macos-llvm-ghc"&gt;
+&lt;h2&gt;macOS で LLVM を GHC が使えるようにする&lt;a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support"&gt;https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support&lt;/a&gt;&lt;/blockquote&gt;
+&lt;p&gt;今回は GHC 8.6.5 を使ったので， LLVM のバージョンは 6 系になる．なので， LLVM 6 系を Homebrew でインストールする:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+brew install llvm@6
+&lt;/pre&gt;
+&lt;p&gt;後は， GHC が見にいく llvm のツールの場所をインストールしたものに変更する． GHC は &lt;tt class="docutils literal"&gt;settings&lt;/tt&gt; ファイルというものを持っている．これは単なるテキストファイルで， Haskell の &lt;tt class="docutils literal"&gt;[(String, String)]&lt;/tt&gt; 型のダンプ情報の形式で書かれていて，ユーザが書き換え可能だ． GHC は実行するたびにこのファイルを見て， &lt;tt class="docutils literal"&gt;read :: String &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; [(String, String)]&lt;/tt&gt; した情報を元に設定を初期化する．このファイルは， &lt;tt class="docutils literal"&gt;lib&lt;/tt&gt; ディレクトリのトップに置かれているのが通常で， &lt;tt class="docutils literal"&gt;ghcup&lt;/tt&gt; を使っている場合， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;~/.ghcup/ghc/8.6.5/lib/ghc-8.6.5/settings&lt;/span&gt;&lt;/tt&gt; にある．この設定の LLVM 関連部分を修正する．主に修正する箇所は 2 つ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[
+...
+("LLVM llc command", "llc"),
+("LLVM opt command", "opt"),
+("LLVM clang command", "clang")
+]
+&lt;/pre&gt;
+&lt;p&gt;のうちの &lt;tt class="docutils literal"&gt;LLVM llc command&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;LLVM opt command&lt;/tt&gt; を LLVM 6 のパスに置き換える．置き換える場所は&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ echo $(brew --prefix llvm@6)/bin/{llc,opt}
+/usr/local/opt/llvm@6/bin/llc /usr/local/opt/llvm@6/bin/opt
+&lt;/pre&gt;
+&lt;p&gt;で，次のように書けばいい:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;  [
+  ...
+&lt;span class="gd"&gt;- ("LLVM llc command", "llc"),&lt;/span&gt;
+&lt;span class="gd"&gt;- ("LLVM opt command", "opt"),&lt;/span&gt;
+&lt;span class="gi"&gt;+ ("LLVM llc command", "/usr/local/opt/llvm@6/bin/llc"),&lt;/span&gt;
+&lt;span class="gi"&gt;+ ("LLVM opt command", "/usr/local/opt/llvm@6/bin/opt"),&lt;/span&gt;
+  ("LLVM clang command", "clang")
+  ]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;div class="section" id="llvm-clang-command"&gt;
+&lt;h3&gt;LLVM clang command について&lt;a class="headerlink" href="#llvm-clang-command" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;LLVM clang command&lt;/tt&gt; はなんか変えなくても動くし，こいつを &lt;tt class="docutils literal"&gt;/usr/local/opt/llvm@6/bin/clang&lt;/tt&gt; に変えてコンパイルすると以下のエラーが出てコンパイルができない:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cabal new-build
+...
+
+/var/folders/km/7h33fnqs7bddrz_xtx609ss00000gn/T/ghc78032_0/ghc_1.s:2:31: error:
+    error: invalid OS update specifier, comma expected
+            .build_version macos, 10, 14    sdk_version 10, 14
+                                            ^
+  |
+2 |         .build_version macos, 10, 14    sdk_version 10, 14
+  |                               ^
+
+&amp;lt;no location info&amp;gt;: error:
+    Error running clang! you need clang installed to use the LLVM backend
+    (or GHC tried to execute clang incorrectly)
+`clang' failed in phase `Clang (Assembler)'. (Exit code: 1)
+&lt;/pre&gt;
+&lt;p&gt;原因不明だが， &lt;tt class="docutils literal"&gt;LLVM clang command&lt;/tt&gt; をいじらなければ普通に動くので，なんだろなって思って放置してる．原因誰か知ってたら教えてくださいって感じ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="llvm"&gt;
+&lt;h2&gt;LLVM を通してビルドする&lt;a class="headerlink" href="#llvm" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;後は， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-fllvm&lt;/span&gt;&lt;/tt&gt; オプションをつけてビルドすればいい． &lt;tt class="docutils literal"&gt;cabal&lt;/tt&gt; の場合，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+cabal build --ghc-options=-fflvm
+&lt;/pre&gt;
+&lt;p&gt;みたいにする．ついでに，ネイティブビルドの場合 &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-fasm&lt;/span&gt;&lt;/tt&gt; を付ける．なお， LLVM の出力が見たかったら &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-llvm&lt;/span&gt;&lt;/tt&gt; というオプションで見れるっぽい． LLVM 出力ができてるかどうかは， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-llvm&lt;/span&gt;&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-asm&lt;/span&gt;&lt;/tt&gt; をつけて &lt;tt class="docutils literal"&gt;asm&lt;/tt&gt; の出力が出てたら出来てない， &lt;tt class="docutils literal"&gt;llvm&lt;/tt&gt; の出力が出てたら出来てるって感じで確認できる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;macOS の環境の下， GHC で LLVM を使う方法を紹介した． LLVM 用のコード生成見る時とかに使っていきたい．後，パフォーマンスが劇的に改善するらしいね．&lt;/p&gt;
+&lt;p&gt;ただ， &lt;tt class="docutils literal"&gt;ghcup&lt;/tt&gt; を使っている場合一々 &lt;tt class="docutils literal"&gt;settings&lt;/tt&gt; を変更しなきゃいけないのは微妙なので，この辺なんとかしたいね．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/05/ghc-with-llvm.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/ghc-with-llvm.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category><category term="LLVM"></category><category term="macOS"></category><category term="Homebrew"></category></entry></feed>

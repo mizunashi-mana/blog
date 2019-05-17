@@ -5,51 +5,65 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/</loc>
-<lastmod>2019-05-12T13:30:56-00:00</lastmod>
+<lastmod>2019-05-17T05:49:17-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/archives.html</loc>
-<lastmod>2019-05-12T13:30:56-00:00</lastmod>
+<lastmod>2019-05-17T05:49:17-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tags.html</loc>
-<lastmod>2019-05-12T13:30:56-00:00</lastmod>
+<lastmod>2019-05-17T05:49:17-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/categories.html</loc>
-<lastmod>2019-05-12T13:30:56-00:00</lastmod>
+<lastmod>2019-05-17T05:49:17-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/0-profile.html</loc>
-<lastmod>2019-05-12T13:30:56-00:00</lastmod>
+<lastmod>2019-05-17T05:49:17-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/1-about.html</loc>
-<lastmod>2019-05-12T13:30:56-00:00</lastmod>
+<lastmod>2019-05-17T05:49:17-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html</loc>
-<lastmod>2019-05-12T13:30:56-00:00</lastmod>
+<lastmod>2019-05-17T05:49:17-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/</loc>
+<lastmod>2019-05-17T15:01:00+09:00</lastmod>
+<changefreq>monthly</changefreq>
+<priority>0.7</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/</loc>
+<lastmod>2019-05-17T15:00:00+09:00</lastmod>
+<changefreq>monthly</changefreq>
+<priority>0.7</priority>
 </url>
 
 <url>
@@ -214,6 +228,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
+<loc>https://mizunashi-mana.github.io/blog/category/huan-jing-gou-zhu.html</loc>
+<lastmod>2019-05-17T15:01:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
 <loc>https://mizunashi-mana.github.io/blog/category/huremuwaku.html</loc>
 <lastmod>2019-05-12T22:40:00+09:19</lastmod>
 <changefreq>daily</changefreq>
@@ -229,7 +250,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html</loc>
-<lastmod>2019-04-24T14:00:00+09:19</lastmod>
+<lastmod>2019-05-17T15:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -265,6 +286,48 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://mizunashi-mana.github.io/blog/category/zhi-gan.html</loc>
 <lastmod>2019-04-13T20:00:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/haskell.html</loc>
+<lastmod>2019-05-17T15:01:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/ghc.html</loc>
+<lastmod>2019-05-17T15:01:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/llvm.html</loc>
+<lastmod>2019-05-17T15:01:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/macos.html</loc>
+<lastmod>2019-05-17T15:01:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/homebrew.html</loc>
+<lastmod>2019-05-17T15:01:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/io.html</loc>
+<lastmod>2019-05-17T15:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -459,21 +522,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
-<loc>https://mizunashi-mana.github.io/blog/tag/haskell.html</loc>
-<lastmod>2019-04-21T22:00:00+09:19</lastmod>
-<changefreq>daily</changefreq>
-<priority>0.5</priority>
-</url>
-
-<url>
 <loc>https://mizunashi-mana.github.io/blog/tag/chou-xiang-ji-jie.html</loc>
-<lastmod>2019-04-21T22:00:00+09:19</lastmod>
-<changefreq>daily</changefreq>
-<priority>0.5</priority>
-</url>
-
-<url>
-<loc>https://mizunashi-mana.github.io/blog/tag/ghc.html</loc>
 <lastmod>2019-04-21T22:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
@@ -572,7 +621,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html</loc>
-<lastmod>2019-05-12T22:40:00+09:19</lastmod>
+<lastmod>2019-05-17T15:01:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>

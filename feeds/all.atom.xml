@@ -1,5 +1,694 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-05-12T22:40:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Apache Spark についての覚書</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/" rel="alternate"></link><published>2019-05-12T22:40:00+09:00</published><updated>2019-05-12T22:40:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-12:/blog/posts/2019/05/cluster-distributed-programming/</id><summary type="html">&lt;p&gt;ちょっと興味があったので， Apache Spark 関連についていくつか調べたことメモる．なお，僕は最近まで Apache Spark は MapReduce してると思ってたぐらいだし， Hadoop も Spark も触ったことない人間なんで，完全に信憑性はないです．そこはよろしく．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-05-17T15:01:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>GHC で LLVM を通したビルドを行う</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/" rel="alternate"></link><published>2019-05-17T15:01:00+09:00</published><updated>2019-05-17T15:01:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-with-llvm/</id><summary type="html">&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="macos-llvm-ghc"&gt;
+&lt;h2&gt;macOS で LLVM を GHC が使えるようにする&lt;a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support"&gt;https …&lt;/a&gt;&lt;/blockquote&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="macos-llvm-ghc"&gt;
+&lt;h2&gt;macOS で LLVM を GHC が使えるようにする&lt;a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support"&gt;https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support&lt;/a&gt;&lt;/blockquote&gt;
+&lt;p&gt;今回は GHC 8.6.5 を使ったので， LLVM のバージョンは 6 系になる．なので， LLVM 6 系を Homebrew でインストールする:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+brew install llvm@6
+&lt;/pre&gt;
+&lt;p&gt;後は， GHC が見にいく llvm のツールの場所をインストールしたものに変更する． GHC は &lt;tt class="docutils literal"&gt;settings&lt;/tt&gt; ファイルというものを持っている．これは単なるテキストファイルで， Haskell の &lt;tt class="docutils literal"&gt;[(String, String)]&lt;/tt&gt; 型のダンプ情報の形式で書かれていて，ユーザが書き換え可能だ． GHC は実行するたびにこのファイルを見て， &lt;tt class="docutils literal"&gt;read :: String &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; [(String, String)]&lt;/tt&gt; した情報を元に設定を初期化する．このファイルは， &lt;tt class="docutils literal"&gt;lib&lt;/tt&gt; ディレクトリのトップに置かれているのが通常で， &lt;tt class="docutils literal"&gt;ghcup&lt;/tt&gt; を使っている場合， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;~/.ghcup/ghc/8.6.5/lib/ghc-8.6.5/settings&lt;/span&gt;&lt;/tt&gt; にある．この設定の LLVM 関連部分を修正する．主に修正する箇所は 2 つ:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[
+...
+("LLVM llc command", "llc"),
+("LLVM opt command", "opt"),
+("LLVM clang command", "clang")
+]
+&lt;/pre&gt;
+&lt;p&gt;のうちの &lt;tt class="docutils literal"&gt;LLVM llc command&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;LLVM opt command&lt;/tt&gt; を LLVM 6 のパスに置き換える．置き換える場所は&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ echo $(brew --prefix llvm@6)/bin/{llc,opt}
+/usr/local/opt/llvm@6/bin/llc /usr/local/opt/llvm@6/bin/opt
+&lt;/pre&gt;
+&lt;p&gt;で，次のように書けばいい:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;  [
+  ...
+&lt;span class="gd"&gt;- ("LLVM llc command", "llc"),&lt;/span&gt;
+&lt;span class="gd"&gt;- ("LLVM opt command", "opt"),&lt;/span&gt;
+&lt;span class="gi"&gt;+ ("LLVM llc command", "/usr/local/opt/llvm@6/bin/llc"),&lt;/span&gt;
+&lt;span class="gi"&gt;+ ("LLVM opt command", "/usr/local/opt/llvm@6/bin/opt"),&lt;/span&gt;
+  ("LLVM clang command", "clang")
+  ]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;div class="section" id="llvm-clang-command"&gt;
+&lt;h3&gt;LLVM clang command について&lt;a class="headerlink" href="#llvm-clang-command" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;LLVM clang command&lt;/tt&gt; はなんか変えなくても動くし，こいつを &lt;tt class="docutils literal"&gt;/usr/local/opt/llvm@6/bin/clang&lt;/tt&gt; に変えてコンパイルすると以下のエラーが出てコンパイルができない:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ cabal new-build
+...
+
+/var/folders/km/7h33fnqs7bddrz_xtx609ss00000gn/T/ghc78032_0/ghc_1.s:2:31: error:
+    error: invalid OS update specifier, comma expected
+            .build_version macos, 10, 14    sdk_version 10, 14
+                                            ^
+  |
+2 |         .build_version macos, 10, 14    sdk_version 10, 14
+  |                               ^
+
+&amp;lt;no location info&amp;gt;: error:
+    Error running clang! you need clang installed to use the LLVM backend
+    (or GHC tried to execute clang incorrectly)
+`clang' failed in phase `Clang (Assembler)'. (Exit code: 1)
+&lt;/pre&gt;
+&lt;p&gt;原因不明だが， &lt;tt class="docutils literal"&gt;LLVM clang command&lt;/tt&gt; をいじらなければ普通に動くので，なんだろなって思って放置してる．原因誰か知ってたら教えてくださいって感じ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="llvm"&gt;
+&lt;h2&gt;LLVM を通してビルドする&lt;a class="headerlink" href="#llvm" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;後は， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-fllvm&lt;/span&gt;&lt;/tt&gt; オプションをつけてビルドすればいい． &lt;tt class="docutils literal"&gt;cabal&lt;/tt&gt; の場合，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+cabal build --ghc-options=-fflvm
+&lt;/pre&gt;
+&lt;p&gt;みたいにする．ついでに，ネイティブビルドの場合 &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-fasm&lt;/span&gt;&lt;/tt&gt; を付ける．なお， LLVM の出力が見たかったら &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-llvm&lt;/span&gt;&lt;/tt&gt; というオプションで見れるっぽい． LLVM 出力ができてるかどうかは， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-llvm&lt;/span&gt;&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-asm&lt;/span&gt;&lt;/tt&gt; をつけて &lt;tt class="docutils literal"&gt;asm&lt;/tt&gt; の出力が出てたら出来てない， &lt;tt class="docutils literal"&gt;llvm&lt;/tt&gt; の出力が出てたら出来てるって感じで確認できる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;macOS の環境の下， GHC で LLVM を使う方法を紹介した． LLVM 用のコード生成見る時とかに使っていきたい．後，パフォーマンスが劇的に改善するらしいね．&lt;/p&gt;
+&lt;p&gt;ただ， &lt;tt class="docutils literal"&gt;ghcup&lt;/tt&gt; を使っている場合一々 &lt;tt class="docutils literal"&gt;settings&lt;/tt&gt; を変更しなきゃいけないのは微妙なので，この辺なんとかしたいね．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/05/ghc-with-llvm.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/ghc-with-llvm.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category><category term="LLVM"></category><category term="macOS"></category><category term="Homebrew"></category></entry><entry><title>GHC IO モナドの中身</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/" rel="alternate"></link><published>2019-05-17T15:00:00+09:00</published><updated>2019-05-17T15:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-io-inside/</id><summary type="html">&lt;p&gt;Haskell の IO モナドって，中身どうなってたんだろと気になってて，ちょっと調べてみた．そのメモ．&lt;/p&gt;
+&lt;div class="section" id="io-realworld"&gt;
+&lt;h2&gt;IO モナドと RealWorld&lt;a class="headerlink" href="#io-realworld" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;まずは基本から． IO モナドは， Haskell の根幹となるモナドで， &lt;tt class="docutils literal"&gt;main&lt;/tt&gt; も IO で書く． GHC では中身は次のように定義されている &lt;a class="footnote-reference" href="#io-monad-definition" id="auto-id-1"&gt;[1]&lt;/a&gt;:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+-- In GHC.Types …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Haskell の IO モナドって，中身どうなってたんだろと気になってて，ちょっと調べてみた．そのメモ．&lt;/p&gt;
+&lt;div class="section" id="io-realworld"&gt;
+&lt;h2&gt;IO モナドと RealWorld&lt;a class="headerlink" href="#io-realworld" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;まずは基本から． IO モナドは， Haskell の根幹となるモナドで， &lt;tt class="docutils literal"&gt;main&lt;/tt&gt; も IO で書く． GHC では中身は次のように定義されている &lt;a class="footnote-reference" href="#io-monad-definition" id="auto-id-1"&gt;[1]&lt;/a&gt;:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+-- In GHC.Types module of ghc-prim package
+newtype IO a = IO (State# RealWorld -&amp;gt; (# State# RealWorld, a #))
+&lt;/pre&gt;
+&lt;p&gt;見ての通り， &lt;tt class="docutils literal"&gt;IO a&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;State# RealWorld &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (# State# RealWorld, a #)&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; だ．あんまり見慣れない &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; という型と &lt;tt class="docutils literal"&gt;(# , #)&lt;/tt&gt; という型が出てきたけど， &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; の方は置いといて， &lt;tt class="docutils literal"&gt;(# , #)&lt;/tt&gt; からまず説明しておく．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;(# , #)&lt;/tt&gt; は特別に &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; のみ許可されてる型というわけではなく， GHC の &lt;tt class="docutils literal"&gt;UnboxedTuples&lt;/tt&gt; という拡張で提供される型．名前の通り， unboxed なタプルを提供してくれる．いわゆる多値というやつで，ヒープアロケーションされず，要素はレジスタかスタックに格納される．つまり， &lt;tt class="docutils literal"&gt;s &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (# s, a #)&lt;/tt&gt; なのは特に性能とか実行時表現の違いを無視すれば， &lt;tt class="docutils literal"&gt;s &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (s, a)&lt;/tt&gt; と書くのと同じ意味を持つ．なので， IO モナドとは型の定義だけ見れば， &lt;tt class="docutils literal"&gt;State (State# RealWorld)&lt;/tt&gt; モナドと同じことを表現してることになる．&lt;/p&gt;
+&lt;p&gt;次に &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; とはなんなのかだけど， &lt;tt class="docutils literal"&gt;State#&lt;/tt&gt; ， &lt;tt class="docutils literal"&gt;RealWorld&lt;/tt&gt; 両方プリミティブで，言語表層的には &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;ghc-prim&lt;/span&gt;&lt;/tt&gt; パッケージの &lt;tt class="docutils literal"&gt;GHC.Prim&lt;/tt&gt; モジュールで定義された，中身のいじれない型ということになる &lt;a class="footnote-reference" href="#how-to-defined-primtypes" id="auto-id-2"&gt;[2]&lt;/a&gt; ．&lt;/p&gt;
+&lt;p&gt;GHC の IO モナドは，意味としては現実世界のコンテキストを表す &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を状態とする State モナドだ．ただ，単なる State モナドではなく，線形使用制約というものがついている．つまり，現在の状態として受け取った &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; は，状態遷移において必ず 1 度だけ使わなければいけない．ただこの制約は， Haskell の型システムでは守られていることの保証ができない &lt;a class="footnote-reference" href="#uniqueness-typing" id="auto-id-3"&gt;[3]&lt;/a&gt; ．そこで， GHC では IO に対する操作は隠蔽されている．そして， RTS が提供する IO 操作用のプリミティブ関数だけが &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を弄るようになっている．例えば，以下の &lt;tt class="docutils literal"&gt;IORef&lt;/tt&gt; を使用する IO モナドでのプログラム:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE BlockArguments #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Control.Concurrent&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.IORef&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;newIORef&lt;/span&gt; &lt;span class="kt"&gt;True&lt;/span&gt;
+  &lt;span class="n"&gt;writeIORef&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+  &lt;span class="n"&gt;readIORef&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;は，プリミティブ命令と明示的な &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; の伝搬で書いてみると，以下のようになる &lt;a class="footnote-reference" href="#ioref-use-mutvar-inside" id="auto-id-4"&gt;[4]&lt;/a&gt; :&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE BangPatterns  #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE MagicHash     #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE UnboxedTuples #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;GHC.Base&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;State&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kt"&gt;RealWorld&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kt"&gt;State&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kt"&gt;RealWorld&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
+      &lt;span class="kr"&gt;let&lt;/span&gt;
+        &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;newMutVar&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kt"&gt;True&lt;/span&gt;       &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+        &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s2&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;writeMutVar&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt; &lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+        &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s3&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;  &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;readMutVar&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;        &lt;span class="n"&gt;s2&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+      &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s3&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;State モナドで，返り値が unboxed tuple になり，状態が &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; に変わってるだけである．ランタイムは最終的にこの IO を受け取って，最初の &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を渡して実行していく．まさに現実世界を状態として実行されていく純粋関数が， Haskell のプログラムというわけである．ただ，現実世界というのはままならないもので，パッと状態を元に戻すといったことはできないし，状態を複製するというわけにも，元のまま保存するというわけにもいかない．このような制約と整合性がつくようにするのが，線形使用制約である．実際にこの制約が破られるとどうなるか，少し見てみる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE BlockArguments #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE BangPatterns   #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE MagicHash      #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE UnboxedTuples  #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;GHC.Base&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- | Example of unsafe IO using&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- Some case:&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; main&lt;/span&gt;
+&lt;span class="c1"&gt;-- World&lt;/span&gt;
+&lt;span class="c1"&gt;-- Hello&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt;
+    &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;unIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"Hello"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+    &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;unIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"World"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;unIO&lt;/tt&gt; は単に &lt;tt class="docutils literal"&gt;\(IO x) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; x&lt;/tt&gt; で， &lt;tt class="docutils literal"&gt;GHC.Base&lt;/tt&gt; で定義されている関数．上の関数は &lt;tt class="docutils literal"&gt;s0#&lt;/tt&gt; を3回 (出力部分で2回，返り値で1回の計3回) 使用しており，また捨ててる状態もあるなど，やりたい放題なわけだけど，元の状態 &lt;tt class="docutils literal"&gt;s0#&lt;/tt&gt; を返しているからといって何も出力されないわけでもないし，今回は想定と逆順とはいえ出力が行われているわけだが，最適化によっては片方しか出力がされないみたいなこともある．もちろん，エラーが起こった時に &lt;tt class="docutils literal"&gt;main&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;catch&lt;/tt&gt; しても例外が取れるとも限らない．&lt;/p&gt;
+&lt;p&gt;現実世界は State モナドのように状態を気軽に &lt;tt class="docutils literal"&gt;get&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;put&lt;/tt&gt; で差し戻したりすることはできない．実行した副作用を元に戻すことができないからだ． &lt;tt class="docutils literal"&gt;putStrLn "Hello"&lt;/tt&gt; を一度計算として走らせてしまえば，それを後から差し戻そうとしてももう出力してしまった後かもしれない．そうなれば，戻す作業は大掛かりだしそもそもユーザが見てしまった出力をなかったことになんてできない．それができてしまったら，タイムマシンの発明だ．ノーベル賞が取れるだろう． &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; はそのような事情を鑑みて，せめて実行タイミングを制御することを目的としたものだ．どの IO 処理の後に次の IO 処理を行うかを， &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を線形使用制約に従って伝搬させることで保証させる．さらに IO 操作そのものは， &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を渡してやらないと起動しない．これにより， IO 命令は第1級のデータとして扱えるわけだ． GHC のランタイムは， Haskell で扱えない &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; の実体を定義し，初期の現実世界を表す状態を作って，それをユーザが定義した &lt;tt class="docutils literal"&gt;main&lt;/tt&gt; に渡してやるだけという感じになる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="io"&gt;
+&lt;h2&gt;IO コードの生成&lt;a class="headerlink" href="#io" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ここからが本題．表面的には， IO モナドは以上の思想で運用されてるわけだけど，実際にこの線形な State モナドは GHC の内部でどのように扱われ，どのようなコード生成がされるんだろう？ それをいろいろ調査してみた．なお，使ったのは GHC 8.6.5 ．&lt;/p&gt;
+&lt;p&gt;まず， &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; の実際の値は，サイズ 0 ，つまり何の情報も持たず，レジスタもスタックも特に消費しない値として使われる．なので，意味的には上記で述べた通り現実世界を表現する仮想の状態として扱われるが，実行時に愚直にそのような状態更新が行われるわけでないということだ．実際に，まずは IO を使ったプログラムが，コンパイル過程でどのように変遷していくかを見てみる．対象は以下のプログラム:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.IORef&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;newIORef&lt;/span&gt; &lt;span class="kt"&gt;True&lt;/span&gt;
+  &lt;span class="n"&gt;writeIORef&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+  &lt;span class="n"&gt;readIORef&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;このプログラムの &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-simpl&lt;/span&gt;&lt;/tt&gt; は，以下のようになる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+main1
+  :: GHC.Prim.State# GHC.Prim.RealWorld
+    -&amp;gt; (# GHC.Prim.State# GHC.Prim.RealWorld, Bool #)
+main1
+  = \ (s_i7hd :: GHC.Prim.State# GHC.Prim.RealWorld) -&amp;gt;
+      case GHC.Prim.newMutVar#
+            @ Bool @ GHC.Prim.RealWorld GHC.Types.True s_i7hd
+      of
+      { (# ipv_i7ho, ipv1_i7hp #) -&amp;gt;
+      case GHC.Prim.writeMutVar#
+            @ GHC.Prim.RealWorld @ Bool ipv1_i7hp GHC.Types.False ipv_i7ho
+      of s2#_i7hT
+      { __DEFAULT -&amp;gt;
+      GHC.Prim.readMutVar# @ GHC.Prim.RealWorld @ Bool ipv1_i7hp s2#_i7hT
+      }
+      }
+
+main :: IO Bool
+main
+  = main1
+    `cast` (Sym (GHC.Types.N:IO[0] &amp;lt;Bool&amp;gt;_R)
+            :: (GHC.Prim.State# GHC.Prim.RealWorld
+                -&amp;gt; (# GHC.Prim.State# GHC.Prim.RealWorld, Bool #))
+              ~R# IO Bool)
+&lt;/pre&gt;
+&lt;p&gt;余計な情報はかなり省いている． &lt;tt class="docutils literal"&gt;main1&lt;/tt&gt; の部分が本体で， &lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;cast&lt;/tt&gt; に変換され，インライン展開と最適化によって余計なコンストラクタが消えた結果，上の方で述べた &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; の明示的な伝搬におおよそ変換されている．後は， Core 特有の多相関数に対して型推論で推論された型の明示的な適用などが書かれている．ここらへんは， &lt;tt class="docutils literal"&gt;TypeApplications&lt;/tt&gt; 拡張で書かれたコードだと思えば素直に読めると思う．最終的な Core はほぼこの形で出力される．次にこの Core は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-stg&lt;/span&gt;&lt;/tt&gt; で見ると，以下のように変換される:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+main1 =
+  [] \r [void_0E]
+    case newMutVar# [GHC.Types.True GHC.Prim.void#] of {
+      Unit# ipv1_s7lS -&amp;gt;
+          case
+              writeMutVar# [ipv1_s7lS GHC.Types.False GHC.Prim.void#]
+          of
+          s2#_s7lT
+          { (##) -&amp;gt; readMutVar# [ipv1_s7lS GHC.Prim.void#];
+          };
+    };
+
+main =
+  [] \r [void_0E] main1 GHC.Prim.void#;
+&lt;/pre&gt;
+&lt;p&gt;STG の大雑把な読み方だけど， &lt;tt class="docutils literal"&gt;[] \r &lt;span class="pre"&gt;[...]&lt;/span&gt; ...&lt;/tt&gt; は関数を表すクロージャで最後の &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;[...]&lt;/span&gt;&lt;/tt&gt; に引数が並んでいて， &lt;tt class="docutils literal"&gt;f &lt;span class="pre"&gt;[...]&lt;/span&gt;&lt;/tt&gt; は関数適用になる．なお， 1 引数の関数適用は &lt;tt class="docutils literal"&gt;[]&lt;/tt&gt; が省略される．Core と対応させれば雰囲気はなんとなく分かるだろう．注目して欲しいのは， &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; の引数だった部分が，全て &lt;tt class="docutils literal"&gt;void_XX&lt;/tt&gt; という変数名に置き換わっていること，適用部分も &lt;tt class="docutils literal"&gt;GHC.Prim.void#&lt;/tt&gt; という値の適用に置き換わっていること，パターンマッチで unboxed tuple のマッチをしていた部分がそれぞれ &lt;tt class="docutils literal"&gt;Unit#&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(##)&lt;/span&gt;&lt;/tt&gt; でのマッチに置き換わっていることだ．これらの意味はこの後の C-- の出力を見れば分かるだろう． &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-ddump-cmm&lt;/span&gt;&lt;/tt&gt; で C-- の出力を見ると，以下のようになっている:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[main1_entry() //  []
+        { info_tbls: [(c1y24,
+                        label: main1_info
+                        rep: HeapRep static { Fun {arity: 1 fun_type: ArgSpec 3} }
+                        srt: Nothing)]
+          stack_info: arg_space: 0 updfr_space: Nothing
+        }
+    {offset
+      c1y24: // global
+          if ((Sp + -8) &amp;lt; SpLim) (likely: False) goto c1y25; else goto c1y26;
+      c1y25: // global
+          R1 = main1_closure;
+          call (stg_gc_fun)(R1) args: 8, res: 0, upd: 8;
+      c1y26: // global
+          I64[Sp - 8] = block_c1y1Y_info;
+          R1 = GHC.Types.True_closure+2;
+          Sp = Sp - 8;
+          call stg_newMutVar#(R1) args: 8, res: 8, upd: 8;
+    }
+},
+section ""data" . main1_closure" {
+    main1_closure:
+        const main1_info;
+},
+_c1y1Y() //  [R1]
+        { info_tbls: [(c1y1Y,
+                        label: block_c1y1Y_info
+                        rep: StackRep []
+                        srt: Nothing)]
+          stack_info: arg_space: 0 updfr_space: Nothing
+        }
+    {offset
+      c1y1Y: // global
+          call MO_WriteBarrier();
+          P64[R1 + 8] = GHC.Types.False_closure+1;
+          call "ccall" arg hints:  [PtrHint,
+                                    PtrHint]  result hints:  [] dirty_MUT_VAR(BaseReg, R1);
+          R1 = P64[R1 + 8];
+          Sp = Sp + 8;
+          call (P64[Sp])(R1) args: 8, res: 0, upd: 8;
+    }
+}]
+
+[main_entry() //  []
+        { info_tbls: [(c1y34,
+                        label: main_info
+                        rep: HeapRep static { Fun {arity: 1 fun_type: ArgSpec 3} }
+                        srt: Nothing)]
+          stack_info: arg_space: 0 updfr_space: Nothing
+        }
+    {offset
+      c1y34: // global
+          call main1_info() args: 8, res: 0, upd: 8;
+    }
+},
+section ""data" . main_closure" {
+    main_closure:
+        const main_info;
+}]
+&lt;/pre&gt;
+&lt;p&gt;ちょっと長いけど，落ち着いて読めば大丈夫．まず， &lt;tt class="docutils literal"&gt;main_entry&lt;/tt&gt; の部分は見た通り &lt;tt class="docutils literal"&gt;main1&lt;/tt&gt; のクロージャを呼び出してるだけなのでいいだろう． STG で適用していたはずの &lt;tt class="docutils literal"&gt;GHC.Prim.void#&lt;/tt&gt; や受け取っていた &lt;tt class="docutils literal"&gt;void_0E&lt;/tt&gt; は完全に綺麗さっぱり消えていることがわかる．で， &lt;tt class="docutils literal"&gt;main1_entry&lt;/tt&gt; の方だが， C-- を読むに当たって以下のパターンを覚えておくと読みやすいと思う．&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;スタックサイズチェック&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+label_stackcheck: // global
+        if ((Sp + -8) &amp;lt; SpLim) (likely: False) goto label_ok; else goto label_gc;
+label_gc: // global
+        R1 = main1_closure;
+        call (stg_gc_fun)(R1) args: 8, res: 0, upd: 8;
+label_ok: // global
+        ...
+&lt;/pre&gt;
+&lt;p class="last"&gt;クロージャエントリの最初などには，スタックの上限チェックが挟まる． &lt;tt class="docutils literal"&gt;SpLim&lt;/tt&gt; がスタックサイズの上限値を表していて，現在のスタックポインタがそれをオーバーしていないかチェックしている．スタックサイズが足りていないと，一旦 GC を走らせにいく．それでもオーバーするようなら stack overflow になる．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;ヒープサイズチェック&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+label_heapcheck: // global
+    Hp = Hp + N;
+    if (Hp &amp;gt; HpLim) (likely: False) goto label_gc; else goto label_ok;
+label_gc: // global
+    HpAlloc = N;
+    R1 = R1;
+    call stg_gc_unpt_r1(R1) returns to label_heapcheck, args: 8, res: 8, upd: 8;
+label_ok: // global
+    ...
+&lt;/pre&gt;
+&lt;p class="last"&gt;今回は出てこないが，こちらもよくあるやつなので覚えておいたほうがいいと思う．ヒープ領域へのアロケーション時にヒープの上限チェックが挟まる． &lt;tt class="docutils literal"&gt;HpLim&lt;/tt&gt; がヒープサイズの上限値を表していて，確保する分 ( &lt;tt class="docutils literal"&gt;N&lt;/tt&gt; ) 足したヒープポインタがそれをオーバーしていないかチェックする．ヒープサイズが足りてないと，一旦 GC を走らせにいく．それでもオーバーするようなら heap overflow になる．なお，呼ぶ GC の関数は確保する領域に置かれるオブジェクトによって異なる．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;サンク評価&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+    if (R1 &amp;amp; 7 != 0) goto label_ok; else goto label_eval;
+label_eval: // global
+    call (I64[R1])(R1) returns to label_ok
+label_ok: // global
+    ...
+&lt;/pre&gt;
+&lt;p class="last"&gt;これも今回は出てないけど頻出のやつなので紹介しておく． GHC では pointer tagging という手法を使用していて，ポインタの下位 数 bit (うちは 64bit 環境でその場合 3 bit) はタグになっている &lt;a class="footnote-reference" href="#heap-aligned" id="auto-id-5"&gt;[5]&lt;/a&gt; ．それぞれのタグの意味は &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/haskell-execution/pointer-tagging"&gt;https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/haskell-execution/pointer-tagging&lt;/a&gt; を参照してもらうとして，大事なのは 0 の場合サンクを表すということ．上のコードはサンクかどうかを判定し，サンクならそのクロージャの評価に移る．そして，その後コードを実行する．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;STG でのプリミティブ命令の変換&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;今回， STG で呼び出していた &lt;tt class="docutils literal"&gt;readMutVar#&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;writeMutVar#&lt;/tt&gt; はどっかへ行ってしまっている．影を残しているのは &lt;tt class="docutils literal"&gt;newMutVar#&lt;/tt&gt; のみでこいつも &lt;tt class="docutils literal"&gt;stg_newMutVar#&lt;/tt&gt; という名前になっている．実はプリミティブ命令は全てが全て RTS に関数として登録されているわけではない．多くは C-- の命令列に翻訳される．翻訳のされ方を調べる方法は，以下のことをすればいい:&lt;/p&gt;
+&lt;ol class="arabic"&gt;
+&lt;li&gt;&lt;p class="first"&gt;プリミティブ命令のコンストラクタを調べる．&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/compiler/prelude/primops.txt.pp"&gt;compiler/prelude/primops.txt.pp&lt;/a&gt; を見にいく． &lt;tt class="docutils literal"&gt;primtype&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;primop&lt;/tt&gt; が定義されている．名前の通り，プリミティブ型とプリミティブ命令を定義する部分． &lt;tt class="docutils literal"&gt;primop&lt;/tt&gt; は，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+primop Constructor "identifier" Category Type
+  {Description.}
+  with attribute1 = value1 ...
+&lt;/pre&gt;
+&lt;p&gt;という書式で書かれてる．見たいプリミティブ命令の identifier を検索して，対応する Constructor をまず調べる．&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;&lt;tt class="docutils literal"&gt;emitPrimOp&lt;/tt&gt; の該当箇所を見にいく．&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/compiler/codeGen/StgCmmPrim.hs#L269"&gt;compiler/codeGen/StgCmmPrim.hs の emitPrimOp のパターンマッチ部分&lt;/a&gt; を見にいく． &lt;tt class="docutils literal"&gt;emitPrimOp&lt;/tt&gt; はプリミティブ命令のコンストラクタをパターンマッチして，対応する C-- のコードを出す．最初に調べたコンストラクタで，パターンマッチの該当部分を見ればどういうコードが出されるかが分かる．&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;例えば， &lt;tt class="docutils literal"&gt;writeMutVar#&lt;/tt&gt; は&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+primop  WriteMutVarOp "writeMutVar#"  GenPrimOp
+  MutVar# s a -&amp;gt; a -&amp;gt; State# s -&amp;gt; State# s
+  {Write contents of {\tt MutVar\#}.}
+  with
+  -- See Note [Why MutVar# ops can't fail]
+  has_side_effects = True
+  code_size = { primOpCodeSizeForeignCall } -- for the write barrier
+&lt;/pre&gt;
+&lt;p&gt;と定義されている．なので対応するコンストラクタは &lt;tt class="docutils literal"&gt;ReadMutVarOp&lt;/tt&gt; になる．こいつの生成箇所は，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+emitPrimOp dflags res@[] WriteMutVarOp [mutv,var]
+  = do -- Without this write barrier, other CPUs may see this pointer before
+        -- the writes for the closure it points to have occurred.
+        emitPrimCall res MO_WriteBarrier []
+        emitStore (cmmOffsetW dflags mutv (fixedHdrSizeW dflags)) var
+        emitCCall
+                [{-no results-}]
+                (CmmLit (CmmLabel mkDirty_MUT_VAR_Label))
+                [(baseExpr, AddrHint), (mutv,AddrHint)]
+&lt;/pre&gt;
+&lt;p&gt;となっている．まさに， &lt;tt class="docutils literal"&gt;main1_entry&lt;/tt&gt; の&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+call MO_WriteBarrier();
+P64[R1 + 8] = GHC.Types.False_closure+1;
+call "ccall" arg hints:  [PtrHint,
+                          PtrHint]  result hints:  [] dirty_MUT_VAR(BaseReg, R1);
+&lt;/pre&gt;
+&lt;p&gt;という部分が対応してる．なお，プリミティブ命令の一部は特殊で， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;out-of-line&lt;/span&gt;&lt;/tt&gt; という属性を持ってたりする．今回は， &lt;tt class="docutils literal"&gt;newMutVar#&lt;/tt&gt; がこの属性を持っている:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+primop  NewMutVarOp "newMutVar#" GenPrimOp
+  a -&amp;gt; State# s -&amp;gt; (# State# s, MutVar# s a #)
+  {Create {\tt MutVar\#} with specified initial value in specified state thread.}
+  with
+  out_of_line = True
+  has_side_effects = True
+&lt;/pre&gt;
+&lt;p&gt;この属性を持っているやつに関しては， &lt;tt class="docutils literal"&gt;emitPrimOp&lt;/tt&gt; では処理されず RTS に登録されている関数が使用される．その関数の中身は， &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/rts/PrimOps.cmm"&gt;rts/PrimOps.cmm&lt;/a&gt; で定義されている．中身の識別子は &lt;tt class="docutils literal"&gt;stg_&lt;/tt&gt; という接頭辞をつけて Z エンコーディングされていて， &lt;tt class="docutils literal"&gt;newMutVar#&lt;/tt&gt; は，以下の実装が対応する:&lt;/p&gt;
+&lt;pre class="last literal-block"&gt;
+stg_newMutVarzh ( gcptr init )
+{
+    W_ mv;
+
+    ALLOC_PRIM_P (SIZEOF_StgMutVar, stg_newMutVarzh, init);
+
+    mv = Hp - SIZEOF_StgMutVar + WDS(1);
+    SET_HDR(mv,stg_MUT_VAR_DIRTY_info,CCCS);
+    StgMutVar_var(mv) = init;
+
+    return (mv);
+}
+&lt;/pre&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;大体この 4 点を押さえておけば，なんとなくで読めると思う．出力された C-- のコードがやってることは，大体以下の感じ:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;スタックサイズチェック&lt;/li&gt;
+&lt;li&gt;次の部分の継続をスタックに入れて， &lt;tt class="docutils literal"&gt;GHC.Types.True&lt;/tt&gt; を引数に &lt;tt class="docutils literal"&gt;stg_newMutVar&lt;/tt&gt; に移る．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;stg_newMutVar&lt;/tt&gt; から返ってきた &lt;tt class="docutils literal"&gt;MutVar&lt;/tt&gt; に &lt;tt class="docutils literal"&gt;GHC.Types.False&lt;/tt&gt; を書き込む．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;MutVar&lt;/tt&gt; から値を読み込む．&lt;/li&gt;
+&lt;li&gt;読み込んだ値を返り値として，スタックから次の継続を実行する．&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;見ての通り，どこにも &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; は現れない．しかも， &lt;tt class="docutils literal"&gt;writeMutVar#&lt;/tt&gt; の変換を部分を見れば分かるように，こいつは返り値が全く存在しない．ここから，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;Unit#&lt;/tt&gt; は実行時表現を持たない (&lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; と同じ) ．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(##)&lt;/span&gt;&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;GHC.Prim.void#&lt;/tt&gt; は，完全に実行時表現を持たず，スタック・レジスタのいずれにも格納されない．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ということが分かると思う． &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; は STG の段階で実行時表現を持たない &lt;tt class="docutils literal"&gt;GHC.Prim.void#&lt;/tt&gt; へと変換され， C-- の段階ではコード中に片鱗すら見せない形に変換される．&lt;/p&gt;
+&lt;p&gt;なお余談だけど， unboxed proxy と呼ばれる &lt;tt class="docutils literal"&gt;GHC.Prim.Proxy#&lt;/tt&gt; 型も GHC では提供されていて，こいつは &lt;tt class="docutils literal"&gt;State#&lt;/tt&gt; と同じく &lt;tt class="docutils literal"&gt;GHC.Prim.void#&lt;/tt&gt; に変換され実行時には消えて無くなる．これを使って&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;State&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Proxy&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;と定義しても同じ操作が起きる． &lt;tt class="docutils literal"&gt;Proxy# a&lt;/tt&gt; は unboxed なので，この型の値は関数で受け取る前に評価される:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; import GHC.Prim
+&amp;gt;&amp;gt;&amp;gt; :set -XMagicHash
+&amp;gt;&amp;gt;&amp;gt; f :: Proxy# a -&amp;gt; (); f _ = ()
+&amp;gt;&amp;gt;&amp;gt; f undefined
+*** Exception: Prelude.undefined
+&lt;/pre&gt;
+&lt;p&gt;これは &lt;tt class="docutils literal"&gt;State#&lt;/tt&gt; でも同様．つまり， &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; は実行時に消えるからといって何の影響も実行に及ぼさないというわけではないし，なんら特別な仕組みで動いているわけでもないということ． IO モナドは， unboxed な線形使用のサイズを持たない型と unboxed tuple を使って表現されることにより，結果の値を取り出すためパターンマッチをすると必ず &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; は評価されるので，汎用的な unboxed の仕組みで評価タイミングを保証できることになる．なので，線形使用を守っているなら，特別な仕組みを必要とせず最適化やコード生成を行える．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="unsafe-io"&gt;
+&lt;h2&gt;Unsafe IO&lt;a class="headerlink" href="#unsafe-io" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; は直感的にはランタイムが内部で持っている外部情報を，仮想的に現実世界を表す状態とみたてた型で， &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; の評価タイミングを保証するものだった．そして，実際のコード生成では完全に削除され，保証された評価順序での実行コードだけが生成される．実行コードは無引数の関数コードとして保存され，ランタイムがメインスレッドで GC を立ち上げた後この関数コードを呼び出す．これが一連の流れになる．&lt;/p&gt;
+&lt;p&gt;ただ，上の流れは線形使用制約を守った使い方をする場合の話だった．では，制約を守らない場合はどうなるのだろうか？ 上で紹介したコードについて同じように中間出力を見てみる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE BlockArguments #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE BangPatterns   #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE MagicHash      #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE UnboxedTuples  #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;GHC.Base&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt;
+    &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;unIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"Hello"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+    &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;unIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"World"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これは STG の段階では以下のようなコードになっていた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+main1 =
+    [] \r [void_0E]
+      case
+          GHC.IO.Handle.Text.hPutStr'
+              GHC.IO.Handle.FD.stdout
+              main4
+              GHC.Types.True
+              GHC.Prim.void#
+      of
+      { Unit# ipv1_sRHj [Occ=Once!] -&amp;gt;
+            case ipv1_sRHj of {
+              () -&amp;gt;
+                  case
+                      GHC.IO.Handle.Text.hPutStr'
+                          GHC.IO.Handle.FD.stdout
+                          main2
+                          GHC.Types.True
+                          GHC.Prim.void#
+                  of
+                  { Unit# ipv3_sRHn [Occ=Once!] -&amp;gt;
+                        case ipv3_sRHn of { () -&amp;gt; Unit# [GHC.Tuple.()]; };
+                  };
+            };
+      };
+&lt;/pre&gt;
+&lt;p&gt;色々省略してるが，なんとなく出されたコードは分かるだろう． &lt;tt class="docutils literal"&gt;main4&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;"World"&lt;/tt&gt; を表す文字列データ， &lt;tt class="docutils literal"&gt;main2&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;"Hello"&lt;/tt&gt; を表す文字列データが格納されている． &lt;tt class="docutils literal"&gt;GHC.IO.Handle.Text.hPutStr' :: Handle &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; String &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Bool &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; IO ()&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;putStrLn&lt;/tt&gt; が最終的に参照する &lt;tt class="docutils literal"&gt;base&lt;/tt&gt; パッケージの関数で， 3 番目の引数に &lt;tt class="docutils literal"&gt;True&lt;/tt&gt; を渡すと，改行込みで文字列を出力する． &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を渡している部分は全て &lt;tt class="docutils literal"&gt;GHC.Prim.void#&lt;/tt&gt; に置き換わっており，返り値にいたっては &lt;tt class="docutils literal"&gt;Unit# &lt;span class="pre"&gt;[GHC.Tuple.()]&lt;/span&gt;&lt;/tt&gt; を返すなどまるっきりの無視であり，制約を守らなくても特に特別な処理はされずやはり &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; は実行時には完全に消えることが示唆されている．ただ，注目したいのは &lt;tt class="docutils literal"&gt;hPutStr'&lt;/tt&gt; の呼び出される順序で， &lt;tt class="docutils literal"&gt;"World"&lt;/tt&gt; が渡された後 &lt;tt class="docutils literal"&gt;"Hello"&lt;/tt&gt; が渡されていることが分かる．これが， &lt;tt class="docutils literal"&gt;let&lt;/tt&gt; で書いた順とは逆順に文字列が出力される原因である．&lt;/p&gt;
+&lt;p&gt;Haskell の仕様では let と case ， BangPattern のセマンティクス &lt;a class="footnote-reference" href="#let-semantics" id="auto-id-6"&gt;[6]&lt;/a&gt; &lt;a class="footnote-reference" href="#case-semantics" id="auto-id-7"&gt;[7]&lt;/a&gt; &lt;a class="footnote-reference" href="#bangpattern-semantics" id="auto-id-8"&gt;[8]&lt;/a&gt; として，上から書いた順に評価されるのが基本だが，これらは副作用がないことが前提になっているので，最適化次第で順序を変えることができる．今回は逆順になっている．なお，明示的に以下のように &lt;tt class="docutils literal"&gt;let&lt;/tt&gt; を分けて書くとちゃんとした順序になる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt;
+    &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;unIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"Hello"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="kr"&gt;let&lt;/span&gt;
+    &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;unIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"World"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;ただこれももちろん最適化次第．線形使用制約を満たさないコードを書いても大体は直感的に動くけど，このように最適化やコード生成に影響する部分だと，直感に反する挙動をする場合がある．&lt;/p&gt;
+&lt;p&gt;さて， IO の動作は制約を守った上で，プログラムが操作順序をきちんと制御しながら書くのが理想だが，現実的には少し制約を破ってもパフォーマンスの改善やプログラミングを容易にしたいことがある．そのため， GHC ではこの制約を破る方法もいくつか提供されている．これが， &lt;tt class="docutils literal"&gt;GHC.IO.Unsafe&lt;/tt&gt; モジュールで提供されている関数群．主要なのは，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;unsafeDupablePerformIO&lt;/span&gt;  &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;unsafeDupablePerformIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;runRW&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="nf"&gt;unsafeDupableInterleaveIO&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;unsafeDupableInterleaveIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;let&lt;/span&gt;
+                  &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;
+                &lt;span class="kr"&gt;in&lt;/span&gt;
+                &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;の 2 つの関数． &lt;tt class="docutils literal"&gt;runRW# :: (State# RealWorld &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; a) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; a&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;ghc-prim&lt;/span&gt;&lt;/tt&gt; パッケージの &lt;tt class="docutils literal"&gt;GHC.Magic&lt;/tt&gt; モジュールで定義されてる関数で，適当に &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を適用する関数． &lt;tt class="docutils literal"&gt;GHC.Prim&lt;/tt&gt; モジュールに &lt;tt class="docutils literal"&gt;realWorld# :: State# RealWorld&lt;/tt&gt; という値が定義されていて， &lt;tt class="docutils literal"&gt;runRW# f = f realWorld#&lt;/tt&gt; で定義されている．もちろん， &lt;tt class="docutils literal"&gt;realWorld# = GHC.Prim.void#&lt;/tt&gt; だ．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;unsafeDupablePerformIO&lt;/tt&gt; は， IO に &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を無理やり適用して結果を抽出する．つまり，副作用が起こる操作を無理やり実行するわけだ． &lt;tt class="docutils literal"&gt;unsafeDupableInterleaveIO&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を受け取ったもので適用するが，結果の状態は無視して元の状態を返す． &lt;tt class="docutils literal"&gt;r&lt;/tt&gt; はサンクになっていて， &lt;tt class="docutils literal"&gt;r&lt;/tt&gt; が評価された際初めて IO 操作が現在の IO 操作順序とは無関係に動き始める．特別な処理をしているわけではないが，感覚的には割り込みみたいなものだと思って良いと思う．&lt;/p&gt;
+&lt;p&gt;これら 2 つの関数は dupable と付いてる通り，マルチスレッドの場合一回だけ実行されるとは限らない．通常の副作用のない計算もそうだが，マルチスレッドの場合サンクはそれぞれのスレッドで評価される可能性がある．なお，マルチスレッドにおいてサンク評価をシングルスレッドに制限する方法も用意されていて， &lt;tt class="docutils literal"&gt;GHC.Prim.noDuplicate# :: State# RealWorld &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; State# RealWorld&lt;/tt&gt; がそう．こいつの本体は， &lt;tt class="docutils literal"&gt;PrimOps.cmm&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;stg_noDuplicatezh&lt;/tt&gt; で，説明が &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/rts/PrimOps.cmm#L2188"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/rts/PrimOps.cmm#L2188&lt;/a&gt; に書かれている．要点は，あるスレッドで &lt;tt class="docutils literal"&gt;noDuplicate#&lt;/tt&gt; が実行され，さらにもう一つのスレッドでも実行された場合もう一つの方はブロックされるということ．これを使って，通常使う API は定義されている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;unsafePerformIO&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;unsafePerformIO&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;unsafeDupablePerformIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;noDuplicate&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;unsafeInterleaveIO&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;unsafeInterleaveIO&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;unsafeDupableInterleaveIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;noDuplicate&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;noDuplicate&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;noDuplicate&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;noDuplicate&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt; &lt;span class="n"&gt;s'&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これにより，評価が始まると &lt;tt class="docutils literal"&gt;noDuplicate&lt;/tt&gt; が実行され単一スレッドでのみ評価が行われることになる． &lt;tt class="docutils literal"&gt;unsafePerformIO&lt;/tt&gt; は副作用をないものとして評価する関数で &lt;tt class="docutils literal"&gt;Debug.Trace.trace&lt;/tt&gt; で使われている． &lt;tt class="docutils literal"&gt;unsafeInterleaveIO&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;hGetContents&lt;/tt&gt; など遅延 IO で使われていて， IO の皮を被っておきながら実際の操作は結果のサンクを評価した時に初めて実行されるというものだ．通常の IO はただの State モナドなので， IO の文脈で使われている限りインライン化しても問題ないわけだけd， &lt;tt class="docutils literal"&gt;unsafePerformIO&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を適用して文脈外に値を取り出してしまうので，どこで評価が起きるかも保証されないし，内容によってはインライン展開のされ方によって副作用が何回か起きたりする場合もある． &lt;tt class="docutils literal"&gt;Debug.Trace.trace&lt;/tt&gt; を使ったことがある人は分かると思うが，文字列が出力されるタイミングは予測がかなり難しいし，インライン展開のされ方によって複数回出力がある場合もあればはじめの一回のみといったこともあり得る．&lt;/p&gt;
+&lt;p&gt;このように &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; の線形使用を無視すると，便利なこともある反面，気をつけなければいけないことがかなり増える．副作用を持つ関数を遅延評価で扱うのはかなり骨が折れるし，その中で順序の保証を行えるようなデータ構造を与えているのに，そのデータ構造を無視する使い方をしてるわけだから当たり前といったらそうなのだけど．&lt;/p&gt;
+&lt;p&gt;とにかく， IO 自体は特別な仕組みを特に提供しておらず， unsafe な場合も例外ではない．特別な仕組みを提供する場合も &lt;tt class="docutils literal"&gt;noDuplicate&lt;/tt&gt; のようにプリミティブ操作を与えることで制御を行なっていることが分かる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="st-io"&gt;
+&lt;h2&gt;ST モナドと IO モナド&lt;a class="headerlink" href="#st-io" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;IO モナドとよく一緒に語られるものとして ST モナドがある．こいつは，以下の定義になっている &lt;a class="footnote-reference" href="#st-monad-definition" id="auto-id-9"&gt;[9]&lt;/a&gt;:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+newtype ST s a = ST (State# s -&amp;gt; (# State# s, a #))
+&lt;/pre&gt;
+&lt;p&gt;IO と違うところは &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;State# s&lt;/tt&gt; と多相的になってるだけ．なので， &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; とは， &lt;tt class="docutils literal"&gt;ST RealWorld&lt;/tt&gt; のことだ．実際 &lt;tt class="docutils literal"&gt;stToIO :: ST RealWorld a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; IO a&lt;/tt&gt; という命令も提供されている．&lt;/p&gt;
+&lt;p&gt;ST モナドは， &lt;tt class="docutils literal"&gt;s&lt;/tt&gt; が多相的なままで使われる． &lt;tt class="docutils literal"&gt;GHC.Prim&lt;/tt&gt; モジュールで提供されている API には &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; を扱うものと &lt;tt class="docutils literal"&gt;s&lt;/tt&gt; を型パラメータとして &lt;tt class="docutils literal"&gt;State# s&lt;/tt&gt; を扱うものの 2 種類が提供されており，例えば &lt;tt class="docutils literal"&gt;newMutVar#&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;newArray#&lt;/tt&gt; などは多相的なまま扱える．多くの場合重い命令やインライン展開されるとまずい命令などは &lt;tt class="docutils literal"&gt;State# RealWorld&lt;/tt&gt; で扱われ， &lt;tt class="docutils literal"&gt;MutVar&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;Array&lt;/tt&gt; を扱うような軽く IO 処理が局所的に閉じられるような命令は多相的になっており，多相的になっている方が &lt;tt class="docutils literal"&gt;ST&lt;/tt&gt; モナドで使用できる．もちろん，多相パラメータを &lt;tt class="docutils literal"&gt;RealWorld&lt;/tt&gt; に特殊化してやれば IO と同様の操作もできる．&lt;/p&gt;
+&lt;p&gt;これらの多相的なプリミティブ命令のラッパとして， &lt;tt class="docutils literal"&gt;Data.STRef&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;array&lt;/tt&gt; パッケージの &lt;tt class="docutils literal"&gt;Data.Array.ST&lt;/tt&gt; などが提供されており， &lt;tt class="docutils literal"&gt;IORef&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;IOArray&lt;/tt&gt; は内部でこの &lt;tt class="docutils literal"&gt;ST&lt;/tt&gt; モナドの元で提供されてる API を &lt;tt class="docutils literal"&gt;RealWorld&lt;/tt&gt; で特殊化してさらにラップしてる．&lt;/p&gt;
+&lt;p&gt;ST モナドは多相的なまま保っている，つまり局所的に閉じられる処理のみ使っている場合は &lt;tt class="docutils literal"&gt;runST :: (forall s. ST s a) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; a&lt;/tt&gt; で純粋な計算の中で計算可能だ．こいつは遅延しようがインライン展開されようが同じ処理を行い，現実世界にも見た目上特に影響を与えず &lt;a class="footnote-reference" href="#runst-is-pure" id="auto-id-10"&gt;[10]&lt;/a&gt; ，実行される． &lt;tt class="docutils literal"&gt;RealWorld&lt;/tt&gt; で特殊化された処理も入っている場合は &lt;tt class="docutils literal"&gt;stToIO&lt;/tt&gt; で IO に変換できる． &lt;tt class="docutils literal"&gt;runST&lt;/tt&gt; の実装がどうなってるかだが，次のようになっている:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+runST :: (forall s. ST s a) -&amp;gt; a
+runST (ST st_rep) = case runRW# st_rep of (# _, a #) -&amp;gt; a
+&lt;/pre&gt;
+&lt;p&gt;ところで &lt;tt class="docutils literal"&gt;GHC.Prim&lt;/tt&gt; で定義されているデータ型の中にはパラメータに &lt;tt class="docutils literal"&gt;s&lt;/tt&gt; があるものもある． &lt;tt class="docutils literal"&gt;runST&lt;/tt&gt; では結果の型 &lt;tt class="docutils literal"&gt;a&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;s&lt;/tt&gt; に依存しない必要があるので，このような型の値は &lt;tt class="docutils literal"&gt;runST&lt;/tt&gt; では外に出せないようになっている．例えば， &lt;tt class="docutils literal"&gt;MutableByteArray# s&lt;/tt&gt; は外に出せない．もしこいつが外に出せてしまったとすると，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+arr :: MutableByteArray# s
+arr = runST $ ST \s# -&amp;gt; newByteArray# 10 s#
+
+update0Arr :: Int -&amp;gt; Int
+update0Arr (I# i) = runST $ ST \s0# -&amp;gt;
+  let
+    !(# s1#, res# #) = readIntArray# arr 0# s0#
+    !s2# = writeIntArray# arr 0# i s1#
+  in (# s2#, I# res# #)
+&lt;/pre&gt;
+&lt;p&gt;というプログラム (このプログラムは実際にはコンパイルエラーになる) で &lt;tt class="docutils literal"&gt;update0Arr&lt;/tt&gt; は前回書き込んだ値を返し，パラメータによって違う値を返してしまうことになる．このようなことを防ぐため，外に出してはいけないデータ型はパラメータ &lt;tt class="docutils literal"&gt;s&lt;/tt&gt; が付いている．このように， ST も IO と同じように特別なことはしておらず，既存の汎用的な仕組みを利用して，うまく実装されている &lt;a class="footnote-reference" href="#runrw-magic" id="auto-id-11"&gt;[11]&lt;/a&gt; ．もちろん，コード生成も IO と同じように ST のラッパーが消え去って， &lt;tt class="docutils literal"&gt;State# s&lt;/tt&gt; も消え去ることになり，後は伝搬された &lt;tt class="docutils literal"&gt;State# s&lt;/tt&gt; の順序に従って評価順序が決定される．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-12"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-12" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC の IO についてちょっと調べた．実は， IOManager と RTS の内部の説明に行き着きたかったんだけど，長くなりそうなんで別途にすることにする．&lt;/p&gt;
+&lt;p&gt;なんとなくここら辺は知っていたんだけど，ここまで実際にコード生成見てみたことはなかったんで，色々知識が補強された．この辺結構賢いよなあって毎回思う．僕もこういうやつパッと思いつけるぐらい，強くなりてえなあ．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="io-monad-definition" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="http://hackage.haskell.org/package/ghc-prim-0.5.3/docs/src/GHC.Types.html#IO"&gt;http://hackage.haskell.org/package/ghc-prim-0.5.3/docs/src/GHC.Types.html#IO&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="how-to-defined-primtypes" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なお， &lt;tt class="docutils literal"&gt;GHC.Prim&lt;/tt&gt; の Haddock ドキュメントは全てダミー定義になっていて， &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/compiler/prelude/primops.txt.pp"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/compiler/prelude/primops.txt.pp&lt;/a&gt; から生成されている．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="uniqueness-typing" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-3"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;線形使用制約は，一意性とも呼ばれている．この制約を保証できる型システムを持ってる言語も，世の中にはいくつかある． Clean が有名だけど，最近だと Idris なども持っていて，一意型と言われる特殊な型を導入して，この型に関する検査で制約を検査する．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="ioref-use-mutvar-inside" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[4]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;tt class="docutils literal"&gt;IORef&lt;/tt&gt; は中で &lt;tt class="docutils literal"&gt;MutVar#&lt;/tt&gt; を使用している．本来なら，変換前のプログラムと完全に合わせるには，適宜コンストラクタで &lt;tt class="docutils literal"&gt;MutVar#&lt;/tt&gt; を包む操作が必要だが，ここではその部分は省略している．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="heap-aligned" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-5"&gt;[5]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なお， &lt;tt class="docutils literal"&gt;+ 8&lt;/tt&gt; をスタックポインタにしている箇所が多いのはこのためで，ポインタはタグのため 8 byte ごとにしか番地を表せない．そのため，ヒープ領域もこのバイト数を単位に整地されていて， &lt;tt class="docutils literal"&gt;+ 8&lt;/tt&gt; は次の番地という意味になる．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="let-semantics" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-6"&gt;[6]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#x8-450003.12"&gt;https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#x8-450003.12&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="case-semantics" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-7"&gt;[7]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#x8-610022"&gt;https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#x8-610022&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="bangpattern-semantics" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-8"&gt;[8]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://downloads.haskell.org/~ghc/8.6.5/docs/html/users_guide/glasgow_exts.html#recursive-and-polymorphic-let-bindings"&gt;https://downloads.haskell.org/~ghc/8.6.5/docs/html/users_guide/glasgow_exts.html#recursive-and-polymorphic-let-bindings&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="st-monad-definition" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-9"&gt;[9]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://hackage.haskell.org/package/base-4.12.0.0/docs/src/GHC.ST.html#ST"&gt;https://hackage.haskell.org/package/base-4.12.0.0/docs/src/GHC.ST.html#ST&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="runst-is-pure" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-10"&gt;[10]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;もちろん，スタックやヒープをいじることにはなるし， GC のお世話にもなるわけだけど，それは純粋な計算の場合も同じだ．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="runrw-magic" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-11"&gt;[11]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なお， &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/compiler/coreSyn/CorePrep.hs#L948"&gt;https://gitlab.haskell.org/ghc/ghc/blob/ghc-8.6.5-release/compiler/coreSyn/CorePrep.hs#L948&lt;/a&gt; に書いてある通り，実は最適化によっては外に出てはいけないものが &lt;tt class="docutils literal"&gt;runST&lt;/tt&gt; の外に出てしまうことがある．なので，実際には &lt;tt class="docutils literal"&gt;runST&lt;/tt&gt; ，もとい &lt;tt class="docutils literal"&gt;runRW#&lt;/tt&gt; を最適化において特別扱いする必要がある．具体的には，インライン展開されるタイミングを他のものと比べずらしてるらしい．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/05/ghc-io-inside.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/ghc-io-inside.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category><category term="IO"></category></entry><entry><title>Apache Spark についての覚書</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/" rel="alternate"></link><published>2019-05-12T22:40:00+09:00</published><updated>2019-05-12T22:40:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-12:/blog/posts/2019/05/cluster-distributed-programming/</id><summary type="html">&lt;p&gt;ちょっと興味があったので， Apache Spark 関連についていくつか調べたことメモる．なお，僕は最近まで Apache Spark は MapReduce してると思ってたぐらいだし， Hadoop も Spark も触ったことない人間なんで，完全に信憑性はないです．そこはよろしく．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;分散処理の抽象&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Apache Spark 周りってほぼ歴史の話なんで，まずはそこから． Google の MapReduce …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ちょっと興味があったので， Apache Spark 関連についていくつか調べたことメモる．なお，僕は最近まで Apache Spark は MapReduce してると思ってたぐらいだし， Hadoop も Spark も触ったことない人間なんで，完全に信憑性はないです．そこはよろしく．&lt;/p&gt;
