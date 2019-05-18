@@ -447,7 +447,7 @@ primop  WriteMutVarOp "writeMutVar#"  GenPrimOp
   has_side_effects = True
   code_size = { primOpCodeSizeForeignCall } -- for the write barrier
 </pre>
-<p>と定義されている．なので対応するコンストラクタは <tt class="docutils literal">ReadMutVarOp</tt> になる．こいつの生成箇所は，</p>
+<p>と定義されている．なので対応するコンストラクタは <tt class="docutils literal">WriteMutVarOp</tt> になる．こいつの生成箇所は，</p>
 <pre class="literal-block">
 emitPrimOp dflags res@[] WriteMutVarOp [mutv,var]
   = do -- Without this write barrier, other CPUs may see this pointer before
@@ -631,7 +631,7 @@ main1 =
 <span class="nf">noDuplicate</span> <span class="ow">::</span> <span class="kt">IO</span> <span class="nb">()</span>
 <span class="nf">noDuplicate</span> <span class="ow">=</span> <span class="kt">IO</span> <span class="o">$</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="kr">case</span> <span class="n">noDuplicate</span><span class="o">#</span> <span class="n">s</span> <span class="kr">of</span> <span class="n">s'</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="o">#</span> <span class="n">s'</span><span class="p">,</span> <span class="nb">()</span> <span class="o">#</span><span class="p">)</span>
 </pre></div>
-</td></tr></table><p>これにより，評価が始まると <tt class="docutils literal">noDuplicate</tt> が実行され単一スレッドでのみ評価が行われることになる． <tt class="docutils literal">unsafePerformIO</tt> は副作用をないものとして評価する関数で <tt class="docutils literal">Debug.Trace.trace</tt> で使われている． <tt class="docutils literal">unsafeInterleaveIO</tt> は <tt class="docutils literal">hGetContents</tt> など遅延 IO で使われていて， IO の皮を被っておきながら実際の操作は結果のサンクを評価した時に初めて実行されるというものだ．通常の IO はただの State モナドなので， IO の文脈で使われている限りインライン化しても問題ないわけだけd， <tt class="docutils literal">unsafePerformIO</tt> は <tt class="docutils literal">State# RealWorld</tt> を適用して文脈外に値を取り出してしまうので，どこで評価が起きるかも保証されないし，内容によってはインライン展開のされ方によって副作用が何回か起きたりする場合もある． <tt class="docutils literal">Debug.Trace.trace</tt> を使ったことがある人は分かると思うが，文字列が出力されるタイミングは予測がかなり難しいし，インライン展開のされ方によって複数回出力がある場合もあればはじめの一回のみといったこともあり得る．</p>
+</td></tr></table><p>これにより，評価が始まると <tt class="docutils literal">noDuplicate</tt> が実行され単一スレッドでのみ評価が行われることになる． <tt class="docutils literal">unsafePerformIO</tt> は副作用をないものとして評価する関数で <tt class="docutils literal">Debug.Trace.trace</tt> で使われている． <tt class="docutils literal">unsafeInterleaveIO</tt> は <tt class="docutils literal">hGetContents</tt> など遅延 IO で使われていて， IO の皮を被っておきながら実際の操作は結果のサンクを評価した時に初めて実行されるというものだ．通常の IO はただの State モナドなので， IO の文脈で使われている限りインライン化しても問題ないわけだけだが， <tt class="docutils literal">unsafePerformIO</tt> は <tt class="docutils literal">State# RealWorld</tt> を適用して文脈外に値を取り出してしまうので，どこで評価が起きるかも保証されないし，内容によってはインライン展開のされ方によって副作用が何回か起きたりする場合もある． <tt class="docutils literal">Debug.Trace.trace</tt> を使ったことがある人は分かると思うが，文字列が出力されるタイミングは予測がかなり難しいし，インライン展開のされ方によって複数回出力がある場合もあればはじめの一回のみといったこともあり得る．</p>
 <p>このように <tt class="docutils literal">State# RealWorld</tt> の線形使用を無視すると，便利なこともある反面，気をつけなければいけないことがかなり増える．副作用を持つ関数を遅延評価で扱うのはかなり骨が折れるし，その中で順序の保証を行えるようなデータ構造を与えているのに，そのデータ構造を無視する使い方をしてるわけだから当たり前といったらそうなのだけど．</p>
 <p>とにかく， IO 自体は特別な仕組みを特に提供しておらず， unsafe な場合も例外ではない．特別な仕組みを提供する場合も <tt class="docutils literal">noDuplicate</tt> のようにプリミティブ操作を与えることで制御を行なっていることが分かる．</p>
 </div>
