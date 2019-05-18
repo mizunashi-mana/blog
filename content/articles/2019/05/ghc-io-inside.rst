@@ -278,7 +278,7 @@ STG でのプリミティブ命令の変換
       has_side_effects = True
       code_size = { primOpCodeSizeForeignCall } -- for the write barrier
 
-  と定義されている．なので対応するコンストラクタは ``ReadMutVarOp`` になる．こいつの生成箇所は， ::
+  と定義されている．なので対応するコンストラクタは ``WriteMutVarOp`` になる．こいつの生成箇所は， ::
 
     emitPrimOp dflags res@[] WriteMutVarOp [mutv,var]
       = do -- Without this write barrier, other CPUs may see this pointer before
@@ -449,7 +449,7 @@ Haskell の仕様では let と case ， BangPattern のセマンティクス [#
   noDuplicate :: IO ()
   noDuplicate = IO $ \s -> case noDuplicate# s of s' -> (# s', () #)
 
-これにより，評価が始まると ``noDuplicate`` が実行され単一スレッドでのみ評価が行われることになる． ``unsafePerformIO`` は副作用をないものとして評価する関数で ``Debug.Trace.trace`` で使われている． ``unsafeInterleaveIO`` は ``hGetContents`` など遅延 IO で使われていて， IO の皮を被っておきながら実際の操作は結果のサンクを評価した時に初めて実行されるというものだ．通常の IO はただの State モナドなので， IO の文脈で使われている限りインライン化しても問題ないわけだけd， ``unsafePerformIO`` は ``State# RealWorld`` を適用して文脈外に値を取り出してしまうので，どこで評価が起きるかも保証されないし，内容によってはインライン展開のされ方によって副作用が何回か起きたりする場合もある． ``Debug.Trace.trace`` を使ったことがある人は分かると思うが，文字列が出力されるタイミングは予測がかなり難しいし，インライン展開のされ方によって複数回出力がある場合もあればはじめの一回のみといったこともあり得る．
+これにより，評価が始まると ``noDuplicate`` が実行され単一スレッドでのみ評価が行われることになる． ``unsafePerformIO`` は副作用をないものとして評価する関数で ``Debug.Trace.trace`` で使われている． ``unsafeInterleaveIO`` は ``hGetContents`` など遅延 IO で使われていて， IO の皮を被っておきながら実際の操作は結果のサンクを評価した時に初めて実行されるというものだ．通常の IO はただの State モナドなので， IO の文脈で使われている限りインライン化しても問題ないわけだけだが， ``unsafePerformIO`` は ``State# RealWorld`` を適用して文脈外に値を取り出してしまうので，どこで評価が起きるかも保証されないし，内容によってはインライン展開のされ方によって副作用が何回か起きたりする場合もある． ``Debug.Trace.trace`` を使ったことがある人は分かると思うが，文字列が出力されるタイミングは予測がかなり難しいし，インライン展開のされ方によって複数回出力がある場合もあればはじめの一回のみといったこともあり得る．
 
 このように ``State# RealWorld`` の線形使用を無視すると，便利なこともある反面，気をつけなければいけないことがかなり増える．副作用を持つ関数を遅延評価で扱うのはかなり骨が折れるし，その中で順序の保証を行えるようなデータ構造を与えているのに，そのデータ構造を無視する使い方をしてるわけだから当たり前といったらそうなのだけど．
 
