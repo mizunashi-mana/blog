@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - 環境構築</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Fri, 17 May 2019 15:01:00 +0900</lastBuildDate><item><title>GHC で LLVM を通したビルドを行う</title><link>https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/</link><description>&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記 - 環境構築</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Tue, 21 May 2019 15:00:00 +0900</lastBuildDate><item><title>Apache Spark のお試し環境を作る</title><link>https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/</link><description>&lt;p&gt;Spark は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; という対話式のお試し環境がついていて，かなりちょっと実行してみる系がやりやすそう．なので，そのための環境を Docker で作った．その備忘録．&lt;/p&gt;
+&lt;p&gt;なお， &lt;a class="reference external" href="https://github.com/Semantive/docker-spark"&gt;https://github.com/Semantive/docker-spark&lt;/a&gt; を参考にさせてもらった．と言っても，最終的にかなり似通ったものになってしまったが．&lt;/p&gt;
+&lt;div class="section" id="docker"&gt;
+&lt;h2&gt;Docker の初期設定を書く&lt;a class="headerlink" href="#docker" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;基本的な構成は，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;Dockerfile&lt;/tt&gt; : Hadoop と …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Tue, 21 May 2019 15:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-05-21:/blog/posts/2019/05/spark-installation-for-try/</guid><category>並列分散処理</category><category>Spark</category><category>Hadoop</category><category>Docker</category></item><item><title>GHC で LLVM を通したビルドを行う</title><link>https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/</link><description>&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
 &lt;div class="section" id="macos-llvm-ghc"&gt;
 &lt;h2&gt;macOS で LLVM を GHC が使えるようにする&lt;a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:&lt;/p&gt;

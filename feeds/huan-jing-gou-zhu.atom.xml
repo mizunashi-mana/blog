@@ -1,5 +1,234 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 環境構築</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/huan-jing-gou-zhu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-05-17T15:01:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>GHC で LLVM を通したビルドを行う</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/" rel="alternate"></link><published>2019-05-17T15:01:00+09:00</published><updated>2019-05-17T15:01:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-with-llvm/</id><summary type="html">&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 環境構築</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/huan-jing-gou-zhu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-05-21T15:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Apache Spark のお試し環境を作る</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/" rel="alternate"></link><published>2019-05-21T15:00:00+09:00</published><updated>2019-05-21T15:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-21:/blog/posts/2019/05/spark-installation-for-try/</id><summary type="html">&lt;p&gt;Spark は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; という対話式のお試し環境がついていて，かなりちょっと実行してみる系がやりやすそう．なので，そのための環境を Docker で作った．その備忘録．&lt;/p&gt;
+&lt;p&gt;なお， &lt;a class="reference external" href="https://github.com/Semantive/docker-spark"&gt;https://github.com/Semantive/docker-spark&lt;/a&gt; を参考にさせてもらった．と言っても，最終的にかなり似通ったものになってしまったが．&lt;/p&gt;
+&lt;div class="section" id="docker"&gt;
+&lt;h2&gt;Docker の初期設定を書く&lt;a class="headerlink" href="#docker" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;基本的な構成は，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;Dockerfile&lt;/tt&gt; : Hadoop と …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Spark は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; という対話式のお試し環境がついていて，かなりちょっと実行してみる系がやりやすそう．なので，そのための環境を Docker で作った．その備忘録．&lt;/p&gt;
+&lt;p&gt;なお， &lt;a class="reference external" href="https://github.com/Semantive/docker-spark"&gt;https://github.com/Semantive/docker-spark&lt;/a&gt; を参考にさせてもらった．と言っても，最終的にかなり似通ったものになってしまったが．&lt;/p&gt;
+&lt;div class="section" id="docker"&gt;
+&lt;h2&gt;Docker の初期設定を書く&lt;a class="headerlink" href="#docker" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;基本的な構成は，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;Dockerfile&lt;/tt&gt; : Hadoop と Spark が入ったイメージの設定&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;docker-compose.yml&lt;/span&gt;&lt;/tt&gt; : master と worker の協調動作の設定&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;scripts/entrypoint.bash&lt;/tt&gt; : イメージを起動した時の実行スクリプト&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;にする．ベースイメージとしては， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;openjdk:8-jre&lt;/span&gt;&lt;/tt&gt; を使う:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+FROM openjdk:8-jre
+&lt;/pre&gt;
+&lt;p&gt;元々は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;openjdk:9-jre&lt;/span&gt;&lt;/tt&gt; で試してみてたんだけど， Spark の起動時に次のような警告が出るので，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.apache.spark.unsafe.Platform (file:/opt/spark/jars/spark-unsafe_2.11-2.4.3.jar) to method java.nio.Bits.unaligned()
+WARNING: Please consider reporting this to the maintainers of org.apache.spark.unsafe.Platform
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+&lt;/pre&gt;
+&lt;p&gt;一応 8 にバージョンを落としとくことにした． &lt;tt class="docutils literal"&gt;openjdk&lt;/tt&gt; のイメージは， Debian をベースに作られてる．なので，まず Debian 用の初期設定コードを書いておく:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+RUN apt-get update \
+ &amp;amp;&amp;amp; DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    apt-utils locales wget \
+ &amp;amp;&amp;amp; update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX \
+ &amp;amp;&amp;amp; locale-gen en_US.UTF-8 \
+ &amp;amp;&amp;amp; DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales \
+ &amp;amp;&amp;amp; rm -rf /var/lib/apt/lists/*
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="hadoop-spark"&gt;
+&lt;h2&gt;Hadoop と Spark のインストール&lt;a class="headerlink" href="#hadoop-spark" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;次は， Hadoop と Spark のインストール設定．公式のプレビルドアーカイブを使う．両者，設定は大体一緒． Hadoop の方は次の感じになる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+ENV HADOOP_VERSION="2.7.7" \
+    HADOOP_CHECKSUM="17c8917211dd4c25f78bf60130a390f9e273b0149737094e45f4ae5c917b1174b97eb90818c5df068e607835120126281bcc07514f38bd7fd3cb8e9d3db1bdde" \
+    HADOOP_INSTALL_DIR="/opt/hadoop"
+
+ENV HADOOP_HOME="${HADOOP_INSTALL_DIR}" \
+    HADOOP_CONF_DIR="${SPARK_INSTALL_DIR}/etc/hadoop"
+
+RUN useradd --system --create-home --home-dir "${HADOOP_HOME}" hadoop \
+ &amp;amp;&amp;amp; mkdir -p "${HADOOP_INSTALL_DIR}" \
+ &amp;amp;&amp;amp; cd "${HADOOP_INSTALL_DIR}" \
+ &amp;amp;&amp;amp; wget -q -O "${HADOOP_INSTALL_DIR}/hadoop.tgz" "https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" \
+ &amp;amp;&amp;amp; sha512sum "hadoop.tgz" | grep "${HADOOP_CHECKSUM}" \
+ &amp;amp;&amp;amp; tar -xz --strip 1 -f "hadoop.tgz" \
+ &amp;amp;&amp;amp; chown -R hadoop:hadoop "${HADOOP_HOME}"
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;hadoop&lt;/tt&gt; システムユーザを作り，公式からアーカイブを落としてきて，チェックサムで検査して，展開し，所有権を &lt;tt class="docutils literal"&gt;hadoop&lt;/tt&gt; ユーザにする．落としてくる場所は， &lt;tt class="docutils literal"&gt;/opt/hadoop&lt;/tt&gt; ディレクトリ．なお， &lt;tt class="docutils literal"&gt;HADOOP_HOME&lt;/tt&gt; などがちゃんと設定されていないと， Spark が動かない． Spark の方は，次のように設定する:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+ENV SPARK_VERSION="2.4.3" \
+    SPARK_CHECKSUM="e8b7f9e1dec868282cadcad81599038a22f48fb597d44af1b13fcc76b7dacd2a1caf431f95e394e1227066087e3ce6c2137c4abaf60c60076b78f959074ff2ad" \
+    SPARK_INSTALL_DIR="/opt/spark"
+
+ENV SPARK_HOME="${SPARK_INSTALL_DIR}" \
+    SPARK_CONF_DIR="${SPARK_INSTALL_DIR}/conf"
+
+RUN useradd --system --create-home --home-dir "${SPARK_HOME}" spark \
+ &amp;amp;&amp;amp; mkdir -p "${SPARK_INSTALL_DIR}" \
+ &amp;amp;&amp;amp; cd "${SPARK_INSTALL_DIR}" \
+ &amp;amp;&amp;amp; wget -q -O "${SPARK_INSTALL_DIR}/spark-bin-hadoop.tgz" "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION%.*}.tgz" \
+ &amp;amp;&amp;amp; sha512sum "spark-bin-hadoop.tgz" | grep "${SPARK_CHECKSUM}" \
+ &amp;amp;&amp;amp; tar -xz --strip 1 -f "spark-bin-hadoop.tgz" \
+ &amp;amp;&amp;amp; chown -R spark:spark "${SPARK_HOME}"
+&lt;/pre&gt;
+&lt;p&gt;見ての通り， Hadoop とほぼ同じだ．後は， エントリーポイントを書いて設定するだけ．ただ，それだけだとちょっと不便なので次の設定も書いておく:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+ENV PATH="${SPARK_INSTALL_DIR}/bin:${PATH}" \
+    LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;PATH&lt;/tt&gt; の設定は， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; などを実行パスに含める為．二つ目の設定は，書かないと次の警告が発生する:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;エントリーポイントの設定&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;エントリーポイントとして，次のバッシュスクリプト &lt;tt class="docutils literal"&gt;scripts/entrypoint.bash&lt;/tt&gt; を作成した:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/usr/bin/env bash&lt;/span&gt;
+
+&lt;span class="o"&gt;[[&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="nv"&gt;$DEBUG&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;"true"&lt;/span&gt; &lt;span class="o"&gt;]]&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt; -x
+&lt;span class="o"&gt;[[&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="nv"&gt;$STRICT&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;"true"&lt;/span&gt; &lt;span class="o"&gt;]]&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt; -u
+&lt;span class="nb"&gt;set&lt;/span&gt; -eo pipefail
+
+&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; in
+  master&lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="nb"&gt;shift&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;
+    &lt;span class="nb"&gt;exec&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;SPARK_INSTALL_DIR&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;/bin/spark-class"&lt;/span&gt; &lt;span class="s2"&gt;"org.apache.spark.deploy.master.Master"&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="nv"&gt;$@&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
+    &lt;span class="p"&gt;;;&lt;/span&gt;
+  worker&lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="nb"&gt;shift&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;
+    &lt;span class="nb"&gt;exec&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;SPARK_INSTALL_DIR&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;/bin/spark-class"&lt;/span&gt; &lt;span class="s2"&gt;"org.apache.spark.deploy.worker.Worker"&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="nv"&gt;$@&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
+    &lt;span class="p"&gt;;;&lt;/span&gt;
+  *&lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="nb"&gt;exec&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="nv"&gt;$@&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
+    &lt;span class="p"&gt;;;&lt;/span&gt;
+&lt;span class="k"&gt;esac&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;こいつは， &lt;tt class="docutils literal"&gt;master&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;worker&lt;/tt&gt; を1引数目に受け取ると， Spark のそれぞれのメインクラスを，それ以外の場合コマンドだと思ってそれを実行する．こいつを，コピーして，エントリーポイントとして設定する:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+COPY scripts/entrypoint.bash /sbin/entrypoint.bash
+RUN chmod 755 /sbin/entrypoint.bash
+
+USER spark
+WORKDIR $SPARK_HOME
+
+ENTRYPOINT [ "/sbin/entrypoint.bash" ]
+CMD ["master"]
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="docker-compose"&gt;
+&lt;h2&gt;Docker Compose の設定&lt;a class="headerlink" href="#docker-compose" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;後は &lt;tt class="docutils literal"&gt;master&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;worker&lt;/tt&gt; それぞれを一つずつインスタンスとして起動して，協調動作させるための設定を， Docker Compose で書く． &lt;tt class="docutils literal"&gt;master&lt;/tt&gt; は以下のようにする:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+master:
+  build: .
+  command: ["master"]
+
+  hostname: master
+  environment:
+    MASTER: spark://master:7077
+  ports:
+    - 4040:4040
+    - 6066:6066
+    - 7077:7077
+    - 8080:8080
+&lt;/pre&gt;
+&lt;p&gt;それぞれのポートは，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;4040: アプリケーション確認用 Web UI&lt;/li&gt;
+&lt;li&gt;8080: ジョブヒストリー確認用 Web UI&lt;/li&gt;
+&lt;li&gt;6066: Rest API&lt;/li&gt;
+&lt;li&gt;7077: ジョブサブミット用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;という感じっぽい．なお，設定できる環境変数は，コンテナを起動した後，以下で確認できる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+docker-compose exec master cat conf/spark-env.sh.template
+&lt;/pre&gt;
+&lt;p&gt;なお， &lt;tt class="docutils literal"&gt;MASTER&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; などの CLI 用に設定している． CLI はこの変数を見て &lt;tt class="docutils literal"&gt;master&lt;/tt&gt; のジョブサブミット先を決めるっぽい． &lt;tt class="docutils literal"&gt;worker&lt;/tt&gt; の方は以下のように書く:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+worker1:
+  build: .
+  command: ["worker", "spark://master:7077"]
+  depends_on:
+    - master
+
+  environment:
+    SPARK_WORKER_WEBUI_PORT: 8081
+  ports:
+    - 8081:8081
+&lt;/pre&gt;
+&lt;p&gt;最終的にできたやつは， &lt;a class="reference external" href="https://github.com/mizunashi-mana/docker-toy-spark"&gt;https://github.com/mizunashi-mana/docker-toy-spark&lt;/a&gt; に上げてある．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="spark-shell"&gt;
+&lt;h2&gt;spark-shell を動かす&lt;a class="headerlink" href="#spark-shell" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;後は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark://localhost:7077&lt;/span&gt;&lt;/tt&gt; に設定して起動すればいい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+spark-shell --master spark://localhost:7077
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;master&lt;/tt&gt; のコンテナでも起動できて，次のようにする:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+docker-compose exec master spark-shell
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;SparkContext&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;sc&lt;/tt&gt; に束縛されて，諸々がデフォルトで &lt;tt class="docutils literal"&gt;import&lt;/tt&gt; されてる sbt みたいな感じっぽい．例えば次のような入力ができる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+scala&amp;gt; sc.parallelize(0 until 100).flatMap { p =&amp;gt; (0 until 100).map { i =&amp;gt; ((p + i) % 40, i) } }.groupByKey().count()
+res1: Long = 40
+&lt;/pre&gt;
+&lt;p&gt;論理プランは次のメソッドで見れる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+scala&amp;gt; sc.parallelize(0 until 100).flatMap { p =&amp;gt; (0 until 100).map { i =&amp;gt; ((p + i) % 40, i) } }.groupByKey().toDebugString
+res3: String =
+(2) ShuffledRDD[11] at groupByKey at &amp;lt;console&amp;gt;:25 []
++-(2) MapPartitionsRDD[10] at flatMap at &amp;lt;console&amp;gt;:25 []
+    |  ParallelCollectionRDD[9] at parallelize at &amp;lt;console&amp;gt;:25 []
+&lt;/pre&gt;
+&lt;p&gt;最初の &lt;tt class="docutils literal"&gt;(N)&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;N&lt;/tt&gt; はパーティション数， &lt;tt class="docutils literal"&gt;[N]&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;N&lt;/tt&gt; は RDD の ID っぽい．例えば， &lt;tt class="docutils literal"&gt;parallelize&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;groupByKey&lt;/tt&gt; でパーティション数を指定してみる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+scala&amp;gt; sc.parallelize(0 until 100, 100).flatMap { p =&amp;gt; (0 until 100).map { i =&amp;gt; ((p + i) % 40, i) } }.groupByKey(50).toDebugString
+res5: String =
+(50) ShuffledRDD[17] at groupByKey at &amp;lt;console&amp;gt;:25 []
++-(100) MapPartitionsRDD[16] at flatMap at &amp;lt;console&amp;gt;:25 []
+    |   ParallelCollectionRDD[15] at parallelize at &amp;lt;console&amp;gt;:25 []
+&lt;/pre&gt;
+&lt;p&gt;なお， &lt;tt class="docutils literal"&gt;:q&lt;/tt&gt; で閉じれる．アクションを実行すると，ジョブが発行される．ジョブは &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;http://localhost:4040&lt;/span&gt;&lt;/tt&gt; から見れる．画面は以下の感じ:&lt;/p&gt;
+&lt;img alt="物理プランのステージ分けやタイムラインなどが見れる．" src="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/spark-installation-for-try/application-ui-image.png"/&gt;
+&lt;p&gt;タスクの詳細は，ステージ欄にあるリンクから見れるっぽい．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Spark ，プログラムが手軽に書けるし，対話的に色々試せて良さそう．&lt;/p&gt;
+&lt;p&gt;時折気を見て，色々試していきたいなあ．てことで，以上です．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/05/spark-installation-for-try.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/spark-installation-for-try.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="並列分散処理"></category><category term="Spark"></category><category term="Hadoop"></category><category term="Docker"></category></entry><entry><title>GHC で LLVM を通したビルドを行う</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/" rel="alternate"></link><published>2019-05-17T15:01:00+09:00</published><updated>2019-05-17T15:01:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-with-llvm/</id><summary type="html">&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
 &lt;div class="section" id="macos-llvm-ghc"&gt;
 &lt;h2&gt;macOS で LLVM を GHC が使えるようにする&lt;a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:&lt;/p&gt;
