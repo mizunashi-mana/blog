@@ -1,0 +1,46 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage[all]{xy}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{10cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+  \begin{prooftree}
+    \hypo{A \in \mathcal{A}}
+    \infer1[type]{\vdash \mathop{\mathbf{type}} A}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\vdash \mathop{\mathbf{type}} A}
+    \infer1[var]{x: A \vdash x: A}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{f: A_1 \to A_2 \in \mathcal{F}}
+    \hypo{x: A \vdash e_1: A_1}
+    \infer2[app]{x: A \vdash f(e_1): A_2}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: A_1 \vdash e_1: A_2}
+    \hypo{x: A_1 \vdash e_2: A_2}
+    \infer2[eq]{x: A_1 \vdash e_1 =_{A_2} e_2}
+  \end{prooftree}
+\]
+\end{document}

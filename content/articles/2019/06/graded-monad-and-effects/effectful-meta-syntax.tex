@@ -1,0 +1,99 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{10cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+  \begin{prooftree}
+    \hypo{A \in \mathcal{A}}
+    \infer1[type]{\vdash \mathop{\mathbf{type}} A}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{E \in \mathcal{E}}
+    \infer1[effect]{\vdash \mathop{\mathbf{effect}} E}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\vdash \mathop{\mathbf{effect}} \epsilon}
+    \hypo{\vdash \mathop{\mathbf{type}} \tau}
+    \infer2[type lift]{\vdash \mathop{\mathbf{type}} T \epsilon \tau}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\vdash \mathop{\mathbf{type}} \tau}
+    \infer1[var]{x: \tau \vdash x: \tau}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: \tau_1 \vdash e: \tau_2}
+    \infer1[lift]{x: \tau_1 \vdash [e]: T 1 \tau_2}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: \tau \vdash e: \tau_1}
+    \hypo{f: \tau_1 \to \tau_2 \in \mathcal{F}}
+    \infer2[app]{x: \tau \vdash f(e): \tau_2}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: \tau \vdash e: \tau_1}
+    \hypo{f: \tau_1 \xrightarrow{\epsilon} \tau_2 \in \mathcal{F}}
+    \infer2[effectful app]{x: \tau \vdash f(e): T \epsilon \tau_2}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: \tau_1 \vdash e_1: T \epsilon_1 \tau_2}
+    \hypo{x_1: \tau_2 \vdash e_2: T \epsilon_2 \tau_3}
+    \infer2[let]{x: \tau_1 \vdash (\mathop{\mathbf{let}} x_1 \gets e_1 \mathop{\mathbf{in}} e_2): T (\epsilon_1 \cdot \epsilon_2) \tau_3}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\vdash \mathop{\mathbf{effect}} \epsilon_1}
+    \hypo{\vdash \mathop{\mathbf{effect}} \epsilon_2}
+    \infer2[effect ord]{\vdash \epsilon_1 \sqsubseteq \epsilon_2}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: \tau_1 \vdash e: T \epsilon_1 \tau_2}
+    \hypo{\vdash \epsilon_1 \sqsubseteq \epsilon_2}
+    \infer2[cast]{x: \tau_1 \vdash e: T \epsilon_2 \tau_2}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: \tau_1 \vdash e_1: \tau_2}
+    \hypo{x: \tau_1 \vdash e_2: \tau_2}
+    \infer2[eq]{x: \tau_1 \vdash e_1 =_{\tau_2} e_2}
+  \end{prooftree}
+\]
+\end{document}
