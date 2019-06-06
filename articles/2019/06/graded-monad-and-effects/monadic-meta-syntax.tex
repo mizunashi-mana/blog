@@ -1,0 +1,38 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage[all]{xy}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{10cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+  \begin{prooftree}
+    \hypo{\vdash \mathop{\mathbf{type}} \tau}
+    \infer1[type lift]{\vdash \mathop{\mathbf{type}} T \tau}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: \tau_1 \vdash e: \tau_2}
+    \infer1[lift]{x: \tau_1 \vdash [e]: T \tau_2}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{x: \tau_1 \vdash e_1: T \tau_2}
+    \hypo{x_1: \tau_2 \vdash e_2: T \tau_3}
+    \infer2[let]{x: \tau_1 \vdash (\mathop{\mathbf{let}} x_1 \gets e_1 \mathop{\mathbf{in}} e_2): T \tau_3}
+  \end{prooftree}
+\]
+\end{document}

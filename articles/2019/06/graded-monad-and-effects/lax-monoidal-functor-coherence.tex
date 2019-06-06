@@ -1,0 +1,69 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=30pt{
+      (T \epsilon_1 \otimes T \epsilon_2) \otimes T \epsilon_3
+      \ar@{=}[r]
+      \ar@{->}[d]^{\mu_{\epsilon_1,\epsilon_2} \mathbin{\otimes} \mathrm{id}}
+      & T \epsilon_1 \otimes (T \epsilon_2 \otimes T \epsilon_3)
+      \ar@{->}[d]_{\mathrm{id} \mathbin{\otimes} \mu_{\epsilon_2,\epsilon_3}}
+      \\
+      T (\epsilon_1 \cdot \epsilon_2) \otimes T \epsilon_3
+      \ar@{->}[d]^{\mu_{\epsilon_1 \cdot \epsilon_2, \epsilon_3}}
+      &
+      T \epsilon_1 \otimes T (\epsilon_2 \cdot \epsilon_3)
+      \ar@{->}[d]_{\mu_{\epsilon_1, \epsilon_2 \cdot \epsilon_3}}
+      \\
+      T ((\epsilon_1 \cdot \epsilon_2) \cdot \epsilon_3)
+      \ar@{=}[r]
+      &
+      T (\epsilon_1 \cdot (\epsilon_2 \cdot \epsilon_3))
+      \ar@{}[luu]|{\circlearrowright}
+    }
+  }
+\end{align*}
+\begin{align*}
+  \vcenter{
+    \xymatrix@=30pt{
+      1_C \otimes T \epsilon
+      \ar@{->}[d]_{\eta \mathbin{\otimes} \mathrm{id}}
+      &
+      T \epsilon \ar@{=}[dd]
+      \ar@{=}[l]
+      \ar@{=}[r]
+      &
+      T \epsilon \otimes 1_C
+      \ar@{->}[d]_{\mathrm{id} \mathbin{\otimes} \eta}
+      \\
+      T 1_E \otimes T \epsilon
+      \ar@{->}[d]_{\mu_{1_E, \epsilon}}
+      & &
+      T \epsilon \otimes T 1_E
+      \ar@{->}[d]_{\mu_{\epsilon, 1_E}}
+      \\
+      T (1_E \cdot \epsilon)
+      \ar@{=}[r]
+      &
+      T \epsilon
+      \ar@/^25pt/@{{}{ }{}}[uu]|{\circlearrowright}
+      \ar@/_25pt/@{{}{ }{}}[uu]|{\circlearrowright}
+      &
+      T (\epsilon \cdot 1_E)
+      \ar@{=}[l]
+    }
+  }
+\end{align*}
+\end{document}
