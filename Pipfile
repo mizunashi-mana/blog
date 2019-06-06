@@ -9,6 +9,7 @@ verify_ssl = true
 pelican = "*"
 ghp-import = "*"
 beautifulsoup4 = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"

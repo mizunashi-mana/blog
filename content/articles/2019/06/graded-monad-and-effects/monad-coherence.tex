@@ -1,0 +1,30 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+
+\setlength{\paperwidth}{10cm}
+\setlength{\paperheight}{4cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=30pt{
+      T^3 A \ar@{->}[d]_{T \mu_A} \ar@{->}[r]^{\mu_{T A}} & T^2 A \ar@{->}[d]^{\mu_A} \\
+      T^2 A \ar@{->}[r]_{\mu_A} & T A \ar@{}[lu]|{\circlearrowright}
+    }
+  }
+  \hspace{10pt}
+  \vcenter{
+    \xymatrix@=30pt{
+      T A \ar@{->}[d]_{T \eta_A} \ar@{->}[r]^{\eta_{T A}} \ar@{=}[rd] & T^2 A \ar@{->}[d]^{\mu_A} \\
+      T^2 A \ar@{->}[r]_{\mu_A} \ar@{}[ru]|(.3){\circlearrowright} \ar@{}[ru]|(.7){\circlearrowright} & T A
+    }
+  }
+\end{align*}
+\end{document}

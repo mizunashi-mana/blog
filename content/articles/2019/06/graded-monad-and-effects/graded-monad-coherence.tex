@@ -1,0 +1,58 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=30pt{
+      T \epsilon_1; T (\epsilon_2 \cdot \epsilon_3)
+      \ar@{=>}[d]_{\mu^{\epsilon_1, \epsilon_2 \cdot \epsilon_3}}
+      &
+      T \epsilon_1; T \epsilon_2; T \epsilon_3
+      \ar@{=>}[l]_{T \epsilon_1 \mu^{\epsilon_2, \epsilon_3}}
+      \ar@{=>}[r]^{\mu^{\epsilon_1, \epsilon_2}_{T \epsilon_3}}
+      &
+      T (\epsilon_1 \cdot \epsilon_2); T \epsilon_3
+      \ar@{=>}[d]^{(T \epsilon_1) \mu^{\epsilon_1 \cdot \epsilon_2, \epsilon_3}}
+      \\
+      T (\epsilon_1 \cdot (\epsilon_2 \cdot \epsilon_3))
+      \ar@{=}[rr]
+      & \ar@{}[u]|{\circlearrowright} &
+      T ((\epsilon_1 \cdot \epsilon_2) \cdot \epsilon_3)
+    }
+  }
+\end{align*}
+\begin{align*}
+  \vcenter{
+    \xymatrix@=30pt{
+      T 1; T \epsilon
+      \ar@{=>}[d]_{\mu^{1, \epsilon}}
+      &
+      T \epsilon \ar@{=}[d]
+      \ar@{=>}[l]_{\eta_{T \epsilon}}
+      \ar@{=>}[r]^{T \epsilon \eta}
+      &
+      T \epsilon; T 1
+      \ar@{=>}[d]^{\mu^{\epsilon, 1}}
+      \\
+      T (1 \cdot \epsilon)
+      \ar@{}[ru]|{\circlearrowright}
+      \ar@{=}[r]
+      & T \epsilon &
+      T (\epsilon \cdot 1)
+      \ar@{}[lu]|{\circlearrowright}
+      \ar@{=}[l]
+    }
+  }
+\end{align*}
+\end{document}

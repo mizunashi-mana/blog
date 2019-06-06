@@ -18,3 +18,7 @@ __pycache__/
 
 # for npm
 /node_modules/
+
+# for pdflatex
+*.log
+*.aux
