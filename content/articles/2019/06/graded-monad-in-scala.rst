@@ -300,7 +300,7 @@ Int のリテラル型は， ``1 <: Int`` ， ``2 <: Int`` という関係を満
 
   T \epsilon = \int_{\epsilon' \in E} S(\epsilon \cdot \epsilon') + (-)
 
-に対応する．なお，現状の Dotty は， higher kinded type に対してのパターンマッチの網羅性検査があまりうまくいかないようで [#dotty-hkt-pattern-check-problem] ，めっちゃ警告が出るけど気にしないでくれ．これを使うと，例外を複数種類投げる計算を管理することができて，
+に対応する．なお，現状の Dotty は， higher kinded type に対してのパターンマッチの網羅性検査があまりうまくいかないようで [#dotty-hkt-pattern-check-problem]_ ，めっちゃ警告が出るけど気にしないでくれ．これを使うと，例外を複数種類投げる計算を管理することができて，
 
 .. code-block:: scala
 
