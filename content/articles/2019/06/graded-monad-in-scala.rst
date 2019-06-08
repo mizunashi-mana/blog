@@ -102,21 +102,21 @@ Dotty には union type という型があり，型 ``X`` ， ``Y`` に対して
 
 .. code-block:: scala
 
-  for (
+  for {
     v1 <- program1
     _  <- program2(v1)
     v2 <- program3(v2)
-  ) GradedMonad.gradedPure((v1, v2))
+  } GradedMonad.gradedPure((v1, v2))
 
 または，
 
 .. code-block:: scala
 
-  for (
+  for {
     v1 <- program1
     _  <- program2(v1)
     v2 <- program3(v2)
-  ) yield (v1, v2)
+  } yield (v1, v2)
 
 みたいにコードを書ける．後，こいつが満たさなきゃいけない性質の検査コードも書いておいた:
 
