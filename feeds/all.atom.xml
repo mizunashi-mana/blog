@@ -127,22 +127,22 @@ sbt new lampepfl/dotty.g8
 2
 3
 4
-5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
   &lt;span class="n"&gt;v1&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;program1&lt;/span&gt;
   &lt;span class="k"&gt;_&lt;/span&gt;  &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;program2&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
   &lt;span class="n"&gt;v2&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;program3&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v2&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="nc"&gt;GradedMonad&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gradedPure&lt;/span&gt;&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="n"&gt;v1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v2&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="nc"&gt;GradedMonad&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gradedPure&lt;/span&gt;&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="n"&gt;v1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v2&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;または，&lt;/p&gt;
 &lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
 2
 3
 4
-5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
   &lt;span class="n"&gt;v1&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;program1&lt;/span&gt;
   &lt;span class="k"&gt;_&lt;/span&gt;  &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;program2&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
   &lt;span class="n"&gt;v2&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;program3&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v2&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v2&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v2&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいにコードを書ける．後，こいつが満たさなきゃいけない性質の検査コードも書いておいた:&lt;/p&gt;
 &lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1

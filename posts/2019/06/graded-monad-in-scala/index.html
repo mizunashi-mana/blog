@@ -276,22 +276,22 @@ sbt new lampepfl/dotty.g8
 2
 3
 4
-5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="o">(</span>
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="o">{</span>
   <span class="n">v1</span> <span class="k">&lt;-</span> <span class="n">program1</span>
   <span class="k">_</span>  <span class="k">&lt;-</span> <span class="n">program2</span><span class="o">(</span><span class="n">v1</span><span class="o">)</span>
   <span class="n">v2</span> <span class="k">&lt;-</span> <span class="n">program3</span><span class="o">(</span><span class="n">v2</span><span class="o">)</span>
-<span class="o">)</span> <span class="nc">GradedMonad</span><span class="o">.</span><span class="n">gradedPure</span><span class="o">((</span><span class="n">v1</span><span class="o">,</span> <span class="n">v2</span><span class="o">))</span>
+<span class="o">}</span> <span class="nc">GradedMonad</span><span class="o">.</span><span class="n">gradedPure</span><span class="o">((</span><span class="n">v1</span><span class="o">,</span> <span class="n">v2</span><span class="o">))</span>
 </pre></div>
 </td></tr></table><p>または，</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
 4
-5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="o">(</span>
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="o">{</span>
   <span class="n">v1</span> <span class="k">&lt;-</span> <span class="n">program1</span>
   <span class="k">_</span>  <span class="k">&lt;-</span> <span class="n">program2</span><span class="o">(</span><span class="n">v1</span><span class="o">)</span>
   <span class="n">v2</span> <span class="k">&lt;-</span> <span class="n">program3</span><span class="o">(</span><span class="n">v2</span><span class="o">)</span>
-<span class="o">)</span> <span class="k">yield</span> <span class="o">(</span><span class="n">v1</span><span class="o">,</span> <span class="n">v2</span><span class="o">)</span>
+<span class="o">}</span> <span class="k">yield</span> <span class="o">(</span><span class="n">v1</span><span class="o">,</span> <span class="n">v2</span><span class="o">)</span>
 </pre></div>
 </td></tr></table><p>みたいにコードを書ける．後，こいつが満たさなきゃいけない性質の検査コードも書いておいた:</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
