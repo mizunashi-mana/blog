@@ -1,0 +1,73 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=30pt{
+      & & &
+      \hat{T} A \ar@{=}[ddd]
+      \ar@{->}[lld]_{\eta_{\hat{T}}}
+      \ar@/_20pt/@{->}[llld]_{\hat{\eta}_{\hat{T}}}
+      \ar@/_5pt/@{{}{ }{}}[llld]|{\circlearrowright}
+      \ar@/_40pt/@{{}{ }{}}[ddd]|(0.25){\circlearrowright}
+      \ar@{->}[rrd]^{\hat{T}(\eta)}
+      \ar@/^20pt/@{->}[rrrd]^{\hat{T}(\hat{\eta})}
+      \ar@/^5pt/@{{}{ }{}}[rrrd]|{\circlearrowright}
+      \ar@/^40pt/@{{}{ }{}}[ddd]|(0.25){\circlearrowright}
+      \\
+      \hat{T}^2 A
+      \ar@{->}[rd]_{\mu^{F,F}}
+      \ar@/_50pt/@{->}[rrrdd]_{\hat{\mu}}
+      \ar@/_35pt/@{{}{ }{}}[rrrdd]|{\circlearrowright}
+      &
+      T 1 (\hat{T} A)
+      \ar@{->}[l]_{T (1 \to F)}
+      \ar@/^40pt/@{->}[rrdd]^{\mu^{1,F}}
+      \ar@/^25pt/@{{}{ }{}}[rrdd]|{\circlearrowright}
+      \ar@{->}[rd]^{\mu^{1,F}}
+      \ar@{{}{ }{}}[d]|{\circlearrowright}
+      & & & &
+      \hat{T} (T 1 A)
+      \ar@{->}[r]^{\hat{T}(T (1 \to F))}
+      \ar@/_40pt/@{->}[lldd]_{\mu^{F,1}}
+      \ar@/_25pt/@{{}{ }{}}[lldd]|{\circlearrowright}
+      \ar@{->}[ld]^{\mu^{F,1}}
+      \ar@{{}{ }{}}[d]|{\circlearrowright}
+      &
+      \hat{T}^2 A
+      \ar@{->}[ld]^{\mu^{F,F}}
+      \ar@/^50pt/@{->}[llldd]^{\hat{\mu}}
+      \ar@/^35pt/@{{}{ }{}}[llldd]|{\circlearrowright}
+      \\
+      &
+      T (F \cdot F) A
+      \ar@{->}[rrd]_{T (F \cdot F \to F)}
+      &
+      \hat{T} A
+      \ar@{->}[l]_{T (F \to F \cdot F)}
+      \ar@{=}[rd]
+      \ar@{{}{ }{}}[d]|(0.35){\circlearrowright}
+      & &
+      \hat{T} A
+      \ar@{->}[r]_{T (F \to F \cdot F)}
+      \ar@{=}[ld]
+      \ar@{{}{ }{}}[d]|(0.35){\circlearrowright}
+      &
+      T (F \cdot F) A
+      \ar@{->}[lld]^{T (F \cdot F \to F)}
+      \\
+      & & &
+      \hat{T} A
+      &
+    }
+  }
+\end{align*}
+\end{document}
