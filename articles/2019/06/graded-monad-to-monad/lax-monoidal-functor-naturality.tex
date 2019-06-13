@@ -1,0 +1,30 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=80pt{
+      T \epsilon_1; T \epsilon_2
+      \ar@{=>}[d]_{\mu^{\epsilon_1,\epsilon_2}}
+      \ar@{=>}[r]^{T (\epsilon_1 \to \epsilon'_1); T(\epsilon_2 \to \epsilon'_2)}
+      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      T \epsilon'_1; T \epsilon'_2
+      \ar@{=>}[d]^{\mu^{\epsilon'_1,\epsilon'_2}}
+      \\
+      T (\epsilon_1 \cdot \epsilon_2)
+      \ar@{=>}[r]_{T (\epsilon_1 \cdot \epsilon_2 \to \epsilon'_1 \cdot \epsilon'_2)}
+      &
+      T (\epsilon'_1 \cdot \epsilon'_2)
+    }
+  }
+\end{align*}
+\end{document}

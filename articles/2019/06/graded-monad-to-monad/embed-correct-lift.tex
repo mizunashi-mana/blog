@@ -1,0 +1,38 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\newcommand{\semanticf}[1]{\llbracket #1\rrbracket}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=80pt{
+      \semanticf{\tau_1}
+      \ar@/^40pt/@{->}[rr]^{\semanticf{x: \tau_1 \vdash [e]: T 1 \tau_2}}
+      \ar@/^20pt/@{{}{ }{}}[rr]|{\circlearrowright}
+      \ar@{->}[r]^{\semanticf{x: \tau_1 \vdash e: \tau_2}}
+      \ar@{->}[rrd]_{\semanticf{x: \tau_1 \vdash [e]: \hat{T} \tau_2}}
+      \ar@/^20pt/@{{}{ }{}}[rrd]|(0.45){\circlearrowright}
+      &
+      \semanticf{\tau_2}
+      \ar@{->}[r]^{\eta_{\semanticf{\tau_2}}}
+      \ar@{->}[rd]^{\hat{\eta}}
+      \ar@/^30pt/@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      T 1 \semanticf{\tau_2}
+      \ar@{->}[d]^{T (1 \leq F) \semanticf{\tau_2}}
+      \\
+      &
+      &
+      \hat{T} \semanticf{\tau_2}
+    }
+  }
+\end{align*}
+\end{document}

@@ -1,0 +1,66 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\newcommand{\semanticf}[1]{\llbracket #1\rrbracket}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=100pt{
+      \semanticf{\tau_1}
+      \ar@/^40pt/@{->}[rrr]^{\semanticf{x: \tau_1 \vdash (\mathrel{\mathbf{let}} x_1 \gets e_1 \mathrel{\mathbf{in}} e_2): T (\epsilon_1 \cdot \epsilon_2) \tau_3}}
+      \ar@/^20pt/@{{}{ }{}}[rrr]|{\circlearrowright}
+      \ar@{->}[r]^{\semanticf{x: \tau_1 \vdash e_1: T \epsilon_1 \tau_2}}
+      \ar@{->}[rd]_{\semanticf{x: \tau_1 \vdash e_1: \hat{T} \tau_2}}
+      \ar@/^40pt/@{{}{ }{}}[rd]|{\circlearrowright}
+      \ar@/_190pt/@{->}[rrrdd]^(0.67){\semanticf{x: \tau_1 \vdash (\mathrel{\mathbf{let}} x_1 \gets e_1 \mathrel{\mathbf{in}} e_2): \hat{T} \tau_3}}
+      \ar@/_150pt/@{{}{ }{}}[rrrdd]|{\circlearrowright}
+      &
+      T \semanticf{\epsilon_1}_{\mathcal{E}} \semanticf{\tau_2}
+      \ar@{->}[r]^-{T \semanticf{\epsilon_1}_{\mathcal{E}} \semanticf{x_1: \tau_2 \vdash e_2: T \epsilon_2 \tau_3}}
+      \ar@/_20pt/@{->}[rd]_{T \semanticf{\epsilon_1}_{\mathcal{E}} \semanticf{x_1: \tau_2 \vdash e_2: \hat{T} \tau_3}}
+      \ar@/^30pt/@{{}{ }{}}[rd]|{\circlearrowright}
+      \ar@{->}[d]_{T (\semanticf{\epsilon_1}_{\mathcal{E}} \leq F) \semanticf{\tau_2}}
+      \ar@/_20pt/@{{}{ }{}}[rdd]|{\circlearrowright}
+      &
+      T \semanticf{\epsilon_1}_{\mathcal{E}} (T \semanticf{\epsilon_2}_{\mathcal{E}} \semanticf{\tau_3})
+      \ar@{->}[r]^{\mu^{\semanticf{\epsilon_1}_{\mathcal{E}},\semanticf{\epsilon_2}_{\mathcal{E}}}_{\semanticf{\tau_3}}}
+      \ar@{->}[d]_{T \semanticf{\epsilon_1}_{\mathcal{E}} (T (\semanticf{\epsilon_2}_{\mathcal{E}} \leq F) \semanticf{\tau_3})}
+      \ar@/^50pt/@{->}[dd]^{T (\semanticf{\epsilon_1}_{\mathcal{E}} \leq F) (T (\semanticf{\epsilon_2}_{\mathcal{E}} \leq F) \semanticf{\tau_3})}
+      \ar@/^25pt/@{{}{ }{}}[dd]|(0.6){\circlearrowright}
+      &
+      T (\semanticf{\epsilon_1}_{\mathcal{E}} \cdot T \semanticf{\epsilon_2}_{\mathcal{E}}) \semanticf{\tau_3}
+      \ar@/^50pt/@{->}[dd]^{T (\semanticf{\epsilon_1}_{\mathcal{E}} \cdot T \semanticf{\epsilon_2}_{\mathcal{E}} \leq F) \semanticf{\tau_3}}
+      \ar@/^25pt/@{{}{ }{}}[dd]|(0.6){\circlearrowright}
+      \ar@{->}[d]_{T (\semanticf{\epsilon_1}_{\mathcal{E}} \cdot T \semanticf{\epsilon_2}_{\mathcal{E}} \leq F \cdot F) \semanticf{\tau_3}}
+      \\
+      &
+      \hat{T} \semanticf{\tau_2}
+      \ar@/_20pt/@{->}[rd]_{\hat{T} \semanticf{x_1: \tau_2 \vdash e_2: \hat{T} \tau_3}}
+      &
+      T \semanticf{\epsilon_1}_{\mathcal{E}} (\hat{T} \semanticf{\tau_3})
+      \ar@{->}[d]_{T (\semanticf{\epsilon_1}_{\mathcal{E}} \leq F) (\hat{T} \semanticf{\tau_3})}
+      &
+      T (F \cdot F) \semanticf{\tau_3}
+      \ar@{->}[d]_{T (F \cdot F \leq F) \semanticf{\tau_3}}
+      \\
+      &
+      &
+      \hat{T} (\hat{T} \semanticf{\tau_3})
+      \ar@{->}[ru]_{\mu^{F,F}_{\semanticf{\tau_3}}}
+      \ar@/_40pt/@{{}{ }{}}[ru]|{\circlearrowright}
+      \ar@{->}[r]_{\hat{\mu}_{\semanticf{\tau_3}}}
+      \ar@{{}{ }{}}[ruu]|(0.6){\circlearrowright}
+      &
+      \hat{T} \semanticf{\tau_3}
+    }
+  }
+\end{align*}
+\end{document}
