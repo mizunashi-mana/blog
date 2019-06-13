@@ -1,0 +1,38 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\newcommand{\semanticf}[1]{\llbracket #1\rrbracket}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=80pt{
+      \semanticf{\tau}
+      \ar@/^40pt/@{->}[rr]^{\semanticf{x: \tau \vdash f(e): T \epsilon \tau_2}}
+      \ar@/^20pt/@{{}{ }{}}[rr]|{\circlearrowright}
+      \ar@{->}[r]^{\semanticf{x: \tau \vdash e: \tau_1}}
+      \ar@{->}[rrd]_{\semanticf{x: \tau \vdash f(e): \hat{T} \tau_2}}
+      \ar@/^20pt/@{{}{ }{}}[rrd]|(0.45){\circlearrowright}
+      &
+      \semanticf{\tau_1}
+      \ar@{->}[r]^{\semanticf{f}}
+      \ar@{->}[rd]^{\semanticf{f}}
+      \ar@/^30pt/@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      T \semanticf{\epsilon}_{\mathcal{E}} \semanticf{\tau_2}
+      \ar@{->}[d]^{T (\semanticf{\epsilon}_{\mathcal{E}} \leq F) \semanticf{\tau_2}}
+      \\
+      &
+      &
+      \hat{T} \semanticf{\tau_2}
+    }
+  }
+\end{align*}
+\end{document}
