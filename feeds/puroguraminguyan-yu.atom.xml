@@ -1,5 +1,999 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-05-17T15:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>GHC IO モナドの中身</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/" rel="alternate"></link><published>2019-05-17T15:00:00+09:00</published><updated>2019-05-17T15:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-io-inside/</id><summary type="html">&lt;p&gt;Haskell の IO モナドって，中身どうなってたんだろと気になってて，ちょっと調べてみた．そのメモ．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-06-24T18:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Rust のジェネリック関数はどうコンパイルされるのか</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/06/rust-generics-inside/" rel="alternate"></link><published>2019-06-24T18:00:00+09:00</published><updated>2019-06-24T18:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-06-24:/blog/posts/2019/06/rust-generics-inside/</id><summary type="html">&lt;p&gt;最近， (特に境界条件を伴った) 多相関数が言語ごとにどういうコードを吐くかが気になったので， Haskell とコードの生成方針が異なるという噂の Rust を見てみることにした．その覚え書き．なお， Rust 普段使いではないので間違ってるかもしれないのと，情報が古いかもしれない．&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://rust-lang.github.io/rustc-guide/about-this-guide.html"&gt;https://rust-lang.github.io/rustc-guide/about-this-guide.html&lt;/a&gt; が主な参考文献．使った &lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; は，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;rustc: &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;1 …&lt;/span&gt;&lt;/tt&gt;&lt;/li&gt;&lt;/ul&gt;</summary><content type="html">&lt;p&gt;最近， (特に境界条件を伴った) 多相関数が言語ごとにどういうコードを吐くかが気になったので， Haskell とコードの生成方針が異なるという噂の Rust を見てみることにした．その覚え書き．なお， Rust 普段使いではないので間違ってるかもしれないのと，情報が古いかもしれない．&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://rust-lang.github.io/rustc-guide/about-this-guide.html"&gt;https://rust-lang.github.io/rustc-guide/about-this-guide.html&lt;/a&gt; が主な参考文献．使った &lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; は，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;rustc: &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;1.37.0-nightly&lt;/span&gt; (4edff843d &lt;span class="pre"&gt;2019-06-16)&lt;/span&gt;&lt;/tt&gt;&lt;/li&gt;
+&lt;li&gt;cargo: &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;1.37.0-nightly&lt;/span&gt; (545f35425 &lt;span class="pre"&gt;2019-05-23)&lt;/span&gt;&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;で， macOS で試してる．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;Rust のコンパイルフロー&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;まず， Rust のコンパイルフローとその情報を見る方法について，確認する． Rust は大体以下の流れでコード生成をするっぽい．&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;ソースコードをパースして， AST に．&lt;/li&gt;
+&lt;li&gt;名前解決 / マクロ展開を行う．&lt;/li&gt;
+&lt;li&gt;AST を HIR (構文をより単純にしたもの) に変換．&lt;/li&gt;
+&lt;li&gt;型検査などの意味解析を行う．&lt;/li&gt;
+&lt;li&gt;HIR を MIR (借用の解析に適した中間言語) に変換．&lt;/li&gt;
+&lt;li&gt;借用検査及び最適化を行う &lt;a class="footnote-reference" href="#mir-based-borrow-check" id="auto-id-2"&gt;[1]&lt;/a&gt; ．&lt;/li&gt;
+&lt;li&gt;MIR を LLVM IR に変換する．&lt;/li&gt;
+&lt;li&gt;LLVM でオブジェクトファイルを生成させる．&lt;/li&gt;
+&lt;li&gt;オブジェクトファイルを lld でリンクする．&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;それぞれの中間言語を簡単に紹介しておくと，まず HIR は Rust の構文をやや削って単純化したもので，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;演算子の優先順位の概念はなく，括弧が必ずつく．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;for&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;if let&lt;/tt&gt; といった構文がない．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;という感じになっている． &lt;tt class="docutils literal"&gt;for&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;if let&lt;/tt&gt; は， &lt;tt class="docutils literal"&gt;loop&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;match&lt;/tt&gt; ， &lt;tt class="docutils literal"&gt;let&lt;/tt&gt; などを使って表現される．また，存在型が明確に入っていて，戻り値の型で使われる &lt;tt class="docutils literal"&gt;impl Trait&lt;/tt&gt; がこの型に変換されるらしい．ソースコードに対応する HIR を見たければ， nightly のみで使える &lt;tt class="docutils literal"&gt;Z&lt;/tt&gt; オプションを使って以下のようにする:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+rustc -Zunpretty=hir source.rs
+&lt;/pre&gt;
+&lt;p&gt;なお，内部で扱う生の木構造を見たかったら &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;hir-tree&lt;/span&gt;&lt;/tt&gt; ，型解決された後の型が明示されたものを見たかったら &lt;tt class="docutils literal"&gt;hir,typed&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-Zunpretty&lt;/span&gt;&lt;/tt&gt; に渡せばいいっぽい．&lt;/p&gt;
+&lt;p&gt;MIR は，コード生成に寄せ，最適化のため制御フローグラフが明示された中間言語．制御フローグラフの各ノードを，ブロックとして囲んで， &lt;tt class="docutils literal"&gt;goto&lt;/tt&gt; 文や他幾つかのプリミティブ命令を取り入れ，ブロックからブロックの遷移をそれで表している．後，変数の使用範囲や &lt;tt class="docutils literal"&gt;move&lt;/tt&gt; なども明示されてる．こいつを表示したかったら以下のようにする:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+rustc -Zunpretty=mir source.rs
+&lt;/pre&gt;
+&lt;p&gt;Graphviz 向けに DOT 言語を使ってグラフの形で出力してくれるやつもあって， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;mir-cfg&lt;/span&gt;&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-Zunpretty&lt;/span&gt;&lt;/tt&gt; に渡すとそういう表示になる．&lt;/p&gt;
+&lt;p&gt;LLVM IR はまあ勝手知ったるものだと思うので，まあそういうやつです．以下のようにして出力ができる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+rustc --emit=llvm-ir -Ccodegen-units=1 source.rs
+&lt;/pre&gt;
+&lt;p&gt;これを行うと &lt;tt class="docutils literal"&gt;source.ll&lt;/tt&gt; というファイルにコードが生成される．なお， &lt;tt class="docutils literal"&gt;cargo&lt;/tt&gt; を使う場合， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;cargo-asm&lt;/span&gt;&lt;/tt&gt; プラグインを使うのが良いっぽい．こいつを使う場合，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+cargo llvm-ir
+&lt;/pre&gt;
+&lt;p&gt;で， LLVM IR での関数単位を表示してくれ，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+cargo llvm-ir func
+&lt;/pre&gt;
+&lt;p&gt;で， &lt;tt class="docutils literal"&gt;func&lt;/tt&gt; のコードが標準出力に表示できる．なお，デフォルトで表示されるのはリリースビルドになっているので，最適化があまりかかっていないものを見たかったら，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+cargo llvm-ir --build-type=debug func
+&lt;/pre&gt;
+&lt;p&gt;と指定するのが良さそう．&lt;/p&gt;
+&lt;p&gt;オブジェクトファイルも LLVM IR と同じように &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;--emit=obj&lt;/span&gt;&lt;/tt&gt; で出力でき， &lt;tt class="docutils literal"&gt;source.o&lt;/tt&gt; みたいなファイルが生成される．&lt;/p&gt;
+&lt;p&gt;なお， Rust はライブラリを &lt;tt class="docutils literal"&gt;crate&lt;/tt&gt; という単位で管理する．通常ビルドする時は，この &lt;tt class="docutils literal"&gt;crate&lt;/tt&gt; ごとにスタティックライブラリのアーカイブである &lt;tt class="docutils literal"&gt;rlib&lt;/tt&gt; ファイルを作る． &lt;tt class="docutils literal"&gt;rlib&lt;/tt&gt; ファイルは，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;オブジェクトファイル (&lt;tt class="docutils literal"&gt;*.o&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;LLVM のビットコード (&lt;tt class="docutils literal"&gt;*.bc.z&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;Rust 独自のメタデータ (&lt;tt class="docutils literal"&gt;rust.metadata.bin&lt;/tt&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;を含む &lt;tt class="docutils literal"&gt;ar&lt;/tt&gt; アーカイブになっている． &lt;tt class="docutils literal"&gt;cargo&lt;/tt&gt; でビルドする場合は， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;target/{debug,release}/deps/*.rlib&lt;/span&gt;&lt;/tt&gt; に依存 &lt;tt class="docutils literal"&gt;crate&lt;/tt&gt; のライブラリが置かれるっぽい．で，メタデータの部分の解析が今回メインになるんだけど，こいつは単体でも出力できて， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;--emit=metadata&lt;/span&gt;&lt;/tt&gt; とやると &lt;tt class="docutils literal"&gt;libsource.rmeta&lt;/tt&gt; みたいなファイルが生成される．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;Rust のジェネリック関数のコード生成アプローチ&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Rust のジェネリック関数のコード生成方法の概要は， Rust Book の &lt;a class="reference external" href="https://doc.rust-lang.org/1.35.0/book/ch10-01-syntax.html#performance-of-code-using-generics"&gt;Performance of Code Using Generics&lt;/a&gt; で&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Rust accomplishes this by performing monomorphization of the code that is using generics at compile time. Monomorphization is the process of turning generic code into specific code by filling in the concrete types that are used when compiled.&lt;/p&gt;
+&lt;p&gt;In this process, the compiler does the opposite of the steps we used to create the generic function in Listing 10-5: the compiler looks at all the places where generic code is called and generates code for the concrete types the generic code is called with.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;と述べられている通り，&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;ジェネリック関数が使われている部分を全て探し出して，&lt;/li&gt;
+&lt;li&gt;その中から具象型で使われてる部分を抽出し，どの具象型で使われてるかを洗い出し，&lt;/li&gt;
+&lt;li&gt;それぞれの具象型に対して単相的なコードを埋め込み，&lt;/li&gt;
+&lt;li&gt;使われてる部分のジェネリック関数の呼び出しを埋め込んだ単相的な関数の呼び出しにすげ替える．&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;つまり， C++ のテンプレートと同じアプローチを取る．もちろん単相的な関数を生成する為には，元のジェネリック関数の実装を知っている必要がある．ただ， Rust には C++ のようにヘッダと実装を分ける機能はない．なので，ジェネリック関数が &lt;tt class="docutils literal"&gt;crate&lt;/tt&gt; を超えて使われる場合，各 &lt;tt class="docutils literal"&gt;crate&lt;/tt&gt; は単にリンクするようのオブジェクトファイルを提供するだけでなく，自身が持っているジェネリック関数の実装をメタデータとして渡してやる必要がある．ついでに，渡してやる必要のあるデータは他にも幾つかある．詳細は後で見る．&lt;/p&gt;
+&lt;p&gt;とりあえず，本当に単相的なコードを埋め込んでいるかのちょっとした確認をしておく．次のようなコードを用意する:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+// monomorphization.rs
+
+pub fn generic_func&amp;lt;T&amp;gt;(x: T) -&amp;gt; T {
+  x
+}
+
+pub fn test_func1() -&amp;gt; i32 {
+  generic_func(0)
+}
+
+pub fn test_func2() -&amp;gt; i32 {
+  generic_func(333)
+}
+
+pub fn test_func3() -&amp;gt; Option&amp;lt;i32&amp;gt; {
+  generic_func(None)
+}
+&lt;/pre&gt;
+&lt;p&gt;こいつに対応する LLVM IR を見てみる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ rustc --emit=llvm-ir -Ccodegen-units=1 --crate-type=lib monomorphization.rs
+$ cat monomorphization.ll
+...
+
+; monomorphization::generic_func
+; Function Attrs: uwtable
+define i32 @_ZN16monomorphization12generic_func17h4e8466f957c62c4dE(i32 %x) unnamed_addr #0 {
+start:
+  ret i32 %x
+}
+
+; monomorphization::generic_func
+; Function Attrs: uwtable
+define { i32, i32 } @_ZN16monomorphization12generic_func17hdce2324413889031E(i32 %x.0, i32 %x.1) unnamed_addr #0 {
+start:
+  %0 = insertvalue { i32, i32 } undef, i32 %x.0, 0
+  %1 = insertvalue { i32, i32 } %0, i32 %x.1, 1
+  ret { i32, i32 } %1
+}
+
+; monomorphization::test_func1
+; Function Attrs: uwtable
+define i32 @_ZN16monomorphization10test_func117hd71db534fc9d7a5fE() unnamed_addr #0 {
+start:
+; call monomorphization::generic_func
+  %0 = call i32 @_ZN16monomorphization12generic_func17h4e8466f957c62c4dE(i32 0)
+  br label %bb1
+
+bb1:                                              ; preds = %start
+  ret i32 %0
+}
+
+; monomorphization::test_func2
+; Function Attrs: uwtable
+define i32 @_ZN16monomorphization10test_func217h14aba5cafddf6defE() unnamed_addr #0 {
+start:
+; call monomorphization::generic_func
+  %0 = call i32 @_ZN16monomorphization12generic_func17h4e8466f957c62c4dE(i32 333)
+  br label %bb1
+
+bb1:                                              ; preds = %start
+  ret i32 %0
+}
+
+; monomorphization::test_func3
+; Function Attrs: uwtable
+define { i32, i32 } @_ZN16monomorphization10test_func317h7ff127b737116f48E() unnamed_addr #0 {
+start:
+  %_1 = alloca { i32, i32 }, align 4
+  %0 = bitcast { i32, i32 }* %_1 to i32*
+  store i32 0, i32* %0, align 4
+  %1 = getelementptr inbounds { i32, i32 }, { i32, i32 }* %_1, i32 0, i32 0
+  %2 = load i32, i32* %1, align 4, !range !0
+  %3 = getelementptr inbounds { i32, i32 }, { i32, i32 }* %_1, i32 0, i32 1
+  %4 = load i32, i32* %3, align 4
+; call monomorphization::generic_func
+  %5 = call { i32, i32 } @_ZN16monomorphization12generic_func17hdce2324413889031E(i32 %2, i32 %4)
+  %6 = extractvalue { i32, i32 } %5, 0
+  %7 = extractvalue { i32, i32 } %5, 1
+  br label %bb1
+
+bb1:                                              ; preds = %start
+  %8 = insertvalue { i32, i32 } undef, i32 %6, 0
+  %9 = insertvalue { i32, i32 } %8, i32 %7, 1
+  ret { i32, i32 } %9
+}
+
+...
+&lt;/pre&gt;
+&lt;p&gt;見ての通り， &lt;tt class="docutils literal"&gt;i32&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;Option&amp;lt;i32&amp;gt;&lt;/tt&gt; 用にそれぞれ &lt;tt class="docutils literal"&gt;generic_func&lt;/tt&gt; のコードが生成されていて， &lt;tt class="docutils literal"&gt;test_func1&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;test_func2&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;i32&lt;/tt&gt; 用のを， &lt;tt class="docutils literal"&gt;test_func3&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;Option&amp;lt;i32&amp;gt;&lt;/tt&gt; 用のを呼んでることが分かる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-4"&gt;
+&lt;h2&gt;メタデータの内容&lt;a class="headerlink" href="#auto-id-4" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;メタデータは， Rust コンパイラの &lt;a class="reference external" href="https://github.com/rust-lang/rust/tree/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_metadata"&gt;rustc_metadata crate&lt;/a&gt; で取り扱っているっぽい．まだ，よく分かってない部分もあるんだけど，メタデータは大体以下のフォーマットになってるっぽい:&lt;/p&gt;
+&lt;ol class="arabic"&gt;
+&lt;li&gt;&lt;p class="first"&gt;最初の 7 byte はヘッダで， &lt;tt class="docutils literal"&gt;[0, 0, 0, 0, b'r', b'u', b's', b't', 0, 0, 0]&lt;/tt&gt; (&lt;tt class="docutils literal"&gt;0000 0000 7275 7374 0000 00&lt;/tt&gt;) 固定．&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;次の 1 byte はフォーマットバージョンで，現状はバージョン 4 (&lt;tt class="docutils literal"&gt;04&lt;/tt&gt;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;次の 4 byte は，書き込んだバイト数が入っている．&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;次はビルドに使った &lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; のバージョンが， &lt;tt class="docutils literal"&gt;String&lt;/tt&gt; をシリアライズした形で埋め込まれている．つまり，最初に文字列の長さ，次にその本体が続く感じ．ただし， &lt;tt class="docutils literal"&gt;usize&lt;/tt&gt; 型の文字列の長さは， LEB128 エンコードされていて，短い文字列なら 1 byte で表現される．今回の環境では，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+2b72 7573 7463 2031 2e33 372e 302d 6e69  +rustc 1.37.0-ni
+6768 746c 7920 2834 6564 6666 3834 3364  ghtly (4edff843d
+2032 3031 392d 3036 2d31 3629            2019-06-16)
+&lt;/pre&gt;
+&lt;p&gt;となっていた． &lt;tt class="docutils literal"&gt;0x2b = 43&lt;/tt&gt; なので合ってそう．&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;次に &lt;a class="reference external" href="https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_metadata/schema.rs#L156"&gt;CrateRoot&lt;/a&gt; をシリアライズしたものが，埋め込まれる．&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;メタデータのエンコードは次の関数を用いるっぽい:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;// https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_metadata/encoder.rs#L1866&lt;/span&gt;
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;encode_metadata&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tcx&lt;/span&gt;: &lt;span class="nc"&gt;TyCtxt&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nc"&gt;EncodedMetadata&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;TyCtxt&lt;/tt&gt; は typing context と呼ばれてるけど，ぶっちゃけ色々入ってるやつ．多分 &lt;tt class="docutils literal"&gt;crate&lt;/tt&gt; ごとに一つ用意されていて， &lt;tt class="docutils literal"&gt;crate&lt;/tt&gt; の情報と型情報などが入っている． &lt;tt class="docutils literal"&gt;EncodedMetadata&lt;/tt&gt; はメタデータがバイト列にエンコードされたものを表す型だけど，実体はただの &lt;tt class="docutils literal"&gt;Vec&amp;lt;u8&amp;gt;&lt;/tt&gt; の newtype になっている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;// https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc/middle/cstore.rs#L150&lt;/span&gt;
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;EncodedMetadata&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;raw_data&lt;/span&gt;: &lt;span class="nb"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="kt"&gt;u8&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この関数の主要部分は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;ecx.encode_crate_root();&lt;/span&gt;&lt;/tt&gt; で，ここで &lt;tt class="docutils literal"&gt;CrateRoot&lt;/tt&gt; のシリアライズを行なっている．デコードは，次の部分でやるっぽい:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;// https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_metadata/decoder.rs#L369&lt;/span&gt;
+&lt;span class="k"&gt;impl&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MetadataBlob&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;is_compatible&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="kt"&gt;bool&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;get_rustc_version&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nb"&gt;String&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;get_root&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nc"&gt;CrateRoot&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;list_crate_metadata&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                              &lt;/span&gt;&lt;span class="n"&gt;out&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nc"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;dyn&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;io&lt;/span&gt;::&lt;span class="n"&gt;Write&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nc"&gt;io&lt;/span&gt;::&lt;span class="nb"&gt;Result&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                              &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;MetadataBlob&lt;/tt&gt; はメタデータのバイトフォーマットデータを表すデータ型で，やはり実体は &lt;tt class="docutils literal"&gt;u8&lt;/tt&gt; 列のスライスになっている．ただ，こっちは高速化のため色々やってるっぽくて，その為の保証情報も付随してる．それぞれのメソッドは，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;is_compatible&lt;/tt&gt;: メタデータのヘッダとバージョンチェック&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;get_rustc_version&lt;/tt&gt;: &lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; のバージョンをデシリアライズして取得&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;get_root&lt;/tt&gt;: &lt;tt class="docutils literal"&gt;CrateRoot&lt;/tt&gt; をデシリアライズして取得&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;list_crate_metadata&lt;/tt&gt;: &lt;tt class="docutils literal"&gt;get_root&lt;/tt&gt; で取ってきた &lt;tt class="docutils literal"&gt;CrateRoot&lt;/tt&gt; から，外部ファイルで依存している名前を一覧表示 &lt;a class="footnote-reference" href="#list-crate-metadata-usecase" id="auto-id-5"&gt;[2]&lt;/a&gt; ．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;という感じっぽい．で，肝心のどういう情報が載ってるかだけど，それは &lt;tt class="docutils literal"&gt;CrateRoot&lt;/tt&gt; の定義を見れば良くて，フィールドの名前から推察する限り，以下の情報が入ってそう．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;crate&lt;/tt&gt; の情報 (名前 / ターゲット / エディションなど)&lt;/li&gt;
+&lt;li&gt;外部やネイティブライブラリへの依存関係&lt;/li&gt;
+&lt;li&gt;trait の実装やエクスポートしているシンボル情報&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;entries_index&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;で， &lt;tt class="docutils literal"&gt;entries_index&lt;/tt&gt; が今回重要な情報で，こいつには &lt;a class="reference external" href="https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_metadata/schema.rs#L211"&gt;Entry&lt;/a&gt; 要素が格納されている位置がたくさん詰め込まれている． &lt;tt class="docutils literal"&gt;Entry&lt;/tt&gt; は以下の種類のデータを持っているっぽい:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;// https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_metadata/schema.rs#L231&lt;/span&gt;
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="nc"&gt;EntryKind&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Const&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ConstQualif&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;RenderedConst&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;ImmStatic&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;MutStatic&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;ForeignImmStatic&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;ForeignMutStatic&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;ForeignMod&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;ForeignType&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;GlobalAsm&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;TypeParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;ConstParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Existential&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Enum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ReprOptions&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Field&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Variant&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;VariantData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Struct&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;VariantData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ReprOptions&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Union&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;VariantData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ReprOptions&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nb"&gt;Fn&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;FnData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;ForeignFn&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;FnData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Mod&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;ModData&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;MacroDef&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;MacroDef&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Closure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;ClosureData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Generator&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;GeneratorData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Trait&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;TraitData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Impl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;ImplData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Method&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;MethodData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;AssocType&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AssocContainer&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;AssocExistential&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AssocContainer&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;AssocConst&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;AssocContainer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ConstQualif&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;RenderedConst&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;TraitAlias&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Lazy&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;TraitAliasData&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="na"&gt;'tcx&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;で，全種類において，可視性 / 属性 / 安定性情報や，型情報 / ジェネリクス / 境界条件の情報，本体の MIR コードなどが入っているっぽい．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="mir"&gt;
+&lt;h2&gt;メタデータの MIR を確認する&lt;a class="headerlink" href="#mir" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; の nightly 版には， &lt;tt class="docutils literal"&gt;rustc_private&lt;/tt&gt; という feature が用意されていて，それを使うと &lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; 内の crate を使える．それを使えば何とかなると思ったんだけど，なんか色々辛くて，コンパイラに直接コードを埋め込むことにした．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; のコンパイラ本体コードは， &lt;a class="reference external" href="https://github.com/rust-lang/rust/tree/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_driver"&gt;rustc_driver crate&lt;/a&gt; で扱っているっぽい．ここの &lt;a class="reference external" href="https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_driver/lib.rs#L124"&gt;run_compiler&lt;/a&gt; に次のコードを追加する:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;rustc&lt;/span&gt;::&lt;span class="n"&gt;hir&lt;/span&gt;::&lt;span class="n"&gt;def_id&lt;/span&gt;::&lt;span class="n"&gt;DefIndex&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="k"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;rustc&lt;/span&gt;::&lt;span class="n"&gt;hir&lt;/span&gt;::&lt;span class="n"&gt;def&lt;/span&gt;::&lt;span class="n"&gt;DefKind&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="k"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;rustc_mir&lt;/span&gt;::&lt;span class="n"&gt;util&lt;/span&gt;::&lt;span class="n"&gt;pretty&lt;/span&gt;::&lt;span class="n"&gt;write_basic_block&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sess&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;opts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;debugging_opts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;save_analysis&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;mem&lt;/span&gt;::&lt;span class="n"&gt;drop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;compiler&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;expansion&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;take&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="c1"&gt;// inspect crate metadata code&lt;/span&gt;
+&lt;span class="c1"&gt;//----------------------------------------&lt;/span&gt;
+&lt;span class="n"&gt;compiler&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cstore&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;iter_crate_data&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cmeta&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;crate_name_str&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;String&lt;/span&gt;::&lt;span class="n"&gt;from&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmeta&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;as_str&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;target_crate_name_prefix&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"monomorphization_"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;crate_name_str&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;starts_with&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;target_crate_name_prefix&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;idx_num&lt;/span&gt;: &lt;span class="kt"&gt;u32&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;crate_name_str&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;target_crate_name_prefix&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;len&lt;/span&gt;&lt;span class="p"&gt;()..]&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;unwrap&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;def_index&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DefIndex&lt;/span&gt;::&lt;span class="n"&gt;from&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;idx_num&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;entry_name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cmeta&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;item_name&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;def_index&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="n"&gt;as_str&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;Some&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DefKind&lt;/span&gt;::&lt;span class="nb"&gt;Fn&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cmeta&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;def_kind&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;def_index&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;compiler&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;global_ctxt&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;unwrap&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;peek_mut&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;enter&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;tcx&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"{}: {}"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;entry_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cmeta&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fn_sig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;def_index&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;tcx&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;Some&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;body&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cmeta&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;maybe_get_optimized_mir&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tcx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;def_index&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;block&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;body&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basic_blocks&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;indices&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="n"&gt;write_basic_block&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tcx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;block&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;body&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;_&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;Ok&lt;/span&gt;&lt;span class="p"&gt;(()),&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;io&lt;/span&gt;::&lt;span class="n"&gt;stdout&lt;/span&gt;&lt;span class="p"&gt;()).&lt;/span&gt;&lt;span class="n"&gt;unwrap&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;block&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;body&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basic_blocks&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;len&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                            &lt;/span&gt;&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;""&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Cannot found MIR body."&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;});&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"{}: This entry is not function."&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;entry_name&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="c1"&gt;//----------------------------------------&lt;/span&gt;
+
+&lt;span class="n"&gt;compiler&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ongoing_codegen&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;compiler.cstore()&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;CrateStore&lt;/tt&gt; データが入っており，こいつに crate のメタデータが詰め込まれている．こいつから&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;中身のクレートをそれぞれ見て，名前が &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;monomorphization_[0-9]*&lt;/span&gt;&lt;/tt&gt; となっているものを引っ張ってくる．&lt;/li&gt;
+&lt;li&gt;後ろに付いている番号を &lt;tt class="docutils literal"&gt;Entry&lt;/tt&gt; のインデックスとして，メタデータからそのエントリの情報をもらってくる．&lt;/li&gt;
+&lt;li&gt;エントリの中身を表示する．&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;ということをする．ただ， &lt;tt class="docutils literal"&gt;Entry&lt;/tt&gt; 自体はパブリックに使えないデータになっていて， &lt;tt class="docutils literal"&gt;EntryKind&lt;/tt&gt; も同様なので直接は扱えない．で， &lt;tt class="docutils literal"&gt;EntryKind&lt;/tt&gt; に相当するパブリックなデータ型があり，それが &lt;tt class="docutils literal"&gt;DefKind&lt;/tt&gt; ．一回こいつでエントリの種別を取得し，関数ならその関数の型シグネチャと MIR コードを表示する．ただこいつらの取得には &lt;tt class="docutils literal"&gt;TyCtxt&lt;/tt&gt; が必要になる．こいつはスレッドローカルストレージに格納されていて，取り出すときは色々面倒な操作が必要になる．それを取り出してるのが，  &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;compiler.global_ctxt().unwrap().peek_mut().enter(|tcx|&lt;/span&gt; { ... })&lt;/tt&gt; の部分．後， MIR は制御フローグラフのノード (ブロック) の塊になっているので，そいつをいい感じに表示するためのコードも入れてる．ただ，このコードはこれだけでは動かなくって， &lt;a class="reference external" href="https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_metadata/cstore.rs#L135"&gt;CrateStore.iter_crate_data&lt;/a&gt; と &lt;a class="reference external" href="https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_mir/util/pretty.rs#L302"&gt;write_basic_block&lt;/a&gt; が必要になるためこいつをパブリックにした:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;// https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_metadata/cstore.rs#L135
+&lt;span class="gd"&gt;- pub(super) fn iter_crate_data&amp;lt;I&amp;gt;(&amp;amp;self, mut i: I)&lt;/span&gt;
+&lt;span class="gi"&gt;+ pub fn iter_crate_data&amp;lt;I&amp;gt;(&amp;amp;self, mut i: I)&lt;/span&gt;
+
+// https://github.com/rust-lang/rust/blob/4edff843dd219cf19a5fede6c78c7ce95402e1f5/src/librustc_mir/util/mod.rs#L13
+&lt;span class="gd"&gt;- pub(super) mod pretty&lt;/span&gt;
+&lt;span class="gi"&gt;+ pub mod pretty&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;で，このコードを埋め込んで &lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; をコンパイルする． &lt;a class="reference external" href="https://rust-lang.github.io/rustc-guide/how-to-build-and-run.html"&gt;https://rust-lang.github.io/rustc-guide/how-to-build-and-run.html&lt;/a&gt; の通りに，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+cp config.toml.example config.toml
+sed -ie 's/#debug = false/debug = true/' config.toml
+./x.py build
+&lt;/pre&gt;
+&lt;p&gt;みたいなことをすればいい．なお，実際に使った &lt;tt class="docutils literal"&gt;config.toml&lt;/tt&gt; は以下の感じ:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gd"&gt;--- config.toml.example&lt;/span&gt;
+&lt;span class="gi"&gt;+++ config.toml&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -27,7 +27,7 @@&lt;/span&gt;
+ #release-debuginfo = false
+
+ # Indicates whether the LLVM assertions are enabled or not
+&lt;span class="gd"&gt;-#assertions = false&lt;/span&gt;
+&lt;span class="gi"&gt;+assertions = true&lt;/span&gt;
+
+ # Indicates whether ccache is used when building LLVM
+ #ccache = false
+&lt;span class="gu"&gt;@@ -136,7 +136,7 @@&lt;/span&gt;
+ # Flag to specify whether any documentation is built. If false, rustdoc and
+ # friends will still be compiled but they will not be used to generate any
+ # documentation.
+&lt;span class="gd"&gt;-#docs = true&lt;/span&gt;
+&lt;span class="gi"&gt;+docs = false&lt;/span&gt;
+
+ # Indicate whether the compiler should be documented in addition to the standard
+ # library and facade crates.
+&lt;span class="gu"&gt;@@ -263,7 +263,7 @@&lt;/span&gt;
+ # Note: the slowness of the non optimized compiler compiling itself usually
+ #       outweighs the time gains in not doing optimizations, therefore a
+ #       full bootstrap takes much more time with `optimize` set to false.
+&lt;span class="gd"&gt;-#optimize = true&lt;/span&gt;
+&lt;span class="gi"&gt;+optimize = true&lt;/span&gt;
+
+ # Indicates that the build should be configured for debugging Rust. A
+ # `debug`-enabled compiler and standard library will be somewhat
+&lt;span class="gu"&gt;@@ -286,7 +286,7 @@&lt;/span&gt;
+ #       "maximally debuggable" environment (notably libstd) takes
+ #       hours to build.
+ #
+&lt;span class="gd"&gt;-#debug = false&lt;/span&gt;
+&lt;span class="gi"&gt;+debug = true&lt;/span&gt;
+
+ # Number of codegen units to use for each compiler invocation. A value of 0
+ # means "the number of cores on this machine", and 1+ is passed through to the
+&lt;span class="gu"&gt;@@ -324,10 +324,10 @@&lt;/span&gt;
+ #debuginfo-level-tests = 0
+
+ # Whether or not `panic!`s generate backtraces (RUST_BACKTRACE)
+&lt;span class="gd"&gt;-#backtrace = true&lt;/span&gt;
+&lt;span class="gi"&gt;+backtrace = true&lt;/span&gt;
+
+ # Whether to always use incremental compilation when building rustc
+&lt;span class="gd"&gt;-#incremental = false&lt;/span&gt;
+&lt;span class="gi"&gt;+incremental = true&lt;/span&gt;
+
+ # Build a multi-threaded rustc
+ #parallel-compiler = false
+&lt;span class="gu"&gt;@@ -340,7 +340,7 @@&lt;/span&gt;
+ # The "channel" for the Rust build to produce. The stable/beta channels only
+ # allow using stable features, whereas the nightly and dev channels allow using
+ # nightly features
+&lt;span class="gd"&gt;-#channel = "dev"&lt;/span&gt;
+&lt;span class="gi"&gt;+channel = "dev"&lt;/span&gt;
+
+ # By default the `rustc` executable is built with `-Wl,-rpath` flags on Unix
+ # platforms to ensure that the compiler is usable by default from the build
+&lt;span class="gu"&gt;@@ -353,12 +353,12 @@&lt;/span&gt;
+ #verbose-tests = false
+
+ # Flag indicating whether tests are compiled with optimizations (the -O flag).
+&lt;span class="gd"&gt;-#optimize-tests = true&lt;/span&gt;
+&lt;span class="gi"&gt;+optimize-tests = false&lt;/span&gt;
+
+ # Flag indicating whether codegen tests will be run or not. If you get an error
+ # saying that the FileCheck executable is missing, you may want to disable this.
+ # Also see the target's llvm-filecheck option.
+&lt;span class="gd"&gt;-#codegen-tests = true&lt;/span&gt;
+&lt;span class="gi"&gt;+codegen-tests = false&lt;/span&gt;
+
+ # Flag indicating whether git info will be retrieved from .git automatically.
+ # Having the git information can cause a lot of rebuilds during development.
+&lt;span class="gu"&gt;@@ -408,7 +408,7 @@&lt;/span&gt;
+ #deny-warnings = true
+
+ # Print backtrace on internal compiler errors during bootstrap
+&lt;span class="gd"&gt;-#backtrace-on-ice = false&lt;/span&gt;
+&lt;span class="gi"&gt;+backtrace-on-ice = true&lt;/span&gt;
+
+ # Whether to verify generated LLVM IR
+ #verify-llvm-ir = false
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なお， &lt;tt class="docutils literal"&gt;rustup&lt;/tt&gt; でこのビルドしたコンパイラを，次のように登録できるらしい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+rustup toolchain link local-build build/x86_64*/stage2
+&lt;/pre&gt;
+&lt;p&gt;便利だ．後は使いたいディレクトリで &lt;tt class="docutils literal"&gt;rustup override set &lt;span class="pre"&gt;local-build&lt;/span&gt;&lt;/tt&gt; とかすればいい．で，まず &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;hir-tree&lt;/span&gt;&lt;/tt&gt; からみたいエントリのインデックスを特定する:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ rustc -Zunpretty=hir-tree monomorphization.rs
+...
+        HirId {
+            owner: DefIndex(12),
+            local_id: 0,
+        }: Item {
+            ident: generic_func#0,
+            hir_id: HirId {
+                owner: DefIndex(12),
+                local_id: 0,
+            },
+            attrs: [],
+            node: Fn(
+                FnDecl {
+                    inputs: [
+                        type(T),
+                    ],
+                    output: Return(
+                        type(T),
+                    ),
+                    c_variadic: false,
+                    implicit_self: None,
+                },
+...
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;generic_func&lt;/tt&gt; は 12 番っぽい．この番号を元に次のようにして，メタデータを見る:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ rustc --crate-type=lib --crate-name=monomorphization_12 monomorphization.rs
+$ cat &amp;gt; main.rs
+extern crate monomorphization_12;
+
+fn main() {
+  println!("{:?}", monomorphization_12::generic_func(0));
+}
+$ rustc -L . main.rs
+generic_func: fn(T) -&amp;gt; T
+  bb0: {
+      _0 = move _1;                    // bb0[0]: scope 0 at monomorphization.rs:4:3: 4:4
+      return;                          // bb0[1]: scope 0 at monomorphization.rs:5:2: 5:2
+  }
+&lt;/pre&gt;
+&lt;p&gt;このコードが，元の &lt;tt class="docutils literal"&gt;monomorphization.rs&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;generic_func&lt;/tt&gt; 関数の MIR コードと一致することは，以下のように確認できる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ rustc --crate-type=lib -Zunpretty=mir monomorphization.rs
+...
+
+fn  generic_func(_1: T) -&amp;gt; T {
+    let mut _0: T;                       // return place in scope 0 at monomorphization.rs:3:33: 3:34
+
+    bb0: {
+        _0 = move _1;                    // bb0[0]: scope 0 at monomorphization.rs:4:3: 4:4
+        return;                          // bb0[1]: scope 0 at monomorphization.rs:5:2: 5:2
+    }
+}
+
+...
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-6"&gt;
+&lt;h2&gt;境界条件を伴ったジェネリック関数&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;トレイトの境界条件が付いた場合は，どのようなコードが生成されるかも見てみる．まず，次のコードを用意する:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;// trait_monomorphization.rs&lt;/span&gt;
+
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;trait&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;TestTrait&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;test_trait_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nc"&gt;Self&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;generic_trait_func&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;T&lt;/span&gt;: &lt;span class="nc"&gt;TestTrait&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;: &lt;span class="nc"&gt;T&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nc"&gt;T&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;test_trait_func&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;impl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;TestTrait&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;i32&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;test_trait_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nc"&gt;Self&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;impl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;TestTrait&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;Option&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="kt"&gt;i32&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;test_trait_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nc"&gt;Self&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;test_func1&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="kt"&gt;i32&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;generic_trait_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;test_func2&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="kt"&gt;i32&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;generic_trait_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;333&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;test_func3&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nb"&gt;Option&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="kt"&gt;i32&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;generic_trait_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;None&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;こいつの， MIR コードは以下のようになる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ rustc --crate-type lib -Zunpretty=mir trait_monomorphization.rs
+// WARNING: This output format is intended for human consumers only
+// and is subject to change without notice. Knock yourself out.
+fn  &amp;lt;impl at trait_monomorphization.rs:17:1: 21:2&amp;gt;::test_trait_func(_1: std::option::Option&amp;lt;i32&amp;gt;) -&amp;gt; std::option::Option&amp;lt;i32&amp;gt; {
+    let mut _0: std::option::Option&amp;lt;i32&amp;gt;; // return place in scope 0 at trait_monomorphization.rs:18:31: 18:35
+
+    bb0: {
+        _0 = _1;                         // bb0[0]: scope 0 at trait_monomorphization.rs:19:5: 19:9
+        return;                          // bb0[1]: scope 0 at trait_monomorphization.rs:20:4: 20:4
+    }
+}
+
+fn  generic_trait_func(_1: T) -&amp;gt; T {
+    let mut _0: T;                       // return place in scope 0 at trait_monomorphization.rs:7:50: 7:51
+    let mut _2: T;                       // in scope 0 at trait_monomorphization.rs:8:3: 8:4
+
+    bb0: {
+        StorageLive(_2);                 // bb0[0]: scope 0 at trait_monomorphization.rs:8:3: 8:4
+        _2 = move _1;                    // bb0[1]: scope 0 at trait_monomorphization.rs:8:3: 8:4
+        _0 = const &amp;lt;T as TestTrait&amp;gt;::test_trait_func(move _2) -&amp;gt; bb1; // bb0[2]: scope 0 at trait_monomorphization.rs:8:3: 8:22
+                                        // ty::Const
+                                        // + ty: fn(T) -&amp;gt; T {&amp;lt;T as TestTrait&amp;gt;::test_trait_func}
+                                        // + val: Scalar(&amp;lt;ZST&amp;gt;)
+                                        // mir::Constant
+                                        // + span: trait_monomorphization.rs:8:5: 8:20
+                                        // + ty: fn(T) -&amp;gt; T {&amp;lt;T as TestTrait&amp;gt;::test_trait_func}
+                                        // + literal: Const { ty: fn(T) -&amp;gt; T {&amp;lt;T as TestTrait&amp;gt;::test_trait_func}, val: Scalar(&amp;lt;ZST&amp;gt;) }
+    }
+
+    bb1: {
+        StorageDead(_2);                 // bb1[0]: scope 0 at trait_monomorphization.rs:8:21: 8:22
+        return;                          // bb1[1]: scope 0 at trait_monomorphization.rs:9:2: 9:2
+    }
+}
+
+fn  &amp;lt;impl at trait_monomorphization.rs:11:1: 15:2&amp;gt;::test_trait_func(_1: i32) -&amp;gt; i32 {
+    let mut _0: i32;                     // return place in scope 0 at trait_monomorphization.rs:12:31: 12:35
+
+    bb0: {
+        _0 = _1;                         // bb0[0]: scope 0 at trait_monomorphization.rs:13:5: 13:9
+        return;                          // bb0[1]: scope 0 at trait_monomorphization.rs:14:4: 14:4
+    }
+}
+
+fn  test_func1() -&amp;gt; i32 {
+    let mut _0: i32;                     // return place in scope 0 at trait_monomorphization.rs:23:24: 23:27
+
+    bb0: {
+        _0 = const generic_trait_func::&amp;lt;i32&amp;gt;(const 0i32) -&amp;gt; bb1; // bb0[0]: scope 0 at trait_monomorphization.rs:24:3: 24:24
+                                        // ty::Const
+                                        // + ty: fn(i32) -&amp;gt; i32 {generic_trait_func::&amp;lt;i32&amp;gt;}
+                                        // + val: Scalar(&amp;lt;ZST&amp;gt;)
+                                        // mir::Constant
+                                        // + span: trait_monomorphization.rs:24:3: 24:21
+                                        // + ty: fn(i32) -&amp;gt; i32 {generic_trait_func::&amp;lt;i32&amp;gt;}
+                                        // + literal: Const { ty: fn(i32) -&amp;gt; i32 {generic_trait_func::&amp;lt;i32&amp;gt;}, val: Scalar(&amp;lt;ZST&amp;gt;) }
+                                        // ty::Const
+                                        // + ty: i32
+                                        // + val: Scalar(0x00000000)
+                                        // mir::Constant
+                                        // + span: trait_monomorphization.rs:24:22: 24:23
+                                        // + ty: i32
+                                        // + literal: Const { ty: i32, val: Scalar(0x00000000) }
+    }
+
+    bb1: {
+        return;                          // bb1[0]: scope 0 at trait_monomorphization.rs:25:2: 25:2
+    }
+}
+
+fn  test_func3() -&amp;gt; std::option::Option&amp;lt;i32&amp;gt; {
+    let mut _0: std::option::Option&amp;lt;i32&amp;gt;; // return place in scope 0 at trait_monomorphization.rs:31:24: 31:35
+    let mut _1: std::option::Option&amp;lt;i32&amp;gt;; // in scope 0 at trait_monomorphization.rs:32:22: 32:26
+
+    bb0: {
+        StorageLive(_1);                 // bb0[0]: scope 0 at trait_monomorphization.rs:32:22: 32:26
+        discriminant(_1) = 0;            // bb0[1]: scope 0 at trait_monomorphization.rs:32:22: 32:26
+        _0 = const generic_trait_func::&amp;lt;std::option::Option&amp;lt;i32&amp;gt;&amp;gt;(move _1) -&amp;gt; bb1; // bb0[2]: scope 0 at trait_monomorphization.rs:32:3: 32:27
+                                        // ty::Const
+                                        // + ty: fn(std::option::Option&amp;lt;i32&amp;gt;) -&amp;gt; std::option::Option&amp;lt;i32&amp;gt; {generic_trait_func::&amp;lt;std::option::Option&amp;lt;i32&amp;gt;&amp;gt;}
+                                        // + val: Scalar(&amp;lt;ZST&amp;gt;)
+                                        // mir::Constant
+                                        // + span: trait_monomorphization.rs:32:3: 32:21
+                                        // + ty: fn(std::option::Option&amp;lt;i32&amp;gt;) -&amp;gt; std::option::Option&amp;lt;i32&amp;gt; {generic_trait_func::&amp;lt;std::option::Option&amp;lt;i32&amp;gt;&amp;gt;}
+                                        // + literal: Const { ty: fn(std::option::Option&amp;lt;i32&amp;gt;) -&amp;gt; std::option::Option&amp;lt;i32&amp;gt; {generic_trait_func::&amp;lt;std::option::Option&amp;lt;i32&amp;gt;&amp;gt;}, val: Scalar(&amp;lt;ZST&amp;gt;) }
+    }
+
+    bb1: {
+        StorageDead(_1);                 // bb1[0]: scope 0 at trait_monomorphization.rs:32:26: 32:27
+        return;                          // bb1[1]: scope 0 at trait_monomorphization.rs:33:2: 33:2
+    }
+}
+
+fn  test_func2() -&amp;gt; i32 {
+    let mut _0: i32;                     // return place in scope 0 at trait_monomorphization.rs:27:24: 27:27
+
+    bb0: {
+        _0 = const generic_trait_func::&amp;lt;i32&amp;gt;(const 333i32) -&amp;gt; bb1; // bb0[0]: scope 0 at trait_monomorphization.rs:28:3: 28:26
+                                        // ty::Const
+                                        // + ty: fn(i32) -&amp;gt; i32 {generic_trait_func::&amp;lt;i32&amp;gt;}
+                                        // + val: Scalar(&amp;lt;ZST&amp;gt;)
+                                        // mir::Constant
+                                        // + span: trait_monomorphization.rs:28:3: 28:21
+                                        // + ty: fn(i32) -&amp;gt; i32 {generic_trait_func::&amp;lt;i32&amp;gt;}
+                                        // + literal: Const { ty: fn(i32) -&amp;gt; i32 {generic_trait_func::&amp;lt;i32&amp;gt;}, val: Scalar(&amp;lt;ZST&amp;gt;) }
+                                        // ty::Const
+                                        // + ty: i32
+                                        // + val: Scalar(0x0000014d)
+                                        // mir::Constant
+                                        // + span: trait_monomorphization.rs:28:22: 28:25
+                                        // + ty: i32
+                                        // + literal: Const { ty: i32, val: Scalar(0x0000014d) }
+    }
+
+    bb1: {
+        return;                          // bb1[0]: scope 0 at trait_monomorphization.rs:29:2: 29:2
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;トレイトのメソッド呼び出しが， &lt;tt class="docutils literal"&gt;&amp;lt;T as &lt;span class="pre"&gt;Trait&amp;gt;::method&lt;/span&gt;&lt;/tt&gt; みたいな形に変わり，境界条件はなくなっている． LLVM IR も見てみる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ rustc --crate-type=lib --emit=llvm-ir trait_monomorphization.rs
+$ cat trait_monomorphization.ll
+...
+
+; trait_monomorphization::generic_trait_func
+; Function Attrs: uwtable
+define { i32, i32 } @_ZN22trait_monomorphization18generic_trait_func17h2353f770a11f3463E(i32 %x.0, i32 %x.1) unnamed_addr #0 {
+start:
+; call &amp;lt;core::option::Option&amp;lt;i32&amp;gt; as trait_monomorphization::TestTrait&amp;gt;::test_trait_func
+  %0 = call { i32, i32 } @"_ZN85_$LT$core..option..Option$LT$i32$GT$$u20$as$u20$trait_monomorphization..TestTrait$GT$15test_trait_func17h91469f85fa74f82cE"(i32 %x.0, i32 %x.1)
+  %1 = extractvalue { i32, i32 } %0, 0
+  %2 = extractvalue { i32, i32 } %0, 1
+  br label %bb1
+
+bb1:                                              ; preds = %start
+  %3 = insertvalue { i32, i32 } undef, i32 %1, 0
+  %4 = insertvalue { i32, i32 } %3, i32 %2, 1
+  ret { i32, i32 } %4
+}
+
+; trait_monomorphization::generic_trait_func
+; Function Attrs: uwtable
+define i32 @_ZN22trait_monomorphization18generic_trait_func17h888a1bef68f0d18bE(i32 %x) unnamed_addr #0 {
+start:
+; call &amp;lt;i32 as trait_monomorphization::TestTrait&amp;gt;::test_trait_func
+  %0 = call i32 @"_ZN57_$LT$i32$u20$as$u20$trait_monomorphization..TestTrait$GT$15test_trait_func17hc700a3de885bafa4E"(i32 %x)
+  br label %bb1
+
+bb1:                                              ; preds = %start
+  ret i32 %0
+}
+
+; &amp;lt;i32 as trait_monomorphization::TestTrait&amp;gt;::test_trait_func
+; Function Attrs: uwtable
+define i32 @"_ZN57_$LT$i32$u20$as$u20$trait_monomorphization..TestTrait$GT$15test_trait_func17hc700a3de885bafa4E"(i32 %self) unnamed_addr #0 {
+start:
+  ret i32 %self
+}
+
+; &amp;lt;core::option::Option&amp;lt;i32&amp;gt; as trait_monomorphization::TestTrait&amp;gt;::test_trait_func
+; Function Attrs: uwtable
+define { i32, i32 } @"_ZN85_$LT$core..option..Option$LT$i32$GT$$u20$as$u20$trait_monomorphization..TestTrait$GT$15test_trait_func17h91469f85fa74f82cE"(i32 %self.0, i32 %self.1) unnamed_addr #0 {
+start:
+  %0 = insertvalue { i32, i32 } undef, i32 %self.0, 0
+  %1 = insertvalue { i32, i32 } %0, i32 %self.1, 1
+  ret { i32, i32 } %1
+}
+
+; trait_monomorphization::test_func1
+; Function Attrs: uwtable
+define i32 @_ZN22trait_monomorphization10test_func117h34f6be1b1f5ee768E() unnamed_addr #0 {
+start:
+; call trait_monomorphization::generic_trait_func
+  %0 = call i32 @_ZN22trait_monomorphization18generic_trait_func17h888a1bef68f0d18bE(i32 0)
+  br label %bb1
+
+bb1:                                              ; preds = %start
+  ret i32 %0
+}
+
+; trait_monomorphization::test_func2
+; Function Attrs: uwtable
+define i32 @_ZN22trait_monomorphization10test_func217h4d629592fd7a0d2cE() unnamed_addr #0 {
+start:
+; call trait_monomorphization::generic_trait_func
+  %0 = call i32 @_ZN22trait_monomorphization18generic_trait_func17h888a1bef68f0d18bE(i32 333)
+  br label %bb1
+
+bb1:                                              ; preds = %start
+  ret i32 %0
+}
+
+; trait_monomorphization::test_func3
+; Function Attrs: uwtable
+define { i32, i32 } @_ZN22trait_monomorphization10test_func317ha2174098ce8095a3E() unnamed_addr #0 {
+start:
+  %_1 = alloca { i32, i32 }, align 4
+  %0 = bitcast { i32, i32 }* %_1 to i32*
+  store i32 0, i32* %0, align 4
+  %1 = getelementptr inbounds { i32, i32 }, { i32, i32 }* %_1, i32 0, i32 0
+  %2 = load i32, i32* %1, align 4, !range !0
+  %3 = getelementptr inbounds { i32, i32 }, { i32, i32 }* %_1, i32 0, i32 1
+  %4 = load i32, i32* %3, align 4
+; call trait_monomorphization::generic_trait_func
+  %5 = call { i32, i32 } @_ZN22trait_monomorphization18generic_trait_func17h2353f770a11f3463E(i32 %2, i32 %4)
+  %6 = extractvalue { i32, i32 } %5, 0
+  %7 = extractvalue { i32, i32 } %5, 1
+  br label %bb1
+
+bb1:                                              ; preds = %start
+  %8 = insertvalue { i32, i32 } undef, i32 %6, 0
+  %9 = insertvalue { i32, i32 } %8, i32 %7, 1
+  ret { i32, i32 } %9
+}
+
+...
+&lt;/pre&gt;
+&lt;p&gt;やはり，普通のジェネリック関数と同じで，型ごとに特殊化されたコードが生成され，メソッドの実装もそれぞれ埋め込まれるっぽい．なお，表示が同じになるのでやらないけど，メタデータに， &lt;tt class="docutils literal"&gt;generic_func&lt;/tt&gt; の時と同じように &lt;tt class="docutils literal"&gt;generic_trait_func&lt;/tt&gt; の MIR コードも埋め込まれる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-7"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-7" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;というわけで， Rust のジェネリック関数は基本，関数が使われる場所を解析して，その場所の型ごとに特殊化したコードを生成しそれを使うようにする．ただ，パブリックなジェネリック関数はそのコード情報を crate に埋め込む必要があるので，メタデータに MIR コードとして入れておく．これはトレイトによる境界条件があっても変わらない，という感じっぽい．基本 C++ のテンプレートと同じで，ソース中にそのまま書ける感じかな．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; の解読，辛かったけど，色々情報を手に入れた．結構 &lt;tt class="docutils literal"&gt;rustc&lt;/tt&gt; で情報を見れるの良さそう．後， &lt;tt class="docutils literal"&gt;rustup&lt;/tt&gt; をそのままビルドしたコードに使えるのもいいっすね．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="mir-based-borrow-check" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;元々は HIR で借用検査 (borrow check) を行なっていたっぽいが， Rust 2018 で入った NLL (non-lexical lifetime) の為に MIR でやるようにしたっぽい．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="list-crate-metadata-usecase" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-5"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;正直，何に使うかはよく分かってない．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/06/rust-generics-inside.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/06/rust-generics-inside.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Rust"></category><category term="多相関数"></category><category term="ジェネリクス"></category><category term="トレイト"></category></entry><entry><title>GHC IO モナドの中身</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/" rel="alternate"></link><published>2019-05-17T15:00:00+09:00</published><updated>2019-05-17T15:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-io-inside/</id><summary type="html">&lt;p&gt;Haskell の IO モナドって，中身どうなってたんだろと気になってて，ちょっと調べてみた．そのメモ．&lt;/p&gt;
 &lt;div class="section" id="io-realworld"&gt;
 &lt;h2&gt;IO モナドと RealWorld&lt;a class="headerlink" href="#io-realworld" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;まずは基本から． IO モナドは， Haskell の根幹となるモナドで， &lt;tt class="docutils literal"&gt;main&lt;/tt&gt; も IO で書く． GHC では中身は次のように定義されている &lt;a class="footnote-reference" href="#io-monad-definition" id="auto-id-1"&gt;[1]&lt;/a&gt;:&lt;/p&gt;
