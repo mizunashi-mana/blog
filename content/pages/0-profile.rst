@@ -17,6 +17,9 @@
 `JavaScript <https://mizunashi-mana.github.io/blog/tag/javascript.html>`_
   Node.js とブラウザフロントエンド，両方触ったことがある．普段書くときは， ES2015 で書けるよう環境構築している．実行モデルとかもそれなりに理解があるが，そこまで最新を追えている訳ではない．
 
+`Rust <https://mizunashi-mana.github.io/blog/tag/rust.html>`_
+  あんまり書けない．読めはする．
+
 `Scala <https://mizunashi-mana.github.io/blog/tag/scala.html>`_
   あんまり書けない．読めはする．
 
