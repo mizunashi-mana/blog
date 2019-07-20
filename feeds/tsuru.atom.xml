@@ -1,5 +1,222 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - ツール</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/tsuru.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-18T22:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>unified 形式パッチの文法について</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/about-unified-diff-style/" rel="alternate"></link><published>2019-04-18T22:00:00+09:00</published><updated>2019-04-18T22:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-18:/blog/posts/2019/04/about-unified-diff-style/</id><summary type="html">&lt;p&gt;パッチファイルの形式にはいくつかあるわけだが， &lt;cite&gt;git&lt;/cite&gt; の &lt;cite&gt;diff&lt;/cite&gt; で使われている形式について，ちょっと調べたのでそのメモ．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - ツール</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/tsuru.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-07-20T22:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>DokuWiki の構文拡張プラグインの作り方</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/07/dokuwiki-syntax-plugin/" rel="alternate"></link><published>2019-07-20T22:00:00+09:00</published><updated>2019-07-20T22:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-07-20:/blog/posts/2019/07/dokuwiki-syntax-plugin/</id><summary type="html">&lt;p&gt;DokuWiki で Markdown が書けるプラグインを結構前に作った．で，たまにメンテしてるんだけど，そのメンテのために色々備忘録を残しておこうと思ったので，そのメモ．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;DokuWiki のプラグイン作成&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;DokuWiki のプラグインの作成方法は， &lt;a class="reference external" href="https://www.dokuwiki.org/devel:plugins"&gt;https://www.dokuwiki.org/devel:plugins&lt;/a&gt; に大体まとまっている． DokuWiki では，以下の種類のプラグインを書ける．&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;構文拡張プラグイン&lt;/dt&gt;
+&lt;dd&gt;文法を拡張するプラグイン．&lt;/dd&gt;
+&lt;dt&gt;動作拡張プラグイン …&lt;/dt&gt;&lt;/dl&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;DokuWiki で Markdown が書けるプラグインを結構前に作った．で，たまにメンテしてるんだけど，そのメンテのために色々備忘録を残しておこうと思ったので，そのメモ．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;DokuWiki のプラグイン作成&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;DokuWiki のプラグインの作成方法は， &lt;a class="reference external" href="https://www.dokuwiki.org/devel:plugins"&gt;https://www.dokuwiki.org/devel:plugins&lt;/a&gt; に大体まとまっている． DokuWiki では，以下の種類のプラグインを書ける．&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;構文拡張プラグイン&lt;/dt&gt;
+&lt;dd&gt;文法を拡張するプラグイン．&lt;/dd&gt;
+&lt;dt&gt;動作拡張プラグイン&lt;/dt&gt;
+&lt;dd&gt;DokuWiki の動作を拡張するプラグイン． Wiki のページを作った際にテンプレートを適用したりできる．&lt;/dd&gt;
+&lt;dt&gt;管理者向けプラグイン&lt;/dt&gt;
+&lt;dd&gt;管理者の操作を拡張するプラグイン． Wiki のアップグレード画面を追加したりできる．&lt;/dd&gt;
+&lt;dt&gt;ヘルパープラグイン&lt;/dt&gt;
+&lt;dd&gt;他のプラグイン向けに関数を提供したりできる．&lt;/dd&gt;
+&lt;dt&gt;表示拡張プラグイン&lt;/dt&gt;
+&lt;dd&gt;DokuWiki の表示を拡張するプラグイン．&lt;/dd&gt;
+&lt;dt&gt;API拡張プラグイン&lt;/dt&gt;
+&lt;dd&gt;DokuWiki の API を拡張するプラグイン．どういうことができるのかはあんまり分かってない．&lt;/dd&gt;
+&lt;dt&gt;認証拡張プラグイン&lt;/dt&gt;
+&lt;dd&gt;新たに認証方式を追加できるプラグイン．&lt;/dd&gt;
+&lt;dt&gt;CLI拡張プラグイン&lt;/dt&gt;
+&lt;dd&gt;コマンドを新たに追加できるプラグイン．どういうことができるのかはあんまり分かってない．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;各プラグインはそれぞれの名前にあった PHP ファイルを用意し，専用の抽象クラスを継承した具象クラスを作成することで，作成できる．今回対象にするのは構文拡張プラグイン．プラグインは，管理者ページの拡張機能管理画面から管理できる．インストールは， DokuWiki のパッケージインデックスから持ってくる方法とアーカイブファイルからインストール方法がある．&lt;/p&gt;
+&lt;p&gt;なおプラグインのファイル構造は， &lt;a class="reference external" href="https://www.dokuwiki.org/devel:plugin_file_structure"&gt;https://www.dokuwiki.org/devel:plugin_file_structure&lt;/a&gt; に載ってる通り．必須なのは &lt;tt class="docutils literal"&gt;plugin.info.txt&lt;/tt&gt; で，そこにプラグイン名や情報を書く．後は &lt;tt class="docutils literal"&gt;conf&lt;/tt&gt; ディレクトリに設定項目を書いたりする．&lt;/p&gt;
+&lt;p&gt;DokuWiki のパッケージインデックスは実はそんなに高等なものではなくて，単なる &lt;a class="reference external" href="https://www.dokuwiki.org"&gt;本家のDokuWiki&lt;/a&gt; にプラグインのページを探すだけ．プラグインの著者はアーカイブファイルのダウンロード URL を作成し，そのページに登録しておく．プラグインのインストールはそこから行われる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;構文拡張プラグイン&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;構文拡張プラグイン (Syntax Plugin) の作り方は， &lt;a class="reference external" href="https://www.dokuwiki.org/devel:syntax_plugins"&gt;https://www.dokuwiki.org/devel:syntax_plugins&lt;/a&gt; に書いてある通り， &lt;tt class="docutils literal"&gt;syntax.php&lt;/tt&gt; という名前のファイルに &lt;tt class="docutils literal"&gt;DokuWiki_Syntax_Plugin&lt;/tt&gt; クラスを継承して &lt;tt class="docutils literal"&gt;syntax_plugin_[プラグイン名]&lt;/tt&gt; という名前のクラスを作る．このクラスは次のメソッドを実装する必要がある:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt;
+
+&lt;span class="nb"&gt;define&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'PLUGIN_NAME'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'example'&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;syntax_plugin_example&lt;/span&gt; &lt;span class="k"&gt;extends&lt;/span&gt; &lt;span class="nx"&gt;DokuWiki_Syntax_Plugin&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// パースの仕方を制御するための情報を返す．&lt;/span&gt;
+  &lt;span class="c1"&gt;// https://www.dokuwiki.org/devel:syntax_plugins#syntax_types に一覧がある．&lt;/span&gt;
+  &lt;span class="k"&gt;public&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;getType&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;'protected'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="c1"&gt;// 追加する構文の種類を制御する．&lt;/span&gt;
+  &lt;span class="c1"&gt;// 指定しない場合，インライン構文として認識される．&lt;/span&gt;
+  &lt;span class="k"&gt;public&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;getPType&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;'block'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="c1"&gt;// パースの優先度を設定する．&lt;/span&gt;
+  &lt;span class="c1"&gt;// 標準の優先度は https://www.dokuwiki.org/devel:parser:getsort_list に載ってる&lt;/span&gt;
+  &lt;span class="k"&gt;public&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;getSort&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;69&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="c1"&gt;// 構文がマッチする条件を登録する．&lt;/span&gt;
+  &lt;span class="k"&gt;public&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;connectTo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$mode&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nv"&gt;$this&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="na"&gt;Lexer&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="na"&gt;addEntryPattern&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'&amp;lt;example&amp;gt;(?=.*&amp;lt;/example&amp;gt;)'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;$mode&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'plugin_'&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nx"&gt;PLUGIN_NAME&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="c1"&gt;// 構文が終了する条件を登録する．&lt;/span&gt;
+  &lt;span class="k"&gt;public&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;postConnect&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nv"&gt;$this&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="na"&gt;Lexer&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="na"&gt;addExitPattern&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'&amp;lt;/example&amp;gt;'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'plugin_'&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nx"&gt;PLUGIN_NAME&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="c1"&gt;// マッチした内容を前処理する．&lt;/span&gt;
+  &lt;span class="k"&gt;public&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;handle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$match&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;$state&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;$pos&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;Doku_Handler&lt;/span&gt; &lt;span class="nv"&gt;$handler&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$state&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nx"&gt;DOKU_LEXER_UNMATCHED&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+          &lt;span class="s1"&gt;'render'&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="k"&gt;true&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+          &lt;span class="s1"&gt;'match'&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="nv"&gt;$match&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="p"&gt;];&lt;/span&gt;
+      &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+          &lt;span class="s1"&gt;'render'&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="k"&gt;false&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="c1"&gt;// 前処理したデータをレンダリングする．&lt;/span&gt;
+  &lt;span class="k"&gt;public&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$format&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;Doku_Renderer&lt;/span&gt; &lt;span class="nv"&gt;$renderer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;$data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="nv"&gt;$data&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;'render'&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="k"&gt;true&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="nv"&gt;$match&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;$data&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;'match'&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+
+    &lt;span class="nv"&gt;$renderer&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="na"&gt;cdata&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$match&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="k"&gt;true&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この場合， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;&amp;lt;example&amp;gt;...&amp;lt;/example&amp;gt;&lt;/span&gt;&lt;/tt&gt; という構文が追加され，その中身をそのまま表示するようになる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="api"&gt;
+&lt;h2&gt;レンダラのAPI&lt;a class="headerlink" href="#api" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;render&lt;/tt&gt; メソッドが受け取る &lt;tt class="docutils literal"&gt;$renderer&lt;/tt&gt; は，それぞれのレンダモードに対応したレンダリングを行う API をいくつか持っている． API は， &lt;a class="reference external" href="https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/renderer.php.html#doku_renderer"&gt;https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/renderer.php.html#doku_renderer&lt;/a&gt; に載ってる:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;table&lt;/li&gt;
+&lt;li&gt;list&lt;/li&gt;
+&lt;li&gt;horizontal line&lt;/li&gt;
+&lt;li&gt;strong&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;など， HTML のいくつかのタグに対応するレンダAPIがあり，こいつらを使うと DokuWiki で使われてるスタイルに合わせたレンダリングができる．&lt;/p&gt;
+&lt;p&gt;レンダラは内部でバッファを持っていて，各APIはそれを更新していく．そいつに直接書き込むこともできる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$renderer-&amp;gt;doc .= 'something';
+&lt;/pre&gt;
+&lt;p&gt;例えば XHTML モードの場合， &lt;a class="reference external" href="https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/xhtml.php.source.html#l315"&gt;https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/xhtml.php.source.html#l315&lt;/a&gt; を見れば分かる通り，大体は API の名前に対応する HTML タグをそのままバッファに追加してるだけ．&lt;/p&gt;
+&lt;p&gt;実際の DokuWiki がどういうレンダリングをするかは， &lt;a class="reference external" href="https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/handler.php.source.html#l5"&gt;https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/handler.php.source.html#l5&lt;/a&gt; をみれば分かる．例えばリンクの処理部分は， &lt;a class="reference external" href="https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/handler.php.source.html#l527"&gt;https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/handler.php.source.html#l527&lt;/a&gt; になる．URLと名前で区切って内部リンクか外部リンクかなどを判別して適切にレンダAPIを呼び出していく．APIの呼び出しは， 実際にはこのハンドラ内では呼び出されず，呼び出し登録が &lt;tt class="docutils literal"&gt;_addCall&lt;/tt&gt; というメソッドで行われているだけで，その後積まれた API 呼び出しの登録が実行されるようになっている．呼び出し登録は文書のデータ構造を把握する際に役に立つらしい &lt;a class="footnote-reference" href="#instruction-for-analysis" id="auto-id-4"&gt;[1]&lt;/a&gt; ．例えば，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+===== Read More =====
+
+All documentation and additional information besides the [[syntax|syntax description]] is maintained in the DokuWiki at [[doku&amp;gt;|www.dokuwiki.org]].
+&lt;/pre&gt;
+&lt;p&gt;のような DokuWiki の文書があった場合，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+array(
+  array('document_start', array()),
+  array('header',         array('Header', 2, 0)),
+  array('section_open',   array(2)),
+  array('p_open',         array()),
+  array('cdata',          array("\nAll documentation and additional information besides the ")),
+  array('internallink',   array('syntax', 'syntax description')),
+  array('cdata',          array(' is maintained in the DokuWiki at ')),
+  array('internallink',   array('doku&amp;gt;', 'www.dokuwiki.org')),
+  array('cdata',          array('.')),
+  array('p_close',        array()),
+  array('document_end',   array()),
+)
+&lt;/pre&gt;
+&lt;p&gt;みたいな呼び出し登録が生成される．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-5"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;DokuWiki のプラグイン開発ってかなり狭い領域だと思うけど，まあ誰かの参考になればという感じで．公式にも色々ドキュメントがあるのでのぞいてみると良さそう．て感じで．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="instruction-for-analysis" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;実際にレンダリングをしてしまうと単なる文字列になってしまい，文書の構造の情報がなくなってしまうが，呼び出し登録は少なくともレンダラの API の呼び出し順序などが見れる．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/07/dokuwiki-syntax-plugin.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/07/dokuwiki-syntax-plugin.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="PHP"></category><category term="Wiki"></category><category term="DokuWiki"></category><category term="プラグイン"></category></entry><entry><title>unified 形式パッチの文法について</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/about-unified-diff-style/" rel="alternate"></link><published>2019-04-18T22:00:00+09:00</published><updated>2019-04-18T22:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-18:/blog/posts/2019/04/about-unified-diff-style/</id><summary type="html">&lt;p&gt;パッチファイルの形式にはいくつかあるわけだが， &lt;cite&gt;git&lt;/cite&gt; の &lt;cite&gt;diff&lt;/cite&gt; で使われている形式について，ちょっと調べたのでそのメモ．&lt;/p&gt;
 &lt;div class="section" id="diff"&gt;
 &lt;h2&gt;diff 形式&lt;a class="headerlink" href="#diff" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;diff コマンドが吐き出す形式は色々ある．主に以下のものがあるらしい &lt;a class="footnote-reference" href="#diffutils-manual-output-formats" id="auto-id-1"&gt;[1]&lt;/a&gt; :&lt;/p&gt;
