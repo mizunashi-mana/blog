@@ -1,0 +1,31 @@
+graph cocall {
+  f;
+  z;
+  s;
+  t;
+  g;
+  p;
+  x;
+  y;
+
+  f -- z;
+  s -- t;
+  s -- s;
+  g -- s;
+  g -- t;
+  s -- z;
+  t -- z;
+  g -- z;
+  p -- x;
+  p -- y;
+  x -- y;
+  p -- z;
+  p -- s;
+  p -- t;
+  x -- z;
+  x -- s;
+  x -- t;
+  y -- z;
+  y -- s;
+  y -- t;
+}
