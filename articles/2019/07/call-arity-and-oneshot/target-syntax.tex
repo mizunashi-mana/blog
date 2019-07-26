@@ -1,0 +1,21 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  e
+  &\mathrel{::=} x &\mbox{variable} \\
+  &\mid e_1 \, e_2 &\mbox{application} \\
+  &\mid \text{\texttt{\textbackslash}} x_1 \cdots x_n \mathbin{\text{\texttt{->}}} e &\mbox{lambda abstraction} \\
+  &\mid \mathop{\mathbf{if}} e \mathop{\mathbf{then}} e_1 \mathop{\mathbf{else}} e_2 &\mbox{conditional branching} \\
+  &\mid \mathop{\mathbf{let}} x \mathbin{\text{\texttt{=}}} e_1 \mathop{\mathbf{in}} e_2 &\mbox{non-recursive binding} \\
+  &\mid \mathop{\mathbf{letrec}} {\{ x_i \mathbin{\text{\texttt{=}}} e_i \}}_i \mathop{\mathbf{in}} e &\mbox{mutually recursive binding}
+\end{align*}
+\end{document}
