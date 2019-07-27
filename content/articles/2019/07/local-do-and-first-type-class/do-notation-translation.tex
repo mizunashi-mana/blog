@@ -1,0 +1,20 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{minted}[escapeinside=||]{haskell}
+do { |$e$| }    |\hspace{3pt}|           = |$e$|
+do { |$e$| ; |$\mathit{stmts}$| }        = |$e$| >> do { |$\mathit{stmts}$| }
+do { |$p$| <- |$e$| ; |$\mathit{stmts}$| }   = |$e$| >>= \case
+                              |$p$| -> do { |$\mathit{stmts}$| }
+                              _ -> fail "..."
+do { let |$\mathit{decls}$| ; |$\mathit{stmts}$| } = let |$\mathit{decls}$| in do { |$\mathit{stmts}$| }
+\end{minted}
+\end{document}

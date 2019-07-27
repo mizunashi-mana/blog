@@ -1,0 +1,21 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \mathit{lexp} &\mathrel{::=} \mathtexttt{do} \,\mathtexttt{\{} \,\mathit{stmts} \,\mathtexttt{\}} \\
+  \mathit{stmts} &\mathrel{::=} \mathit{stmt}_1 \,\cdots \,\mathit{stmt}_n \,\mathit{exp} \,[\mathtexttt{;}] \hspace{20pt} (n \geq 0) \\
+  \mathit{stmt}
+  &\mathrel{::=} \mathit{exp} \,\mathtexttt{;} \\
+  &\phantom{::}\mid \mathit{pat} \,\mathtexttt{<-} \,\mathit{exp} \,\mathtexttt{;} \\
+  &\phantom{::}\mid \mathtexttt{let} \,\mathit{decls} \,\mathtexttt{;} \\
+  &\phantom{::}\mid \mathtexttt{;}
+\end{align*}
+\end{document}
