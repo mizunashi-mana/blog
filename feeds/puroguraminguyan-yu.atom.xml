@@ -1,5 +1,392 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-07-27T13:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Call Arity と融合変換</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/07/call-arity-and-oneshot/" rel="alternate"></link><published>2019-07-26T22:00:00+09:00</published><updated>2019-07-27T13:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-07-26:/blog/posts/2019/07/call-arity-and-oneshot/</id><summary type="html">&lt;p&gt;GHC は，最適化のため Call Arity と呼ばれるコード解析を行っている．この解析で，自由変数が何個引数を持っていいかを判定し，イータ展開を可能にする．リストにおける融合変換とも密接な関係のある解析だ．こいつの存在とどういうことをやっているかはだいたい知っていたんだけど，ちょっと詳しく知りたい事例があったので調べてみた．そのメモ．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-07-27T15:30:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Local Do と型クラス</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/" rel="alternate"></link><published>2019-07-27T15:30:00+09:00</published><updated>2019-07-27T15:30:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-07-27:/blog/posts/2019/07/local-do-and-first-type-class/</id><summary type="html">&lt;p&gt;現在， GHC に &lt;a class="reference external" href="https://github.com/ghc-proposals/ghc-proposals/pull/111"&gt;線形型の提案&lt;/a&gt; がされていて活発に議論されている．プロトタイプも &lt;a class="reference external" href="https://github.com/tweag/ghc/tree/linear-types"&gt;ここ&lt;/a&gt; から利用可能だ． Docker イメージも利用可能なので，気軽に試せると思うので，ぜひ試してみてくれ．&lt;/p&gt;
+&lt;p&gt;さて，そんな線形型の提案の裏で，副産物として Local Do という拡張が提案されている．今回は，その拡張の紹介と最近思ってることのお話．&lt;/p&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;Local Do 拡張&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Haskell の …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;現在， GHC に &lt;a class="reference external" href="https://github.com/ghc-proposals/ghc-proposals/pull/111"&gt;線形型の提案&lt;/a&gt; がされていて活発に議論されている．プロトタイプも &lt;a class="reference external" href="https://github.com/tweag/ghc/tree/linear-types"&gt;ここ&lt;/a&gt; から利用可能だ． Docker イメージも利用可能なので，気軽に試せると思うので，ぜひ試してみてくれ．&lt;/p&gt;
+&lt;p&gt;さて，そんな線形型の提案の裏で，副産物として Local Do という拡張が提案されている．今回は，その拡張の紹介と最近思ってることのお話．&lt;/p&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;Local Do 拡張&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Haskell の do 構文は，ご存知の通りモナドのメソッドを使った式を手続き型ライクに書ける構文だ:&lt;/p&gt;
+&lt;img alt="do 構文の要素" class="align-center" src="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/local-do-and-first-type-class/do-notation-syntax.png"/&gt;
+&lt;p&gt;この構文は次の &lt;tt class="docutils literal"&gt;Prelude&lt;/tt&gt; にある定義を想定している &lt;a class="footnote-reference" href="#monad-class-in-ghc" id="auto-id-4"&gt;[1]&lt;/a&gt;:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Applicative&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;MonadFail&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;fail&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Applicative&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;こいつらを元に，次の変換を行う:&lt;/p&gt;
+&lt;img alt="do 構文の脱糖変換" class="align-center" src="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/local-do-and-first-type-class/do-notation-translation.png"/&gt;
+&lt;p&gt;この構文は &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; クラス専用だが，現在 Haskell には，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://hackage.haskell.org/package/indexed-0.1.3/docs/Control-Monad-Indexed.html#t:IxMonad"&gt;IxMonad&lt;/a&gt; : indexed monad&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://hackage.haskell.org/package/effect-monad-0.8.1.0/docs/Control-Effect.html#t:Effect"&gt;Effect&lt;/a&gt; : graded monad&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://hackage.haskell.org/package/rmonad-0.8.0.2/docs/Control-RMonad.html#t:RMonad"&gt;RMonad&lt;/a&gt; : 制約付き monad&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;やそれを一般化した &lt;a class="reference external" href="https://hackage.haskell.org/package/supermonad"&gt;super monad&lt;/a&gt; などがあり，これらは全て型の異なる &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(&amp;gt;&amp;gt;=)&lt;/span&gt;&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;fail&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(&amp;gt;&amp;gt;)&lt;/span&gt;&lt;/tt&gt; を持つ．また， &lt;a class="reference external" href="https://github.com/tweag/linear-base/blob/0d6165fbd8ad84dd1574a36071f00a6137351637/src/Control/Monad/Linear.hs#L43"&gt;線形型用の monad&lt;/a&gt; なども考案されている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Applicative&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;MonadFail&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;fail&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これらは型は違うものの同じようなメソッドを持っており，同じように do 構文が適用できる．実際， indexed monad については， &lt;a class="reference external" href="http://hackage.haskell.org/package/indexed-do-notation"&gt;indexed-do-notation&lt;/a&gt; というパッケージで &lt;tt class="docutils literal"&gt;TemplateHaskell&lt;/tt&gt; によっての実装が提供されている．また，線形型用の monad を提供する &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;linear-base&lt;/span&gt;&lt;/tt&gt; パッケージには， &lt;tt class="docutils literal"&gt;Control.Monad.Linear.Builder&lt;/tt&gt; というモジュールが提供されており，その中では次のデータ構造が提供されている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Control.Monad.Linear&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;Linear&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;BuilderType&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Builder&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;   &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;fail&lt;/span&gt;   &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;MonadFail&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;monadBuilder&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;BuilderType&lt;/span&gt;
+&lt;span class="nf"&gt;monadBuilder&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Builder&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;   &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;fail&lt;/span&gt;   &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fail&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;Control.Monad.Linear&lt;/tt&gt; は線形型用の monad を提供するモジュールだ．この &lt;tt class="docutils literal"&gt;Builder&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;RebindableSyntax&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;RecordWildCards&lt;/tt&gt; 拡張を組み合わせて，以下のようなコードが書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE BlockArguments    #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE OverloadedStrings #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE RebindableSyntax  #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE RecordWildCards   #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;Main&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt;           &lt;span class="nn"&gt;Prelude&lt;/span&gt;                      &lt;span class="k"&gt;hiding&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Monad&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kt"&gt;MonadFail&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt;           &lt;span class="nn"&gt;Prelude.Linear&lt;/span&gt;               &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Unrestricted&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Control.Monad.Linear.Builder&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;Linear&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;System.IO&lt;/span&gt;                    &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;System&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;System.IO.Resource&lt;/span&gt;           &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;RIO&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt;           &lt;span class="nn"&gt;Data.String&lt;/span&gt;                  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;fromString&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;RIO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;writeSomething&lt;/span&gt; &lt;span class="s"&gt;"something.txt"&lt;/span&gt;
+
+&lt;span class="nf"&gt;writeSomething&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;FilePath&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;RIO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;RIO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Unrestricted&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nf"&gt;writeSomething&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;h0&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;RIO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;openFile&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="kt"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;WriteMode&lt;/span&gt;
+    &lt;span class="n"&gt;h1&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;RIO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hPutStr&lt;/span&gt; &lt;span class="n"&gt;h0&lt;/span&gt; &lt;span class="s"&gt;"some"&lt;/span&gt;
+    &lt;span class="n"&gt;h2&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;RIO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hPutStr&lt;/span&gt; &lt;span class="n"&gt;h1&lt;/span&gt; &lt;span class="s"&gt;"thing"&lt;/span&gt;
+    &lt;span class="kt"&gt;RIO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hClose&lt;/span&gt; &lt;span class="n"&gt;h2&lt;/span&gt;
+    &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Unrestricted&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Builder&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Linear&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;monadBuilder&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;RebindableSyntax&lt;/tt&gt; は整数リテラルや do 構文などの糖衣構文において，中で使われるメソッドを， &lt;tt class="docutils literal"&gt;Prelude&lt;/tt&gt; から探す代わりに現在のスコープから探すようにする拡張だ．なので，今回は通常の &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; のメソッドの代わりに， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;Linear.Builder{..}&lt;/span&gt; = Linear.monadBuilder&lt;/tt&gt; で束縛したものが do 構文で使われる事になる．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;TemplateHaskell&lt;/tt&gt; を使った例はコンパイル速度の問題と依存関係の問題がある． &lt;tt class="docutils literal"&gt;RebindableSyntax&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;NoImplicitPrelude&lt;/tt&gt; に依存する他， do 構文以外の様々な構文に影響するという問題がある．そこで do 構文のみで内部で使用するメソッドを切り替えられるようにする拡張が， &lt;tt class="docutils literal"&gt;LocalDo&lt;/tt&gt; 拡張になる．&lt;/p&gt;
+&lt;p&gt;現在の提案では， do 構文を拡張し，次のようなことが指定できるようにするという事になっている:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+do @Linear.monadBuilder
+  h0 &amp;lt;- RIO.openFile path System.WriteMode
+  h1 &amp;lt;- RIO.hPutStr h0 "some"
+  h2 &amp;lt;- RIO.hPutStr h1 "thing"
+  RIO.hClose h2
+  return (Unrestricted ())
+&lt;/pre&gt;
+&lt;p&gt;こう書くと，脱糖の際 &lt;tt class="docutils literal"&gt;Linear.monadBuilder&lt;/tt&gt; のフィールドを使うようになる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-5"&gt;
+&lt;h2&gt;現在の提案の問題点&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ところで，単純に脱糖の際 &lt;tt class="docutils literal"&gt;Linear.monadBuilder&lt;/tt&gt; のフィールドを使うと言ったが，実際は幾つかのデザイン選択がある．例えば，次のプログラムを見てみよう:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+do @Linear.monadBuilder
+  x &amp;lt;- m1 &amp;gt;&amp;gt; m2
+  pure x
+&lt;/pre&gt;
+&lt;p&gt;このプログラムはどう翻訳されるべきだろうか？ 例えば次の変換があり得るだろう:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+let
+  Linear.Builder{..} = Linear.monadBuilder
+in (m1 &amp;gt;&amp;gt; m2) &amp;gt;&amp;gt;= \x -&amp;gt; pure x
+&lt;/pre&gt;
+&lt;p&gt;このプログラムへの変換は，あなたが想定していたものだろうか？ この例では， do 構文中に出てきた &lt;tt class="docutils literal"&gt;&amp;gt;&amp;gt;&lt;/tt&gt; も線形型版に置き換わる．これは一見便利だが，多くの場合意図しない挙動であり，しかもプログラム片を別の関数に切り出した場合動作が異なってしまう．これは言語デザインの一貫性の面からも微妙だ．現状の提案では，脱糖は実は Haskell の構文に則っておらず，上のような名前の衝突も起こすようなものになっている:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+do @b { x &amp;lt;- u; stmts }  =  case b of { &amp;gt;&amp;gt;= } -&amp;gt; (&amp;gt;&amp;gt;=) u $ \x -&amp;gt; do @b { stmts }
+do @b { u; stmts }       =  case b of { &amp;gt;&amp;gt; } -&amp;gt; (&amp;gt;&amp;gt;) u $ do @b { stmts }
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;NameFieldPuns&lt;/tt&gt; を前提に書かれてると提案では述べているが，実際にはこの拡張を有効にしても右側の構文はコンパイルが通らない．コンストラクタが省略されているためだ．読み方としては，単一コンストラクタのフィールドを束縛するのが，擬似構文 &lt;tt class="docutils literal"&gt;case v of { field } &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; e&lt;/tt&gt; ということになる．現在の提案は，これが問題視されているが，一意な解決案が出ていない．&lt;/p&gt;
+&lt;p&gt;解決案の一つとして， &lt;tt class="docutils literal"&gt;LocalDo&lt;/tt&gt; のための以下のような &lt;tt class="docutils literal"&gt;Builder&lt;/tt&gt; 型を作るという提案がなされている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Builder&lt;/span&gt; &lt;span class="n"&gt;t_bind&lt;/span&gt; &lt;span class="n"&gt;t_then&lt;/span&gt; &lt;span class="n"&gt;t_fail&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Builder&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;t_bind&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;   &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;t_then&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;fail&lt;/span&gt;   &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;t_fail&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Builder&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="kt"&gt;MonadFail&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;monadBuilder&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt;
+&lt;span class="nf"&gt;monadBuilder&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Builder&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Prelude&lt;/span&gt;&lt;span class="o"&gt;.&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Prelude&lt;/span&gt;&lt;span class="o"&gt;.&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kt"&gt;Prelude&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fail&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;後は脱糖で使う関数を &lt;tt class="docutils literal"&gt;Builder&lt;/tt&gt; のフィールドにすればいい．個人的にはこの提案が落とし所だと思う．一応触れられてる問題点としては，新たにフィールドを追加すると既存のコードが壊れやすいということだ．そのため，次のような形にすることも提案されている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;HasBind&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;TypeOfBind&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;
+  &lt;span class="n"&gt;localBind&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TypeOfBind&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;HasThen&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;TypeOfThen&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;
+  &lt;span class="n"&gt;localThen&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TypeOfThen&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+
+&lt;span class="o"&gt;...&lt;/span&gt;
+
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;HasBind&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;TypeOfBind&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+  &lt;span class="n"&gt;localBind&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;HasThen&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;TypeOfBind&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+  &lt;span class="n"&gt;localBind&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="o"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この場合，フィールドが増えても既存のコードを壊さないで拡張できるメリットがある．ただここまでくると，実は同じ機能を持ってる型クラス既にあるじゃんということで，次のようにすることが現在提案されている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;TypeOfMonadBind&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;HasField&lt;/span&gt; &lt;span class="s"&gt;"&amp;gt;&amp;gt;="&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;TypeOfMonadBind&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;getField&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;TypeOfMonadThen&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Monad&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;HasThen&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;TypeOfMonadThen&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;getField&lt;/span&gt; &lt;span class="kt"&gt;MonadBuilder&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="o"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なお PureScript の方には，実は &lt;tt class="docutils literal"&gt;LocalDo&lt;/tt&gt; 相当の機能が既に入っている． PureScript では qualified do と呼ばれていて，以下のように書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Prelude&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;P&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Effect&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Effect&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Effect.Console&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;log&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Effect&lt;/span&gt; &lt;span class="kt"&gt;Unit&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;P&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;log&lt;/span&gt; &lt;span class="s"&gt;"Hello"&lt;/span&gt;
+  &lt;span class="n"&gt;log&lt;/span&gt; &lt;span class="s"&gt;"World!"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;qualified do はモジュールを指定して，そのモジュールの中から脱糖に必要な関数を探してくる．モジュールを切り替えることで DSL を様々なモジュールに着地させることができるわけだ．この方式でも名前空間の破壊は起こらないため，解決策の一つとして提案されている．ただ，これは実行時に着地先を変えることは出来ないため，表現能力が下がってしまう点が問題視されている．&lt;/p&gt;
+&lt;p&gt;また型解決についてあまり触れられていないのも，問題視されている．最悪脱糖してから型検査すればいいと思うが，かなりエラーメッセージが不親切になるだろう．また，脱糖してからだと，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;builder&lt;/span&gt;
+  &lt;span class="n"&gt;putStr&lt;/span&gt; &lt;span class="s"&gt;"Hello "&lt;/span&gt;
+  &lt;span class="n"&gt;putStr&lt;/span&gt; &lt;span class="s"&gt;"World!"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;と&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;builder&lt;/span&gt;
+  &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;putStr&lt;/span&gt; &lt;span class="s"&gt;"Hello "&lt;/span&gt;
+  &lt;span class="n"&gt;putStr&lt;/span&gt; &lt;span class="s"&gt;"World!"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;で前者は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(&amp;gt;&amp;gt;)&lt;/span&gt;&lt;/tt&gt; だけ，後者は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(&amp;gt;&amp;gt;=)&lt;/span&gt;&lt;/tt&gt; だけを使うということになるが，片方は型エラーでもう片方はコンパイルに通るといったことになり，一貫性がない．そもそも， &lt;tt class="docutils literal"&gt;builder&lt;/tt&gt; が全てのフィールドを兼ね揃えているかチェックすべきかどうかという点もある．また， &lt;tt class="docutils literal"&gt;builder&lt;/tt&gt; の型をどう推論するか， &lt;tt class="docutils literal"&gt;LocalDo&lt;/tt&gt; の文の型推論はどうするかについても考える必要があるだろう．&lt;/p&gt;
+&lt;p&gt;このように現状結構穴がある提案になっていて，提案者に対し修正が要求されている．また，積極的な議論が呼びかけられている．何かアイデアや疑問があれば，投げておくといいかもしれない．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="haskell"&gt;
+&lt;h2&gt;Haskell の型クラスについて思うこと&lt;a class="headerlink" href="#haskell" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ところで少し話が変わるが， Haskell の型クラスは内部では単なるデータ型に変換される．例えば，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;SampleC&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;sampleM1&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="n"&gt;sampleM2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;SampleC&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;sampleM1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="n"&gt;sampleM2&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+
+&lt;span class="nf"&gt;sampleV&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;SampleC&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;sampleV&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sampleM2&lt;/span&gt; &lt;span class="n"&gt;sampleM1&lt;/span&gt;
+
+&lt;span class="nf"&gt;sampleV2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sampleV2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sampleV&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいなコードがあった場合，内部的には&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;DSampleC&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;DSampleC&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;sampleM1&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sampleM2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;dSampleC_Int&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;DSampleC&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;dSampleC_Int&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;DSampleC&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;sampleM1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sampleM2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;sampleV&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;DSampleC&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;sampleV&lt;/span&gt; &lt;span class="kt"&gt;DSampleC&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sampleM2&lt;/span&gt; &lt;span class="n"&gt;sampleM1&lt;/span&gt;
+
+&lt;span class="nf"&gt;sampleV2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sampleV2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sampleV&lt;/span&gt; &lt;span class="n"&gt;dSampleC_Int&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいなコードが生成される．型クラス相当の内部で定義されているデータ型を辞書と呼び，型クラスの制約が実際には辞書を渡していく形式に変換されることから，この変換を辞書渡しスタイルと呼ぶことがある．ところで，このように見てみると型クラスの仕組みとは，実際には辞書という暗黙のオブジェクトをパラメータとして持つ関数を定義する仕組みであるように見えてくる．そしてパラメータはコンパイル時にインスタンス解析によって暗黙的に埋め込まれる．今回の &lt;tt class="docutils literal"&gt;Builder&lt;/tt&gt; 型は，実際には内部の辞書を顕在化させているにすぎないように見えてくる．もちろん，明示的にデータ型を指定できるので動的に作ったオブジェクトを指定することもできるわけだが，ほとんどの場合辞書を一回 Haskell で扱えるデータ型に変換して渡すことになるだろう．これは二重に手間だ．&lt;/p&gt;
+&lt;p&gt;Haskell の型クラスの実装を悪用した有名なパッケージとして， &lt;a class="reference external" href="https://hackage.haskell.org/package/reflection"&gt;reflection&lt;/a&gt; というものがある．これは一つしかメソッドを持たない型クラスが，内部で &lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; 相当の実装をすることを利用し，暗黙の引数を型クラスの仕組みを通して実現するパッケージだ．これは，暗黙の引数以上のことを実現でき，辞書を一旦顕在化させてその後また型制約に戻すといったテクニックに利用できる．ただ，こちらも本来なら辞書をそのまま利用できれば解決できる話だ．&lt;/p&gt;
+&lt;p&gt;つまり Haskell の型クラスインスタンスが第1級でなく，そのためいくつかの場面で不便だということだ．もし第1級であれば，今回の提案ももう少し工夫の余地があっただろう． Scala はこれを実現していて，単に暗黙の引数として Scala のなんていうことはないクラスのインスタンスが渡されるので，それを通常の Scala プログラミングの範囲で取り扱える．同じように単に暗黙の引数とその解決のためのオブジェクトを簡潔に定義できる糖衣構文さえあれば，実は型クラスの仕組みは実現できる． Haskell の型クラスはかなり古参なので，いまさら変えようということになってもちょっと難しいと思うが，最近ちょっとそこら辺が不満で，今回の提案が入ってビルダを書く羽目になるたび，そういうこと考えるんだろなあというぼやきでした．&lt;/p&gt;
+&lt;p&gt;なお，こういうことを考えてる人は昔からちらほらいて，最近もそういう記事を目にした．まあ，みんなそう思うよねというお話でした．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-6"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;なんか最後ぐだぐだになったが， &lt;tt class="docutils literal"&gt;LocalDo&lt;/tt&gt; 拡張の提案とその問題点，現在の議論の内容を紹介した．それから，型クラスについてちょっと不満に思っていることを書いた．&lt;/p&gt;
+&lt;p&gt;個人的にはこういう系は F# のコンピュテーション式が一番使い勝手良いなあと思っていたので，それ相当のことができる機能が GHC 拡張で提案されてるのは嬉しい．ただ，現状お蔵入りしかけなので，議論が活発になればいいなということで書いた．&lt;/p&gt;
+&lt;p&gt;後この記事は &lt;a class="reference external" href="https://haskell-jp.connpass.com/event/138061/"&gt;Haskell-jpもくもく会&lt;/a&gt; の時間を使って書いたので宣伝をしとくと，月一ぐらいで Haskell に関していろんな人が集まって，1日個々で作業し成果を発表する会があって， Haskell-jp さんが主催してる．分からないことがあればすぐ隣の人とかに聞けるので，興味があれば参加してみるといいのではないでしょうか．&lt;/p&gt;
+&lt;p&gt;ということで，今日はこれで．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="monad-class-in-ghc" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;GHC では &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; は， &lt;tt class="docutils literal"&gt;GHC.Base&lt;/tt&gt; モジュールで定義されている．現状の GHC 8.6 ではこの記事で述べたものの他に &lt;tt class="docutils literal"&gt;return&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(&amp;gt;&amp;gt;)&lt;/span&gt;&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;fail&lt;/tt&gt; メソッドがある．これは， &lt;a class="reference external" href="https://prime.haskell.org/wiki/Libraries/Proposals/MonadFail"&gt;MFP&lt;/a&gt; / &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/proposal/monad-of-no-return"&gt;MRP&lt;/a&gt; で削除される予定．この記事では， MFP / MRP が最終段階までいったことを想定した定義を書いている．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/07/local-do-and-first-type-class.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/07/local-do-and-first-type-class.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category><category term="GHC拡張"></category><category term="do構文"></category><category term="型クラス"></category></entry><entry><title>Call Arity と融合変換</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/07/call-arity-and-oneshot/" rel="alternate"></link><published>2019-07-26T22:00:00+09:00</published><updated>2019-07-27T13:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-07-26:/blog/posts/2019/07/call-arity-and-oneshot/</id><summary type="html">&lt;p&gt;GHC は，最適化のため Call Arity と呼ばれるコード解析を行っている．この解析で，自由変数が何個引数を持っていいかを判定し，イータ展開を可能にする．リストにおける融合変換とも密接な関係のある解析だ．こいつの存在とどういうことをやっているかはだいたい知っていたんだけど，ちょっと詳しく知りたい事例があったので調べてみた．そのメモ．&lt;/p&gt;
 &lt;p&gt;なお元ネタは，Breitner (nomeata) 先生の &lt;a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S1477842416300756"&gt;Call Arity&lt;/a&gt; ．&lt;/p&gt;
 &lt;div class="section" id="auto-id-2"&gt;
 &lt;h2&gt;イータ展開と最適化&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
