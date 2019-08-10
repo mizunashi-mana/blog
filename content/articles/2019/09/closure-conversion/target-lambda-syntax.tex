@@ -1,0 +1,19 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  e
+  &\mathrel{::=} x &(\text{variable}) \\
+  &\phantom{:::}\mid e_1 e_2 &(\text{application}) \\
+  &\phantom{:::}\mid \lambda x. e &(\text{lambda abstraction}) \\
+  &\phantom{:::}\mid \mathop{\mathrm{let}} x = e_1 \mathrel{\mathrm{in}} e &(\text{lambda abstraction})
+\end{align*}
+\end{document}

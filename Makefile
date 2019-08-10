@@ -24,6 +24,12 @@ ifeq ($(RELATIVE), 1)
 	PELICANOPTS += --relative-urls
 endif
 
+
+.SUFFIXES: .tex .pdf .png .eps .svg
+
+.PHONY: html help clean regenerate serve serve-global devserver stopserver publish github
+
+
 help:
 	@echo 'Makefile for a pelican Web site                                           '
 	@echo '                                                                          '
@@ -83,5 +89,11 @@ github: publish
 	$(GHP_IMPORT) -m "Generate Pelican site" -b $(GITHUB_PAGES_BRANCH) $(OUTPUTDIR)
 	git push origin $(GITHUB_PAGES_BRANCH)
 
+.pdf.png:
+	pdftopng -f 1 -l 1 $< $@
+	@mv $@-000001.png $@
 
-.PHONY: html help clean regenerate serve serve-global devserver stopserver publish github
+.tex.pdf:
+	pdflatex -shell-escape $<
+	rm $(subst .tex,.aux,$<) $(subst .tex,.log,$<)
+	pdfcrop $@ $@
