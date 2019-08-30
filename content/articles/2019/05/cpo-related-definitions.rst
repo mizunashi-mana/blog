@@ -52,7 +52,7 @@ Complete Partial Order
   poset :math:`D` に対して，その部分集合 :math:`M \subseteq D` が有向とは，以下を満たすこと:
 
   .. math::
-    \forall U \in \mathcal{P}_{\mathit{fin}}(M)\ldotp \text{\(U\) は上界 \(x \in P\) を持つ}
+    \forall U \in \mathcal{P}_{\mathit{fin}}(M)\ldotp \text{\(U\) は上界 \(x \in M\) を持つ}
 
 名前の意味的には，部分集合の上界を集めるとまたそれに上界があり，それにもやっぱり上界があってと言う感じで，最終的にある場所に対して上に上に順序が伸びていく感じ．なお，伸びていく場所が 2 点とか 3 点になってるような奴は， directed にならない．あと空集合にも上界の存在を求めてるので，空集合自体は directed じゃないことにも注意．また， directed subset は自身の内に上限を持つとは限らなくて， :math:`[0,1) \subseteq \mathbb{R}` を考えてみると，こいつは poset :math:`\langle \mathbb{R}, \leq\rangle` の directed subset になってて，上限は 1 だが，これは自身の内にはない．
 
