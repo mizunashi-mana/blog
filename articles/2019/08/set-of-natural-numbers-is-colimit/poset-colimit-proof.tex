@@ -1,0 +1,24 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      n \in F(n) \ar@{|->}[d]_{\varphi_n} \ar@{=}[r]^{F(n \leq i)} \ar@{{}{ }{}}[rd]|{\circlearrowright} &
+      n \in F(i) \ar@{|->}[d]^{\varphi_i} \ar@{=}[rd]^{\mu_i} \\
+      \varphi_n(n) \in X \ar@{=}[r]^{\Delta(X)(n \leq i)} \ar@{=}[rd] \ar@/^20pt/@{{}{ }{}}[rd]|{\circlearrowright} &
+      \varphi_i(n) \in X \ar@{=}[d] \ar@{{}{ }{}}[r]|{\circlearrowright} &
+      n \in \mathbb{N} \ar@{|->}[ld]^f \\
+      & f(n) \in X
+    }
+  }
+\end{align*}
+\end{document}
