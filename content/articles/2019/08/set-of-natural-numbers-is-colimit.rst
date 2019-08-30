@@ -14,7 +14,7 @@ directed colimit
 
 .. math::
 
-  \forall \varphi: F \Rightarrow \Delta X\ldotp \exists ! f: \mathop{\mathrm{colim}} F \Rightarrow X\ldotp \mu; \Delta(f) = \varphi
+  \forall \varphi: F \Rightarrow \Delta X\ldotp \exists ! f: \mathop{\mathrm{colim}} F \to X\ldotp \mu; \Delta(f) = \varphi
 
 ただし， :math:`\Delta: C \to C^I` は対角関手．
 
@@ -44,7 +44,7 @@ Cpo での colimit
 
   f(\infty) = f(\bigsqcup_{n \in \mathbb{N}} n) = \bigsqcup_{n \in \mathbb{N}} f(n) = \bigsqcup_{n \in \mathbb{N}} \varphi_n(n)
 
-を満たす必要がある． :math:`X` が cpo なので，こいつは well-defined で sup は一意より， :math:`f` は :math:`\mathbb{N}_{\infty}` 全域で一意に定めることができる．ここから， :math:`F: \mathbb{N} \to \mathrm{Cpo}` の colimit は :math:`\mathbb{N}_{\infty}` になる．
+:math:`X` が cpo なので，こいつは well-defined で sup は一意より， :math:`f` は :math:`\mathbb{N}_{\infty}` 全域で一意に定めることができる．ここから， :math:`F: \mathbb{N} \to \mathrm{Cpo}` の colimit は :math:`\mathbb{N}_{\infty}` になる．
 
 :math:`\mathrm{Poset}` と :math:`\mathrm{Cpo}`
 ----------------------------------------------
