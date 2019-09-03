@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - プログラミング</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Wed, 03 Apr 2019 00:00:00 +0900</lastBuildDate><item><title>Python の datetime が難しい</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/</link><description>&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記 - プログラミング</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Tue, 03 Sep 2019 21:00:00 +0900</lastBuildDate><item><title>Scala の Map.flatMap の罠</title><link>https://mizunashi-mana.github.io/blog/posts/2019/09/scala-map-flatmap-trap/</link><description>&lt;p&gt;Scala のコレクションライブラリは難しい．最近，強くそう思える事案に出くわしたので，そのメモ．なお，使った環境は以下の通り:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="39%"/&gt;
+&lt;col width="61%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;Scala のバージョン&lt;/td&gt;
+&lt;td&gt;2.13.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Java Runtime のバージョン&lt;/td&gt;
+&lt;td&gt;Java(TM) SE Runtime Environment 1.8.0_131&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Java Hotspot …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Tue, 03 Sep 2019 21:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-09-03:/blog/posts/2019/09/scala-map-flatmap-trap/</guid><category>Scala</category><category>Collection Library</category><category>Map</category><category>標準ライブラリ</category></item><item><title>Python の datetime が難しい</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/</link><description>&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
 &lt;div class="section" id="aware-naive"&gt;
 &lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;

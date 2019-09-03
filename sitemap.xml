@@ -5,51 +5,58 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/</loc>
-<lastmod>2019-08-30T13:58:29-00:00</lastmod>
+<lastmod>2019-09-03T12:10:17-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/archives.html</loc>
-<lastmod>2019-08-30T13:58:29-00:00</lastmod>
+<lastmod>2019-09-03T12:10:17-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tags.html</loc>
-<lastmod>2019-08-30T13:58:29-00:00</lastmod>
+<lastmod>2019-09-03T12:10:17-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/categories.html</loc>
-<lastmod>2019-08-30T13:58:29-00:00</lastmod>
+<lastmod>2019-09-03T12:10:17-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/0-profile.html</loc>
-<lastmod>2019-08-30T13:58:29-00:00</lastmod>
+<lastmod>2019-09-03T12:10:17-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/1-about.html</loc>
-<lastmod>2019-08-30T13:58:29-00:00</lastmod>
+<lastmod>2019-09-03T12:10:17-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html</loc>
-<lastmod>2019-08-30T13:58:29-00:00</lastmod>
+<lastmod>2019-09-03T12:10:17-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/posts/2019/09/scala-map-flatmap-trap/</loc>
+<lastmod>2019-09-03T21:00:00+09:00</lastmod>
+<changefreq>monthly</changefreq>
+<priority>0.7</priority>
 </url>
 
 <url>
@@ -313,7 +320,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/category/puroguramingu.html</loc>
-<lastmod>2019-04-03T00:00:00+09:19</lastmod>
+<lastmod>2019-09-03T21:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -356,6 +363,34 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://mizunashi-mana.github.io/blog/category/zhi-gan.html</loc>
 <lastmod>2019-04-13T20:00:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/scala.html</loc>
+<lastmod>2019-09-03T21:00:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/collection-library.html</loc>
+<lastmod>2019-09-03T21:00:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/map.html</loc>
+<lastmod>2019-09-03T21:00:00+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/biao-zhun-raiburari.html</loc>
+<lastmod>2019-09-03T21:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -524,13 +559,6 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/quan-lun.html</loc>
 <lastmod>2019-06-12T23:00:00+09:19</lastmod>
-<changefreq>daily</changefreq>
-<priority>0.5</priority>
-</url>
-
-<url>
-<loc>https://mizunashi-mana.github.io/blog/tag/scala.html</loc>
-<lastmod>2019-06-07T23:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -753,13 +781,6 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
-<loc>https://mizunashi-mana.github.io/blog/tag/biao-zhun-raiburari.html</loc>
-<lastmod>2019-04-13T20:00:00+09:19</lastmod>
-<changefreq>daily</changefreq>
-<priority>0.5</priority>
-</url>
-
-<url>
 <loc>https://mizunashi-mana.github.io/blog/tag/seo.html</loc>
 <lastmod>2019-04-10T00:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
@@ -817,7 +838,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html</loc>
-<lastmod>2019-08-30T22:30:00+09:19</lastmod>
+<lastmod>2019-09-03T21:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
