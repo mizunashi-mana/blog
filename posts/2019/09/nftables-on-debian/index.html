@@ -1,0 +1,494 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった． さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables …" />
+<meta name="keywords" content="Debian, iptables, nftables, ファイアウォール">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="iptables から nftables への移行"/>
+<meta property="og:description" content="Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった． さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-09-21 08:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="Debian"/>
+<meta property="article:tag" content="iptables"/>
+<meta property="article:tag" content="nftables"/>
+<meta property="article:tag" content="ファイアウォール"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; iptables から nftables への移行</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="nftables-on-debian">iptables から nftables への移行</h1>
+    <p>
+          Posted on 土 21 9月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．</p>
+<p>さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables 用に書き直したので，その備忘録．</p>
+<p>なお，参考文献は以下だが，こちとらインフラは素人の普段はプログラマ屋さんなので結構間違ってるかもしれない．</p>
+<ul class="simple">
+<li><a class="reference external" href="https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes">https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes</a></li>
+<li><a class="reference external" href="https://wiki.archlinux.jp/index.php/Nftables">https://wiki.archlinux.jp/index.php/Nftables</a></li>
+</ul>
+<div class="section" id="nftables">
+<h2>nftables の基本<a class="headerlink" href="#nftables" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>nftables はそこまで iptables と基本は変わらなくて，文法とかが異なったり永続化の方法がデフォルトで付いてたりとユーザ操作部分が分かりやすくなったっぽい．基本的には，</p>
+<ul class="simple">
+<li><tt class="docutils literal">nft</tt> コマンドで操作</li>
+<li><tt class="docutils literal">/etc/nftables.conf</tt> で永続化</li>
+</ul>
+<p>みたいな感じ． <tt class="docutils literal">nft</tt> は <tt class="docutils literal">sbin</tt> にあるので，ルート権限で参照する必要がある．後，一応 Debian 10 では <tt class="docutils literal">iptables</tt> の互換インターフェースと <tt class="docutils literal">iptables</tt> からの移行用として <tt class="docutils literal"><span class="pre">iptables-translate</span></tt> というコマンドが用意されている．</p>
+<p>なお， <tt class="docutils literal">/etc/nftables.conf</tt> の読み込みは systemd のユニットファイルで指定されていて，再読み込みは，</p>
+<pre class="literal-block">
+systemctl restart nftables
+</pre>
+<p>でできる．設定ファイルのチェックは，</p>
+<pre class="literal-block">
+nft -c -f /etc/nftables.conf
+</pre>
+<p>でできる．現在の設定は，</p>
+<pre class="literal-block">
+nft list tables
+nft list table inet filter
+</pre>
+<p>とかで確認できる． <tt class="docutils literal">inet filter</tt> テーブルは， <tt class="docutils literal">iptables</tt> の <tt class="docutils literal">filter</tt> と対応する． <tt class="docutils literal"><span class="pre">iptables-translate</span></tt> は <tt class="docutils literal">iptables</tt> のルールを <tt class="docutils literal">nftables</tt> 用に変換してくれるコマンドで，</p>
+<pre class="literal-block">
+$ iptables-translate -A INPUT -m state --state NEW -j DROP
+nft add rule ip filter INPUT ct state new  counter drop
+</pre>
+<p>みたいな感じで使える．なお，一括で変換する <tt class="docutils literal"><span class="pre">iptables-restore-translate</span></tt> も用意されてるっぽい． <tt class="docutils literal"><span class="pre">-f</span></tt> オプションでファイル指定もできる． <tt class="docutils literal">iptables</tt> からの移行の際は，</p>
+<ol class="arabic simple">
+<li>今のルールを <tt class="docutils literal"><span class="pre">iptables-save</span></tt> で吐き出させて</li>
+<li><tt class="docutils literal"><span class="pre">iptables-restore-translate</span></tt> に噛ませて変換し，その変換したルールを実行し</li>
+<li>最後に <tt class="docutils literal">nft list ruleset</tt> の内容を <tt class="docutils literal">/etc/nftables.conf</tt> に保存する</li>
+</ol>
+<p>を実行すれば良い．まあちょっと調整は必要かもしれないけど．</p>
+</div>
+<div class="section" id="auto-id-1">
+<h2>nftables のルール<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>さて， <tt class="docutils literal">nftables</tt> では <tt class="docutils literal">iptables</tt> のルールから文法が大きく変わった．ただ要素自体はそれほど変化はなさそう．ルールは階層構造で管理されていて，</p>
+<ol class="arabic simple">
+<li>table family (<tt class="docutils literal">inet</tt> / <tt class="docutils literal">bridge</tt> / etc.)</li>
+<li>table type (<tt class="docutils literal">filter</tt> / <tt class="docutils literal">nat</tt> / etc.)</li>
+<li>chain (<tt class="docutils literal">input</tt> / <tt class="docutils literal">forward</tt> / <tt class="docutils literal">output</tt> / etc.)</li>
+</ol>
+<p>の順で指定できる．それぞれ多分好きに増やせるはず． <tt class="docutils literal">/etc/nftables.conf</tt> だと以下のように階層構造で指定できる:</p>
+<pre class="literal-block">
+table inet filter {
+  chain input {
+    type filter hook input priority 0; policy drop;
+    ...
+  }
+
+  chain forward {
+    type filter hook forward priority 0; policy drop;
+    ...
+  }
+
+  chain output {
+    type filter hook output priority 0; policy accept;
+    ...
+  }
+}
+</pre>
+<p>chain は上記のようにそれぞれフックを設定することもできる．後， <tt class="docutils literal">policy</tt> でデフォルトのコントロールフローを設定できる．コントロールフローは以下の種類がある <a class="footnote-reference" href="#queue-operation" id="auto-id-2">[1]</a>:</p>
+<dl class="docutils">
+<dt>accept</dt>
+<dd>パケットを通し，その場でルール評価を終了する</dd>
+<dt>drop</dt>
+<dd>パケットを落とし，その場でルール評価を終了する</dd>
+<dt>continue</dt>
+<dd>ルール評価を続ける</dd>
+<dt>return</dt>
+<dd>現在の chain から呼び出し元の chain に戻って続きを評価する．なお，コールスタックに何もない場合 accept と同じになる</dd>
+<dt>jump &lt;chain&gt;</dt>
+<dd>コールスタックに現在の chain の場所を追加し，指定した chain の評価を始める</dd>
+<dt>goto &lt;chain&gt;</dt>
+<dd>コールスタックに何も追加しないで，指定した chain の評価を始める</dd>
+</dl>
+<p>で，それぞれ文の最後に指定できる． <tt class="docutils literal">type</tt> と <tt class="docutils literal">policy</tt> は特別な文で，他の文は次のような形をとる:</p>
+<pre class="literal-block">
+&lt;match&gt;* &lt;statement&gt;* &lt;controlflow&gt;
+</pre>
+<p><tt class="docutils literal">&lt;match&gt;</tt> は文でハンドルするパケットの種類を指定し， <tt class="docutils literal">&lt;statement&gt;</tt> はパケットに対する操作を指定できる． <tt class="docutils literal">&lt;match&gt;</tt> は，</p>
+<dl class="docutils">
+<dt>meta</dt>
+<dd>パケットのメタデータに対するマッチ</dd>
+<dt>ip</dt>
+<dd>IP パケットに対するマッチ</dd>
+<dt>ip6</dt>
+<dd>IPv6 パケットに対するマッチ</dd>
+<dt>icmp</dt>
+<dd>ICMP パケットに対するマッチ</dd>
+<dt>icmpv6</dt>
+<dd>ICMPv6 パケットに対するマッチ</dd>
+<dt>tcp</dt>
+<dd>TCP パケットに対するマッチ</dd>
+<dt>udp</dt>
+<dd>UDP パケットに対するマッチ</dd>
+<dt>ct</dt>
+<dd>conntrack エントリに対するマッチ</dd>
+</dl>
+<p>などのマッチが指定できる．マッチそれぞれにパラメータがあり，より詳細にハンドル文が書ける．例えば， <tt class="docutils literal">ip</tt> マッチは <tt class="docutils literal">saddr</tt> / <tt class="docutils literal">protocol</tt> などのパラメータがあり，以下のような指定が書ける:</p>
+<pre class="literal-block">
+ip protocol { tcp, udp } ip saddr != 192.168.2.0/24
+</pre>
+<p>パラメータに対するマッチは，幾つかの関係演算子が使えるようになっていて， <tt class="docutils literal">==</tt> / <tt class="docutils literal">!=</tt> / <tt class="docutils literal">&lt;</tt> などが使えるっぽい．なお，何も指定しないで空白区切で並べると，内部で implicit 演算子扱いになり，それぞれのパラメータでデフォルトの演算子 (大抵は <tt class="docutils literal">==</tt> と同値) が指定されるっぽい．なので，上のは次のと同じ:</p>
+<pre class="literal-block">
+ip protocol == { tcp, udp } ip saddr != 192.168.2.0/24
+</pre>
+<p>どのマッチでどのパラメータが使えるのかは， <a class="reference external" href="https://www.netfilter.org/projects/nftables/manpage.html">nftables の man</a> か <a class="reference external" href="https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes#Matches">Quick reference</a> を参照すれば良い．</p>
+<p><tt class="docutils literal">&lt;statement&gt;</tt> の方は，</p>
+<dl class="docutils">
+<dt>log</dt>
+<dd>ログ出力を行う</dd>
+<dt>reject</dt>
+<dd>レスポンスパケットを指定して，パケットを落とす</dd>
+<dt>counter</dt>
+<dd>パケットの数のカウンタを設定する</dd>
+<dt>limit</dt>
+<dd>パケットのレート制限を設定する</dd>
+</dl>
+<p>みたいなものが設定できる．それぞれ指定できるパラメータは， <a class="reference external" href="https://www.netfilter.org/projects/nftables/manpage.html">nftables の man</a> か <a class="reference external" href="https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes#Statements">Quick reference</a> を参照．まあ， <tt class="docutils literal">iptables</tt> と大体同じことができる．</p>
+<p>後， <tt class="docutils literal">hashlimit</tt> の代替として <tt class="docutils literal">meter</tt> という機能があるらしいが，現在は代わりに dynamic set / map と言うことになってるらしく，この辺もよく分かってない．時間あるときに調べないと．</p>
+</div>
+<div class="section" id="auto-id-4">
+<h2>設定例<a class="headerlink" href="#auto-id-4" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>とりあえず，今回作った簡単なファイアウォール設定を置いとく:</p>
+<pre class="literal-block">
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet filter {
+  chain input {
+    type filter hook input priority 0;
+
+    # default drop
+    policy drop;
+
+    # established/related connections
+    ct state { established, related } accept;
+
+    # loopback interface
+    iif lo accept;
+
+    jump filter_broadcast;
+    jump filter_fragments;
+    jump filter_invalids;
+    jump filter_icmp;
+    jump filter_synflood;
+    jump reject_auth_ident;
+
+    # accept TCP ports
+    # SSH
+    tcp dport { ssh } ct state new accept;
+
+    # Web
+    #tcp dport { http, https } ct state new accept;
+
+    # Mail
+    #tcp dport { smtp } ct state new accept;
+
+    jump drop_others;
+  }
+
+  chain forward {
+    type filter hook forward priority 0;
+
+    # default drop
+    policy drop;
+
+    # established/related connections
+    ct state { established, related } accept;
+
+    # loopback interface
+    iif lo accept;
+  }
+
+  chain output {
+    type filter hook output priority 0;
+
+    # default accept
+    policy accept;
+  }
+
+  chain filter_broadcast {
+    pkttype != { broadcast, multicast } return;
+    drop;
+  }
+
+  chain filter_fragments {
+    ip frag-off &amp; 0x1fff 0 return;
+    limit rate 6/minute burst 10 packets log prefix "[IPTABLES FRAGMENT]: " level debug continue;
+    drop;
+  }
+
+  chain filter_invalids {
+    ct state != invalid return;
+    limit rate 6/minute burst 10 packets log prefix "[IPTABLES INVALID]: " level debug continue;
+    drop;
+  }
+
+  chain filter_icmp {
+    icmpv6 type {
+      destination-unreachable,
+      packet-too-big,
+      time-exceeded,
+      parameter-problem,
+      nd-router-advert,
+      nd-neighbor-solicit,
+      nd-neighbor-advert,
+    } accept;
+    icmp type {
+      destination-unreachable,
+      router-advertisement,
+      time-exceeded,
+      parameter-problem,
+    } accept;
+
+    # echo-request
+    jump filter_pingdeath;
+    icmp type echo-request accept;
+  }
+
+  chain filter_pingdeath {
+    icmp type != echo-request return;
+    meter ping_scan { ip saddr limit rate 1/second burst 4 packets } return;
+    limit rate 6/minute burst 10 packets log prefix "[IPTABLES PING_DEATH]: " level debug continue;
+    drop;
+  }
+
+  chain filter_synflood {
+    ct state != new return;
+    meter syn_scan { ip saddr limit rate 2/second burst 100 packets } return;
+    limit rate 6/minute burst 10 packets log prefix "[IPTABLES SYNFLOOD]: " level debug continue;
+    drop;
+  }
+
+  chain drop_others {
+    limit rate 6/minute burst 10 packets log prefix "[IPTABLES SCANED]: " level debug continue;
+    drop;
+  }
+
+  chain reject_auth_ident {
+    tcp dport { 113 } reject with tcp reset;
+  }
+}
+</pre>
+<p>うちの環境は， IPv6 無効にしてるので IPv6 用には他にも色々書いといたほうがいいかもしれない．</p>
+</div>
+<div class="section" id="auto-id-5">
+<h2>まとめ<a class="headerlink" href="#auto-id-5" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Debian buster にアップグレードした時の備忘録でした． <tt class="docutils literal">iptables</tt> の諸々が改善されたのは良いが，結局よく分からん文法になってて，うーんと言う感じ．まあ，設定ファイルは前よりずっと見やすくなった感はある．ただ， <tt class="docutils literal">nftables</tt> の文法，形式的なものが見つからなくてドキュメントもかなりゆるふわ感があり，結局本家の bison ファイルみに行く羽目になったのでそこら辺何とかして欲しいっすね．こちらからは以上です．</p>
+<table class="docutils footnote" frame="void" id="queue-operation" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td><tt class="docutils literal">queue</tt> という操作もあるようだけど，あんまり深く調べてない．</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/09/nftables-on-debian.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/09/nftables-on-debian.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/debian.html">Debian</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/iptables.html">iptables</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/nftables.html">nftables</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/huaiauoru.html">ファイアウォール</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

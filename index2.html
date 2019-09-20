@@ -130,6 +130,32 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/06/graded-monad-and-effects/#graded-monad-and-effects">Graded Monad とエフェクト</a></h2>
+    <p>
+          Posted on 木 06 6月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/shu-xue.html">数学</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/quan-lun.html">圏論</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ehuekutoshisutemu.html">エフェクトシステム</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/monado.html">モナド</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/puroguramuyi-wei-lun.html">プログラム意味論</a>
+    </p>
+  </header>
+  <div>
+      <p>graded monad について聞きかじって，色々調べたのでそのメモ． graded monad はエフェクトシステムの categorical semantics 作るときに使われてるらしい．エフェクトシステム勉強会でも話があったやつ．</p>
+<div class="section" id="auto-id-1">
+<h2>モナドとエフェクト<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まず基本的なやつから．以下の構造は一対一の対応を持つ．</p>
+<dl class="docutils">
+<dt>クライスリトリプル (Kleisli triple)</dt>
+<dd><p class="first">圏 <span class="math inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span></span></span></span></span> 上のクライスリトリプルとは，以下の要素の組 <span class="math inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mi>T</mi><mo separator="true">,</mo><mi>η …</mi></mrow></semantics></math></span></span></span></p></dd></dl></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/06/graded-monad-and-effects/#graded-monad-and-effects">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/#spark-installation-for-try">Apache Spark のお試し環境を作る</a></h2>
     <p>
           Posted on 火 21 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huan-jing-gou-zhu.html">環境構築</a>
@@ -344,33 +370,6 @@ $ node --eval 'const KaTeX = require("katex"); console.log(KaTeX …</pre></div>
 <p>Scala コンパイラが実際どういう処理をしてるのか知らなかったので，まずはその辺を調べた． Scala は，プログラムを複数のフェーズに分けてコンパイルし，最終的に JVM …</p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/scala-compile-inside/#scala-compile-inside">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/#bye-mathml-hello-katex">MathML にバイバイして， KaTeX に移行した</a></h2>
-    <p>
-          Posted on 月 22 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/mathml.html">MathML</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/restructuredtext.html">reStructuredText</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/css.html">CSS</a>
-    </p>
-  </header>
-  <div>
-      <p>以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．</p>
-<div class="section" id="mathml">
-<h2>MathML に敗北した<a class="headerlink" href="#mathml" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>正確には， MathML は悪くないんだが，現状の MathML + MathJax 環境は色々辛いものがあった．</p>
-<ul class="simple">
-<li><tt class="docutils literal">\mathit</tt> や <tt class="docutils literal">\mathrel</tt> などの基本的なコマンドに対応していない．</li>
-<li>MathJax のレンダリングが遅い．</li>
-<li>MathJax …</li></ul></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/#bye-mathml-hello-katex">    Continue reading
 </a>
   </div>
 </article>
