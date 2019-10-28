@@ -1,0 +1,696 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="Haskell はいくつかのリテラルで型クラスを使用したオーバーロードを許容している．例えば，Haskell で 1 と書いた場合，この型は 1 :: Num a =&gt; a になり， Num のインスタンスを定義することで，リテラルに対する実体をユーザも制御できるようになっている．GHC拡張で文字列に対してのオーバーロードなども提供されている．ただ，提供するデータ型とリテラルによっては，プログラムが意図通りに動かなかったりクラッシュしてしまったりすることがある．これを事前にチェックする仕組みを，コンパイラプラグインで実装する方法を紹介する． なお，環境として以下を想定している． GHC …" />
+<meta name="keywords" content="Haskell, GHC, リテラル, GHC拡張">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="リテラルをコンパイラ時にチェックする"/>
+<meta property="og:description" content="Haskell はいくつかのリテラルで型クラスを使用したオーバーロードを許容している．例えば，Haskell で 1 と書いた場合，この型は 1 :: Num a =&gt; a になり， Num のインスタンスを定義することで，リテラルに対する実体をユーザも制御できるようになっている．GHC拡張で文字列に対してのオーバーロードなども提供されている．ただ，提供するデータ型とリテラルによっては，プログラムが意図通りに動かなかったりクラッシュしてしまったりすることがある．これを事前にチェックする仕組みを，コンパイラプラグインで実装する方法を紹介する． なお，環境として以下を想定している． GHC …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-10-28 18:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="フレームワーク"/>
+<meta property="article:tag" content="Haskell"/>
+<meta property="article:tag" content="GHC"/>
+<meta property="article:tag" content="リテラル"/>
+<meta property="article:tag" content="GHC拡張"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; リテラルをコンパイラ時にチェックする</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="lint-bslit-by-ghc-plugin">リテラルをコンパイラ時にチェックする</h1>
+    <p>
+          Posted on 月 28 10月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>Haskell はいくつかのリテラルで型クラスを使用したオーバーロードを許容している．例えば，Haskell で <tt class="docutils literal">1</tt> と書いた場合，この型は <tt class="docutils literal">1 :: Num a =&gt; a</tt> になり， <tt class="docutils literal">Num</tt> のインスタンスを定義することで，リテラルに対する実体をユーザも制御できるようになっている．GHC拡張で文字列に対してのオーバーロードなども提供されている．ただ，提供するデータ型とリテラルによっては，プログラムが意図通りに動かなかったりクラッシュしてしまったりすることがある．これを事前にチェックする仕組みを，コンパイラプラグインで実装する方法を紹介する．</p>
+<p>なお，環境として以下を想定している．</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="69%"/>
+<col width="31%"/>
+</colgroup>
+<tbody valign="top">
+<tr><td>GHC のバージョン</td>
+<td>8.8.1</td>
+</tr>
+<tr><td>Cabal のバージョン</td>
+<td>3.0.0.0</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="haskell">
+<h2>Haskell のオーバーロードリテラル<a class="headerlink" href="#haskell" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Haskell では整数及び浮動小数点数リテラルにおいて，オーバーロードが許容されている．それぞれ，</p>
+<ul class="simple">
+<li>整数リテラル: <tt class="docutils literal">Num</tt> のインスタンス</li>
+<li>浮動小数点数リテラル: <tt class="docutils literal">Fractional</tt> のインスタンス</li>
+</ul>
+<p>でオーバーロードされる．さらに， GHC 拡張で</p>
+<ul class="simple">
+<li><tt class="docutils literal">OverloadedStrings</tt>: 文字列リテラルを <tt class="docutils literal">IsString</tt> のインスタンスでオーバーロードする</li>
+</ul>
+<p>基本的に，この実装は何か基盤となるデータ型に対し，そこからキャストするようになっている．例えば，整数リテラル <tt class="docutils literal">1</tt> は <tt class="docutils literal">fromInteger (1 :: Integer)</tt> に変換されている．リテラルそれぞれで変換の仕方を挙げると，</p>
+<ul class="simple">
+<li>整数リテラル: <tt class="docutils literal">Integer</tt> から <tt class="docutils literal">fromInteger</tt> メソッドを使って変換</li>
+<li>浮動小数点数リテラル: <tt class="docutils literal">Rational</tt> から <tt class="docutils literal">fromRational</tt> メソッドを使って変換</li>
+<li>文字列リテラル: <tt class="docutils literal">String</tt> から <tt class="docutils literal">fromString</tt> メソッドを使って変換</li>
+</ul>
+<p>のようになる．ただ，このキャストは必ずしも安全とは限らない．例えば， <tt class="docutils literal">300 :: Data.Int.Int8</tt> というリテラルを考えると， <tt class="docutils literal">300</tt> は 符号付き8bit 表現の域を超えてしまっている．実際に GHCi 上で試してみると，以下の出力が得られる:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; 300 :: Data.Int.Int8
+
+&lt;interactive&gt;:1:1: warning: [-Woverflowed-literals]
+    Literal 300 is out of the GHC.Int.Int8 range -128..127
+44
+</pre>
+<p>このような意図しない挙動を防ぐため，GHC では標準で提供するデータ型のリテラルに対しては上のようなオーバーフローチェックをしてくれる．ただ，標準で提供されてないデータ型については，このようなチェックは行われない．有名な例が <tt class="docutils literal">ByteString</tt> に対する文字列リテラルのチェックだ． <tt class="docutils literal">ByteString</tt> は利便性のため <tt class="docutils literal">IsString</tt> のインスタンスを提供している．<tt class="docutils literal">ByteString</tt> は 8bit 文字の列で，バイト列の管理に使われる．ただ <tt class="docutils literal">String</tt> は Unicode 文字の列で， <tt class="docutils literal">ByteString</tt> は直接対応しない．そのため <tt class="docutils literal">IsString</tt> インスタンスの実装は，特定のエンコードを決めてバイト列に変換するか，全ての文字が 8bit 内に収まっていると仮定しての変換の二通りということになる．<tt class="docutils literal">ByteString</tt> では後者が選ばれている．そのため，以下のようなことが起こる:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; "あ" :: Data.ByteString.ByteString
+"B"
+</pre>
+<p>このような予期しない動作をするリテラルを，コンパイル時に判定して警告を出したいことは良くあるので，それを実装してみる．</p>
+</div>
+<div class="section" id="ghc-compiler-plugin">
+<h2>GHC Compiler Plugin<a class="headerlink" href="#ghc-compiler-plugin" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>GHC にはコンパイルフェーズを挟み込めるプラグインシステムが存在する．型検査や Core-to-Core の変換が主だったが， 8.6 からは Source Plugin と呼ばれる構文解析や型検査後に環境を弄れるプラグインが作れるようになった．今回はこのうち，型検査後にフェーズを挟み込める機能を使用し，リテラルに対しての警告を表示する．</p>
+<p>プラグインの作り方のドキュメントは， <a class="reference external" href="https://downloads.haskell.org/~ghc/8.8.1/docs/html/users_guide/extending_ghc.html#compiler-plugins">GHCユーザガイド</a> を参照すると良いだろう．また， mpickering 先生による <a class="reference external" href="https://mpickering.github.io/plugins.html">まとめサイト</a> も参考になると思う．基本的には， <tt class="docutils literal">ghc</tt> パッケージの <a class="reference external" href="http://hackage.haskell.org/package/ghc-8.6.5/docs/Plugins.html#t:Plugin">GhcPlugins.Plugin</a> 型のデータを <tt class="docutils literal">plugin</tt> という名前でエクスポートしたモジュールを作り，そのモジュールを <tt class="docutils literal"><span class="pre">-fplugin=&lt;module&gt;</span></tt> で指定してコンパイルを行えば良い．例えば，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">module</span> <span class="nn">PluginExample</span> <span class="kr">where</span>
+
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">GhcPlugins</span>
+
+<span class="nf">plugin</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">Plugin</span>
+<span class="nf">plugin</span> <span class="ow">=</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">defaultPlugin</span>
+</pre></div>
+</td></tr></table><p>のようなモジュールを作り， <tt class="docutils literal"><span class="pre">-fplugin=PluginExample</span></tt> をオプションに加えてコンパイルすれば良い．型検査後にフェーズを挟み込む場合，次のように書く:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">module</span> <span class="nn">PluginExample</span> <span class="kr">where</span>
+
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">GhcPlugins</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">TcRnTypes</span>   <span class="k">as</span> <span class="n">TcM</span>
+
+<span class="nf">plugin</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">Plugin</span>
+<span class="nf">plugin</span> <span class="ow">=</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">defaultPlugin</span>
+  <span class="p">{</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">typeCheckResultAction</span> <span class="ow">=</span> <span class="n">pluginAction</span>
+  <span class="p">}</span>
+
+<span class="nf">pluginAction</span>
+  <span class="ow">::</span> <span class="p">[</span><span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">CommandLineOption</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">ModSummary</span>
+  <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcGblEnv</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcGblEnv</span>
+<span class="nf">pluginAction</span> <span class="n">args</span> <span class="n">mods</span> <span class="n">tcEnv</span> <span class="ow">=</span> <span class="n">doSomething</span>
+</pre></div>
+</td></tr></table><p><tt class="docutils literal">doSomething</tt> の部分はデフォルトでは <tt class="docutils literal">pure tcEnv</tt> で定義されている．それぞれの引数の内容は，</p>
+<dl class="docutils">
+<dt><tt class="docutils literal">args :: [CommandLineOption]</tt></dt>
+<dd>プラグインのコマンドライン引数． <tt class="docutils literal"><span class="pre">-fplugin</span></tt> オプションで渡せるようになっている．</dd>
+<dt><tt class="docutils literal">mods :: ModSummary</tt></dt>
+<dd>対象モジュールの概要</dd>
+<dt><tt class="docutils literal">tcEnv :: TcM.TcGblEnv</tt></dt>
+<dd>型情報の解析に必要なものがいろいろ入っている．</dd>
+</dl>
+<p>みたいな感じ．後，プラグインは再コンパイルの必要性などを指定できて，デフォルトでは強制的に再コンパイルされるようになっている．特に <tt class="docutils literal">IO</tt> 処理に依存しないプラグインを書く場合は，次のようにしておくと良い:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">module</span> <span class="nn">PluginExample</span> <span class="kr">where</span>
+
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">GhcPlugins</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">TcRnTypes</span>   <span class="k">as</span> <span class="n">TcM</span>
+
+<span class="nf">plugin</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">Plugin</span>
+<span class="nf">plugin</span> <span class="ow">=</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">defaultPlugin</span>
+  <span class="p">{</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">pluginRecompile</span> <span class="ow">=</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">purePlugin</span>
+  <span class="p">,</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">typeCheckResultAction</span> <span class="ow">=</span> <span class="n">pluginAction</span>
+  <span class="p">}</span>
+</pre></div>
+</td></tr></table><p>デフォルトでは <tt class="docutils literal">GhcPlugins.impurePlugin</tt> が指定されている．フラグが変化した際に再コンパイルする <tt class="docutils literal">GhcPlugins.flagRecompile</tt> なども用意されている．</p>
+</div>
+<div class="section" id="ast">
+<h2>AST を再帰的に探索する<a class="headerlink" href="#ast" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>では早速プラグインを作っていく．<tt class="docutils literal">TcGblEnv</tt> の <tt class="docutils literal">tcg_binds</tt> フィールドには，トップレベルの束縛の型検査済の AST が入っている．まず，この AST を再帰的に辿ってリテラル部分を見つけていく．再帰的に式を辿る関数を書いてもいいが，今回は <a class="reference external" href="http://hackage.haskell.org/package/syb">SYB (Scrap Your Boilerplate)</a> を使う．こいつは， <a class="reference external" href="http://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Data.html#t:Data">Data</a> のインスタンスであれば，再帰関数を動的な型キャストなどを使ってうまく実装し，提供してくれるパッケージだ．こいつを使って，以下のようにすると，簡単にリテラル部分を全探索するコードを書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="k">qualified</span> <span class="nn">Generics.SYB</span> <span class="k">as</span> <span class="n">SYB</span>
+
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">HsExtension</span> <span class="k">as</span> <span class="n">HsSyn</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">HsBinds</span>     <span class="k">as</span> <span class="n">HsSyn</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">HsExpr</span>      <span class="k">as</span> <span class="n">HsSyn</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">HsLit</span>       <span class="k">as</span> <span class="n">HsSyn</span>
+
+<span class="nf">pluginAction</span>
+  <span class="ow">::</span> <span class="p">[</span><span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">CommandLineOption</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">ModSummary</span>
+  <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcGblEnv</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcGblEnv</span>
+<span class="nf">pluginAction</span> <span class="n">_args</span> <span class="n">_mods</span> <span class="n">tcEnv</span> <span class="ow">=</span> <span class="kr">do</span>
+  <span class="kr">let</span> <span class="n">lbinds</span> <span class="ow">=</span> <span class="kt">TcM</span><span class="o">.</span><span class="n">tcg_binds</span> <span class="n">tcEnv</span>
+  <span class="n">lintLHsBinds</span> <span class="n">lbinds</span>
+  <span class="n">pure</span> <span class="n">tcEnv</span>
+
+<span class="nf">lintLHsBinds</span> <span class="ow">::</span> <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">LHsBinds</span> <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">GhcTc</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="nb">()</span>
+<span class="nf">lintLHsBinds</span> <span class="n">lbinds</span> <span class="ow">=</span> <span class="n">sequence_</span> <span class="o">$</span> <span class="n">listify</span> <span class="n">go</span> <span class="n">lbinds</span>
+  <span class="kr">where</span>
+    <span class="n">go</span> <span class="p">(</span><span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">L</span> <span class="n">loc</span> <span class="n">expr</span><span class="p">)</span> <span class="ow">=</span> <span class="kr">case</span> <span class="n">expr</span> <span class="kr">of</span>
+      <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">HsWrap</span> <span class="kr">_</span> <span class="kr">_</span> <span class="n">e</span>  <span class="ow">-&gt;</span> <span class="n">go</span> <span class="o">$</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">L</span> <span class="n">loc</span> <span class="n">e</span>
+      <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">HsOverLit</span> <span class="kr">_</span> <span class="n">l</span> <span class="ow">-&gt;</span> <span class="kt">Just</span> <span class="o">$</span> <span class="n">lintHsOverLit</span> <span class="n">loc</span> <span class="n">l</span>
+      <span class="kr">_</span>                   <span class="ow">-&gt;</span> <span class="kt">Nothing</span>
+
+<span class="nf">listify</span> <span class="ow">::</span> <span class="kt">Typeable</span> <span class="n">r</span> <span class="ow">=&gt;</span> <span class="p">(</span><span class="n">r</span> <span class="ow">-&gt;</span> <span class="kt">Maybe</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">SYB</span><span class="o">.</span><span class="kt">GenericQ</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+<span class="nf">listify</span> <span class="n">f</span> <span class="ow">=</span> <span class="kt">SYB</span><span class="o">.</span><span class="n">everything</span> <span class="p">(</span><span class="o">++</span><span class="p">)</span> <span class="o">$</span> <span class="kt">[]</span> <span class="p">`</span><span class="kt">SYB</span><span class="o">.</span><span class="n">mkQ</span><span class="p">`</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">toList</span> <span class="o">$</span> <span class="n">f</span> <span class="n">x</span>
+
+<span class="nf">lintHsOverLit</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">SrcSpan</span> <span class="ow">-&gt;</span> <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">HsOverLit</span> <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">GhcTc</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="nb">()</span>
+<span class="nf">lintHsOverLit</span> <span class="n">loc</span> <span class="n">lit</span> <span class="ow">=</span> <span class="n">doSomething</span>
+</pre></div>
+</td></tr></table><p><tt class="docutils literal">listify</tt> は与えられた <tt class="docutils literal">Data</tt> のインスタンスのデータ型を再帰的に辿り，該当するデータ型の部分を見つけたら与えられた関数を適用し，適用結果をリストで集約して返す．これを使って， <tt class="docutils literal">LHsExpr GhcTc</tt> の部分の探索を行なっている． <tt class="docutils literal">LHsExpr GhcTc</tt> は式を表す型 <tt class="docutils literal">HsExpr GhcTc</tt> にソースの位置情報がついたものになっている． <tt class="docutils literal">HsExpr a</tt> のうち，リテラルに関するコンストラクタは次のものになる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">HsExpr</span> <span class="n">p</span>
+  <span class="ow">=</span> <span class="o">...</span>
+  <span class="o">|</span> <span class="kt">HsLit</span> <span class="p">(</span><span class="kt">XLitE</span> <span class="n">p</span><span class="p">)</span> <span class="p">(</span><span class="kt">HsLit</span> <span class="n">p</span><span class="p">)</span>
+  <span class="o">|</span> <span class="kt">HsOverLit</span> <span class="p">(</span><span class="kt">XOverLitE</span> <span class="n">p</span><span class="p">)</span> <span class="p">(</span><span class="kt">HsOverLit</span> <span class="n">p</span><span class="p">)</span>
+  <span class="o">|</span> <span class="o">...</span>
+</pre></div>
+</td></tr></table><p><tt class="docutils literal">HsLit</tt> はオーバーロードされていないリテラル，例えば unboxed なリテラルや <tt class="docutils literal">OverloadedStrings</tt> 拡張のない環境下での文字列リテラルなどを表す． <tt class="docutils literal">HsOverLit</tt> は逆にオーバーロードされたリテラルを表す． <tt class="docutils literal">X~</tt> みたいな部分は <a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/">Trees that Grow</a> の実装部分．後からコンストラクタを拡張したり，フェーズによって情報を付加したりできるようになっている．まあ，だいたいは無視して良くて， <tt class="docutils literal">HsOverLit</tt> コンストラクタの本体は <tt class="docutils literal">HsOverLit p</tt> の部分．中身は，次のようになっている:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">HsOverLit</span> <span class="n">p</span>
+  <span class="ow">=</span> <span class="kt">OverLit</span> <span class="p">{</span>
+    <span class="n">ol_ext</span> <span class="ow">::</span> <span class="kt">XOverLit</span> <span class="n">p</span><span class="p">,</span>
+    <span class="n">ol_val</span> <span class="ow">::</span> <span class="kt">OverLitVal</span><span class="p">,</span>
+    <span class="n">ol_witness</span> <span class="ow">::</span> <span class="kt">HsExpr</span> <span class="n">p</span><span class="p">}</span>
+  <span class="o">|</span> <span class="kt">XOverLit</span> <span class="p">(</span><span class="kt">XXOverLit</span> <span class="n">p</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p><tt class="docutils literal">XOverLit</tt> コンストラクタの部分はやっぱり <a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/">Trees that Grow</a> の部分になっていて，現在はまだ使われていない．なので， <tt class="docutils literal">OverLit</tt> コンストラクタが主要部分になる．それぞれのフィールドは，</p>
+<dl class="docutils">
+<dt><tt class="docutils literal">ol_ext</tt></dt>
+<dd><a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/">Trees that Grow</a> の適用部分．型検査後はリテラルの型が入っている．</dd>
+<dt><tt class="docutils literal">ol_val</tt></dt>
+<dd>本体．リテラルの内容が入っている．</dd>
+<dt><tt class="docutils literal">ol_witness</tt></dt>
+<dd>脱糖先として想定される式の AST が入っている．例えば文字列リテラル <tt class="docutils literal">"str"</tt> なら <tt class="docutils literal">fromString "str"</tt> みたいなもの．</dd>
+</dl>
+<p>みたいな感じ． <tt class="docutils literal">ol_val</tt> の中身は</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">OverLitVal</span>
+  <span class="ow">=</span> <span class="kt">HsIntegral</span>   <span class="o">!</span><span class="kt">IntegralLit</span>
+  <span class="o">|</span> <span class="kt">HsFractional</span> <span class="o">!</span><span class="kt">FractionalLit</span>
+  <span class="o">|</span> <span class="kt">HsIsString</span>   <span class="o">!</span><span class="kt">SourceText</span> <span class="o">!</span><span class="kt">FastString</span>
+</pre></div>
+</td></tr></table><p>とほぼそのままの形の物が入っている． <tt class="docutils literal">FastString</tt> は GHC 内部で使用されている文字列を表すためのデータ型で，中身はちょっと情報を付加した <tt class="docutils literal">ByteString</tt> になる．今回の場合は UTF-8 エンコードされたリテラルの文字列が入っている．</p>
+</div>
+<div class="section" id="bytestring">
+<h2>ByteString リテラルをチェックする<a class="headerlink" href="#bytestring" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>後はこのリテラル情報を適当にチェックすれば良い．例えば， <tt class="docutils literal">ByteString</tt> のリテラルをチェックしてみる．まず，概形は以下のようになる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="nn">Control.Monad</span>
+
+<span class="nf">lintHsOverLit</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">SrcSpan</span> <span class="ow">-&gt;</span> <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">HsOverLit</span> <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">GhcTc</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="nb">()</span>
+<span class="nf">lintHsOverLit</span> <span class="n">loc</span> <span class="n">lit</span> <span class="ow">=</span> <span class="kr">case</span> <span class="n">lit</span> <span class="kr">of</span>
+    <span class="kt">OverLit</span> <span class="p">{</span>
+      <span class="kt">HsSyn</span><span class="o">.</span><span class="n">ol_val</span> <span class="ow">=</span> <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">HsIsString</span> <span class="kr">_</span> <span class="n">l</span><span class="p">,</span>
+      <span class="kt">HsSyn</span><span class="o">.</span><span class="n">ol_ext</span> <span class="ow">=</span> <span class="kt">HsSyn</span><span class="o">.</span><span class="kt">OverLitTc</span> <span class="kr">_</span> <span class="n">ty</span><span class="p">}</span> <span class="ow">-&gt;</span> <span class="n">go</span> <span class="n">l</span> <span class="n">ty</span>
+    <span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">pure</span> <span class="nb">()</span>
+  <span class="kr">where</span>
+    <span class="n">go</span> <span class="n">l</span> <span class="n">ty</span> <span class="ow">=</span> <span class="kr">do</span>
+      <span class="n">b</span> <span class="ow">&lt;-</span> <span class="n">checkValidLiteral</span> <span class="n">l</span> <span class="n">ty</span>
+      <span class="n">unless</span> <span class="n">b</span> <span class="o">$</span> <span class="n">throwWarning</span> <span class="n">l</span>
+
+    <span class="n">checkValidLiteral</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">FastString</span> <span class="ow">-&gt;</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">Type</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="kt">Bool</span>
+    <span class="n">checkValidLiteral</span> <span class="n">l</span> <span class="n">ty</span> <span class="ow">=</span> <span class="n">doSomething</span>
+
+    <span class="n">throwWarning</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">FastString</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="nb">()</span>
+    <span class="n">throwWarning</span> <span class="n">l</span> <span class="ow">=</span> <span class="n">doSomething</span>
+</pre></div>
+</td></tr></table><p>後は， <tt class="docutils literal">ByteString</tt> の正常なリテラルかを判定する <tt class="docutils literal">checkValidLiteral</tt> と，警告を発生させる <tt class="docutils literal">throwWarning</tt> をそれぞれ実装していく． <tt class="docutils literal">checkValidLiteral</tt> の概形は以下のようになる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="k">qualified</span> <span class="nn">Data.Char</span> <span class="k">as</span> <span class="n">Char</span>
+
+<span class="nf">checkValidLiteral</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">FastString</span> <span class="ow">-&gt;</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">Type</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="kt">Bool</span>
+<span class="nf">checkValidLiteral</span> <span class="n">l</span> <span class="n">ty</span> <span class="ow">=</span> <span class="kr">case</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">tyConAppTyCon_maybe</span> <span class="n">ty</span> <span class="kr">of</span>
+    <span class="kt">Nothing</span> <span class="ow">-&gt;</span> <span class="n">pure</span> <span class="kt">False</span>
+    <span class="kt">Just</span> <span class="n">tc</span> <span class="ow">-&gt;</span> <span class="kr">do</span>
+      <span class="n">b</span> <span class="ow">&lt;-</span> <span class="n">isByteStringTyCon</span> <span class="n">tc</span>
+      <span class="kr">if</span> <span class="n">b</span>
+        <span class="kr">then</span> <span class="n">pure</span> <span class="n">isValidByteStringLiteral</span> <span class="n">l</span>
+        <span class="kr">else</span> <span class="n">pure</span> <span class="kt">False</span>
+  <span class="kr">where</span>
+    <span class="n">isByteStringTyCon</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">TyCon</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="kt">Bool</span>
+    <span class="n">isByteStringTyCon</span> <span class="ow">=</span> <span class="n">doSomething</span>
+
+    <span class="n">isValidByteStringLiteral</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">FastString</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+    <span class="n">isValidByteStringLiteral</span> <span class="n">l</span> <span class="ow">=</span> <span class="n">all</span> <span class="p">(</span><span class="nf">\</span><span class="n">c</span> <span class="ow">-&gt;</span> <span class="kt">Char</span><span class="o">.</span><span class="n">ord</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">)</span> <span class="o">$</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">unpackFS</span> <span class="n">l</span>
+</pre></div>
+</td></tr></table><p>流れとしては，</p>
+<ol class="arabic simple">
+<li>リテラルの型を見て，その型が具体的な型でかつ</li>
+<li><tt class="docutils literal">ByteString</tt> の型コンストラクタで構築されている時，</li>
+<li>8bit の文字だけで構築されている場合</li>
+</ol>
+<p>真を返すようにしている． <tt class="docutils literal">isByteStringTyCon</tt> では <tt class="docutils literal">ByteString</tt> の型コンストラクタかを判定する必要がある．この操作はちょっとめんどくさくて，以下のような実装になる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="k">qualified</span> <span class="nn">TcRnMonad</span>   <span class="k">as</span> <span class="n">TcM</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">Finder</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">IfaceEnv</span>
+<span class="kr">import</span>           <span class="nn">Control.Monad.IO.Class</span>
+
+<span class="nf">isByteStringTyCon</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">TyCon</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="kt">Bool</span>
+<span class="nf">isByteStringTyCon</span> <span class="n">tc</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="n">tns</span> <span class="ow">&lt;-</span> <span class="n">findByteStringTyConNames</span>
+    <span class="n">pure</span> <span class="o">$</span> <span class="n">elem</span> <span class="p">(</span><span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">tyConName</span> <span class="n">tyCon</span><span class="p">)</span> <span class="n">tns</span>
+  <span class="kr">where</span>
+    <span class="n">findByteStringTyConNames</span> <span class="ow">=</span> <span class="n">traverse</span> <span class="n">findByteStringTyConNameByModule</span>
+      <span class="p">[</span> <span class="s">"Data.ByteString.Internal"</span>
+      <span class="p">,</span> <span class="s">"Data.ByteString.Lazy.Internal"</span>
+      <span class="p">]</span>
+
+    <span class="n">findByteStringTyConNameByModule</span> <span class="n">moduleName</span> <span class="ow">=</span> <span class="kr">do</span>
+      <span class="n">hscEnv</span> <span class="ow">&lt;-</span> <span class="kt">TcM</span><span class="o">.</span><span class="n">getTopEnv</span>
+      <span class="kr">let</span> <span class="n">mn</span> <span class="ow">=</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">mkModuleName</span> <span class="n">moduleName</span>
+      <span class="n">fr</span> <span class="ow">&lt;-</span> <span class="n">liftIO</span> <span class="o">$</span> <span class="kt">Finder</span><span class="o">.</span><span class="n">findImportedModule</span> <span class="n">hscEnv</span> <span class="n">mn</span> <span class="n">bytestringPackage</span>
+      <span class="kr">case</span> <span class="n">fr</span> <span class="kr">of</span>
+        <span class="kt">Finder</span><span class="o">.</span><span class="kt">Found</span> <span class="kr">_</span> <span class="n">md</span> <span class="ow">-&gt;</span> <span class="kr">do</span>
+          <span class="n">tn</span> <span class="ow">&lt;-</span> <span class="kt">IfaceEnv</span><span class="o">.</span><span class="n">lookupOrig</span> <span class="n">md</span> <span class="o">$</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">mkTcOcc</span> <span class="s">"ByteString"</span>
+          <span class="n">pure</span> <span class="o">$</span> <span class="kt">Just</span> <span class="n">tn</span>
+        <span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">pure</span> <span class="kt">Nothing</span>
+
+    <span class="n">bytestringPackage</span> <span class="ow">=</span> <span class="kt">Just</span> <span class="o">$</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">fsLit</span> <span class="s">"bytestring"</span>
+</pre></div>
+</td></tr></table><p>このような実装で，依存している <tt class="docutils literal">bytestring</tt> パッケージのモジュールから， <tt class="docutils literal">ByteString</tt> という名前だった型名のものをうまく探し出して，型コンストラクタの名前がその名前と一致するかをチェックすることができる．<tt class="docutils literal">TcM</tt> モナドは， <tt class="docutils literal">MonadIO</tt> のインスタンスなので， <tt class="docutils literal">IO</tt> 操作を普通に実行できる．なので，必要な操作が <tt class="docutils literal">TcM</tt> の操作で見つからなかったら， <tt class="docutils literal">IO</tt> の操作を探してみるか自分で実装するかすると良い．これで <tt class="docutils literal">checkValidLiteral</tt> は実装できたので，後は警告を出す部分を実装する． <tt class="docutils literal">throwWarning</tt> の実装は以下のようになる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE OverloadedStrings #-}</span>
+
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">Bag</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">ErrUtils</span>
+
+<span class="nf">throwWarning</span> <span class="ow">::</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="kt">FastString</span> <span class="ow">-&gt;</span> <span class="kt">TcM</span><span class="o">.</span><span class="kt">TcM</span> <span class="nb">()</span>
+<span class="nf">throwWarning</span> <span class="n">l</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="n">dynFlags</span> <span class="ow">&lt;-</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">getDynFlags</span>
+    <span class="n">liftIO</span> <span class="o">$</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">printOrThrowWarnings</span> <span class="n">dynFlags</span> <span class="o">$</span> <span class="n">warnMsgs</span> <span class="n">dynFlags</span> <span class="n">l</span>
+  <span class="kr">where</span>
+    <span class="n">warnMsgs</span> <span class="n">dynFlags</span> <span class="n">l</span> <span class="ow">=</span>
+      <span class="kr">let</span> <span class="n">errDoc</span> <span class="ow">=</span> <span class="kt">ErrUtils</span><span class="o">.</span><span class="n">errDoc</span>
+            <span class="p">[</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">ftext</span> <span class="o">$</span> <span class="s">"Literal </span><span class="se">\"</span><span class="s">"</span> <span class="o">&lt;&gt;</span> <span class="n">l</span> <span class="o">&lt;&gt;</span> <span class="s">"</span><span class="se">\"</span><span class="s"> contains illegal characters for ByteString"</span> <span class="p">]</span>
+            <span class="p">[</span> <span class="p">]</span>
+            <span class="p">[</span> <span class="kt">GhcPlugins</span><span class="o">.</span><span class="n">text</span> <span class="s">"Avoid to use non-8bit characters or may use Text instead."</span>
+            <span class="p">]</span>
+          <span class="n">msg</span> <span class="ow">=</span> <span class="kt">ErrUtils</span><span class="o">.</span><span class="n">formatErrDoc</span> <span class="n">dynFlags</span> <span class="n">errDoc</span>
+          <span class="n">warnMsg</span> <span class="ow">=</span> <span class="kt">ErrUtils</span><span class="o">.</span><span class="n">mkPlainWarnMsg</span> <span class="n">dynFlags</span> <span class="n">loc</span> <span class="n">msg</span>
+      <span class="kr">in</span> <span class="kt">Bag</span><span class="o">.</span><span class="n">unitBag</span> <span class="n">warnMsg</span>
+</pre></div>
+</td></tr></table><p>単純に警告を一つ作ってそれを投げてるだけ． <tt class="docutils literal">Bag</tt> は GHC 内で使われている順序なしのコレクションで，内部は単なる二分木になっていて，挿入や結合が定数時間のデータ構造になっている．これで警告のコレクションを作って， <tt class="docutils literal">printOrThrowWarnings</tt> に渡すと，警告の内容を見ていい感じに出力をしたりコンパイルを中断したりしてくれる．以上で実装できる．このプラグインを次のような例</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE OverloadedStrings #-}</span>
+
+<span class="kr">module</span> <span class="nn">Main</span> <span class="kr">where</span>
+
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">Data.ByteString.Char8</span>      <span class="k">as</span> <span class="n">Char8</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">Data.ByteString.Lazy.Char8</span> <span class="k">as</span> <span class="n">LazyChar8</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">System.IO</span>                  <span class="k">as</span> <span class="n">System</span>
+
+<span class="nf">main</span> <span class="ow">::</span> <span class="kt">IO</span> <span class="nb">()</span>
+<span class="nf">main</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="n">putBSStrLn</span> <span class="s">"ascii string"</span>
+    <span class="n">putBSStrLn</span> <span class="s">"のっとばいとすとりんぐ"</span>
+    <span class="n">putStrLn</span> <span class="s">"すとりんぐ"</span>
+    <span class="n">putLBSStrLn</span> <span class="s">"のっとれいじーばいとすとりんぐ"</span>
+  <span class="kr">where</span>
+    <span class="n">putBSStrLn</span> <span class="ow">=</span> <span class="kt">Char8</span><span class="o">.</span><span class="n">hPutStrLn</span> <span class="kt">System</span><span class="o">.</span><span class="n">stdout</span>
+    <span class="n">putLBSStrLn</span> <span class="ow">=</span> <span class="kt">LazyChar8</span><span class="o">.</span><span class="n">hPutStrLn</span> <span class="kt">System</span><span class="o">.</span><span class="n">stdout</span>
+</pre></div>
+</td></tr></table><p>で動かしてみると，以下のような出力が得られる:</p>
+<pre class="literal-block">
+Main.hs:12:16: warning:
+    • Literal "のっとばいとすとりんぐ" contains illegal characters for ByteString
+    • Avoid to use non-8bit characters or may use Text instead.
+   |
+12 |     putBSStrLn "のっとばいとすとりんぐ"
+   |                ^^^^^^^^^^^^^
+
+Main.hs:14:17: warning:
+    • Literal "のっとれいじーばいとすとりんぐ" contains illegal characters for ByteString
+    • Avoid to use non-8bit characters or may use Text instead.
+   |
+14 |     putLBSStrLn "のっとれいじーばいとすとりんぐ"
+   |                 ^^^^^^^^^^^^^^^^^
+</pre>
+<p>なお，解説のコードとはちょっと違うが， <tt class="docutils literal">ByteString</tt> のリテラルをチェックするプラグインの全体は， <a class="reference external" href="https://github.com/mizunashi-mana/ghc-bslit-linter">https://github.com/mizunashi-mana/ghc-bslit-linter</a> に上がっているので参考にして欲しい．</p>
+</div>
+<div class="section" id="auto-id-2">
+<h2>まとめ<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>GHC Compiler Plugin の新しく導入された Source Plugin を使って，リテラルをコンパイル時に検査する手法を紹介した．式を全部探索することになるので，でかいソースにかける場合コンパイル時間の増加が気になるところだが，一応こういうことができるよという感じ．ただ，プラグインを書くにはそれなりに GHC 内のノウハウを知る必要がある．</p>
+<p>Source Plugin を使うと，初心者向けに警告メッセージを分かりやすくしたり増やしたりすることもできそうだ．メンテするのは大変かもしれないけど， SYB などを使えばそれなりに持続期間の長いプラグインは作れるかもしれない．</p>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/10/lint-bslit-by-ghc-plugin.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/10/lint-bslit-by-ghc-plugin.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/riteraru.html">リテラル</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/ghckuo-zhang.html">GHC拡張</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/">Local Do と型クラス</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/">Functor / Applicative / Monad が表すもの</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/call-arity-and-oneshot/">Call Arity と融合変換</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/06/linear-types-in-docker/">GHC の線形型プロトタイプのお試し環境を作る</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/">GHC で LLVM を通したビルドを行う</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

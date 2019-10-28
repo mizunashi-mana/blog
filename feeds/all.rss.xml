@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sat, 21 Sep 2019 08:00:00 +0900</lastBuildDate><item><title>iptables から nftables への移行</title><link>https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/</link><description>&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 28 Oct 2019 18:00:00 +0900</lastBuildDate><item><title>リテラルをコンパイラ時にチェックする</title><link>https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/</link><description>&lt;p&gt;Haskell はいくつかのリテラルで型クラスを使用したオーバーロードを許容している．例えば，Haskell で &lt;tt class="docutils literal"&gt;1&lt;/tt&gt; と書いた場合，この型は &lt;tt class="docutils literal"&gt;1 :: Num a =&amp;gt; a&lt;/tt&gt; になり， &lt;tt class="docutils literal"&gt;Num&lt;/tt&gt; のインスタンスを定義することで，リテラルに対する実体をユーザも制御できるようになっている．GHC拡張で文字列に対してのオーバーロードなども提供されている．ただ，提供するデータ型とリテラルによっては，プログラムが意図通りに動かなかったりクラッシュしてしまったりすることがある．これを事前にチェックする仕組みを，コンパイラプラグインで実装する方法を紹介する．&lt;/p&gt;
+&lt;p&gt;なお，環境として以下を想定している．&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="69%"/&gt;
+&lt;col width="31%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;GHC …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 28 Oct 2019 18:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-10-28:/blog/posts/2019/10/lint-bslit-by-ghc-plugin/</guid><category>Haskell</category><category>GHC</category><category>リテラル</category><category>GHC拡張</category></item><item><title>iptables から nftables への移行</title><link>https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/</link><description>&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
 &lt;p&gt;さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables …&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Sat, 21 Sep 2019 08:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-09-21:/blog/posts/2019/09/nftables-on-debian/</guid><category>Debian</category><category>iptables</category><category>nftables</category><category>ファイアウォール</category></item><item><title>Scala の Map.flatMap の罠</title><link>https://mizunashi-mana.github.io/blog/posts/2019/09/scala-map-flatmap-trap/</link><description>&lt;p&gt;Scala のコレクションライブラリは難しい．最近，強くそう思える事案に出くわしたので，そのメモ．なお，使った環境は以下の通り:&lt;/p&gt;
 &lt;table border="1" class="docutils"&gt;
 &lt;colgroup&gt;

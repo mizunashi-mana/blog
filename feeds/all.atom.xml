@@ -1,5 +1,477 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-09-21T08:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>iptables から nftables への移行</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/" rel="alternate"></link><published>2019-09-21T08:00:00+09:00</published><updated>2019-09-21T08:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-09-21:/blog/posts/2019/09/nftables-on-debian/</id><summary type="html">&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-10-28T18:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>リテラルをコンパイラ時にチェックする</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/" rel="alternate"></link><published>2019-10-28T18:00:00+09:00</published><updated>2019-10-28T18:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-10-28:/blog/posts/2019/10/lint-bslit-by-ghc-plugin/</id><summary type="html">&lt;p&gt;Haskell はいくつかのリテラルで型クラスを使用したオーバーロードを許容している．例えば，Haskell で &lt;tt class="docutils literal"&gt;1&lt;/tt&gt; と書いた場合，この型は &lt;tt class="docutils literal"&gt;1 :: Num a =&amp;gt; a&lt;/tt&gt; になり， &lt;tt class="docutils literal"&gt;Num&lt;/tt&gt; のインスタンスを定義することで，リテラルに対する実体をユーザも制御できるようになっている．GHC拡張で文字列に対してのオーバーロードなども提供されている．ただ，提供するデータ型とリテラルによっては，プログラムが意図通りに動かなかったりクラッシュしてしまったりすることがある．これを事前にチェックする仕組みを，コンパイラプラグインで実装する方法を紹介する．&lt;/p&gt;
+&lt;p&gt;なお，環境として以下を想定している．&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="69%"/&gt;
+&lt;col width="31%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;GHC …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</summary><content type="html">&lt;p&gt;Haskell はいくつかのリテラルで型クラスを使用したオーバーロードを許容している．例えば，Haskell で &lt;tt class="docutils literal"&gt;1&lt;/tt&gt; と書いた場合，この型は &lt;tt class="docutils literal"&gt;1 :: Num a =&amp;gt; a&lt;/tt&gt; になり， &lt;tt class="docutils literal"&gt;Num&lt;/tt&gt; のインスタンスを定義することで，リテラルに対する実体をユーザも制御できるようになっている．GHC拡張で文字列に対してのオーバーロードなども提供されている．ただ，提供するデータ型とリテラルによっては，プログラムが意図通りに動かなかったりクラッシュしてしまったりすることがある．これを事前にチェックする仕組みを，コンパイラプラグインで実装する方法を紹介する．&lt;/p&gt;
+&lt;p&gt;なお，環境として以下を想定している．&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="69%"/&gt;
+&lt;col width="31%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;GHC のバージョン&lt;/td&gt;
+&lt;td&gt;8.8.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Cabal のバージョン&lt;/td&gt;
+&lt;td&gt;3.0.0.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class="section" id="haskell"&gt;
+&lt;h2&gt;Haskell のオーバーロードリテラル&lt;a class="headerlink" href="#haskell" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Haskell では整数及び浮動小数点数リテラルにおいて，オーバーロードが許容されている．それぞれ，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;整数リテラル: &lt;tt class="docutils literal"&gt;Num&lt;/tt&gt; のインスタンス&lt;/li&gt;
+&lt;li&gt;浮動小数点数リテラル: &lt;tt class="docutils literal"&gt;Fractional&lt;/tt&gt; のインスタンス&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;でオーバーロードされる．さらに， GHC 拡張で&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;OverloadedStrings&lt;/tt&gt;: 文字列リテラルを &lt;tt class="docutils literal"&gt;IsString&lt;/tt&gt; のインスタンスでオーバーロードする&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;基本的に，この実装は何か基盤となるデータ型に対し，そこからキャストするようになっている．例えば，整数リテラル &lt;tt class="docutils literal"&gt;1&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;fromInteger (1 :: Integer)&lt;/tt&gt; に変換されている．リテラルそれぞれで変換の仕方を挙げると，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;整数リテラル: &lt;tt class="docutils literal"&gt;Integer&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;fromInteger&lt;/tt&gt; メソッドを使って変換&lt;/li&gt;
+&lt;li&gt;浮動小数点数リテラル: &lt;tt class="docutils literal"&gt;Rational&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;fromRational&lt;/tt&gt; メソッドを使って変換&lt;/li&gt;
+&lt;li&gt;文字列リテラル: &lt;tt class="docutils literal"&gt;String&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;fromString&lt;/tt&gt; メソッドを使って変換&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;のようになる．ただ，このキャストは必ずしも安全とは限らない．例えば， &lt;tt class="docutils literal"&gt;300 :: Data.Int.Int8&lt;/tt&gt; というリテラルを考えると， &lt;tt class="docutils literal"&gt;300&lt;/tt&gt; は 符号付き8bit 表現の域を超えてしまっている．実際に GHCi 上で試してみると，以下の出力が得られる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; 300 :: Data.Int.Int8
+
+&amp;lt;interactive&amp;gt;:1:1: warning: [-Woverflowed-literals]
+    Literal 300 is out of the GHC.Int.Int8 range -128..127
+44
+&lt;/pre&gt;
+&lt;p&gt;このような意図しない挙動を防ぐため，GHC では標準で提供するデータ型のリテラルに対しては上のようなオーバーフローチェックをしてくれる．ただ，標準で提供されてないデータ型については，このようなチェックは行われない．有名な例が &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; に対する文字列リテラルのチェックだ． &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; は利便性のため &lt;tt class="docutils literal"&gt;IsString&lt;/tt&gt; のインスタンスを提供している．&lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; は 8bit 文字の列で，バイト列の管理に使われる．ただ &lt;tt class="docutils literal"&gt;String&lt;/tt&gt; は Unicode 文字の列で， &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; は直接対応しない．そのため &lt;tt class="docutils literal"&gt;IsString&lt;/tt&gt; インスタンスの実装は，特定のエンコードを決めてバイト列に変換するか，全ての文字が 8bit 内に収まっていると仮定しての変換の二通りということになる．&lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; では後者が選ばれている．そのため，以下のようなことが起こる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; "あ" :: Data.ByteString.ByteString
+"B"
+&lt;/pre&gt;
+&lt;p&gt;このような予期しない動作をするリテラルを，コンパイル時に判定して警告を出したいことは良くあるので，それを実装してみる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ghc-compiler-plugin"&gt;
+&lt;h2&gt;GHC Compiler Plugin&lt;a class="headerlink" href="#ghc-compiler-plugin" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC にはコンパイルフェーズを挟み込めるプラグインシステムが存在する．型検査や Core-to-Core の変換が主だったが， 8.6 からは Source Plugin と呼ばれる構文解析や型検査後に環境を弄れるプラグインが作れるようになった．今回はこのうち，型検査後にフェーズを挟み込める機能を使用し，リテラルに対しての警告を表示する．&lt;/p&gt;
+&lt;p&gt;プラグインの作り方のドキュメントは， &lt;a class="reference external" href="https://downloads.haskell.org/~ghc/8.8.1/docs/html/users_guide/extending_ghc.html#compiler-plugins"&gt;GHCユーザガイド&lt;/a&gt; を参照すると良いだろう．また， mpickering 先生による &lt;a class="reference external" href="https://mpickering.github.io/plugins.html"&gt;まとめサイト&lt;/a&gt; も参考になると思う．基本的には， &lt;tt class="docutils literal"&gt;ghc&lt;/tt&gt; パッケージの &lt;a class="reference external" href="http://hackage.haskell.org/package/ghc-8.6.5/docs/Plugins.html#t:Plugin"&gt;GhcPlugins.Plugin&lt;/a&gt; 型のデータを &lt;tt class="docutils literal"&gt;plugin&lt;/tt&gt; という名前でエクスポートしたモジュールを作り，そのモジュールを &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-fplugin=&amp;lt;module&amp;gt;&lt;/span&gt;&lt;/tt&gt; で指定してコンパイルを行えば良い．例えば，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;PluginExample&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;GhcPlugins&lt;/span&gt;
+
+&lt;span class="nf"&gt;plugin&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Plugin&lt;/span&gt;
+&lt;span class="nf"&gt;plugin&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;defaultPlugin&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のようなモジュールを作り， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-fplugin=PluginExample&lt;/span&gt;&lt;/tt&gt; をオプションに加えてコンパイルすれば良い．型検査後にフェーズを挟み込む場合，次のように書く:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;PluginExample&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;GhcPlugins&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;TcRnTypes&lt;/span&gt;   &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;TcM&lt;/span&gt;
+
+&lt;span class="nf"&gt;plugin&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Plugin&lt;/span&gt;
+&lt;span class="nf"&gt;plugin&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;defaultPlugin&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;typeCheckResultAction&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pluginAction&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;pluginAction&lt;/span&gt;
+  &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;CommandLineOption&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;ModSummary&lt;/span&gt;
+  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcGblEnv&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcGblEnv&lt;/span&gt;
+&lt;span class="nf"&gt;pluginAction&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt; &lt;span class="n"&gt;mods&lt;/span&gt; &lt;span class="n"&gt;tcEnv&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;doSomething&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;doSomething&lt;/tt&gt; の部分はデフォルトでは &lt;tt class="docutils literal"&gt;pure tcEnv&lt;/tt&gt; で定義されている．それぞれの引数の内容は，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;args :: [CommandLineOption]&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;プラグインのコマンドライン引数． &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-fplugin&lt;/span&gt;&lt;/tt&gt; オプションで渡せるようになっている．&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;mods :: ModSummary&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;対象モジュールの概要&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;tcEnv :: TcM.TcGblEnv&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;型情報の解析に必要なものがいろいろ入っている．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;みたいな感じ．後，プラグインは再コンパイルの必要性などを指定できて，デフォルトでは強制的に再コンパイルされるようになっている．特に &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; 処理に依存しないプラグインを書く場合は，次のようにしておくと良い:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;PluginExample&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;GhcPlugins&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;TcRnTypes&lt;/span&gt;   &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;TcM&lt;/span&gt;
+
+&lt;span class="nf"&gt;plugin&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Plugin&lt;/span&gt;
+&lt;span class="nf"&gt;plugin&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;defaultPlugin&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pluginRecompile&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;purePlugin&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;typeCheckResultAction&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pluginAction&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;デフォルトでは &lt;tt class="docutils literal"&gt;GhcPlugins.impurePlugin&lt;/tt&gt; が指定されている．フラグが変化した際に再コンパイルする &lt;tt class="docutils literal"&gt;GhcPlugins.flagRecompile&lt;/tt&gt; なども用意されている．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ast"&gt;
+&lt;h2&gt;AST を再帰的に探索する&lt;a class="headerlink" href="#ast" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;では早速プラグインを作っていく．&lt;tt class="docutils literal"&gt;TcGblEnv&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;tcg_binds&lt;/tt&gt; フィールドには，トップレベルの束縛の型検査済の AST が入っている．まず，この AST を再帰的に辿ってリテラル部分を見つけていく．再帰的に式を辿る関数を書いてもいいが，今回は &lt;a class="reference external" href="http://hackage.haskell.org/package/syb"&gt;SYB (Scrap Your Boilerplate)&lt;/a&gt; を使う．こいつは， &lt;a class="reference external" href="http://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Data.html#t:Data"&gt;Data&lt;/a&gt; のインスタンスであれば，再帰関数を動的な型キャストなどを使ってうまく実装し，提供してくれるパッケージだ．こいつを使って，以下のようにすると，簡単にリテラル部分を全探索するコードを書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Generics.SYB&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;SYB&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;HsExtension&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;HsSyn&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;HsBinds&lt;/span&gt;     &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;HsSyn&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;HsExpr&lt;/span&gt;      &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;HsSyn&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;HsLit&lt;/span&gt;       &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;HsSyn&lt;/span&gt;
+
+&lt;span class="nf"&gt;pluginAction&lt;/span&gt;
+  &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;CommandLineOption&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;ModSummary&lt;/span&gt;
+  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcGblEnv&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcGblEnv&lt;/span&gt;
+&lt;span class="nf"&gt;pluginAction&lt;/span&gt; &lt;span class="n"&gt;_args&lt;/span&gt; &lt;span class="n"&gt;_mods&lt;/span&gt; &lt;span class="n"&gt;tcEnv&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;lbinds&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tcg_binds&lt;/span&gt; &lt;span class="n"&gt;tcEnv&lt;/span&gt;
+  &lt;span class="n"&gt;lintLHsBinds&lt;/span&gt; &lt;span class="n"&gt;lbinds&lt;/span&gt;
+  &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;tcEnv&lt;/span&gt;
+
+&lt;span class="nf"&gt;lintLHsBinds&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;LHsBinds&lt;/span&gt; &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;GhcTc&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;lintLHsBinds&lt;/span&gt; &lt;span class="n"&gt;lbinds&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sequence_&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;listify&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;lbinds&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;L&lt;/span&gt; &lt;span class="n"&gt;loc&lt;/span&gt; &lt;span class="n"&gt;expr&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;expr&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+      &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;HsWrap&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;L&lt;/span&gt; &lt;span class="n"&gt;loc&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;
+      &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;HsOverLit&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Just&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;lintHsOverLit&lt;/span&gt; &lt;span class="n"&gt;loc&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+      &lt;span class="kr"&gt;_&lt;/span&gt;                   &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Nothing&lt;/span&gt;
+
+&lt;span class="nf"&gt;listify&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Typeable&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;SYB&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;GenericQ&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="nf"&gt;listify&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;SYB&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;everything&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;[]&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="kt"&gt;SYB&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mkQ&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;toList&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+
+&lt;span class="nf"&gt;lintHsOverLit&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;SrcSpan&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;HsOverLit&lt;/span&gt; &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;GhcTc&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;lintHsOverLit&lt;/span&gt; &lt;span class="n"&gt;loc&lt;/span&gt; &lt;span class="n"&gt;lit&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;doSomething&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;listify&lt;/tt&gt; は与えられた &lt;tt class="docutils literal"&gt;Data&lt;/tt&gt; のインスタンスのデータ型を再帰的に辿り，該当するデータ型の部分を見つけたら与えられた関数を適用し，適用結果をリストで集約して返す．これを使って， &lt;tt class="docutils literal"&gt;LHsExpr GhcTc&lt;/tt&gt; の部分の探索を行なっている． &lt;tt class="docutils literal"&gt;LHsExpr GhcTc&lt;/tt&gt; は式を表す型 &lt;tt class="docutils literal"&gt;HsExpr GhcTc&lt;/tt&gt; にソースの位置情報がついたものになっている． &lt;tt class="docutils literal"&gt;HsExpr a&lt;/tt&gt; のうち，リテラルに関するコンストラクタは次のものになる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;HsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;HsLit&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XLitE&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;HsLit&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;HsOverLit&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XOverLitE&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;HsOverLit&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;HsLit&lt;/tt&gt; はオーバーロードされていないリテラル，例えば unboxed なリテラルや &lt;tt class="docutils literal"&gt;OverloadedStrings&lt;/tt&gt; 拡張のない環境下での文字列リテラルなどを表す． &lt;tt class="docutils literal"&gt;HsOverLit&lt;/tt&gt; は逆にオーバーロードされたリテラルを表す． &lt;tt class="docutils literal"&gt;X~&lt;/tt&gt; みたいな部分は &lt;a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/"&gt;Trees that Grow&lt;/a&gt; の実装部分．後からコンストラクタを拡張したり，フェーズによって情報を付加したりできるようになっている．まあ，だいたいは無視して良くて， &lt;tt class="docutils literal"&gt;HsOverLit&lt;/tt&gt; コンストラクタの本体は &lt;tt class="docutils literal"&gt;HsOverLit p&lt;/tt&gt; の部分．中身は，次のようになっている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;HsOverLit&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;OverLit&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;ol_ext&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;XOverLit&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;ol_val&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;OverLitVal&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;ol_witness&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;HsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;XOverLit&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XXOverLit&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;XOverLit&lt;/tt&gt; コンストラクタの部分はやっぱり &lt;a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/"&gt;Trees that Grow&lt;/a&gt; の部分になっていて，現在はまだ使われていない．なので， &lt;tt class="docutils literal"&gt;OverLit&lt;/tt&gt; コンストラクタが主要部分になる．それぞれのフィールドは，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;ol_ext&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/"&gt;Trees that Grow&lt;/a&gt; の適用部分．型検査後はリテラルの型が入っている．&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;ol_val&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;本体．リテラルの内容が入っている．&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;ol_witness&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;脱糖先として想定される式の AST が入っている．例えば文字列リテラル &lt;tt class="docutils literal"&gt;"str"&lt;/tt&gt; なら &lt;tt class="docutils literal"&gt;fromString "str"&lt;/tt&gt; みたいなもの．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;みたいな感じ． &lt;tt class="docutils literal"&gt;ol_val&lt;/tt&gt; の中身は&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;OverLitVal&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;HsIntegral&lt;/span&gt;   &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="kt"&gt;IntegralLit&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;HsFractional&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="kt"&gt;FractionalLit&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;HsIsString&lt;/span&gt;   &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="kt"&gt;SourceText&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="kt"&gt;FastString&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;とほぼそのままの形の物が入っている． &lt;tt class="docutils literal"&gt;FastString&lt;/tt&gt; は GHC 内部で使用されている文字列を表すためのデータ型で，中身はちょっと情報を付加した &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; になる．今回の場合は UTF-8 エンコードされたリテラルの文字列が入っている．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="bytestring"&gt;
+&lt;h2&gt;ByteString リテラルをチェックする&lt;a class="headerlink" href="#bytestring" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;後はこのリテラル情報を適当にチェックすれば良い．例えば， &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; のリテラルをチェックしてみる．まず，概形は以下のようになる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Control.Monad&lt;/span&gt;
+
+&lt;span class="nf"&gt;lintHsOverLit&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;SrcSpan&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;HsOverLit&lt;/span&gt; &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;GhcTc&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;lintHsOverLit&lt;/span&gt; &lt;span class="n"&gt;loc&lt;/span&gt; &lt;span class="n"&gt;lit&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;lit&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="kt"&gt;OverLit&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ol_val&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;HsIsString&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ol_ext&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;HsSyn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;OverLitTc&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="n"&gt;ty&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="n"&gt;ty&lt;/span&gt;
+    &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="n"&gt;ty&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;checkValidLiteral&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="n"&gt;ty&lt;/span&gt;
+      &lt;span class="n"&gt;unless&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;throwWarning&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+
+    &lt;span class="n"&gt;checkValidLiteral&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;FastString&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Type&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+    &lt;span class="n"&gt;checkValidLiteral&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="n"&gt;ty&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;doSomething&lt;/span&gt;
+
+    &lt;span class="n"&gt;throwWarning&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;FastString&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;throwWarning&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;doSomething&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;後は， &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; の正常なリテラルかを判定する &lt;tt class="docutils literal"&gt;checkValidLiteral&lt;/tt&gt; と，警告を発生させる &lt;tt class="docutils literal"&gt;throwWarning&lt;/tt&gt; をそれぞれ実装していく． &lt;tt class="docutils literal"&gt;checkValidLiteral&lt;/tt&gt; の概形は以下のようになる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Data.Char&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;Char&lt;/span&gt;
+
+&lt;span class="nf"&gt;checkValidLiteral&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;FastString&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Type&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+&lt;span class="nf"&gt;checkValidLiteral&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="n"&gt;ty&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tyConAppTyCon_maybe&lt;/span&gt; &lt;span class="n"&gt;ty&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="kt"&gt;Nothing&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+    &lt;span class="kt"&gt;Just&lt;/span&gt; &lt;span class="n"&gt;tc&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;isByteStringTyCon&lt;/span&gt; &lt;span class="n"&gt;tc&lt;/span&gt;
+      &lt;span class="kr"&gt;if&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+        &lt;span class="kr"&gt;then&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;isValidByteStringLiteral&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+        &lt;span class="kr"&gt;else&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;isByteStringTyCon&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TyCon&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+    &lt;span class="n"&gt;isByteStringTyCon&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;doSomething&lt;/span&gt;
+
+    &lt;span class="n"&gt;isValidByteStringLiteral&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;FastString&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+    &lt;span class="n"&gt;isValidByteStringLiteral&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;all&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Char&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ord&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;256&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unpackFS&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;流れとしては，&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;リテラルの型を見て，その型が具体的な型でかつ&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; の型コンストラクタで構築されている時，&lt;/li&gt;
+&lt;li&gt;8bit の文字だけで構築されている場合&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;真を返すようにしている． &lt;tt class="docutils literal"&gt;isByteStringTyCon&lt;/tt&gt; では &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; の型コンストラクタかを判定する必要がある．この操作はちょっとめんどくさくて，以下のような実装になる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;TcRnMonad&lt;/span&gt;   &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;TcM&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Finder&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;IfaceEnv&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt;           &lt;span class="nn"&gt;Control.Monad.IO.Class&lt;/span&gt;
+
+&lt;span class="nf"&gt;isByteStringTyCon&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TyCon&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+&lt;span class="nf"&gt;isByteStringTyCon&lt;/span&gt; &lt;span class="n"&gt;tc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;tns&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;findByteStringTyConNames&lt;/span&gt;
+    &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;elem&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tyConName&lt;/span&gt; &lt;span class="n"&gt;tyCon&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;tns&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;findByteStringTyConNames&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;traverse&lt;/span&gt; &lt;span class="n"&gt;findByteStringTyConNameByModule&lt;/span&gt;
+      &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="s"&gt;"Data.ByteString.Internal"&lt;/span&gt;
+      &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"Data.ByteString.Lazy.Internal"&lt;/span&gt;
+      &lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="n"&gt;findByteStringTyConNameByModule&lt;/span&gt; &lt;span class="n"&gt;moduleName&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;hscEnv&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getTopEnv&lt;/span&gt;
+      &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;mn&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mkModuleName&lt;/span&gt; &lt;span class="n"&gt;moduleName&lt;/span&gt;
+      &lt;span class="n"&gt;fr&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;liftIO&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;Finder&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;findImportedModule&lt;/span&gt; &lt;span class="n"&gt;hscEnv&lt;/span&gt; &lt;span class="n"&gt;mn&lt;/span&gt; &lt;span class="n"&gt;bytestringPackage&lt;/span&gt;
+      &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;fr&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+        &lt;span class="kt"&gt;Finder&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;Found&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="n"&gt;md&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+          &lt;span class="n"&gt;tn&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;IfaceEnv&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lookupOrig&lt;/span&gt; &lt;span class="n"&gt;md&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mkTcOcc&lt;/span&gt; &lt;span class="s"&gt;"ByteString"&lt;/span&gt;
+          &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;Just&lt;/span&gt; &lt;span class="n"&gt;tn&lt;/span&gt;
+        &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="kt"&gt;Nothing&lt;/span&gt;
+
+    &lt;span class="n"&gt;bytestringPackage&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Just&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fsLit&lt;/span&gt; &lt;span class="s"&gt;"bytestring"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;このような実装で，依存している &lt;tt class="docutils literal"&gt;bytestring&lt;/tt&gt; パッケージのモジュールから， &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; という名前だった型名のものをうまく探し出して，型コンストラクタの名前がその名前と一致するかをチェックすることができる．&lt;tt class="docutils literal"&gt;TcM&lt;/tt&gt; モナドは， &lt;tt class="docutils literal"&gt;MonadIO&lt;/tt&gt; のインスタンスなので， &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; 操作を普通に実行できる．なので，必要な操作が &lt;tt class="docutils literal"&gt;TcM&lt;/tt&gt; の操作で見つからなかったら， &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; の操作を探してみるか自分で実装するかすると良い．これで &lt;tt class="docutils literal"&gt;checkValidLiteral&lt;/tt&gt; は実装できたので，後は警告を出す部分を実装する． &lt;tt class="docutils literal"&gt;throwWarning&lt;/tt&gt; の実装は以下のようになる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE OverloadedStrings #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Bag&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;ErrUtils&lt;/span&gt;
+
+&lt;span class="nf"&gt;throwWarning&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;FastString&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;TcM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="kt"&gt;TcM&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;throwWarning&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;dynFlags&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getDynFlags&lt;/span&gt;
+    &lt;span class="n"&gt;liftIO&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;printOrThrowWarnings&lt;/span&gt; &lt;span class="n"&gt;dynFlags&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;warnMsgs&lt;/span&gt; &lt;span class="n"&gt;dynFlags&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;warnMsgs&lt;/span&gt; &lt;span class="n"&gt;dynFlags&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
+      &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;errDoc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;ErrUtils&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errDoc&lt;/span&gt;
+            &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ftext&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="s"&gt;"Literal &lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s"&gt; contains illegal characters for ByteString"&lt;/span&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="kt"&gt;GhcPlugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt; &lt;span class="s"&gt;"Avoid to use non-8bit characters or may use Text instead."&lt;/span&gt;
+            &lt;span class="p"&gt;]&lt;/span&gt;
+          &lt;span class="n"&gt;msg&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;ErrUtils&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;formatErrDoc&lt;/span&gt; &lt;span class="n"&gt;dynFlags&lt;/span&gt; &lt;span class="n"&gt;errDoc&lt;/span&gt;
+          &lt;span class="n"&gt;warnMsg&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;ErrUtils&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mkPlainWarnMsg&lt;/span&gt; &lt;span class="n"&gt;dynFlags&lt;/span&gt; &lt;span class="n"&gt;loc&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;
+      &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="kt"&gt;Bag&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unitBag&lt;/span&gt; &lt;span class="n"&gt;warnMsg&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;単純に警告を一つ作ってそれを投げてるだけ． &lt;tt class="docutils literal"&gt;Bag&lt;/tt&gt; は GHC 内で使われている順序なしのコレクションで，内部は単なる二分木になっていて，挿入や結合が定数時間のデータ構造になっている．これで警告のコレクションを作って， &lt;tt class="docutils literal"&gt;printOrThrowWarnings&lt;/tt&gt; に渡すと，警告の内容を見ていい感じに出力をしたりコンパイルを中断したりしてくれる．以上で実装できる．このプラグインを次のような例&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE OverloadedStrings #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;Main&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Data.ByteString.Char8&lt;/span&gt;      &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;Char8&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Data.ByteString.Lazy.Char8&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;LazyChar8&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;System.IO&lt;/span&gt;                  &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;System&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;putBSStrLn&lt;/span&gt; &lt;span class="s"&gt;"ascii string"&lt;/span&gt;
+    &lt;span class="n"&gt;putBSStrLn&lt;/span&gt; &lt;span class="s"&gt;"のっとばいとすとりんぐ"&lt;/span&gt;
+    &lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"すとりんぐ"&lt;/span&gt;
+    &lt;span class="n"&gt;putLBSStrLn&lt;/span&gt; &lt;span class="s"&gt;"のっとれいじーばいとすとりんぐ"&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;putBSStrLn&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Char8&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hPutStrLn&lt;/span&gt; &lt;span class="kt"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stdout&lt;/span&gt;
+    &lt;span class="n"&gt;putLBSStrLn&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;LazyChar8&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hPutStrLn&lt;/span&gt; &lt;span class="kt"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stdout&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;で動かしてみると，以下のような出力が得られる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+Main.hs:12:16: warning:
+    • Literal "のっとばいとすとりんぐ" contains illegal characters for ByteString
+    • Avoid to use non-8bit characters or may use Text instead.
+   |
+12 |     putBSStrLn "のっとばいとすとりんぐ"
+   |                ^^^^^^^^^^^^^
+
+Main.hs:14:17: warning:
+    • Literal "のっとれいじーばいとすとりんぐ" contains illegal characters for ByteString
+    • Avoid to use non-8bit characters or may use Text instead.
+   |
+14 |     putLBSStrLn "のっとれいじーばいとすとりんぐ"
+   |                 ^^^^^^^^^^^^^^^^^
+&lt;/pre&gt;
+&lt;p&gt;なお，解説のコードとはちょっと違うが， &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; のリテラルをチェックするプラグインの全体は， &lt;a class="reference external" href="https://github.com/mizunashi-mana/ghc-bslit-linter"&gt;https://github.com/mizunashi-mana/ghc-bslit-linter&lt;/a&gt; に上がっているので参考にして欲しい．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC Compiler Plugin の新しく導入された Source Plugin を使って，リテラルをコンパイル時に検査する手法を紹介した．式を全部探索することになるので，でかいソースにかける場合コンパイル時間の増加が気になるところだが，一応こういうことができるよという感じ．ただ，プラグインを書くにはそれなりに GHC 内のノウハウを知る必要がある．&lt;/p&gt;
+&lt;p&gt;Source Plugin を使うと，初心者向けに警告メッセージを分かりやすくしたり増やしたりすることもできそうだ．メンテするのは大変かもしれないけど， SYB などを使えばそれなりに持続期間の長いプラグインは作れるかもしれない．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/10/lint-bslit-by-ghc-plugin.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/10/lint-bslit-by-ghc-plugin.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category><category term="リテラル"></category><category term="GHC拡張"></category></entry><entry><title>iptables から nftables への移行</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/" rel="alternate"></link><published>2019-09-21T08:00:00+09:00</published><updated>2019-09-21T08:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-09-21:/blog/posts/2019/09/nftables-on-debian/</id><summary type="html">&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
 &lt;p&gt;さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
 &lt;p&gt;さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables 用に書き直したので，その備忘録．&lt;/p&gt;
 &lt;p&gt;なお，参考文献は以下だが，こちとらインフラは素人の普段はプログラマ屋さんなので結構間違ってるかもしれない．&lt;/p&gt;
