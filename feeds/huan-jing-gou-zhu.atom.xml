@@ -228,7 +228,7 @@ var contentMetadataForCustomJS = {
   'source_path': 'articles/2019/05/spark-installation-for-try.rst',
   'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/spark-installation-for-try.rst'
 }
-&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="並列分散処理"></category><category term="Spark"></category><category term="Hadoop"></category><category term="Docker"></category></entry><entry><title>GHC で LLVM を通したビルドを行う</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/" rel="alternate"></link><published>2019-05-17T15:01:00+09:00</published><updated>2019-05-17T15:01:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-with-llvm/</id><summary type="html">&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="環境構築"></category><category term="並列分散処理"></category><category term="Spark"></category><category term="Hadoop"></category><category term="Docker"></category></entry><entry><title>GHC で LLVM を通したビルドを行う</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/" rel="alternate"></link><published>2019-05-17T15:01:00+09:00</published><updated>2019-05-17T15:01:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-17:/blog/posts/2019/05/ghc-with-llvm/</id><summary type="html">&lt;p&gt;GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．&lt;/p&gt;
 &lt;div class="section" id="macos-llvm-ghc"&gt;
 &lt;h2&gt;macOS で LLVM を GHC が使えるようにする&lt;a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:&lt;/p&gt;
@@ -318,4 +318,4 @@ var contentMetadataForCustomJS = {
   'source_path': 'articles/2019/05/ghc-with-llvm.rst',
   'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/ghc-with-llvm.rst'
 }
-&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="Haskell"></category><category term="GHC"></category><category term="LLVM"></category><category term="macOS"></category><category term="Homebrew"></category></entry></feed>
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="環境構築"></category><category term="Haskell"></category><category term="GHC"></category><category term="LLVM"></category><category term="macOS"></category><category term="Homebrew"></category></entry></feed>

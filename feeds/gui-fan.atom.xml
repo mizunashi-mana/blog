@@ -205,4 +205,4 @@ var contentMetadataForCustomJS = {
   'source_path': 'articles/2019/04/about-oss-licenses.rst',
   'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/about-oss-licenses.rst'
 }
-&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="ライセンス"></category><category term="OSS"></category><category term="GPL"></category></entry></feed>
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="規範"></category><category term="ライセンス"></category><category term="OSS"></category><category term="GPL"></category></entry></feed>
