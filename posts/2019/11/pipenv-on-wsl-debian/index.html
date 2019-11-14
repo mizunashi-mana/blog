@@ -47,18 +47,26 @@
     <!-- Microsoft EDGE -->
     <meta name="msapplication-TileColor" content="#555">
 
-    <meta name="author" content="Mizunashi Mana" />
-    <meta name="description" content="Mizunashi Mana's Blog" />
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="久しぶりに Windows 上で環境構築をすることになったんだけど，その際 Pipenv をインストールするのにちょっと躓いたので，その備忘録． Pipenv を入れた時のエラー Windows 上で開発する際は， WSL/Debian を使っている．で，新しい環境でもこれで行くことにして， Pipenv を Python3 環境で使いたかったので，次のようにして入れた: sudo apt update sudo …" />
+<meta name="keywords" content="Python, Debian, WSL">
+
 <meta property="og:site_name" content="続くといいな日記"/>
-<meta property="og:type" content="blog"/>
-<meta property="og:title" content="続くといいな日記"/>
-<meta property="og:description" content="Mizunashi Mana's Blog"/>
+<meta property="og:title" content="pipenv を WSL/Debian で使う際の注意事項"/>
+<meta property="og:description" content="久しぶりに Windows 上で環境構築をすることになったんだけど，その際 Pipenv をインストールするのにちょっと躓いたので，その備忘録． Pipenv を入れた時のエラー Windows 上で開発する際は， WSL/Debian を使っている．で，新しい環境でもこれで行くことにして， Pipenv を Python3 環境で使いたかったので，次のようにして入れた: sudo apt update sudo …"/>
 <meta property="og:locale" content="ja"/>
-<meta property="og:url" content="https://mizunashi-mana.github.io/blog"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/11/pipenv-on-wsl-debian/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-11-14 18:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="環境構築"/>
+<meta property="article:tag" content="Python"/>
+<meta property="article:tag" content="Debian"/>
+<meta property="article:tag" content="WSL"/>
 <meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
 
-  <title>続くといいな日記 &ndash;     Category 環境構築
-</title>
+  <title>続くといいな日記 &ndash; pipenv を WSL/Debian で使う際の注意事項</title>
 
 </head>
 <body>
@@ -127,90 +135,101 @@
 </a>
     </nav>
 
-
-
-<article>
+<article class="single">
   <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/11/pipenv-on-wsl-debian/#pipenv-on-wsl-debian">pipenv を WSL/Debian で使う際の注意事項</a></h2>
+      
+    <h1 id="pipenv-on-wsl-debian">pipenv を WSL/Debian で使う際の注意事項</h1>
     <p>
           Posted on 木 14 11月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huan-jing-gou-zhu.html">環境構築</a>
 
 
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/debian.html">Debian</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/wsl.html">WSL</a>
     </p>
   </header>
+
+
   <div>
-      <p>久しぶりに Windows 上で環境構築をすることになったんだけど，その際 Pipenv をインストールするのにちょっと躓いたので，その備忘録．</p>
+    <p>久しぶりに Windows 上で環境構築をすることになったんだけど，その際 Pipenv をインストールするのにちょっと躓いたので，その備忘録．</p>
 <div class="section" id="pipenv">
 <h2>Pipenv を入れた時のエラー<a class="headerlink" href="#pipenv" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>Windows 上で開発する際は， WSL/Debian を使っている．で，新しい環境でもこれで行くことにして， Pipenv を Python3 環境で使いたかったので，次のようにして入れた:</p>
 <pre class="literal-block">
 sudo apt update
-sudo …</pre></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/11/pipenv-on-wsl-debian/#pipenv-on-wsl-debian">    Continue reading
-</a>
+sudo apt install -y python3-pip
+pip3 install pipenv
+</pre>
+<p>これで，問題なく入ったように見えたんだけど，実際に実行してみると以下のような例外を吐いていた:</p>
+<pre class="literal-block">
+$ pipenv install
+['Traceback (most recent call last):\n', ...]
+Traceback (most recent call last):
+  ...
+  File "/usr/lib/python3.7/subprocess.py", line 1522, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+OSError: [Errno 8] Exec format error: '/mnt/c/.../AppData/Local/Microsoft/WindowsApps/python.exe'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  ...
+  File "~/.local/lib/python3.7/site-packages/pipenv/vendor/vistir/misc.py", line 162, in _create_subprocess
+    sys.stderr.write("Error %s while executing command %s", exc, " ".join(cmd._parts))
+TypeError: write() takes exactly one argument (3 given)
+</pre>
+<p>原因は詳しく調べてないけど，エラーメッセージからおそらく， Python3 のインタプリタを使わずに Python2 のを探してるんじゃないかと思ってる． Debian は現在 Python2 から Python3 の移行期で，デフォルトでは <tt class="docutils literal">python</tt> は Python2 のインタプリタ， <tt class="docutils literal">python3</tt> が Python3 のインタプリタというようになっている．で， <tt class="docutils literal">pipenv</tt> は Python3 の Pip で入れたにもかかわらず，内部で <tt class="docutils literal">python</tt> という名前でインタプリタを探してたりするんじゃないかなと考えている <a class="footnote-reference" href="#notice-details-for-this-issue" id="auto-id-1">[1]</a> ．</p>
+</div>
+<div class="section" id="auto-id-2">
+<h2>解決策<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>で，じゃあなんか解決する方法があるのかだけど，単純には次を実行すればいいっぽい:</p>
+<pre class="literal-block">
+pip3 uninstall -y pipenv
+sudo apt install -y pipenv
+</pre>
+<p>または，問題が起きてるのが <tt class="docutils literal">virtualenv</tt> の環境を作る際に選択する Python のバージョンを間違えてることに起因してるっぽいので，一回環境を作ってその環境を使い続ける分には <tt class="docutils literal">pip3</tt> で入れたものでも大丈夫みたい． Debian のパッケージもあまり詳しく見てないけど， <tt class="docutils literal">pipenv</tt> パッケージはその辺うまいことするパッチでも当ててるってことかな？ とりあえず，これで問題なく動いてるので，まいっかってなってる．</p>
+</div>
+<div class="section" id="auto-id-3">
+<h2>まとめ<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>また詰まるかもしれないので，忘れる前にとりあえず書いといた．気が向けば原因調査したりするかも．後，今回は WSL で問題が起きたけど，普通に Debian 環境だと起きる問題だったりするかも．こちらからは以上です．</p>
+<table class="docutils footnote" frame="void" id="notice-details-for-this-issue" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-1">[1]</a></td><td>なんか原因知ってる人いたら教えてほしい．</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/11/pipenv-on-wsl-debian.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/11/pipenv-on-wsl-debian.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
   </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/#spark-installation-for-try">Apache Spark のお試し環境を作る</a></h2>
+  <div class="tag-cloud">
     <p>
-          Posted on 火 21 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huan-jing-gou-zhu.html">環境構築</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/bing-lie-fen-san-chu-li.html">並列分散処理</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/spark.html">Spark</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/hadoop.html">Hadoop</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/docker.html">Docker</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/debian.html">Debian</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/wsl.html">WSL</a>
     </p>
-  </header>
-  <div>
-      <p>Spark は <tt class="docutils literal"><span class="pre">spark-shell</span></tt> という対話式のお試し環境がついていて，かなりちょっと実行してみる系がやりやすそう．なので，そのための環境を Docker で作った．その備忘録．</p>
-<p>なお， <a class="reference external" href="https://github.com/Semantive/docker-spark">https://github.com/Semantive/docker-spark</a> を参考にさせてもらった．と言っても，最終的にかなり似通ったものになってしまったが．</p>
-<div class="section" id="docker">
-<h2>Docker の初期設定を書く<a class="headerlink" href="#docker" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>基本的な構成は，</p>
-<ul class="simple">
-<li><tt class="docutils literal">Dockerfile</tt> : Hadoop と …</li></ul></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/#spark-installation-for-try">    Continue reading
-</a>
   </div>
-  <hr />
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/">KaTeX コードを静的にレンダリングする</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/">ブログに共有ボタンを追加した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/">Python の datetime が難しい</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/">ブログのデザイン調整</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/">ブログ始めました</a></li>
+    </ul>
+  </div>
+
+
 </article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/#ghc-with-llvm">GHC で LLVM を通したビルドを行う</a></h2>
-    <p>
-          Posted on 金 17 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huan-jing-gou-zhu.html">環境構築</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/llvm.html">LLVM</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/macos.html">macOS</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/homebrew.html">Homebrew</a>
-    </p>
-  </header>
-  <div>
-      <p>GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．</p>
-<div class="section" id="macos-llvm-ghc">
-<h2>macOS で LLVM を GHC が使えるようにする<a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:</p>
-<blockquote>
-<a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support">https …</a></blockquote></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/#ghc-with-llvm">    Continue reading
-</a>
-  </div>
-</article>
-
-  <div class="pagination">
-  </div>
-
-
-
 
     <footer>
 <p>

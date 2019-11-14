@@ -1,5 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 環境構築</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/huan-jing-gou-zhu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-05-21T15:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Apache Spark のお試し環境を作る</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/" rel="alternate"></link><published>2019-05-21T15:00:00+09:00</published><updated>2019-05-21T15:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-21:/blog/posts/2019/05/spark-installation-for-try/</id><summary type="html">&lt;p&gt;Spark は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; という対話式のお試し環境がついていて，かなりちょっと実行してみる系がやりやすそう．なので，そのための環境を Docker で作った．その備忘録．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 環境構築</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/huan-jing-gou-zhu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-11-14T18:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>pipenv を WSL/Debian で使う際の注意事項</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/11/pipenv-on-wsl-debian/" rel="alternate"></link><published>2019-11-14T18:00:00+09:00</published><updated>2019-11-14T18:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-11-14:/blog/posts/2019/11/pipenv-on-wsl-debian/</id><summary type="html">&lt;p&gt;久しぶりに Windows 上で環境構築をすることになったんだけど，その際 Pipenv をインストールするのにちょっと躓いたので，その備忘録．&lt;/p&gt;
+&lt;div class="section" id="pipenv"&gt;
+&lt;h2&gt;Pipenv を入れた時のエラー&lt;a class="headerlink" href="#pipenv" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Windows 上で開発する際は， WSL/Debian を使っている．で，新しい環境でもこれで行くことにして， Pipenv を Python3 環境で使いたかったので，次のようにして入れた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt update
+sudo …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;久しぶりに Windows 上で環境構築をすることになったんだけど，その際 Pipenv をインストールするのにちょっと躓いたので，その備忘録．&lt;/p&gt;
+&lt;div class="section" id="pipenv"&gt;
+&lt;h2&gt;Pipenv を入れた時のエラー&lt;a class="headerlink" href="#pipenv" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Windows 上で開発する際は， WSL/Debian を使っている．で，新しい環境でもこれで行くことにして， Pipenv を Python3 環境で使いたかったので，次のようにして入れた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt update
+sudo apt install -y python3-pip
+pip3 install pipenv
+&lt;/pre&gt;
+&lt;p&gt;これで，問題なく入ったように見えたんだけど，実際に実行してみると以下のような例外を吐いていた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ pipenv install
+['Traceback (most recent call last):\n', ...]
+Traceback (most recent call last):
+  ...
+  File "/usr/lib/python3.7/subprocess.py", line 1522, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+OSError: [Errno 8] Exec format error: '/mnt/c/.../AppData/Local/Microsoft/WindowsApps/python.exe'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  ...
+  File "~/.local/lib/python3.7/site-packages/pipenv/vendor/vistir/misc.py", line 162, in _create_subprocess
+    sys.stderr.write("Error %s while executing command %s", exc, " ".join(cmd._parts))
+TypeError: write() takes exactly one argument (3 given)
+&lt;/pre&gt;
+&lt;p&gt;原因は詳しく調べてないけど，エラーメッセージからおそらく， Python3 のインタプリタを使わずに Python2 のを探してるんじゃないかと思ってる． Debian は現在 Python2 から Python3 の移行期で，デフォルトでは &lt;tt class="docutils literal"&gt;python&lt;/tt&gt; は Python2 のインタプリタ， &lt;tt class="docutils literal"&gt;python3&lt;/tt&gt; が Python3 のインタプリタというようになっている．で， &lt;tt class="docutils literal"&gt;pipenv&lt;/tt&gt; は Python3 の Pip で入れたにもかかわらず，内部で &lt;tt class="docutils literal"&gt;python&lt;/tt&gt; という名前でインタプリタを探してたりするんじゃないかなと考えている &lt;a class="footnote-reference" href="#notice-details-for-this-issue" id="auto-id-1"&gt;[1]&lt;/a&gt; ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;解決策&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;で，じゃあなんか解決する方法があるのかだけど，単純には次を実行すればいいっぽい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+pip3 uninstall -y pipenv
+sudo apt install -y pipenv
+&lt;/pre&gt;
+&lt;p&gt;または，問題が起きてるのが &lt;tt class="docutils literal"&gt;virtualenv&lt;/tt&gt; の環境を作る際に選択する Python のバージョンを間違えてることに起因してるっぽいので，一回環境を作ってその環境を使い続ける分には &lt;tt class="docutils literal"&gt;pip3&lt;/tt&gt; で入れたものでも大丈夫みたい． Debian のパッケージもあまり詳しく見てないけど， &lt;tt class="docutils literal"&gt;pipenv&lt;/tt&gt; パッケージはその辺うまいことするパッチでも当ててるってことかな？ とりあえず，これで問題なく動いてるので，まいっかってなってる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;また詰まるかもしれないので，忘れる前にとりあえず書いといた．気が向けば原因調査したりするかも．後，今回は WSL で問題が起きたけど，普通に Debian 環境だと起きる問題だったりするかも．こちらからは以上です．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-details-for-this-issue" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なんか原因知ってる人いたら教えてほしい．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/11/pipenv-on-wsl-debian.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/11/pipenv-on-wsl-debian.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="環境構築"></category><category term="Python"></category><category term="Debian"></category><category term="WSL"></category></entry><entry><title>Apache Spark のお試し環境を作る</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/" rel="alternate"></link><published>2019-05-21T15:00:00+09:00</published><updated>2019-05-21T15:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-05-21:/blog/posts/2019/05/spark-installation-for-try/</id><summary type="html">&lt;p&gt;Spark は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;spark-shell&lt;/span&gt;&lt;/tt&gt; という対話式のお試し環境がついていて，かなりちょっと実行してみる系がやりやすそう．なので，そのための環境を Docker で作った．その備忘録．&lt;/p&gt;
 &lt;p&gt;なお， &lt;a class="reference external" href="https://github.com/Semantive/docker-spark"&gt;https://github.com/Semantive/docker-spark&lt;/a&gt; を参考にさせてもらった．と言っても，最終的にかなり似通ったものになってしまったが．&lt;/p&gt;
 &lt;div class="section" id="docker"&gt;
 &lt;h2&gt;Docker の初期設定を書く&lt;a class="headerlink" href="#docker" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
