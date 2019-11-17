@@ -130,6 +130,31 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/#to-use-serverside-katex">KaTeX コードを静的にレンダリングする</a></h2>
+    <p>
+          Posted on 日 28 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/katex.html">KaTeX</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/nodejs.html">Node.js</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>
+    </p>
+  </header>
+  <div>
+      <p>ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした．</p>
+<div class="section" id="auto-id-1">
+<h2>KaTeX をサーバサイドレンダリングする<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>特に難しいことはなくて， KaTeX は Node.js 上で動くっぽく，以下のようにすれば HTML を生成できるっぽい:</p>
+<pre class="literal-block">
+$ node --eval 'const KaTeX = require("katex"); console.log(KaTeX …</pre></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/#to-use-serverside-katex">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/about-oss-licenses/#about-oss-licenses">OSS ライセンスについての色々</a></h2>
     <p>
           Posted on 木 25 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/gui-fan.html">規範</a>
@@ -357,41 +382,6 @@ some text[#footnote-ref]_ .
 <p>Haskell 2020 で Applicative が追加される見込みだ (そもそもちゃんと 2020 年に出るのか怪しそうだが)．それを踏まえて，標準ライブラリに入る Haskell の特徴的な一連の型クラス …</p>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/#generalizing-transformation">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">sitemap の追加</a></h2>
-    <p>
-          Posted on 水 10 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/seo.html">SEO</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/google-analytics.html">Google Analytics</a>
-    </p>
-  </header>
-  <div>
-      <p>sitemap とかを追加してみたので，それの備忘録．</p>
-<div class="section" id="auto-id-1">
-<h2>sitemap 周辺ファイルの追加<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>まず Pelican で sitemap を生成させる．これは <tt class="docutils literal">sitemap</tt> プラグインを追加するだけでいい:</p>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4</pre></div></td><td class="code"><div class="highlight"><pre><span></span>  PLUGINS = [
-    ...
-<span class="gi">+   'sitemap',</span>
-  ]
-</pre></div>
-</td></tr></table><p>後は <tt class="docutils literal">SITEMAP</tt> に設定を書く．以下の感じのことを書いた:</p>
-<pre class="literal-block">
-SITEMAP = {
-  'format' …</pre></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/#add-sitemap">    Continue reading
 </a>
   </div>
 </article>
