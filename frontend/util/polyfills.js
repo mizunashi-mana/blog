@@ -1,7 +1,9 @@
+import "core-js";
+
 // http://ajaxian.com/archives/creating-a-queryselector-for-ie-that-runs-at-native-speed
 
 if (!document.querySelectorAll) {
-  document.querySelectorAll = function(selectors) {
+  document.querySelectorAll = function (selectors) {
     let styleElement = document.createElement('style');
     document.documentElement.firstChild.appendChild(styleElement);
     document.__qsa_results = [];
@@ -22,7 +24,7 @@ if (!document.querySelectorAll) {
 }
 
 if (!document.querySelector) {
-  document.querySelector = function(selectors) {
+  document.querySelector = function (selectors) {
     let elements = document.querySelectorAll(selectors);
     return (elements.length > 0) ? elements[0] : null;
   };

@@ -1,4 +1,4 @@
-import './util/web-polyfills';
+import './util/polyfills';
 import './component/sentry_monitor';
 import './component/render_math';
 import * as addShareButtons from './component/add_sharebuttons';
