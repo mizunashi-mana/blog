@@ -1,5 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-09-21T08:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>iptables から nftables への移行</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/" rel="alternate"></link><published>2019-09-21T08:00:00+09:00</published><updated>2019-09-21T08:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-09-21:/blog/posts/2019/09/nftables-on-debian/</id><summary type="html">&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 運用</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/yun-yong.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-11-27T18:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>babel と core-js を使って，古いブラウザをサポートする</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/11/support-more-web-using-babel/" rel="alternate"></link><published>2019-11-27T18:00:00+09:00</published><updated>2019-11-27T18:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-11-27:/blog/posts/2019/11/support-more-web-using-babel/</id><summary type="html">&lt;p&gt;Sentry でたまに，古い OS からのアクセスによるエラーレポートが来る．現状，このブログの JS は &lt;tt class="docutils literal"&gt;let&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;const&lt;/tt&gt; 普通に使ってるし， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;for-of&lt;/span&gt;&lt;/tt&gt; なども使っている．なので，一世代前のブラウザなどを使っていると，そこら辺の機能に対応していなくてエラーになる．試しにこの辺を改善してみると，どうなるかのか観測してみたいなと思って，ちょっとサイト設定をいじってみた．そのメモ．&lt;/p&gt;
+&lt;p&gt;なお，使った環境は以下のもの:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="50%"/&gt;
+&lt;col width="50%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;babel&lt;/td&gt;
+&lt;td&gt;7 …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</summary><content type="html">&lt;p&gt;Sentry でたまに，古い OS からのアクセスによるエラーレポートが来る．現状，このブログの JS は &lt;tt class="docutils literal"&gt;let&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;const&lt;/tt&gt; 普通に使ってるし， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;for-of&lt;/span&gt;&lt;/tt&gt; なども使っている．なので，一世代前のブラウザなどを使っていると，そこら辺の機能に対応していなくてエラーになる．試しにこの辺を改善してみると，どうなるかのか観測してみたいなと思って，ちょっとサイト設定をいじってみた．そのメモ．&lt;/p&gt;
+&lt;p&gt;なお，使った環境は以下のもの:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="50%"/&gt;
+&lt;col width="50%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;babel&lt;/td&gt;
+&lt;td&gt;7.7.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;core-js&lt;/td&gt;
+&lt;td&gt;3.4.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;webpack&lt;/td&gt;
+&lt;td&gt;4.41.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class="section" id="babel-polyfill"&gt;
+&lt;h2&gt;Babel と PolyFill&lt;a class="headerlink" href="#babel-polyfill" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Sentry でたまに，以下のようなエラーが報告されていた．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;SyntaxError: Unexpected end of input&lt;/tt&gt;&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;TypeError: &lt;span class="pre"&gt;document.querySelectorAll(...)[Symbol.iterator]&lt;/span&gt; is not a function&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;おそらくこれらは，ブログの JavaScript が割と新しい構文を使っているためと思われる．で， Web の移行の黎明期は，こういった状況に対応するため，新しい構文を使用したプログラムからそれらを除いたプログラムへのトランスパイラと，古いオブジェクトに新しい API を追加する polyfill が活躍していた．最近は，セキュリティ的な面とこうした状況に対応していくため，ブラウザの自動更新機能が増強され， OS においてもかなりのサポートが入っており，これらを採用しなくても個人レベルなら何とかなる場合が多い．というか，うちのブログは今まで何とかなっていた．&lt;/p&gt;
+&lt;p&gt;トランスパイラや polyfill は，そういった背景もあって無数にあるのだが，その中で首位を占めているのが babel だ． babel は主にトランスパイラを提供しているが，その周辺ツールもまとめて色々提供しており， &lt;tt class="docutils literal"&gt;@babel/polyfill&lt;/tt&gt; もその一つだ．ただ，現在は &lt;tt class="docutils literal"&gt;@babel/polyfill&lt;/tt&gt; は非推奨になっていて，中身は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js&lt;/span&gt;&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;regenerator-runtime&lt;/span&gt;&lt;/tt&gt; というパッケージを読むようになっており，直接これらのパッケージを使うことが推奨されている． &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js&lt;/span&gt;&lt;/tt&gt; は様々な polyfill をまとめてモジュール単位で提供しており， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;regenerator-runtime&lt;/span&gt;&lt;/tt&gt; は generator や async/await などの機能をサポートするための generator のエミュレータが入った軽量のパッケージになっている． babel で吐き出したコードを動かすための &lt;tt class="docutils literal"&gt;@babel/runtime&lt;/tt&gt; パッケージは，実際には幾つかの単純なヘルパ関数と &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;regenerator-runtime&lt;/span&gt;&lt;/tt&gt; を再エクスポートして提供しているだけだ．&lt;/p&gt;
+&lt;p&gt;実際に babel が書いた JavaScript をどうトランスパイルするのか見てみる．まず， babel の cli をインストールする:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+npm i -D @babel/core @babel/cli @babel/preset-env
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;@babel/core&lt;/tt&gt; が babel トランスパイラの本体． &lt;tt class="docutils literal"&gt;@babel/cli&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;@babel/core&lt;/tt&gt; を使う CLI を提供してくれるパッケージになっている．あと， babel は吐き出す JavaScript でどんくらいのレベルの構文を使うか指定できて，デフォルトのいい感じにしてくれる出力を行う際使うパッケージが &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;@babel/preset-env&lt;/span&gt;&lt;/tt&gt; になっている．こいつらをインストールしたら，以下のような感じで試すことができる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ echo "function* gen() { yield 1; }; export const g = gen();" \
+  | npx babel --no-babelrc --presets @babel/preset-env
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.g = void 0;
+
+var _marked =
+/*#__PURE__*/
+regeneratorRuntime.mark(gen);
+
+function gen() {
+  return regeneratorRuntime.wrap(function gen$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          _context.next = 2;
+          return 1;
+
+        case 2:
+        case "end":
+          return _context.stop();
+      }
+    }
+  }, _marked);
+}
+
+;
+var g = gen();
+exports.g = g;
+&lt;/pre&gt;
+&lt;p&gt;このコードは， &lt;tt class="docutils literal"&gt;@babel/runtime&lt;/tt&gt; を別途読み込むことを前提としているが， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;@babel/plugin-transform-runtime&lt;/span&gt;&lt;/tt&gt; プラグインを使うことで，明示的にモジュール読み込みをさせることもできる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ npm i -D @babel/plugin-transform-runtime
+$ echo "function* gen() { yield 1; }; export const g = gen();" \
+  | npx babel --no-babelrc --presets @babel/preset-env --plugins @babel/plugin-transform-runtime
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.g = void 0;
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _marked =
+/*#__PURE__*/
+_regenerator["default"].mark(gen);
+
+function gen() {
+  return _regenerator["default"].wrap(function gen$(_context) {
+    ...
+  }, _marked);
+}
+
+...
+&lt;/pre&gt;
+&lt;p&gt;こんな具合に generator や async/await は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;regenerator-runtime&lt;/span&gt;&lt;/tt&gt; を使ったコードに変換されるし， let / const や arrow function はただの var や function に変換される．ただ，これだけでは旧世代のブラウザに対応できない可能性がある．例えば， &lt;tt class="docutils literal"&gt;document.querySelectorAll&lt;/tt&gt; が返す &lt;tt class="docutils literal"&gt;NodeList&lt;/tt&gt; という抽象インターフェースは，通常の &lt;tt class="docutils literal"&gt;Array&lt;/tt&gt; インスタンスと同様に扱えるように &lt;tt class="docutils literal"&gt;forEach&lt;/tt&gt; メソッドやイテレータが搭載されているが，これが搭載されたのは Chrome でバージョン 51 から，　IE では搭載されていないというサポート状況になっている．そのため，これらのブラウザの上でサポートされている JavaScript の構文のみを使った場合でも，プログラム自体が意図通りに動かない可能性がある．実際， Sentry で報告されてきた &lt;tt class="docutils literal"&gt;TypeError&lt;/tt&gt; はそれが原因だと思われる．&lt;/p&gt;
+&lt;p&gt;これらの API レベルのフォールバックを提供する polyfill で， babel で推奨されているパッケージが &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js&lt;/span&gt;&lt;/tt&gt; だ．例えば， &lt;tt class="docutils literal"&gt;NodeList&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;forEach&lt;/tt&gt; メソッドの polyfill は， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js&lt;/span&gt;&lt;/tt&gt; パッケージの &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js/modules/web.dom-collections.for-each.js&lt;/span&gt;&lt;/tt&gt; というモジュールで提供されている．なお，ソースコードが大きくなることを許容するなら，すべての polyfill をまとめたモジュールとして &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js&lt;/span&gt;&lt;/tt&gt; モジュールを単にインポートするだけでよい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+import "core-js";
+&lt;/pre&gt;
+&lt;p&gt;こうすることで，古い世代のクライアントでもある程度は動作が保証されることになる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="babel-loader"&gt;
+&lt;h2&gt;babel-loader を使う&lt;a class="headerlink" href="#babel-loader" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;さて，このブログでは現状 Webpack を使ってモジュールシステムを管理している． Webpack 上で babel を使用したいなら， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;babel-loader&lt;/span&gt;&lt;/tt&gt; パッケージを使えばよい．具体的には，まず以下のパッケージを依存に追加する:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+npm i -S @babel/runtime
+npm i -D @babel/core babel-loader @babel/preset-env @babel/plugin-transform-runtime
+&lt;/pre&gt;
+&lt;p&gt;後は，以下の設定を &lt;tt class="docutils literal"&gt;webpack.config.js&lt;/tt&gt; に追加する:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   module: {
+     rules: [
+       {
+&lt;span class="gi"&gt;+        test: /\.m?js$/,&lt;/span&gt;
+&lt;span class="gi"&gt;+        exclude: /(node_modules|bower_components)/,&lt;/span&gt;
+&lt;span class="gi"&gt;+        use: {&lt;/span&gt;
+&lt;span class="gi"&gt;+          loader: 'babel-loader',&lt;/span&gt;
+&lt;span class="gi"&gt;+          options: {&lt;/span&gt;
+&lt;span class="gi"&gt;+            presets: ['@babel/preset-env'],&lt;/span&gt;
+&lt;span class="gi"&gt;+            plugins: ['@babel/plugin-transform-runtime']&lt;/span&gt;
+&lt;span class="gi"&gt;+          }&lt;/span&gt;
+&lt;span class="gi"&gt;+        }&lt;/span&gt;
+&lt;span class="gi"&gt;+      },&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;.mjs&lt;/tt&gt; は Node.js などでサポートされている拡張子で， ES5 のモジュールシステムを使うプログラムに慣例として用いられているもの．うちではその拡張子を使ってないけど，とりあえず慣例として追加しておく．このようにしておけば，新しい構文は babel がいい感じにトランスパイルしてくれ，モジュールシステムは webpack がいい感じに解決してパッキングしてくれるようになる．後は， entrypoint のプログラムで &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js&lt;/span&gt;&lt;/tt&gt; を読み込み用にしておけばよいだろう．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;とりあえず， Sentry のノイズ消しとお試しのためフォールバックするようにしてみた．これで，どんな感じになるかしばらく様子見てみようと思う．&lt;/p&gt;
+&lt;p&gt;うちのブログは JavaScript 切っても見れるよう，致命的なところに JavaScript 使っていないはずなので，特にアクセス状況に影響があるわけじゃないと思う．それに最近だとほとんどのブラウザは自動的に最新に保たれる (と信じてる) だろうし， JavaScript が動かない環境はほんの一握りな気がする．ただ，ブログを自分でコード管理しながら運営すると，こういう感じで色々アクセスに対して実験できていいなという感じなので，そういう実験はいろいろしていきたい．そういう感じで．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/11/support-more-web-using-babel.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/11/support-more-web-using-babel.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="運用"></category><category term="Web"></category><category term="JavaScript"></category><category term="Webpack"></category><category term="Babel"></category><category term="ブログ"></category></entry><entry><title>iptables から nftables への移行</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/" rel="alternate"></link><published>2019-09-21T08:00:00+09:00</published><updated>2019-09-21T08:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-09-21:/blog/posts/2019/09/nftables-on-debian/</id><summary type="html">&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
 &lt;p&gt;さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
 &lt;p&gt;さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables 用に書き直したので，その備忘録．&lt;/p&gt;
 &lt;p&gt;なお，参考文献は以下だが，こちとらインフラは素人の普段はプログラマ屋さんなので結構間違ってるかもしれない．&lt;/p&gt;
