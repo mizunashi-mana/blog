@@ -144,7 +144,7 @@ npm i -D @babel/core babel-loader @babel/preset-env @babel/plugin-transform-runt
 &lt;span class="gi"&gt;+        }&lt;/span&gt;
 &lt;span class="gi"&gt;+      },&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;.mjs&lt;/tt&gt; は Node.js などでサポートされている拡張子で， ES5 のモジュールシステムを使うプログラムに慣例として用いられているもの．うちではその拡張子を使ってないけど，とりあえず慣例として追加しておく．このようにしておけば，新しい構文は babel がいい感じにトランスパイルしてくれ，モジュールシステムは webpack がいい感じに解決してパッキングしてくれるようになる．後は， entrypoint のプログラムで &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js&lt;/span&gt;&lt;/tt&gt; を読み込み用にしておけばよいだろう．&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;.mjs&lt;/tt&gt; は Node.js などでサポートされている拡張子で， ES6 のモジュールシステムを使うプログラムに慣例として用いられているもの．うちではその拡張子を使ってないけど，とりあえず慣例として追加しておく．このようにしておけば，新しい構文は babel がいい感じにトランスパイルしてくれ，モジュールシステムは webpack がいい感じに解決してパッキングしてくれるようになる．後は， entrypoint のプログラムで &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;core-js&lt;/span&gt;&lt;/tt&gt; を読み込み用にしておけばよいだろう．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
