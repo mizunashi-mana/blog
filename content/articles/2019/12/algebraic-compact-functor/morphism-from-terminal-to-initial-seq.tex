@@ -1,0 +1,30 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      F^n 0
+      \ar@{->}[r]^{f^n_{n + 1}}
+      \ar@{->}[d]_{h^n_n}
+      &
+      F^{n + 1} 0
+      \ar@{->}[d]^{h^{n + 1}_{n + 1}}
+      \\
+      F^n 1
+      \ar@{->}[ru]^{l^n_{n + 1}}
+      &
+      F^{n + 1} 1
+      \ar@{->}[l]^{g^{n + 1}_n}
+    }
+  }
+\end{align*}
+\end{document}

@@ -1,0 +1,44 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      &
+      F^n 0
+      \ar@{->}[ld]^{k_n}
+      \ar@/_20pt/@{{}{ }{}}[d]|{\circlearrowright}
+      \ar@{->}[d]^{f^n_\infty}
+      \ar@/^50pt/@{->}[dd]^{h^n_\infty}
+      \ar@/_120pt/@{->}[ddd]_{h^n_m}
+      \ar@/_100pt/@{{}{ }{}}[ddd]|{\circlearrowright}
+      \\
+      A
+      \ar@{->}[d]_{h}
+      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      F^\infty 0
+      \ar@{.>}[l]_{k_\infty}
+      \\
+      B
+      \ar@{->}[rd]^{l_m}
+      \ar@{.>}[r]_{l_\infty}
+      &
+      F^\infty 1
+      \ar@{->}[d]^{g^\infty_m}
+      \ar@/_20pt/@{{}{ }{}}[d]|{\circlearrowright}
+      \\
+      &
+      F^m 1
+    }
+  }
+\end{align*}
+\end{document}

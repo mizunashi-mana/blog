@@ -1,0 +1,27 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      F^{n + l} 0
+      \ar@{->}[rd]^{\alpha_n}
+      \ar@{->}[d]_{f^{n + l}_\infty}
+      \ar@/_20pt/@{{}{ }{}}[rd]|{\circlearrowright}
+      \\
+      F^\infty 0
+      \ar@{->}[r]^{\alpha'_\infty}
+      &
+      X
+    }
+  }
+\end{align*}
+\end{document}

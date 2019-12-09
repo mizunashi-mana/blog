@@ -1,0 +1,30 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      F X_1
+      \ar@{->}[r]^{F f}
+      \ar@{->}[d]_{\alpha_1}
+      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      F X_2
+      \ar@{->}[d]^{\alpha_2}
+      \\
+      X_1
+      \ar@{->}[r]^{f}
+      &
+      X_2
+    }
+  }
+\end{align*}
+\end{document}
