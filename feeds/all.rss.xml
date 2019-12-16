@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 16 Dec 2019 20:00:00 +0900</lastBuildDate><item><title>始代数と終代数が一致する条件</title><link>https://mizunashi-mana.github.io/blog/posts/2019/12/algebraic-compact-functor/</link><description>&lt;p&gt;&lt;a class="reference external" href="http://ziphil.com/diary/application/26.html"&gt;http://ziphil.com/diary/application/26.html&lt;/a&gt; を読んでるとき，まとめたことを記事として残しておこうと思った．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 16 Dec 2019 20:00:00 +0900</lastBuildDate><item><title>始代数と終余代数が一致する条件</title><link>https://mizunashi-mana.github.io/blog/posts/2019/12/algebraic-compact-functor/</link><description>&lt;p&gt;&lt;a class="reference external" href="http://ziphil.com/diary/application/26.html"&gt;http://ziphil.com/diary/application/26.html&lt;/a&gt; を読んでるとき，まとめたことを記事として残しておこうと思った．&lt;/p&gt;
 &lt;dl class="docutils"&gt;
 &lt;dt&gt;FIXME&lt;/dt&gt;
 &lt;dd&gt;なお，主定理の一つを証明できてないし，原論文の証明も理解できてない． Barr 先生何言ってんのって感じ．誰か，俺に圏論の常識を教えてくれ．&lt;/dd&gt;
