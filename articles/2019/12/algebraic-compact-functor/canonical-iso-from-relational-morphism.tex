@@ -1,0 +1,40 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      F^{m + 1} 0
+      \ar@{->}[d]_{F k_m}
+      \ar@{->}[rd]^{k_{m + 1}}
+      \ar@/_20pt/@{{}{ }{}}[rd]|{\circlearrowright}
+      \\
+      F A
+      \ar@{->}[r]_{\alpha}
+      \ar@{->}[d]_{F h}
+      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      A
+      \ar@{->}[d]_{h}
+      \\
+      F B
+      \ar@{->}[d]_{F l_m}
+      &
+      B
+      \ar@{->}[l]_{\beta}
+      \ar@{->}[ld]^{l_{m + 1}}
+      \ar@/_20pt/@{{}{ }{}}[ld]|{\circlearrowright}
+      \\
+      F^{m + 1} 1
+    }
+  }
+\end{align*}
+\end{document}

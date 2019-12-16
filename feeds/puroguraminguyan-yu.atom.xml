@@ -1014,7 +1014,7 @@ var contentMetadataForCustomJS = {
 25
 26
 27
-28&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;FROM&lt;/span&gt;&lt;span class="s"&gt; tweag/linear-types:latest&lt;/span&gt;
+28&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="s"&gt;tweag/linear-types:latest&lt;/span&gt;
 
 &lt;span class="k"&gt;ENV&lt;/span&gt; &lt;span class="nv"&gt;CABAL_WORKDIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"/root"&lt;/span&gt;
 

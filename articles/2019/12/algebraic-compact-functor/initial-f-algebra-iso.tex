@@ -1,0 +1,38 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      F A
+      \ar@{->}[d]_{\alpha}
+      \ar@{.>}[r]^{F \beta}
+      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      F (F A)
+      \ar@{->}[d]_{F \alpha}
+      \ar@{->}[r]^{F \alpha}
+      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      F A
+      \ar@{->}[d]^{\alpha}
+      \\
+      A
+      \ar@{.>}[r]^{\beta}
+      &
+      F A
+      \ar@{->}[r]^{\alpha}
+      &
+      A
+    }
+  }
+\end{align*}
+\end{document}

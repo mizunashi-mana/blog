@@ -1,0 +1,30 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      F A
+      \ar@{->}[r]^{F g}
+      \ar@{->}[d]_{\alpha}
+      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      F B
+      \\
+      A
+      \ar@{->}[r]^{g}
+      &
+      B
+      \ar@{->}[u]^{\beta}
+    }
+  }
+\end{align*}
+\end{document}

@@ -131,6 +131,30 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/call-arity-and-oneshot/#call-arity-and-oneshot">Call Arity と融合変換</a></h2>
+    <p>
+          Posted on 金 26 7月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/rong-he-bian-huan.html">融合変換</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/konpaira.html">コンパイラ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/zui-shi-hua.html">最適化</a>
+    </p>
+  </header>
+  <div>
+      <p>GHC は，最適化のため Call Arity と呼ばれるコード解析を行っている．この解析で，自由変数が何個引数を持っていいかを判定し，イータ展開を可能にする．リストにおける融合変換とも密接な関係のある解析だ．こいつの存在とどういうことをやっているかはだいたい知っていたんだけど，ちょっと詳しく知りたい事例があったので調べてみた．そのメモ．</p>
+<p>なお元ネタは，Breitner (nomeata) 先生の <a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S1477842416300756">Call Arity</a> ．</p>
+<div class="section" id="auto-id-2">
+<h2>イータ展開と最適化<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Haskell は知っての通り関数型プログラミング言語なので，息を吐くように関数を第1級として使うし，標準ライブラリに無数の高階関数がある．関数は全てカリー化されていて …</p></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/07/call-arity-and-oneshot/#call-arity-and-oneshot">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/dokuwiki-syntax-plugin/#dokuwiki-syntax-plugin">DokuWiki の構文拡張プラグインの作り方</a></h2>
     <p>
           Posted on 土 20 7月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/tsuru.html">ツール</a>
@@ -344,29 +368,6 @@
 -- In GHC.Types …</pre></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/#cluster-distributed-programming">Apache Spark についての覚書</a></h2>
-    <p>
-          Posted on 日 12 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/bing-lie-fen-san-chu-li.html">並列分散処理</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/spark.html">Spark</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/hadoop.html">Hadoop</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/mapreduce.html">MapReduce</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/gurahu.html">グラフ</a>
-    </p>
-  </header>
-  <div>
-      <p>ちょっと興味があったので， Apache Spark 関連についていくつか調べたことメモる．なお，僕は最近まで Apache Spark は MapReduce してると思ってたぐらいだし， Hadoop も Spark も触ったことない人間なんで，完全に信憑性はないです．そこはよろしく．</p>
-<div class="section" id="auto-id-1">
-<h2>分散処理の抽象<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>Apache Spark 周りってほぼ歴史の話なんで，まずはそこから． Google の MapReduce …</p></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/#cluster-distributed-programming">    Continue reading
 </a>
   </div>
 </article>

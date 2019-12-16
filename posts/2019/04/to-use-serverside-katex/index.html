@@ -275,22 +275,22 @@ asyncio.run(f("arg"))
 21</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
 
-<span class="n">async</span> <span class="k">def</span> <span class="nf">ls1</span><span class="p">():</span>
-  <span class="n">proc</span> <span class="o">=</span> <span class="n">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">ls1</span><span class="p">():</span>
+  <span class="n">proc</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
     <span class="s2">"ls"</span><span class="p">,</span>
     <span class="s2">"-1"</span><span class="p">,</span>
-    <span class="n">stdin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">stdin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">stdout</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
     <span class="p">)</span>
 
-  <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-    <span class="n">line</span> <span class="o">=</span> <span class="n">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+  <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">break</span>
 
     <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
 
-  <span class="n">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+  <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ls1</span><span class="p">())</span>
 </pre></div>
@@ -342,8 +342,8 @@ asyncio.run(f("arg"))
 45</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">STREAM_CHUNK_LIMIT</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">16</span>
 
 <span class="k">class</span> <span class="nc">KaTeXRendererManager</span><span class="p">:</span>
-  <span class="n">async</span> <span class="k">def</span> <span class="nf">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
+  <span class="k">async</span> <span class="k">def</span> <span class="fm">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
       <span class="s1">'node'</span><span class="p">,</span>
       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">'katex_render.js'</span><span class="p">),</span>
       <span class="n">stdin</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
@@ -353,22 +353,22 @@ asyncio.run(f("arg"))
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span>
 
-  <span class="n">async</span> <span class="k">def</span> <span class="nf">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">exc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">async</span> <span class="k">def</span> <span class="fm">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">exc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
       <span class="k">return</span>
 
-    <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 
-<span class="n">async</span> <span class="k">def</span> <span class="nf">render_math_contents</span><span class="p">(</span><span class="n">contents</span><span class="p">):</span>
-  <span class="n">async</span> <span class="k">with</span> <span class="n">KaTeXRendererManager</span><span class="p">()</span> <span class="k">as</span> <span class="n">proc</span><span class="p">:</span>
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">readuntil_sep</span><span class="p">():</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">render_math_contents</span><span class="p">(</span><span class="n">contents</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">with</span> <span class="n">KaTeXRendererManager</span><span class="p">()</span> <span class="k">as</span> <span class="n">proc</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">readuntil_sep</span><span class="p">():</span>
       <span class="n">chunk</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
-      <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+      <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-          <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\t\n</span><span class="s1">'</span><span class="p">)</span>
+          <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\t\n</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">LimitOverrunError</span><span class="p">:</span>
-          <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">STREAM_CHUNK_LIMIT</span> <span class="o">-</span> <span class="mi">1024</span><span class="p">)</span>
+          <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">STREAM_CHUNK_LIMIT</span> <span class="o">-</span> <span class="mi">1024</span><span class="p">)</span>
           <span class="k">continue</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="k">break</span>
@@ -379,11 +379,11 @@ asyncio.run(f("arg"))
       <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1"> '</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
       <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\t\n</span><span class="s1">'</span><span class="p">)</span>
 
-      <span class="k">print</span><span class="p">(</span><span class="n">await</span> <span class="n">readuntil_sep</span><span class="p">())</span>
+      <span class="nb">print</span><span class="p">(</span><span class="k">await</span> <span class="n">readuntil_sep</span><span class="p">())</span>
 
     <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write_eof</span><span class="p">()</span>
 
-<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">render_math_contents</span><span class="p">([</span><span class="s1">'f(x) = 2^x'</span><span class="p">,</span> <span class="s1">'n </span><span class="se">\\</span><span class="s1">in </span><span class="se">\\</span><span class="s1">mathbb{N}'</span><span class="p">]))</span>
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">render_math_contents</span><span class="p">([</span><span class="s1">'f(x) = 2^x'</span><span class="p">,</span> <span class="s1">'n </span><span class="se">\\</span><span class="s1">in </span><span class="se">\\</span><span class="s1">mathbb</span><span class="si">{N}</span><span class="s1">'</span><span class="p">]))</span>
 </pre></div>
 </td></tr></table><p><tt class="docutils literal">async with</tt> が呼ばれた時に， <tt class="docutils literal">__aenter__</tt> で返されたものが束縛され，処理が終了するか例外が出ると <tt class="docutils literal">__aexit__</tt> が呼ばれる．なお， <tt class="docutils literal">__aexit__</tt> は，正常終了すると引数に <tt class="docutils literal">None</tt> が入れられて呼ばれる．なお，サブプロセスから読み取るチャンクの最大サイズはデフォルトで， 64KB (= <span class="math inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mn>16</mn></msup></mrow><annotation encoding="application/x-tex">2 ^ {16}</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">6</span></span></span></span></span></span></span></span></span></span></span></span></span> B) が指定されてる．これを超えるものを読み取ろうとすると， <tt class="docutils literal">LimitOverrunError</tt> 例外が発生する:</p>
 <pre class="literal-block">
@@ -407,8 +407,8 @@ ValueError: Separator is not found, and chunk exceed the limit
 <span class="k">try</span><span class="p">:</span>
   <span class="o">...</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-  <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">''</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">''</span><span class="p">)</span>
 
   <span class="k">raise</span> <span class="n">e</span>
 </pre></div>
