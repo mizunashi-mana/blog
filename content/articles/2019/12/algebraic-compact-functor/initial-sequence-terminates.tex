@@ -1,0 +1,35 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      &
+      F^\beta 0
+      \ar@{->}[ld]_{f^\beta_{\beta + 1}}
+      \ar@{<->}[rd]^{f^\beta_\alpha}_{{f^\beta_\alpha}^{-1}}
+      \ar@{{}{ }{}}[d]|{\circlearrowright}
+      \\
+      F^{\beta + 1} 0
+      \ar@{->}[rr]^{f^{\beta + 1}_\alpha}
+      & &
+      F^\alpha 0
+      \ar@{->}[ld]^{f^\alpha_{\alpha + 1}}
+      \\
+      &
+      F^{\alpha + 1} 0
+      \ar@{<->}[lu]^{F f^\alpha_\beta}_{F {f^\alpha_\beta}^{-1}}
+      \ar@{{}{ }{}}[u]|{\circlearrowright}
+      &
+    }
+  }
+\end{align*}
+\end{document}

@@ -1,0 +1,37 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      F^{\gamma + 1} 0
+      \ar@{->}[r]_{f^{\gamma + 1}_\alpha}
+      \ar@/^20pt/@{->}[rr]^{F f^\gamma_\alpha}
+      \ar@/^12pt/@{{}{ }{}}[rr]|{\circlearrowright}
+      \ar@{->}[d]_{k^{\gamma + 1}}
+      \ar@{{}{ }{}}[rd]|(.3){\circlearrowright}
+      &
+      F^\alpha 0
+      \ar@{<->}[r]^{f^\alpha_{\alpha + 1}}_{{f^\alpha_{\alpha + 1}}^{-1}}
+      \ar@{->}[ld]^k
+      \ar@{{}{ }{}}[d]|{\circlearrowright}
+      &
+      F (F^\alpha 0)
+      \ar@{->}[ld]^{F k}
+      \\
+      X
+      &
+      F X
+      \ar@{->}[l]^a
+    }
+  }
+\end{align*}
+\end{document}
