@@ -130,6 +130,31 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">GHC IO モナドの中身</a></h2>
+    <p>
+          Posted on 金 17 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/io.html">IO</a>
+    </p>
+  </header>
+  <div>
+      <p>Haskell の IO モナドって，中身どうなってたんだろと気になってて，ちょっと調べてみた．そのメモ．</p>
+<div class="section" id="io-realworld">
+<h2>IO モナドと RealWorld<a class="headerlink" href="#io-realworld" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まずは基本から． IO モナドは， Haskell の根幹となるモナドで， <tt class="docutils literal">main</tt> も IO で書く． GHC では中身は次のように定義されている <a class="footnote-reference" href="#io-monad-definition" id="auto-id-1">[1]</a>:</p>
+<pre class="literal-block">
+-- In GHC.Types …</pre></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/#cluster-distributed-programming">Apache Spark についての覚書</a></h2>
     <p>
           Posted on 日 12 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
@@ -348,35 +373,6 @@ $ node --eval 'const KaTeX = require("katex"); console.log(KaTeX …</pre></div>
 <dd>2列で差分を表示する形式 …</dd></dl></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/about-unified-diff-style/#about-unified-diff-style">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/#add-tooltip-for-footnote">脚注のためのツールチップ追加</a></h2>
-    <p>
-          Posted on 月 15 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/css.html">CSS</a>
-    </p>
-  </header>
-  <div>
-      <p>脚注をツールチップで見れるようにしたので，それについて．</p>
-<div class="section" id="restructuredtext">
-<h2>reStructuredText の脚注<a class="headerlink" href="#restructuredtext" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>reStructuredText では脚注が使える．これは，以下のように書けばいい:</p>
-<pre class="literal-block">
-some text[#footnote-ref]_ .
-
-.. [#footnote-ref] some footnote content.
-</pre>
-<p>こうすると，自動でナンバリングが行われ，それぞれ脚注へのリンクと元の文書へのバックリンクが生成される．分かりづらいがバックリンクは，数字の部分に当てがわれ，それをクリックすることで戻れる．ただ，これをクリックするのがめんどかったので，ツールチップで表示してみることにした …</p></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/#add-tooltip-for-footnote">    Continue reading
 </a>
   </div>
 </article>
