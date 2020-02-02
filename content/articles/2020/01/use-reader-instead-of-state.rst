@@ -2,11 +2,12 @@ State モナドの代わりに Reader モナドを使う
 ==========================================
 
 :date: 2020-01-30 20:00
+:modified: 2020-02-03 02:00
 :tags: Haskell, GHC, モナド
 :category: プログラミング
 
 **注意**
-  この記事の主張には不備が確認されています．不備のある箇所は，FIXME に付属してその不備の内容が示されています．この不備は近いうちに修正する予定です．
+  この記事は公開当時主張に誤りを含んでいたため，大幅に書き直しています．また，公開当時の主張の誤りについても，付録として載せておきました．
 
 Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う．
 
@@ -25,7 +26,7 @@ Haskell はかなり多くの神話を持つ言語だ．その中の一つに，
 
   IORef を使うとパフォーマンスは良いが純粋性を損なう．なので，パフォーマンスを気にしないなら State モナドを使うべきだ．
 
-今回の記事は，パフォーマンスについても IORef が State モナドより良い場合があるという主張を含むので，この神話に加担する側面がある．なので，初めに注意喚起を載せておく．巷の多くの例では，この言葉は都市伝説に過ぎない．まずは，その辺について見ておこう．これは，可変参照と State モナドの違いを理解する上でも役に立つはずだし，本記事の良い導入となるだろう．
+巷の多くの例では，この言葉は都市伝説に過ぎない．まずは，その辺について見ておこう．これは，IORef などの可変参照と State モナドの違いを理解する上でも役に立つはずだし，本記事の良い導入となるだろう．
 
 さて，以下のサンプルコードを見てみる:
 
@@ -207,7 +208,143 @@ IORef 再考
 * プリミティブ命令を展開するような最適化が，そこまでパフォーマンスに大きく影響しない
 * ``writeMutVar#`` をそこまで多用しない
 
-コードであれば，IORef は有効ということになるのではないだろうか？ 1つ目の用件は，スタック領域だけで完結しないような状態，つまり ``Int`` のようなものでなく ``Bool`` のような本質的に boxed なデータを扱うコードであれば，大体クリアできる． ``writeMutVar#`` についても，頻繁に変更しないが，参照は頻繁に行うような要件はいくらでもあるだろう．特に，今回対象にしたいのが，グローバルコンテキストだ．グローバルコンテキストの賛否はともかくとして，現実の多くのプログラムは，巨大で常駐し続けるプログラムの設定を管理するデータを持っている．通常グローバルコンテキストは，幾つかのフィールドから構成されていて，ネストされていたりもする．フィールドの中身はヒープに確保しなければいけないため，1つ目の条件を満たす．さらに，その中の幾つかのフィールドは変更可能なものになっている場合があり，起動してからいくつかのタイミングで更新される可能性がある．しかし，それほど頻繁な変更ではないため，2つ目の条件も満たすことになる．つまり，グローバルコンテキストは先ほど挙げた2点を満たしているのだ．さらに嬉しいことに，このような状況設定だと，むしろ State モナドより IORef の方がパフォーマンスを発揮する場合がある．先程の例で，状態を次のようなものにしてみる:
+コードであれば，IORef は有効ということになるのではないだろうか？ 1つ目の用件は，スタック領域だけで完結しないような状態，つまり ``Int`` のようなものでなく ``Bool`` のような本質的に boxed なデータを扱うコードであれば，大体クリアできる． ``writeMutVar#`` についても，頻繁に変更しないが，参照は頻繁に行うような要件はいくらでもあるだろう．特に，今回対象にしたいのが，グローバルコンテキストだ．グローバルコンテキストの賛否はともかくとして，現実の多くのプログラムは，巨大で常駐し続けるプログラムの設定を管理するデータを持っている．通常グローバルコンテキストは，幾つかのフィールドから構成されていて，ネストされていたりもする．フィールドの中身はヒープに確保しなければいけないため，1つ目の条件を満たす．さらに，その中の幾つかのフィールドは変更可能なものになっている場合があり，起動してからいくつかのタイミングで更新される可能性がある．しかし，それほど頻繁な変更ではないため，2つ目の条件も満たすことになる．つまり，グローバルコンテキストは先ほど挙げた2点を満たしているのだ．このような状況設定だと，IORef と State モナドのパフォーマンスは同等になる場合が多い．例えば，次の例を見てみる:
+
+.. code-block:: haskell
+
+  {-# LANGUAGE StrictData #-}
+
+  data Context a = Context
+    { subctx :: SubContext a
+    , param1 :: Bool
+    , param2 :: String
+    , param3 :: Ordering
+    , param4 :: Int
+    }
+
+  data SubContext a = SubContext
+    { subparam1 :: a
+    , subparam2 :: Bool
+    , subparam3 :: String
+    , subparam4 :: Ordering
+    }
+
+  initialContext :: a -> Context a
+  initialContext x = Context
+    { subctx = SubContext
+        { subparam1 = x
+        , subparam2 = False
+        , subparam3 = "str1"
+        , subparam4 = EQ
+        }
+    , param1 = True
+    , param2 = "str2"
+    , param3 = EQ
+    , param4 = 0
+    }
+
+  sumByState :: [Int] -> Context Int
+  sumByState l = execState (go l 0) (initialContext 0)
+    where
+      go :: [Int] -> Integer -> State (Context Int) ()
+      go []     _ = pure ()
+      go (x:xs) i = case i of
+        10000 -> go xs $! i + 1
+        _     -> do
+          goUpdate x
+          go xs 0
+
+      goUpdate x = do
+        ctx <- get
+        let s = subparam1 (subctx ctx) + x
+        put $! ctx
+          { subctx = (subctx ctx)
+            { subparam1 = s
+            }
+          }
+
+  sumByIORef :: [Int] -> IO (Context (IORef Int))
+  sumByIORef l = do
+      r <- newIORef 0
+      let ctx = initialContext r
+      go ctx l 0
+      pure ctx
+    where
+      go :: Context (IORef Int) -> [Int] -> Integer -> IO ()
+      go _   []     _ = pure ()
+      go ctx (x:xs) i = case i of
+        10000 -> go ctx xs $! i + 1
+        _     -> do
+          goUpdate ctx x
+          go ctx xs 0
+
+      goUpdate ctx x = do
+        let r = subparam1 $ subctx ctx
+        s <- readIORef r
+        writeIORef r $! s + x
+
+この例は色々細工がしてあるが，とにかくこの場合，入力リストの長さを 100000 より大きくすると，最適化レベル1 / 2 両方で， ``sumByIORef`` と ``sumByState`` は大体同等の性能か，IORef の方がほんの少し速くなる．細工の内容としては，
+
+* コンテキストの更新の合間に，余計な Integer オブジェクトを作り出し GC させることで，コンテキストの内容自体の世代を成長させてから GC に回収させる．
+* フィールドを多くすることで，State モナドの場合に更新に手間がかかるようにしている．
+
+という感じ．この例は結構無理やり作っているけど，実際コンテキストはそこそこフィールドが多くネストしていて，書き込みが少ないことから内容も世代を超えやすいはずなので，現実の条件を擬似的に作り出してる例と言えると思う．よって，グローバルコンテキストに対し IORef を適用するならば，パフォーマンス的な心配はしなくて良いと言えるのではないだろうか？ さらに，IORef が State モナドより勝る点として以下のものがある．
+
+* 可変なフィールドを明示することができ，データ定義から可変な箇所がわかるようになる．
+* 値の変更の際，State モナドでは読み込み，書き込み両方でデータのネスト構造を辿る必要があったのが，IORef では読み込みのみでよくなる．
+
+今回の例は， ``Context Int`` をちゃんと書き下せば， ``subparam1`` フィールドを unpack できる．この場合， IORef は boxed なものしか扱えないため，ちょっと不利かもしれないが，そこら辺も `unboxed-ref <https://hackage.haskell.org/package/unboxed-ref>`_ 使えばいい勝負ができるんじゃないかなと思ってる (が，試してない．また時間があれば，試してみたい)．
+
+ただ注意として， ``writeIORef`` は局所的に頻繁に呼び出すような場面には向いてないので，その場合は一旦 IORef から取り出して再帰関数の累積引数として引き回したり，そういう時こそ State モナドで最終的な値を作ってから，IORef に入れ直すのが無難．更新の間に色々処理が挟まるようだったら， ``writeIORef`` や ``modifyIORef`` 使ってもいいかもねって感じ．
+
+Reader + IORef
+--------------
+
+さて，先ほど挙げた ``sumByIORef`` は Reader モナドを使うと次のように書き換えられる:
+
+.. code-block:: haskell
+
+  import Control.Monad.Reader
+  import Control.Monad.IO.Class
+
+  type App = ReaderT (Context (IORef Int)) IO
+
+  sumByIORef :: [Int] -> App ()
+  sumByIORef l = go l 0
+    where
+      go :: [Int] -> Integer -> App ()
+      go []     _ = pure ()
+      go (x:xs) i = case i of
+        10000 -> go xs $! i + 1
+        _     -> do
+          goUpdate x
+          go xs 0
+
+      goUpdate x = do
+        ctx <- ask
+        let r = subparam1 $ subctx ctx
+        s <- liftIO $ readIORef r
+        liftIO $ writeIORef r $! s + x
+
+本来， ``State`` が補っていた部分を，読み込み部分は ``ReaderT`` に，可変部分は ``IORef`` と ``IO`` に任せる感じだ．このようなプログラミングスタイルは，何も僕が思いついたわけではなく， `ReaderT パターン <https://www.fpcomplete.com/blog/2017/06/readert-design-pattern>`_ と呼ばれていて，結構最近は浸透しつつあるんかな？ 今まで挙げたコードの清潔さを担保するという他にも，このスタイルはメリットがあり，もうちょっと周辺のツールも整備されてたりするんだけど，まあ詳細は `元記事 <https://www.fpcomplete.com/blog/2017/06/readert-design-pattern>`_ の方を読んでくれ．(飽きてきた．)
+
+まとめ
+------
+
+というわけで，状態更新を行う時の代表手法として紹介される State モナドだけど，Reader + IORef を使った方が見通しがいい場合もあるよという話でした．パフォーマンス面での話は，誰も挙げていない気がしたので書いた感じ．
+
+大雑把には，State モナドより Reader + IORef を使った方がいい場合として，状態が
+
+* 大きくてネストしていたりというように，ほどほどに複雑で
+* 頻繁には変更しなくて
+* 局所的な変更が多くて (変更しない部分も多くて)
+
+という条件を満たす時というのがある．この場合は，State よりも Reader + IORef の方がコードの簡潔さ的に良い場合があり，パフォーマンス面でもそこまで有意差はないよという感じ．今回は，IORef しか紹介しなかったけど，これは TVar とかにも通じる話だし，STRef 使えば全体として純粋に計算できる場合もある．ま，そういう感じで (ざつぅ)．
+
+誤りのあった主張
+----------------
+
+そもそもの目算として，ネストするような状態で奥深くを更新する場合は，IORef の方がパフォーマンス的にも優位なのではないかというのがあったんだけど，これはあまり大きな差ではなさそうだった．まず，当初この記事で挙げていた以下の例で，ネストする状態の分解と構成が重いため， ``sumByState`` より ``sumByIORef`` の方が速いという主張は誤りだった ( `maoe <https://github.com/maoe>`_ さんの `指摘 <https://github.com/mizunashi-mana/blog/pull/85#discussion_r373787772>`_ で判明した． `maoe`_ さん，ありがとうございます)．
 
 .. code-block:: haskell
 
@@ -256,45 +393,56 @@ IORef 再考
         modifyIORef' r \s -> s + x
         go ctx xs
 
-**FIXME**
-  以降の考察は，パフォーマンス面においては `間違い <https://github.com/mizunashi-mana/blog/pull/85#discussion_r373787772>`_ が指摘されています．``sumByState`` は，速度の遅さを改善できる箇所があり，その場合 ``sumByIORef`` より速くなります．この部分については，現在調査中で，別の例になるか，または考察を修正する必要があります．
-
-この場合，最適化レベル1 / 2 両方で， ``sumByIORef`` は ``sumByState`` の 10 倍以上速くなる．これは，State モナドの方の場合，更新のたびに一々 ``SubContext`` / ``Context`` を作り直さなければならないのに対し，IORef は対象の部分だけを更新すれば良く，他の部分は完全に共有されるからだ．これは，メモリ変更の局所性にも貢献する．つまり，最初に挙げた神話は，状態の取り扱い次第では事実になることもある．特に，現実のコードでは，真になる場合も多い．また，このようにネストされたデータの一部分が変更可能な場合，そこを IORef にすることは，パフォーマンスだけでなくコードの簡潔さにも貢献する．State モナドの場合，どこが変更可能なフィールドなのか，データ定義だけから判別はできないが，IORef にすることで，可変なフィールドを明示することができる．また，見ての通り，State モナドの例では読み込み，書き込み両方でデータのネスト構造を辿る必要があったのが，IORef では読み込みのみで良くなり，ノイズを減らすことにも貢献している．
-
-Reader + IORef
---------------
-
-さて，先ほど挙げた ``sumByIORef`` は Reader モナドを使うと次のように書き換えられる:
+この例で問題だったのは， ``sumByState`` の
 
 .. code-block:: haskell
 
-  import Control.Monad.Reader
-  import Control.Monad.IO.Class
+        modify' \ctx -> ctx
+          { subctx = (subctx ctx)
+              { subparam1 = subparam1 (subctx ctx) + x
+              }
+          }
 
-  type App = ReaderT (Context (IORef Int)) IO
+の部分で，大幅に効率が悪かったのはこの部分でスペースリークが発生していたからだった．この場合 ``modify'`` が更新値を WHNF に評価しても，ネストした部分の ``subctx`` に入る値は評価されずサンクになる．このサンクは，最終的に返ってくる ``Context Int`` の値を NF に評価するまで積み上がり，その評価の時点で初めて潰されることになる．このスペースリークが， ``sumByState`` が遅くなっていた要因で，解決策は ``Context a`` / ``SubContext a`` を ``StrictData`` にするか，以下のように ``subparam1`` に入れる値を NF にすれば良い:
 
-  sumByIORef :: [Int] -> App ()
-  sumByIORef l = go l
+.. code-block:: haskell
+
+          modify' \ctx ->
+            let !s = subparam1 (subctx ctx) + x
+            in ctx
+              { subctx = (subctx ctx)
+                  { subparam1 = s
+                  }
+              }
+
+こうすると， ``sumByState`` は ``sumByIORef`` より速くなり，パフォーマンスが改善するというのは誤りだったということになる．では，実際状態の分解と構成はまるっきり無視できるかというと，一応は影響するらしい．今回差し替えた，色々細工を加えた例では，最適化レベル1では 10% ほど ``sumByState`` が ``sumByIORef`` より性能が悪化するという結果になった．ところが，最適化レベル2になると，
+
+.. code-block:: haskell
+
+  data A = A Int Int
+
+  f :: A -> Int
+  f = go
     where
-      go []     = pure ()
-      go (x:xs) = do
-        r <- subparam1 . subctx <$> ask
-        liftIO $ modifyIORef' r \s -> s + x
-        go xs
+      go (A 0 n2)  = n2
+      go (A n1 n2) = go $ A n2 $ n1 - 1
 
-本来， ``State`` が補っていた部分を，読み込み部分は ``ReaderT`` に，可変部分は ``IORef`` と ``IO`` に任せる感じだ．このようなプログラミングスタイルは，何も僕が思いついたわけではなく， `ReaderT パターン <https://www.fpcomplete.com/blog/2017/06/readert-design-pattern>`_ と呼ばれていて，結構最近は浸透しつつあるんかな？ 今まで挙げたパフォーマンスの改善やコードの清潔さを担保するという他にも，このスタイルはメリットがあり，もうちょっと周辺のツールも整備されてたりするんだけど，まあ詳細は `元記事 <https://www.fpcomplete.com/blog/2017/06/readert-design-pattern>`_ の方を読んでくれ．(飽きてきた．)
+を，
 
-まとめ
-------
+.. code-block:: haskell
 
-というわけで，状態更新を行う時の代表手法として紹介される State モナドだけど，Reader + IORef を使った方がいい場合もあるよという話でした．こういうパフォーマンス面での話は，誰も挙げていない気がしたので書いた感じ．
+  data A = A Int Int
 
-大雑把には，State モナドより Reader + IORef を使った方がいい場合として，状態が
+  f :: A -> Int
+  f (A (I# n1#) (I# n2#)) = go n1# n2#
+    where
+      go 0#  m2# = I# m2#
+      go m1# m2# = go m2# $ m1# -# 1#
 
-* 大きくてネストしていたりというように，ほどほどに複雑で
-* 局所的な変更が多くて (変更しない部分も多くて)
+にするような最適化 [#notice-datatype-ww]_ が入り，ネストも平坦になるため一切分解と構成のオーバーヘッドはかからない．また，内部の値も unbox 化されるので，結構コスト削減になってるはずなのだが，代わりにかなり多くの引数を再帰関数で引き回す必要があるため，そこらへんがオーバーヘッドになって，結局 IORef と同程度にしかパフォーマンスが出せてないみたい (ちょっと詳細はまだ調査できていない)．
 
-という条件を満たす時というのがある．この場合は，State よりも Reader + IORef の方がパフォーマンス面でもコードの簡潔さ的にも良い場合があるよという感じ．今回は，IORef しか紹介しなかったけど，これは TVar とかにも通じる話だし，STRef 使えば全体として純粋に計算できる場合もある．ま，そういう感じで (ざつぅ)．
+とりあえず，当初の IORef の場合 State モナドに比べてパフォーマンスが改善する場合もあるというのは，事実となる場合もあるはあるがそこまで大きな有意差ではなく，書くコードと入る最適化によって十分覆る程度のものみたい．なので，パフォーマンスが改善するというよりは，パフォーマンスにそこまで有意差はないと言った方が実態に即している気がしたので，全体的に取り下げることにした．
 
 .. [#notice-write-barrier] GHC では，GC の捕捉のため旧世代から新世代への参照が作られた場合の更新通知を，mutator が行う必要がある．この通知を `write barrier <https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/storage/gc/remembered-sets>`_ と呼んでいて，writeMutVar# も write barrier を内部で行う．しかし，write barrier があまりにも多いと，内部の仕組み的に GC の性能が下がるという問題が知られている．一般に，GHC の GC は可変なオブジェクトについてあまり良いサポートを提供できていないと言う `話 <https://gitlab.haskell.org/ghc/ghc/issues/7662>`__ もある．その意味では，純粋性を贔屓しているというのは正しい．
 .. [#notice-optimization-0] 最適化レベル0，つまり最適化なしの場合，IORef の方が速くなる現象にはここまで触れなかったが，実はこれは State のせいというより mtl のせいという側面が大きい．普段私たちはそこまで意識していないのだが，実は型クラスを使うのにはそれなりの実行時コストがかかる．これらは，最適化によってそれなりに排除されている．しかし，最適化なしの場合はこのコストはもろに影響してくる．今回の場合は， ``IO`` モナドだけを使ったコードと比較し， ``State`` モナドのコードは mtl の API を使ったので ``Monad`` 型クラスと ``MonadState`` 型クラスの抽象化に依存している．つまり，その分コストが増えてしまったということになる．なので，最適化なしの場合は，あまり本質的な違いとは言えないだろう．
+.. [#notice-datatype-ww] データ型に対する w/w の一種みたい: https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/data-types#the-constructor-wrapper-functions
