@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguramingu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-01-30T20:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>State モナドの代わりに Reader モナドを使う</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/" rel="alternate"></link><published>2020-01-30T20:00:00+09:00</published><updated>2020-01-30T20:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-01-30:/blog/posts/2020/01/use-reader-instead-of-state/</id><summary type="html">&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う．&lt;/p&gt;
-&lt;p&gt;なお，環境として以下を想定している．&lt;/p&gt;
-&lt;table border="1" class="docutils"&gt;
-&lt;colgroup&gt;
-&lt;col width="69%"/&gt;
-&lt;col width="31%"/&gt;
-&lt;/colgroup&gt;
-&lt;tbody valign="top"&gt;
-&lt;tr&gt;&lt;td&gt;GHC のバージョン&lt;/td&gt;
-&lt;td&gt;8.6 …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</summary><content type="html">&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguramingu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-01-30T20:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>State モナドの代わりに Reader モナドを使う</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/" rel="alternate"></link><published>2020-01-30T20:00:00+09:00</published><updated>2020-01-30T20:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-01-30:/blog/posts/2020/01/use-reader-instead-of-state/</id><summary type="html">&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;strong&gt;注意&lt;/strong&gt;&lt;/dt&gt;
+&lt;dd&gt;この記事の主張には不備が確認されています．不備のある箇所は，FIXME に付属してその不備の内容が示されています．この不備は近いうちに修正する予定です．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う …&lt;/p&gt;</summary><content type="html">&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;strong&gt;注意&lt;/strong&gt;&lt;/dt&gt;
+&lt;dd&gt;この記事の主張には不備が確認されています．不備のある箇所は，FIXME に付属してその不備の内容が示されています．この不備は近いうちに修正する予定です．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う．&lt;/p&gt;
 &lt;p&gt;なお，環境として以下を想定している．&lt;/p&gt;
 &lt;table border="1" class="docutils"&gt;
 &lt;colgroup&gt;
@@ -372,7 +371,11 @@ cabal build --enable-optimization=n &amp;amp;&amp;amp; cabal --enable-optimizati
       &lt;span class="n"&gt;modifyIORef'&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
       &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この場合，最適化レベル1 / 2 両方で， &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; の 10 倍以上速くなる．これは，State モナドの方の場合，更新のたびに一々 &lt;tt class="docutils literal"&gt;SubContext&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;Context&lt;/tt&gt; を作り直さなければならないのに対し，IORef は対象の部分だけを更新すれば良く，他の部分は完全に共有されるからだ．これは，メモリ変更の局所性にも貢献する．つまり，最初に挙げた神話は，状態の取り扱い次第では事実になることもある．特に，現実のコードでは，真になる場合も多い．また，このようにネストされたデータの一部分が変更可能な場合，そこを IORef にすることは，パフォーマンスだけでなくコードの簡潔さにも貢献する．State モナドの場合，どこが変更可能なフィールドなのか，データ定義だけから判別はできないが，IORef にすることで，可変なフィールドを明示することができる．また，見ての通り，State モナドの例では読み込み，書き込み両方でデータのネスト構造を辿る必要があったのが，IORef では読み込みのみで良くなり，ノイズを減らすことにも貢献している．&lt;/p&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;strong&gt;FIXME&lt;/strong&gt;&lt;/dt&gt;
+&lt;dd&gt;以降の考察は，パフォーマンス面においては &lt;a class="reference external" href="https://github.com/mizunashi-mana/blog/pull/85#discussion_r373787772"&gt;間違い&lt;/a&gt; が指摘されています．&lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; は，速度の遅さを改善できる箇所があり，その場合 &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; より速くなります．この部分については，現在調査中で，別の例になるか，または考察を修正する必要があります．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;この場合，最適化レベル1 / 2 両方で， &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; の 10 倍以上速くなる．これは，State モナドの方の場合，更新のたびに一々 &lt;tt class="docutils literal"&gt;SubContext&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;Context&lt;/tt&gt; を作り直さなければならないのに対し，IORef は対象の部分だけを更新すれば良く，他の部分は完全に共有されるからだ．これは，メモリ変更の局所性にも貢献する．つまり，最初に挙げた神話は，状態の取り扱い次第では事実になることもある．特に，現実のコードでは，真になる場合も多い．また，このようにネストされたデータの一部分が変更可能な場合，そこを IORef にすることは，パフォーマンスだけでなくコードの簡潔さにも貢献する．State モナドの場合，どこが変更可能なフィールドなのか，データ定義だけから判別はできないが，IORef にすることで，可変なフィールドを明示することができる．また，見ての通り，State モナドの例では読み込み，書き込み両方でデータのネスト構造を辿る必要があったのが，IORef では読み込みのみで良くなり，ノイズを減らすことにも貢献している．&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="section" id="reader-ioref"&gt;
 &lt;h2&gt;Reader + IORef&lt;a class="headerlink" href="#reader-ioref" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
@@ -405,8 +408,8 @@ cabal build --enable-optimization=n &amp;amp;&amp;amp; cabal --enable-optimizati
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;本来， &lt;tt class="docutils literal"&gt;State&lt;/tt&gt; が補っていた部分を，読み込み部分は &lt;tt class="docutils literal"&gt;ReaderT&lt;/tt&gt; に，可変部分は &lt;tt class="docutils literal"&gt;IORef&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; に任せる感じだ．このようなプログラミングスタイルは，何も僕が思いついたわけではなく， &lt;a class="reference external" href="https://www.fpcomplete.com/blog/2017/06/readert-design-pattern"&gt;ReaderT パターン&lt;/a&gt; と呼ばれていて，結構最近は浸透しつつあるんかな？ 今まで挙げたパフォーマンスの改善やコードの清潔さを担保するという他にも，このスタイルはメリットがあり，もうちょっと周辺のツールも整備されてたりするんだけど，まあ詳細は &lt;a class="reference external" href="https://www.fpcomplete.com/blog/2017/06/readert-design-pattern"&gt;元記事&lt;/a&gt; の方を読んでくれ．(飽きてきた．)&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class="section" id="auto-id-5"&gt;
-&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;div class="section" id="auto-id-6"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;というわけで，状態更新を行う時の代表手法として紹介される State モナドだけど，Reader + IORef を使った方がいい場合もあるよという話でした．こういうパフォーマンス面での話は，誰も挙げていない気がしたので書いた感じ．&lt;/p&gt;
 &lt;p&gt;大雑把には，State モナドより Reader + IORef を使った方がいい場合として，状態が&lt;/p&gt;
 &lt;ul class="simple"&gt;

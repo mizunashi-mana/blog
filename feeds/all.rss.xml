@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Thu, 30 Jan 2020 20:00:00 +0900</lastBuildDate><item><title>State モナドの代わりに Reader モナドを使う</title><link>https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/</link><description>&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う．&lt;/p&gt;
-&lt;p&gt;なお，環境として以下を想定している．&lt;/p&gt;
-&lt;table border="1" class="docutils"&gt;
-&lt;colgroup&gt;
-&lt;col width="69%"/&gt;
-&lt;col width="31%"/&gt;
-&lt;/colgroup&gt;
-&lt;tbody valign="top"&gt;
-&lt;tr&gt;&lt;td&gt;GHC のバージョン&lt;/td&gt;
-&lt;td&gt;8.6 …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Thu, 30 Jan 2020 20:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2020-01-30:/blog/posts/2020/01/use-reader-instead-of-state/</guid><category>プログラミング</category><category>Haskell</category><category>GHC</category><category>モナド</category></item><item><title>始代数と終余代数が一致する条件</title><link>https://mizunashi-mana.github.io/blog/posts/2019/12/algebraic-compact-functor/</link><description>&lt;p&gt;&lt;a class="reference external" href="http://ziphil.com/diary/application/26.html"&gt;http://ziphil.com/diary/application/26.html&lt;/a&gt; を読んでるとき，まとめたことを記事として残しておこうと思った．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Thu, 30 Jan 2020 20:00:00 +0900</lastBuildDate><item><title>State モナドの代わりに Reader モナドを使う</title><link>https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/</link><description>&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;strong&gt;注意&lt;/strong&gt;&lt;/dt&gt;
+&lt;dd&gt;この記事の主張には不備が確認されています．不備のある箇所は，FIXME に付属してその不備の内容が示されています．この不備は近いうちに修正する予定です．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う …&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Thu, 30 Jan 2020 20:00:00 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2020-01-30:/blog/posts/2020/01/use-reader-instead-of-state/</guid><category>プログラミング</category><category>Haskell</category><category>GHC</category><category>モナド</category></item><item><title>始代数と終余代数が一致する条件</title><link>https://mizunashi-mana.github.io/blog/posts/2019/12/algebraic-compact-functor/</link><description>&lt;p&gt;&lt;a class="reference external" href="http://ziphil.com/diary/application/26.html"&gt;http://ziphil.com/diary/application/26.html&lt;/a&gt; を読んでるとき，まとめたことを記事として残しておこうと思った．&lt;/p&gt;
 &lt;dl class="docutils"&gt;
 &lt;dt&gt;FIXME&lt;/dt&gt;
 &lt;dd&gt;なお，主定理の一つを証明できてないし，原論文の証明も理解できてない． Barr 先生何言ってんのって感じ．誰か，俺に圏論の常識を教えてくれ．&lt;/dd&gt;
