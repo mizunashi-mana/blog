@@ -5,56 +5,56 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/</loc>
-<lastmod>2020-02-02T03:19:00-00:00</lastmod>
+<lastmod>2020-02-02T16:46:42-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/archives.html</loc>
-<lastmod>2020-02-02T03:19:00-00:00</lastmod>
+<lastmod>2020-02-02T16:46:42-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tags.html</loc>
-<lastmod>2020-02-02T03:19:00-00:00</lastmod>
+<lastmod>2020-02-02T16:46:42-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/categories.html</loc>
-<lastmod>2020-02-02T03:19:00-00:00</lastmod>
+<lastmod>2020-02-02T16:46:42-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/0-profile.html</loc>
-<lastmod>2020-02-02T03:19:00-00:00</lastmod>
+<lastmod>2020-02-02T16:46:42-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/1-about.html</loc>
-<lastmod>2020-02-02T03:19:00-00:00</lastmod>
+<lastmod>2020-02-02T16:46:42-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html</loc>
-<lastmod>2020-02-02T03:19:00-00:00</lastmod>
+<lastmod>2020-02-02T16:46:42-00:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/</loc>
-<lastmod>2020-01-30T20:00:00+09:00</lastmod>
+<lastmod>2020-02-03T02:00:00+09:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
 </url>
@@ -376,7 +376,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/category/puroguramingu.html</loc>
-<lastmod>2020-01-30T20:00:00+09:19</lastmod>
+<lastmod>2020-02-03T02:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -425,21 +425,21 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/haskell.html</loc>
-<lastmod>2020-01-30T20:00:00+09:19</lastmod>
+<lastmod>2020-02-03T02:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/ghc.html</loc>
-<lastmod>2020-01-30T20:00:00+09:19</lastmod>
+<lastmod>2020-02-03T02:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/monado.html</loc>
-<lastmod>2020-01-30T20:00:00+09:19</lastmod>
+<lastmod>2020-02-03T02:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -971,7 +971,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html</loc>
-<lastmod>2020-01-30T20:00:00+09:19</lastmod>
+<lastmod>2020-02-03T02:00:00+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
