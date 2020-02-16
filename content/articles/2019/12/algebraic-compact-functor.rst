@@ -16,7 +16,7 @@ http://ziphil.com/diary/application/26.html を読んでるとき，まとめた
 F-algebra と F-coalgebra
 ------------------------
 
-圏 :math:`C`，自己関手 :math:`F: C \to C` において，:math:`F`-algebra は，射 :math:`F X \xrightarrow{a} X` のこと．で， :math:`F`-algebra 同士の射を以下の図式を可換にする射 (:math:`F`-algebra 準同型と呼ぶ) :math:`h`
+圏 :math:`C`，自己関手 :math:`F: C \to C` において，:math:`F`-algebra は，射 :math:`F X \xrightarrow{a} X` のこと．で，:math:`F`-algebra 同士の射を以下の図式を可換にする射 :math:`h` (:math:`F`-algebra 準同型射と呼ぶ)
 
 .. image:: {attach}algebraic-compact-functor/f-algebra-homomorphism.png
   :alt: :math:`F X_1 \xrightarrow{a_1} X_1`，:math:`F X_2 \xrightarrow{a_2} X_2` に対して，:math:`f \circ a_1 = a_2 \circ F f` を満たす :math:`X_1 \xrightarrow{h} X_2`
@@ -268,10 +268,10 @@ initial algebra と terminal coalgebra が一致するような functor を， a
 ついでに， category に対してのざっくりとした algebraically compact 性も定められている．
 
 定義. (algebraically compact category)
-  圏 :math:`C` に対して，任意の自己関手 :math:`F: C \to C` が algebraically compact である時， :math:`C` を algebraically compact と呼ぶ．また，任意の fixed object を持つ :math:`F: C \to C` が algebraically compact である時， :math:`C` を条件付き algebraically compact であると呼ぶ．
+  圏 :math:`C` に対して，任意の自己関手 :math:`F: C \to C` が algebraically compact である時， :math:`C` を algebraically compact と呼ぶ．また，任意の fixed object を持つ :math:`F: C \to C` が algebraically compact である時，:math:`C` を条件付き algebraically compact であると呼ぶ．
 
 定義. (algebraically complete category)
-  圏 :math:`C` に対して，任意の自己関手 :math:`F: C \to C` が initial :math:`F`-algebra を持つ時， :math:`C` を algebraically complete と呼ぶ．
+  圏 :math:`C` に対して，任意の自己関手 :math:`F: C \to C` が initial :math:`F`-algebra を持つ時，:math:`C` を algebraically complete と呼ぶ．
 
 algebraically complete というのは Fleyd が導入した言葉 [#fleyd-1991]_ ．なお，algebraically compact category は algebraically complete category．さて，具体的にどういう条件下だと algebraically compact になるんだろうか？ 1つの条件としては，以下のものがある．
 
@@ -283,12 +283,26 @@ algebraically complete というのは Fleyd が導入した言葉 [#fleyd-1991]
 
   証明:
 
-  この時，任意の :math:`\alpha > \alpha_0` で :math:`h^\alpha; m; h_\alpha = h^\alpha_\alpha` が同型射になる．
+  この時，任意の :math:`\alpha > \alpha_0` で :math:`h^\alpha; m; h_\alpha = h^\alpha_\alpha` が同型射になる．ここで，:math:`e_\alpha = A \xrightarrow{m} B \xrightarrow{h_\alpha} F^\alpha 1 \xrightarrow{{h^\alpha_\alpha}^{-1}} F^\alpha 0 \xrightarrow{h^\alpha} A` を考えると，
+
+  .. math::
+
+    e_\alpha; e_\alpha = m; h_\alpha; {h^\alpha_\alpha}^{-1}; h^\alpha; m; h_\alpha; {h^\alpha_\alpha}^{-1}; h^\alpha = m; h_\alpha; {h^\alpha_\alpha}^{-1}; h^\alpha_\alpha; {h^\alpha_\alpha}^{-1}; h^\alpha = m; h_\alpha; \mathrm{id}; {h^\alpha_\alpha}^{-1}; h^\alpha = e_\alpha
+
+  を満たす．ところで，:math:`\alpha_0 < \alpha` となる :math:`\alpha` 全体は集合を超えることが知られているので，:math:`\alpha_0 < \alpha` における :math:`e_\alpha` 全体が集合になるためには，ある :math:`\alpha_0 < \alpha_1 < \alpha_2` で :math:`e_{\alpha_1} = e_{\alpha_2}` となる必要がある [#term-have-only-a-set]_ ．この時，
+
+  .. image:: {attach}algebraic-compact-functor/finally-canonical-iso-from-relational-morphism.png
+      :alt: :math:`h^{\alpha_2}_{\alpha_2}; g^{\alpha_2}_{\alpha_1}; {h^{\alpha_1}_{\alpha_1}}^{-1}; f^{\alpha_1}_{\alpha_2} = h^{\alpha_2}; e_{\alpha_1}; m; h_{\alpha_2}; {h^{\alpha_2}_{\alpha_2}}^{-1} = h^{\alpha_2}; e_{\alpha_2}; m; h_{\alpha_2}; {h^{\alpha_2}_{\alpha_2}}^{-1} = \mathrm{id}`
+      :align: center
+
+  が可換になるので，:math:`(h^{\alpha_2}_{\alpha_2}; g^{\alpha_2}_{\alpha_1}; {h^{\alpha_1}_{\alpha_1}}^{-1}); f^{\alpha_1}_{\alpha_2} = \mathrm{id}` で，逆も :math:`f^{\alpha_1}_{\alpha_2}; (h^{\alpha_2}_{\alpha_2}; g^{\alpha_2}_{\alpha_1}; {h^{\alpha_1}_{\alpha_1}}^{-1}) = \mathrm{id}` が成り立つことが同様に確かめられる．よって，:math:`f^{\alpha_1}_{\alpha_2}` は同型射であり，この時 :math:`f^{\alpha_1}_{\alpha_1 + 1}` も同型射．つまり， initial sequence が停止し，:math:`F^{\alpha_1} 0 \xleftarrow{{f^{\alpha_1}_{\alpha_1 + 1}}^{-1}} F (F^{\alpha_1} 0)` は initial algebra になる．同様に :math:`F^{\alpha_1} 1 \xrightarrow{{g^{\alpha_1 + 1}_{\alpha_1}}^{-1}} F (F^{\alpha_1} 1)` は terminal coalgebra であり，:math:`h^{\alpha_1}_{\alpha_1}` は canonical iso になる．
 
 ところで，ここから条件付き algebraically compact の条件が以下のようになることも分かる．
 
 系. (条件付き algebraically compact の十分条件)
-  :math:`F: C \to C` について， :math:`h^\infty_\infty: F^\infty 0 \to F^\infty 1` が同型射である時， :math:`F` は条件付き algebraically compact
+  :math:`F: C \to C` について，以下を満たす時 :math:`F` は algebraically compact
+
+  * ある :math:`\alpha_0` が存在して，任意の :math:`\alpha > \alpha_0` で :math:`h^\alpha_\alpha: F^\alpha 0 \to F^\alpha 1` が同型射
 
   証明:
 
@@ -312,22 +326,22 @@ algebraically complete というのは Fleyd が導入した言葉 [#fleyd-1991]
   * 任意の :math:`n \in \mathbb{N}` で， :math:`g^{n + 1}_n; l^n_{n + 1}; h^{n + 1}_{n + 1} \sqsubseteq \mathrm{id}`
   * 任意の :math:`n \in \mathbb{N}` で， :math:`l^n_{n + 1}; h^{n + 1}_{n + 1}; g^{n + 1}_n = \mathrm{id}`
 
-  この時， :math:`F^\infty 0 \sim F^\infty 1`
+  この時， :math:`F^\omega 0 \sim F^\omega 1`
 
   証明:
 
-  :math:`F^\infty 0` が terminal sequence の limit であることを示せば， limit の一意性から言える．さて， cone :math:`(\alpha_n: X \to F^n 1)_n` を取ってきたとき，この cone から :math:`(h^\infty_\infty; g^\infty_n: F^\infty 0 \to F^n 1)_n` への普遍射が :math:`\alpha_\infty = \bigsqcup_m \alpha_m; l^m_{m + 1}; f^{m + 1}_\infty` であることを示す．
+  :math:`F^\omega 0` が terminal sequence の limit であることを示せば， limit の一意性から言える．まず，cone :math:`(h_n: X \to F^n 1)_{n \in \mathbb{N}}` を取ってきたとき，この cone から :math:`(h^\omega_\omega; g^\omega_n: F^\omega 0 \to F^n 1)_{n \in \mathbb{N}}` への普遍射が :math:`h_\omega = \bigsqcup_{m \in \mathbb{N}} h_m; l^m_{m + 1}; f^{m + 1}_\omega` であることを示す．
 
-  さて，まず任意の :math:`n \in \mathbb{N}` に対して :math:`\alpha_\infty = \bigsqcup_{m > n} \alpha_m; l^m_{m + 1}; f^{m + 1}_\infty` ，つまり :math:`(\alpha_m; l^m_{m + 1}; f^{m + 1}_\infty)_m` が単調増加であることを示す．
+  さて，任意の :math:`n \in \mathbb{N}` に対して :math:`h_\omega = \bigsqcup_{m > n} h_m; l^m_{m + 1}; f^{m + 1}_\omega` ，つまり :math:`(h_m; l^m_{m + 1}; f^{m + 1}_\omega)_{m \in \mathbb{N}}` が単調増加であることを示す．
 
   .. math::
 
     \begin{array}{ll}
-      \alpha_m; l^m_{m + 1}; f^{m + 1}_\infty
-      &= \alpha_{m + 1}; g^{m + 1}_m; l^m_{m + 1}; f^{m + 1}_{m + 2}; f^{m + 2}_\infty \\
-      &= \alpha_{m + 1}; g^{m + 1}_m; l^m_{m + 1}; h^{m + 1}_{m + 1}; l^{m + 1}_{m + 2}; f^{m + 2}_\infty \\
-      &\sqsubseteq \alpha_{m + 1}; \mathrm{id} ;l^{m + 1}_{m + 2}; f^{m + 2}_\infty \\
-      &= \alpha_{m + 1}; l^{m + 1}_{m + 2}; f^{m + 2}_\infty
+      h_m; l^m_{m + 1}; f^{m + 1}_\omega
+      &= h_{m + 1}; g^{m + 1}_m; l^m_{m + 1}; f^{m + 1}_{m + 2}; f^{m + 2}_\omega \\
+      &= h_{m + 1}; g^{m + 1}_m; l^m_{m + 1}; h^{m + 1}_{m + 1}; l^{m + 1}_{m + 2}; f^{m + 2}_\omega \\
+      &\sqsubseteq h_{m + 1}; \mathrm{id} ;l^{m + 1}_{m + 2}; f^{m + 2}_\omega \\
+      &= h_{m + 1}; l^{m + 1}_{m + 2}; f^{m + 2}_\omega
     \end{array}
 
   ここから可換性を以下のように示せる:
@@ -335,27 +349,27 @@ algebraically complete というのは Fleyd が導入した言葉 [#fleyd-1991]
   .. math::
 
     \begin{array}{ll}
-      \alpha_\infty; h^\infty_\infty; g^\infty_n
-      &= (\bigsqcup_m \alpha_m; l^m_{m + 1}; f^{m + 1}_\infty); h^\infty_\infty; g^\infty_n \\
-      &= \bigsqcup_{m > n} \alpha_m; l^m_{m + 1}; f^{m + 1}_\infty; h^\infty_\infty; g^\infty_n \\
-      &= \bigsqcup_{m > n} \alpha_m; l^m_{m + 1}; h^{m + 1}_\infty; g^\infty_n \\
-      &= \bigsqcup_{m > n} \alpha_m; l^m_{m + 1}; h^{m + 1}_{m + 1}; g^{m + 1}_n \\
-      &= \bigsqcup_{m > n} \alpha_m; l^m_{m + 1}; h^{m + 1}_{m + 1}; g^{m + 1}_m; g^m_n \\
-      &= \bigsqcup_{m > n} \alpha_m; \mathrm{id}; g^m_n \\
-      &= \bigsqcup_{m > n} \alpha_n \\
-      &= \alpha_n
+      h_\omega; h^\omega_\omega; g^\omega_n
+      &= (\bigsqcup_{m \in \mathbb{N}} h_m; l^m_{m + 1}; f^{m + 1}_\omega); h^\omega_\omega; g^\omega_n \\
+      &= \bigsqcup_{m > n} h_m; l^m_{m + 1}; f^{m + 1}_\omega; h^\omega_\omega; g^\omega_n \\
+      &= \bigsqcup_{m > n} h_m; l^m_{m + 1}; h^{m + 1}_\omega; g^\omega_n \\
+      &= \bigsqcup_{m > n} h_m; l^m_{m + 1}; h^{m + 1}_{m + 1}; g^{m + 1}_n \\
+      &= \bigsqcup_{m > n} h_m; l^m_{m + 1}; h^{m + 1}_{m + 1}; g^{m + 1}_m; g^m_n \\
+      &= \bigsqcup_{m > n} h_m; \mathrm{id}; g^m_n \\
+      &= \bigsqcup_{m > n} h_n \\
+      &= h_n
     \end{array}
 
-  さて，分解射 :math:`\alpha'_\infty: X \to F^\infty 0` を持ってきた時，
+  さて，分解射 :math:`h'_\omega: X \to F^\omega 0` を持ってきた時，
 
   .. math::
 
     \begin{array}{ll}
-      \alpha_\infty
-      &= \bigsqcup_m \alpha_m; l^m_{m + 1}; f^{m + 1}_\infty \\
-      &= \bigsqcup_m \alpha'_\infty; h^\infty_\infty; g^\infty_m; l^m_{m + 1}; f^{m + 1}_\infty \\
-      &= \bigsqcup_m \alpha'_\infty; h^\infty_\infty; g^\infty_m; l^m_{m + 1}; f^{m + 1}_\infty \\
-      &= \alpha'_\infty; (\bigsqcup_m h^\infty_\infty; g^\infty_m; l^m_{m + 1}; f^{m + 1}_\infty)
+      h_\omega
+      &= \bigsqcup_{m \in \mathbb{N}} h_m; l^m_{m + 1}; f^{m + 1}_\omega \\
+      &= \bigsqcup_{m \in \mathbb{N}} h'_\omega; h^\omega_\omega; g^\omega_m; l^m_{m + 1}; f^{m + 1}_\omega \\
+      &= \bigsqcup_{m \in \mathbb{N}} h'_\omega; h^\omega_\omega; g^\omega_m; l^m_{m + 1}; f^{m + 1}_\omega \\
+      &= h'_\omega; (\bigsqcup_m h^\omega_\omega; g^\omega_m; l^m_{m + 1}; f^{m + 1}_\omega)
     \end{array}
 
   となる．ここで，
@@ -363,17 +377,17 @@ algebraically complete というのは Fleyd が導入した言葉 [#fleyd-1991]
   .. math::
 
     \begin{array}{ll}
-      f^n_\infty; (\bigsqcup_m h^\infty_\infty; g^\infty_m; l^m_{m + 1}; f^{m + 1}_\infty)
-      &= \bigsqcup_{m > n} f^n_m; h^m_m; l^m_{m + 1}; f^{m + 1}_\infty \\
-      &= \bigsqcup_{m > n} f^n_m; f^m_{m + 1}; f^{m + 1}_\infty \\
-      &= \bigsqcup_{m > n} f^n_\infty \\
-      &= f^n_\infty
+      f^n_\omega; (\bigsqcup_{m \in \mathbb{N}} h^\omega_\omega; g^\omega_m; l^m_{m + 1}; f^{m + 1}_\omega)
+      &= \bigsqcup_{m > n} f^n_m; h^m_m; l^m_{m + 1}; f^{m + 1}_\omega \\
+      &= \bigsqcup_{m > n} f^n_m; f^m_{m + 1}; f^{m + 1}_\omega \\
+      &= \bigsqcup_{m > n} f^n_\omega \\
+      &= f^n_\omega
     \end{array}
 
-  より， colimit の普遍射の一意性から :math:`\bigsqcup_m h^\infty_\infty; g^\infty_m; l^m_{m + 1}; f^{m + 1}_\infty = \mathrm{id}` ．よって， :math:`\alpha'_\infty = \alpha_\infty` より普遍射の一意性が示せる．
+  より， colimit の普遍射の一意性から :math:`\bigsqcup_{m \in \mathbb{N}} h^\omega_\omega; g^\omega_m; l^m_{m + 1}; f^{m + 1}_\omega = \mathrm{id}` ．よって， :math:`h'_\omega = h_\omega` より普遍射の一意性が示せる．
 
 命題.
-  CPO enriched な圏 :math:`C` ， order enriched な関手 :math:`F: C \to C` について， :math:`T 1 \xrightarrow{g^1_0} 1 \xrightarrow{l} F 0 \xrightarrow{h^1_1} F 1 \sqsubseteq \mathrm{id}` を満たす :math:`l: 1 \to F 0` が与えられた時， :math:`F^\infty 0 \sim F^\infty 1`
+  CPO enriched な圏 :math:`C` ， order enriched な関手 :math:`F: C \to C` について， :math:`T 1 \xrightarrow{g^1_0} 1 \xrightarrow{l} F 0 \xrightarrow{h^1_1} F 1 \sqsubseteq \mathrm{id}` を満たす :math:`l: 1 \to F 0` が与えられた時， :math:`F^\omega 0 \sim F^\omega 1`
 
   証明:
 
@@ -393,12 +407,12 @@ algebraically complete というのは Fleyd が導入した言葉 [#fleyd-1991]
 
   証明:
 
-  上の命題から :math:`F^\infty 0 \sim F^\infty 1` より．
+  上の命題から :math:`F^\omega 0 \sim F^\omega 1` より．
 
 つまり， CPO enriched な状況で， terminal sequence から initial sequence への対応を， :math:`\mathrm{id}` すれすれにいい感じに作れれば良いという感じ．ところで，この対応は pointed CPO の場合 bottom を持ってくることで作れる．
 
 定理.
-  pointed CPO enriched な圏 :math:`C` ， order enriched な関手 :math:`F: C \to C` について， :math:`F` は条件付き algebraically compact ．
+  pointed CPO enriched な圏 :math:`C`，order enriched な関手 :math:`F: C \to C` について，:math:`F` は条件付き algebraically compact ．
 
   証明:
 
@@ -407,7 +421,7 @@ algebraically complete というのは Fleyd が導入した言葉 [#fleyd-1991]
 さて，今圏は initial / terminal object を持ち， chain cocomplete / cochain complete としているが，空でない pointed CPO enriched な圏においては， chain cocomplete であれば null object (initial でも terminal でもある object) の存在を示せる．
 
 命題.
-  空でない pointed CPO enriched な圏 :math:`C` において， chain cocomplete なら null object が存在する．
+  空でない pointed CPO enriched な圏 :math:`C` において，chain cocomplete なら null object が存在する．
 
   証明:
 
@@ -417,82 +431,85 @@ algebraically complete というのは Fleyd が導入した言葉 [#fleyd-1991]
 
     A \xrightarrow{\bot} A \xrightarrow{\bot} \cdots
 
-  この colimit :math:`A_\infty` を考える．この構成射は :math:`A \xrightarrow{u} A_\infty = A \xrightarrow{\bot} A \xrightarrow{u'} A_\infty = A \xrightarrow{\bot} A_\infty` より， :math:`\bot: A \to A_\infty` になる．任意の :math:`X \in |C|` について， :math:`A \xrightarrow{\bot} X` は cocone になる．この時， colimit からの普遍射 :math:`\alpha: A_\infty \to X` が存在する．また， :math:`\alpha': A_\infty \to X` が存在した時， :math:`A \xrightarrow{\bot} A_\infty \xrightarrow{\alpha'} X = A \xrightarrow{\bot} X` より分解射になる．この時， colimit の普遍性より :math:`\alpha = \alpha'` である．よって， :math:`A_\infty` は initial object になる．
+  この colimit :math:`A_\infty` を考える．この構成射は :math:`A \xrightarrow{u} A_\infty = A \xrightarrow{\bot} A \xrightarrow{u'} A_\infty = A \xrightarrow{\bot} A_\infty` より，:math:`\bot: A \to A_\infty` になる．任意の :math:`X \in |C|` について， :math:`A \xrightarrow{\bot} X` は cocone になる．この時，colimit からの普遍射 :math:`!: A_\infty \to X` が存在する．また， :math:`!': A_\infty \to X` が存在した時， :math:`A \xrightarrow{\bot} A_\infty \xrightarrow{!'} X = A \xrightarrow{\bot} X` より分解射になる．この時，colimit の普遍性より :math:`! = !'` である．よって， :math:`A_\infty` は initial object になる．
 
-  また， :math:`X \xrightarrow{\beta} A_\infty` があった時， :math:`X \xrightarrow{\beta} A_\infty = X \xrightarrow{\beta} A_\infty \xrightarrow{\mathrm{id} = \bot} A_\infty = X \xrightarrow{\bot} A_\infty` より，任意の :math:`X \in |C|` について :math:`\beta: X \to A_\infty` も一意に存在する．よって， :math:`A_\infty` は terminal object にもなる．
+  また， :math:`X \xrightarrow{!} A_\infty` があった時， :math:`X \xrightarrow{!} A_\infty = X \xrightarrow{!} A_\infty \xrightarrow{\mathrm{id} = \bot} A_\infty = X \xrightarrow{\bot} A_\infty` より，任意の :math:`X \in |C|` について :math:`!: X \to A_\infty` も一意に存在する．よって， :math:`A_\infty` は terminal object にもなる．
 
 よって，空でない pointed CPO enriched な圏であれば， chain cocomplete を仮定するだけで良い．ところで，ここまでは条件付き algebraically compact ，つまり fixed object を持つ関手のみを対象にしてきたが，関手が CPO enriched ，つまり sup も保存するならば algebraically compact であることが言える．
 
 定理.
-  pointed CPO enriched な圏 :math:`C` ， CPO enriched な関手 :math:`F: C \to C` について， :math:`F` は algebraically compact ．
+  pointed CPO enriched な圏 :math:`C`，CPO enriched な関手 :math:`F: C \to C` について，:math:`F` は algebraically compact ．
 
   証明:
 
-  :math:`l: 1 \to F 0 = \bot` で持ってきた時， :math:`F^\infty 0 \sim F^\infty 1` より，後は :math:`F (F^\infty 0) \sim F^\infty 0` を示せばよい．で， :math:`F (F^\infty 0)` が initial sequence の colimit であることを示せば， colimit の一意性から :math:`F (F^\infty 0) \sim F^\infty 0` が言える．なので， colimit であることを示す．
+  :math:`l: 1 \to F 0 = \bot` で持ってきた時，:math:`F^\omega 0 \sim F^\omega 1`．ところで，実はこの時 :math:`F^\omega 0 \sim F (F^\omega 0)` が示せる．これが成り立てば，:math:`F^\omega 0` は fixed object になるので，題意が言える．よって，これを示す．これは，:math:`F (F^\omega 0)` が
+
+  .. math::
+
+    0 \xrightarrow{f^0_1} F 0 \xrightarrow{f^1_2} \cdots F^n 0 \xrightarrow{f^n_{n + 1}} \cdots
+
+  の colimit であることを示せれば，colimit の一意性から言える．
 
   構成射を
 
   .. math::
 
-    f'^n_\infty = \begin{array}{ll}
-      0 \xrightarrow{!} F (F^\infty 0) &(n = 0) \\
-      F f^m_\infty &(n = m + 1)
-    \end{array}
+    f'^n_\omega: F^n 0 \to F (F^\omega 0) = \left\{\begin{array}{ll}
+      0 \xrightarrow{!} F (F^\omega 0) &(n = 0) \\
+      F f^m_\omega &(n = m + 1)
+    \end{array}\right.
 
-  で作る． cocone :math:`(\alpha_n: F^n 0 \to X)_n` に対して， :math:`\alpha_\infty = \bigsqcup_m F h^\infty_\infty; F g^\infty_m; l^{m + 1}_{m + 2}; \alpha_{m + 2}` が普遍射になることを示す．
+  で作る．cocone :math:`(h_n: F^n 0 \to X)_{n \in \mathbb{N}}` に対して，:math:`h_\omega = \bigsqcup_{m \in \mathbb{N}} F h^\omega_\omega; F g^\omega_m; l^{m + 1}_{m + 2}; h_{m + 2}` が普遍射になることを示す．
 
-  :math:`n = 0` の時， initial object の普遍性より :math:`f'^0_\infty; \alpha_\infty = \alpha_0` になることは良い． :math:`n > 0` の時，
+  :math:`n = 0` の時， initial object の普遍性より :math:`f'^0_\omega; h_\omega = h_0` になることは良い．:math:`n > 0` の時，
 
   .. math::
 
     \begin{array}{ll}
-      f'^n_\infty; \alpha_\infty
-      &= F f^{n - 1}_\infty; (\bigsqcup_m F h^\infty_\infty; F g^\infty_m; l^{m + 1}_{m + 2}; \alpha_{m + 2}) \\
-      &= \bigsqcup_m F f^{n - 1}_\infty; F h^\infty_\infty; F g^\infty_m; l^{m + 1}_{m + 2}; \alpha_{m + 2} \\
-      &= \bigsqcup_{m > n} F f^{n - 1}_m; F h^m_m; F l^m_{m + 1}; \alpha_{m + 2} \\
-      &= \bigsqcup_{m > n} F (f^{n - 1}_m; h^m_m; l^m_{m + 1}); \alpha_{m + 2} \\
-      &= \bigsqcup_{m > n} F f^{n - 1}_{m + 1}; \alpha_{m + 2} \\
-      &= \bigsqcup_{m > n} f^n_{m + 2}; \alpha_{m + 2} \\
-      &= \bigsqcup_{m > n} \alpha_n \\
-      &= \alpha_n
+      f'^n_\omega; h_\omega
+      &= F f^{n - 1}_\omega; (\bigsqcup_{m \in \mathbb{N}} F h^\omega_\omega; F g^\omega_m; l^{m + 1}_{m + 2}; h_{m + 2}) \\
+      &= \bigsqcup_{m \in \mathbb{N}} F f^{n - 1}_\omega; F h^\omega_\omega; F g^\omega_m; l^{m + 1}_{m + 2}; h_{m + 2} \\
+      &= \bigsqcup_{m > n} F f^{n - 1}_m; F h^m_m; F l^m_{m + 1}; h_{m + 2} \\
+      &= \bigsqcup_{m > n} F (f^{n - 1}_m; h^m_m; l^m_{m + 1}); h_{m + 2} \\
+      &= \bigsqcup_{m > n} F f^{n - 1}_{m + 1}; h_{m + 2} \\
+      &= \bigsqcup_{m > n} f^n_{m + 2}; h_{m + 2} \\
+      &= \bigsqcup_{m > n} h_n \\
+      &= h_n
     \end{array}
 
-  より，可換になることが示せる．また，分解射 :math:`\alpha'_\infty: F^\infty 0 \to X` について，
+  より，可換になることが示せる．また，分解射 :math:`h'_\omega: F (F^\omega 0) \to X` について，
 
   .. math::
 
     \begin{array}{lll}
-      \alpha_\infty
-      &= \bigsqcup_m F h^\infty_\infty; F g^\infty_m; l^{m + 1}_{m + 2}; \alpha_{m + 2} \\
-      &= \bigsqcup_m F h^\infty_\infty; F g^\infty_m; l^{m + 1}_{m + 2}; f'^{m + 2}_\infty; \alpha'_\infty \\
-      &= (\bigsqcup_m F h^\infty_\infty; F g^\infty_m; F l^m_{m + 1}; F f^{m + 1}_\infty); \alpha'_\infty \\
-      &= \bigsqcup_m F (h^\infty_\infty; g^\infty_m; l^m_{m + 1}; f^{m + 1}_\infty); \alpha'_\infty \\
-      &= F (\bigsqcup_m h^\infty_\infty; g^\infty_m; l^m_{m + 1}; f^{m + 1}_\infty); \alpha'_\infty \\
-      &= F\,\mathrm{id}; \alpha'_\infty &(\because \text{colimit の普遍性より}) \\
-      &= \alpha'_\infty
+      h_\omega
+      &= \bigsqcup_{m \in \mathbb{N}} F h^\omega_\omega; F g^\omega_m; l^{m + 1}_{m + 2}; h_{m + 2} \\
+      &= \bigsqcup_{m \in \mathbb{N}} F h^\omega_\omega; F g^\omega_m; l^{m + 1}_{m + 2}; f'^{m + 2}_\omega; h'_\omega \\
+      &= (\bigsqcup_{m \in \mathbb{N}} F h^\omega_\omega; F g^\omega_m; F l^m_{m + 1}; F f^{m + 1}_\omega); h'_\omega \\
+      &= \bigsqcup_{m \in \mathbb{N}} F (h^\omega_\omega; g^\omega_m; l^m_{m + 1}; f^{m + 1}_\omega); h'_\omega \\
+      &= F (\bigsqcup_{m \in \mathbb{N}} h^\omega_\omega; g^\omega_m; l^m_{m + 1}; f^{m + 1}_\omega); h'_\omega \\
+      &= F\,\mathrm{id}; h'_\omega &(\because \text{colimit の普遍性より}) \\
+      &= h'_\omega
     \end{array}
 
   よって，分解射は一意になる．
 
-なお，例えば pointed CPO による圏自体は， pointed CPO enriched であり， chain cocomplete なので今回の圏の条件を満たしている．よって，これ上の関手が fixed object を持って continuous function の順序を保存するか， continuous function space の sup を保存すれば， algebraically compact になる．
+なお，例えば pointed CPO による圏自体は，pointed CPO enriched であり，chain cocomplete なので今回の圏の条件を満たしている．よって，これ上の関手が fixed object を持って continuous function の順序を保存するか，continuous function space の sup を保存すれば，algebraically compact になる．
 
 まとめ
 ------
 
-とりあえず，関手が algebraically compact ，つまり initial algebra と terminal algebra が iso になるには，
+とりあえず，関手が algebraically compact，つまり initial algebra と terminal algebra が iso になるには，
 
-* :math:`F^\infty 0 \sim F^\infty 1` であること
+* どこかの :math:`\alpha` で :math:`F^\alpha 0 \sim F^\alpha 1` になること
 * なんらかの algebra と coalgebra の間に relational morphism が作れること
 
-が重要で， relational morphism の方は fixed object があれば作れるので，重要なのは initial sequence の colimit と terminal sequence の limit が一致するかということになる．
+が重要で，relational morphism の方は fixed object があれば作れるので，重要なのは initial sequence と terminal sequence がどこかで iso になるかということになる．
 
-さらに， pointed CPO enriched な場合は，関手が order を保存すれば :math:`\bot` からいい感じに :math:`F^\infty 0 \sim F^\infty 1` に繋げるような terminal sequence から initial sequence への射の列が作れる．なので， order を保存するぐらいで algebraically compact になる．
+さらに， pointed CPO enriched な場合は，関手が order を保存すれば :math:`\bot` からいい感じに :math:`F^\omega 0 \sim F^\omega 1` に繋げるような terminal sequence から initial sequence への射の列が作れる．なので， order を保存するぐらいで algebraically compact になる．
 
-なるほどなという感じ (こなみ) ．
-
-FIXME
-  と気持ちよく終わりたかったが，大事な定理が示せねえ... 誰か助けてくれ．
+なるほどなという感じ (こなみ)．
 
 .. [#fleyd-1991] https://link.springer.com/chapter/10.1007/BFb0084215
-.. [#fixme-proof] この証明が出来ない．原論文の Theorem 1.7 がそれ．Barr 先生は， "Since an object has only a set of endomorphisms" と言ってるが，この文章が理解できなかった...
 .. [#notice-split-mono-and-split-epi] なお，:math:`b_1` を持つことを :math:`a` は split monomorphism である，:math:`b_2` を持つことを :math:`a` は split epimorphism であるという．この命題はもう少し条件を弱め，:math:`a` が mono かつ split epi，または epi かつ split mono でも成立する．
+.. [#term-have-only-a-set] これを， *an object has only a set of endomorphisms* と元論文で言ってる．最初のこの文の意味が分からなくって， https://twitter.com/Ziphil/status/1206575467672690688 で教えてもらった． Ziphil さん，ありがとうございました．

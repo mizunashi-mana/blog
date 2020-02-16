@@ -1,0 +1,70 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      &
+      F^{\alpha_2} 1
+      \ar@{->}[r]^{g^{\alpha_2}_{\alpha_1}}
+      &
+      F^{\alpha_1} 1
+      \ar@{->}[r]^{{h^{\alpha_1}_{\alpha_1}}^{-1}}
+      &
+      F^{\alpha_1} 0
+      \ar@{->}[rrdd]^{f^{\alpha_1}_{\alpha_2}}
+      \ar@{->}[d]^{h^{\alpha_1}}
+      \\
+      &
+      B
+      \ar@{->}[u]^{h_{\alpha_2}}
+      \ar@{->}[ru]^{h_{\alpha_1}}
+      & &
+      A
+      \ar@{->}[d]^{m}
+      \\
+      F^{\alpha_2} 0
+      \ar@{->}[ruu]^{h^{\alpha_2}_{\alpha_2}}
+      \ar@{->}[r]^{h^{\alpha_2}}
+      \ar@{->}[rrd]_{h^{\alpha_2}_{\alpha_2}}
+      \ar@{=}[rrdd]
+      &
+      A
+      \ar@{->}[u]^{m}
+      \ar@{->}[r]_{m}
+      \ar@/^30pt/@{->}[rru]^{e_{\alpha_1}}
+      \ar@{->}[rru]_{e_{\alpha_2}}
+      &
+      B
+      \ar@{->}[d]^{h_{\alpha_2}}
+      &
+      B
+      \ar@{->}[r]_{h_{\alpha_2}}
+      &
+      F^{\alpha_2} 1
+      \ar@{<->}[r]^{h^{\alpha_2}_{\alpha_2}}_{{h^{\alpha_2}_{\alpha_2}}^{-1}}
+      &
+      F^{\alpha_2} 0
+      \ar@{->}[llu]_{h^{\alpha_2}}
+      \\
+      & &
+      F^{\alpha_2} 1
+      \ar@{->}[d]_{{h^{\alpha_2}_{\alpha_2}}^{-1}}
+      \\
+      & &
+      F^{\alpha_2} 0
+      \ar@{->}[ruuu]_{h_{\alpha_2}}
+      \ar@{->}[rruu]_{h^{\alpha_2}_{\alpha_2}}
+      \ar@{=}[rrruu]
+    }
+  }
+\end{align*}
+\end{document}
