@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 03 Feb 2020 02:00:00 +0900</lastBuildDate><item><title>State モナドの代わりに Reader モナドを使う</title><link>https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/</link><description>&lt;dl class="docutils"&gt;
+<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 16 Feb 2020 20:00:00 +0900</lastBuildDate><item><title>State モナドの代わりに Reader モナドを使う</title><link>https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/</link><description>&lt;dl class="docutils"&gt;
 &lt;dt&gt;&lt;strong&gt;注意&lt;/strong&gt;&lt;/dt&gt;
 &lt;dd&gt;この記事は公開当時主張に誤りを含んでいたため，大幅に書き直しています．また，公開当時の主張の誤りについても，付録として載せておきました．&lt;/dd&gt;
 &lt;/dl&gt;
