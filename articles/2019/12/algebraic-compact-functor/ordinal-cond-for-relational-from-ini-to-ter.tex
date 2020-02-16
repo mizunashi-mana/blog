@@ -1,0 +1,50 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{30cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{
+    \xymatrix@=60pt{
+      F^\gamma 0
+      \ar@{->}[d]_{f^\gamma_{\gamma + 1}}
+      \ar@{->}[r]^{h^\gamma}
+      \ar@{{}{ }{}}[rd]|(0.25){\circlearrowright}
+      \ar@{{}{ }{}}[rd]|(0.75){\circlearrowright}
+      &
+      A
+      \ar@{->}[r]^{m}
+      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      &
+      B
+      \ar@{->}[r]^{h_\gamma}
+      \ar@{->}[d]_{b}
+      \ar@{->}[rd]^{h_{\gamma + 1}}
+      &
+      F^\gamma 1
+      \\
+      F^{\gamma + 1} 0
+      \ar@{->}[ru]^{h^{\gamma + 1}}
+      \ar@{->}[r]_{F h^\gamma}
+      &
+      F A
+      \ar@{->}[r]_{F m}
+      \ar@{->}[u]_{a}
+      &
+      F B
+      \ar@{->}[r]_{F h_\gamma}
+      \ar@{{}{ }{}}[ru]|(0.25){\circlearrowright}
+      \ar@{{}{ }{}}[ru]|(0.75){\circlearrowright}
+      &
+      F^{\gamma + 1} 1
+      \ar@{->}[u]_{g^{\gamma + 1}_\gamma}
+    }
+  }
+\end{align*}
+\end{document}

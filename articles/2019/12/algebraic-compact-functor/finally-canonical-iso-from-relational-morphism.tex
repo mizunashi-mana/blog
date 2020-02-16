@@ -13,90 +13,57 @@
   \vcenter{
     \xymatrix@=60pt{
       &
-      F (F^\infty 1)
-      \ar@{->}[r]^\eta
-      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      F^{\alpha_2} 1
+      \ar@{->}[r]^{g^{\alpha_2}_{\alpha_1}}
       &
-      F^\infty 1
-      \ar@{->}[r]^{{h^\infty_\infty}^{-1}}
+      F^{\alpha_1} 1
+      \ar@{->}[r]^{{h^{\alpha_1}_{\alpha_1}}^{-1}}
       &
-      F^\infty 0
-      \ar@{->}[rrd]^\mu
-      \ar@{->}[d]^{k_\infty}
-      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      F^{\alpha_1} 0
+      \ar@{->}[rrdd]^{f^{\alpha_1}_{\alpha_2}}
+      \ar@{->}[d]^{h^{\alpha_1}}
       \\
-      F (F^\infty 0)
-      \ar@{->}[ru]^{F h^\infty_\infty}
-      \ar@{->}[rd]^{F k_\infty}
-      \ar@{->}[rddd]_{F h^\infty_\infty}
-      \ar@{{}{ }{}}[r]|{\circlearrowright}
-      \ar@{{}{ }{}}[rdd]|{\circlearrowright}
-      &
-      F B
-      \ar@{->}[u]^{F l_\infty}
-      \ar@{{}{ }{}}[rd]|{\circlearrowright}
       &
       B
-      \ar@{->}[u]^{l_\infty}
-      \ar@{->}[l]^{\beta}
-      &
+      \ar@{->}[u]^{h_{\alpha_2}}
+      \ar@{->}[ru]^{h_{\alpha_1}}
+      & &
       A
-      \ar@{->}[d]^{h}
-      \ar@{{}{ }{}}[rd]|{\circlearrowright}
-      &
-      F A
-      \ar@{->}[l]^{\alpha}
-      \ar@{->}[d]^{F h}
-      \ar@{{}{ }{}}[rd]|{\circlearrowright}
-      &
-      F (F^\infty 0)
-      \ar@{->}[l]^{F k_\infty}
-      \ar@{->}[d]_{F h^\infty_\infty}
+      \ar@{->}[d]^{m}
       \\
-      &
-      F A
-      \ar@{->}[r]^{\alpha}
-      \ar@{->}[u]^{F h}
-      \ar@{->}[d]^{F h}
-      \ar@{{}{ }{}}[rd]|{\circlearrowright}
+      F^{\alpha_2} 0
+      \ar@{->}[ruu]^{h^{\alpha_2}_{\alpha_2}}
+      \ar@{->}[r]^{h^{\alpha_2}}
+      \ar@{->}[rrd]_{h^{\alpha_2}_{\alpha_2}}
+      \ar@{=}[rrdd]
       &
       A
-      \ar@{->}[u]^{h}
-      \ar@{->}[d]^{h}
+      \ar@{->}[u]^{m}
+      \ar@{->}[r]_{m}
+      \ar@/^30pt/@{->}[rru]^{e_{\alpha_1}}
+      \ar@{->}[rru]_{e_{\alpha_2}}
       &
       B
-      \ar@{->}[r]^{\beta}
-      \ar@{{}{ }{}}[rd]|{\circlearrowright}
-      &
-      F B
-      \ar@{->}[r]^{F l_\infty}
-      &
-      F (F^\infty 1)
-      \ar@/_20pt/@{->}[u]_{F {h^\infty_\infty}^{-1}}
-      \ar@/_10pt/@{{}{ }{}}[u]|{\circlearrowright}
-      \\
-      &
-      F B
-      \ar@{->}[d]^{F l_\infty}
+      \ar@{->}[d]^{h_{\alpha_2}}
       &
       B
-      \ar@{->}[l]^{\beta}
+      \ar@{->}[r]_{h_{\alpha_2}}
       &
-      A
-      \ar@{->}[u]^{h}
+      F^{\alpha_2} 1
+      \ar@{<->}[r]^{h^{\alpha_2}_{\alpha_2}}_{{h^{\alpha_2}_{\alpha_2}}^{-1}}
       &
-      F A
-      \ar@{->}[u]^{F h}
-      \ar@{->}[l]^{\alpha}
-      \ar@{{}{ }{}}[ru]|{\circlearrowright}
+      F^{\alpha_2} 0
+      \ar@{->}[llu]_{h^{\alpha_2}}
       \\
-      &
-      F (F^\infty 1)
-      \ar@{->}[rrr]^{F {h^\infty_\infty}^{-1}}
-      & & &
-      F (F^\infty 0)
-      \ar@{->}[u]^{F k_\infty}
-      \ar@{->}[ruu]_{F h^\infty_\infty}
+      & &
+      F^{\alpha_2} 1
+      \ar@{->}[d]_{{h^{\alpha_2}_{\alpha_2}}^{-1}}
+      \\
+      & &
+      F^{\alpha_2} 0
+      \ar@{->}[ruuu]_{h_{\alpha_2}}
+      \ar@{->}[rruu]_{h^{\alpha_2}_{\alpha_2}}
+      \ar@{=}[rrruu]
     }
   }
 \end{align*}
