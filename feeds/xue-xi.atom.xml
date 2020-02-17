@@ -1,5 +1,936 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 学習</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/xue-xi.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2019-04-08T19:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>CTMCP のために Mozart/Oz を動かす</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/" rel="alternate"></link><published>2019-04-08T19:00:00+09:00</published><updated>2019-04-08T19:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/read-ctmcp/</id><summary type="html">&lt;p&gt;ゼミの輪読で， &lt;a class="reference external" href="https://www.amazon.co.jp/dp/0262220695"&gt;Concepts, Techniques, and Models of Computer Programming (MIT Press)&lt;/a&gt; ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - 学習</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/xue-xi.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-02-17T20:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>AtCoder の新環境テストの問題を解いてみる</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/02/haskell-atcoder-template/" rel="alternate"></link><published>2020-02-17T20:00:00+09:00</published><updated>2020-02-17T20:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-02-17:/blog/posts/2020/02/haskell-atcoder-template/</id><summary type="html">&lt;p&gt;AtCoder が現在新環境のテストをしている: &lt;a class="reference external" href="https://atcoder.jp/contests/language-test-202001"&gt;https://atcoder.jp/contests/language-test-202001&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;今までの環境では GHC 7.10.3 だったのが，新環境では 8.6.5 になるので，この機会に参加してみるかということで，テストで公開されてる問題を解いてみた．そのコードと解説．なお，当方 AtCoder の …&lt;/p&gt;</summary><content type="html">&lt;p&gt;AtCoder が現在新環境のテストをしている: &lt;a class="reference external" href="https://atcoder.jp/contests/language-test-202001"&gt;https://atcoder.jp/contests/language-test-202001&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;今までの環境では GHC 7.10.3 だったのが，新環境では 8.6.5 になるので，この機会に参加してみるかということで，テストで公開されてる問題を解いてみた．そのコードと解説．なお，当方 AtCoder の Haskell 経験全然無いので，なんか指摘あったらしてくれ．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;テンプレ作成&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;よく知られてる問題として，Haskell で AtCoder の問題解く場合，&lt;tt class="docutils literal"&gt;Prelude&lt;/tt&gt; を単純に使うと全部 &lt;tt class="docutils literal"&gt;String&lt;/tt&gt; でデータを持ってきてしまいめっちゃメモリ食って GC のお世話になると言うのがある．他にも AtCoder の問題だと気軽にソートしたい時とかあるけど，リストのソートめっちゃ遅かったり，とにかく &lt;tt class="docutils literal"&gt;Prelude&lt;/tt&gt; はめっちゃリスト推してくるんだけど，現実的にリストだと辛い場面が多い．なので，&lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;Vector&lt;/tt&gt; 系の API を整備したくなってくるので，整備した．&lt;/p&gt;
+&lt;p&gt;整備したのは， &lt;a class="reference external" href="https://github.com/mizunashi-mana/haskell-atcoder-template"&gt;https://github.com/mizunashi-mana/haskell-atcoder-template&lt;/a&gt; に置いてある．もし，ちゃんと ARC / ABC に参加してたら，不足してるのどんどん足してくかもしれない．&lt;/p&gt;
+&lt;p&gt;具体的に何整備したかと言うと，まずよく使う言語拡張のオプション追加した:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;BangPatterns&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;bang pattern &lt;tt class="docutils literal"&gt;!&lt;/tt&gt; が使えるようになる拡張．これつけるとパターンを一回 &lt;tt class="docutils literal"&gt;seq&lt;/tt&gt; 挟んでから照合するようになる．これ付けとくと，最適化の解析がちょっと速くなって，情報も増えるので通常より最適か効きやすくなって速くなる場合が多い．ただ，後述する &lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; で基本は付くのであまり使わなくて良い．ただ，ネストしたパターンについては，&lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; じゃダメな場合があるので，明示的に bang pattern 書く必要がある&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;f $ \x &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; x&lt;/tt&gt; とかを &lt;tt class="docutils literal"&gt;f \x &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; x&lt;/tt&gt; って書けるやつ．いらない &lt;tt class="docutils literal"&gt;$&lt;/tt&gt; 省けるのでタイプ数が 1 減る&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;FlexibleContexts&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;型制約の記法をちょっと柔軟にするやつ．普通 &lt;tt class="docutils literal"&gt;f :: Enum Int =&amp;gt; Int&lt;/tt&gt; とか書けないところを書けるようにしてくれる．元々の制限は型推論で出てきた型にも適用されるので，&lt;tt class="docutils literal"&gt;Vector&lt;/tt&gt; の API とかでたまにこの拡張が必要になる&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;LambdaCase&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;\x &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; case x of ...&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;\case ...&lt;/tt&gt; って書けるやつ．モナディックなやつ書くときに &lt;tt class="docutils literal"&gt;do { r &amp;lt;- m; case r of ... }&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;m &amp;gt;&amp;gt;= \case ...&lt;/tt&gt; みたいに書ける&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;MultiWayIf&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;&lt;tt class="docutils literal"&gt;if cond1 then e1 else if cond2 then e2 else e3&lt;/tt&gt; を&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;if&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;cond1&lt;/span&gt;     &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;e1&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;cond2&lt;/span&gt;     &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;e2&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;e3&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p class="last"&gt;って書けるやつ．ネストをしないで済みやすい&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;OverloadedLists&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;[x :: a, y, z]&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;(IsList l, Item l ~ a) =&amp;gt; l&lt;/tt&gt; みたいな型を持つようになるやつ． &lt;tt class="docutils literal"&gt;Vector&lt;/tt&gt; 気軽に作りたいとき便利&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;OverloadedStrings&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;"str"&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;IsString p =&amp;gt; p&lt;/tt&gt; みたいな型を持つようになるやつ． &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; 気軽に作りたいとき便利&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;ScopedTypeVariables&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;トップレベルの型注釈で &lt;tt class="docutils literal"&gt;forall a. a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; a&lt;/tt&gt; みたいな書き方ができるようになって，型 &lt;tt class="docutils literal"&gt;a&lt;/tt&gt; を式中で参照できるようになるやつ．後述の &lt;tt class="docutils literal"&gt;TypeApplications&lt;/tt&gt; と合わせて使うと便利&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;全てのパターンの外側に bang pattern &lt;tt class="docutils literal"&gt;!&lt;/tt&gt; が付くようになるやつ．bang pattern いちいち付けても同じ恩恵受けられるけど，めんどいし忘れる場合も多いのでこの拡張使うと良い&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;TypeApplications&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;x :: forall a b. a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Int &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; b&lt;/tt&gt; みたいなのに対して，&lt;tt class="docutils literal"&gt;x @Char @() :: Char &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Int &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; ()&lt;/tt&gt; みたいに型適用できるやつ． &lt;tt class="docutils literal"&gt;read :: forall a. Read a =&amp;gt; String &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; a&lt;/tt&gt; 系の出力が多相的なやつは曖昧な型でエラーになりやすいが，&lt;tt class="docutils literal"&gt;read @Int&lt;/tt&gt; みたいにしておくとわざわざ注釈書かなくても型を決められる&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;それから入出力系を整備した．まず， &lt;tt class="docutils literal"&gt;Read&lt;/tt&gt; に変わるやつで， &lt;tt class="docutils literal"&gt;ReadBS&lt;/tt&gt; っていうの定義してる．これは単純に &lt;tt class="docutils literal"&gt;ByteString&lt;/tt&gt; から読み込むやつ．で，それベースに&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;readLineInputs :: forall a. ReadBS a =&amp;gt; IO [a]&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;一行読み込んで，空白区切りで分けて，それぞれ読み込むやつ&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;readLineInputsVec :: forall a. ReadBS a =&amp;gt; UVec.Unbox a =&amp;gt; IO (Vector a)&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;readLineInputs&lt;/tt&gt; とやることは同じだけど，返り値がリストじゃなくて unboxed vector&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;discardLine :: IO ()&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;一行捨てる&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;printN :: Show a =&amp;gt; a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; IO ()&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;改行なし &lt;tt class="docutils literal"&gt;print&lt;/tt&gt;&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;とかを定義した．後， &lt;tt class="docutils literal"&gt;Vector&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;MVector&lt;/tt&gt; をそれぞれ unboxed vector / unboxed mutable vector のエイリアスに設定してたり，&lt;tt class="docutils literal"&gt;Debug&lt;/tt&gt; 空間を &lt;tt class="docutils literal"&gt;Debug.Trace&lt;/tt&gt; のエイリアスにしたり，諸々小細工したりしてる．詳細は &lt;a class="reference external" href="https://github.com/mizunashi-mana/haskell-atcoder-template/blob/master/src/Header.hs"&gt;https://github.com/mizunashi-mana/haskell-atcoder-template/blob/master/src/Header.hs&lt;/a&gt; を見てくれ．&lt;/p&gt;
+&lt;p&gt;で，こいつを &lt;tt class="docutils literal"&gt;CPP&lt;/tt&gt; で &lt;tt class="docutils literal"&gt;#include&lt;/tt&gt; して使ってる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="language-test"&gt;
+&lt;h2&gt;Language Test の解答例&lt;a class="headerlink" href="#language-test" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;で，このテンプレを使った解答例を挙げていく．入出力の概略ぐらいしか問題文は書かないので，&lt;a class="reference external" href="https://atcoder.jp/contests/language-test-202001/tasks"&gt;AtCoder の問題ページ&lt;/a&gt; も参照してくれ．&lt;/p&gt;
+&lt;div class="section" id="welcome-to-atcoder"&gt;
+&lt;h3&gt;Welcome To AtCoder&lt;a class="headerlink" href="#welcome-to-atcoder" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+a
+b c
+s
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;a&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;b&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;c&lt;/tt&gt; は整数値，&lt;tt class="docutils literal"&gt;s&lt;/tt&gt; は文字列&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;a + b + c&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;s&lt;/tt&gt; を空白区切りで一行に&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;
+  &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;BS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLine&lt;/span&gt;
+
+  &lt;span class="n"&gt;printN&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;z&lt;/span&gt;
+  &lt;span class="n"&gt;putSpace&lt;/span&gt;
+  &lt;span class="kt"&gt;BS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これはいいと思う．type application が無いと，入力 &lt;tt class="docutils literal"&gt;x&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;y&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;z&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;Num a =&amp;gt; a&lt;/tt&gt; ぐらいまでしか決まらなくて，type defaulting が起きる．&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-Wall&lt;/span&gt;&lt;/tt&gt; 下だと警告が出るので &lt;tt class="docutils literal"&gt;Int&lt;/tt&gt; を指定してる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="product"&gt;
+&lt;h3&gt;Product&lt;a class="headerlink" href="#product" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+a b
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;a&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;b&lt;/tt&gt; は整数値&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;a * b&lt;/tt&gt; が奇数なら &lt;tt class="docutils literal"&gt;Odd&lt;/tt&gt; と，偶数なら &lt;tt class="docutils literal"&gt;Even&lt;/tt&gt; と出力&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+
+  &lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;mod&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"Even"&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt;            &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"Odd"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これも良いと思う．特に言うことはなさそう．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="placing-marbles"&gt;
+&lt;h3&gt;Placing Marbles&lt;a class="headerlink" href="#placing-marbles" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+abc
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;a&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;b&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;c&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;0&lt;/tt&gt; か &lt;tt class="docutils literal"&gt;1&lt;/tt&gt;&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;1&lt;/tt&gt; の個数&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;Text&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLine&lt;/span&gt;
+  &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;ocount&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="sc"&gt;'1'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;ocount :: MonoFoldable mono =&amp;gt; (Element mono &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Bool) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; mono &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Int&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;ofoldl'&lt;/tt&gt; で該当する要素を数える関数．微妙になかったので作った．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="shift-only"&gt;
+&lt;h3&gt;Shift only&lt;a class="headerlink" href="#shift-only" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+N
+a1 ... aN
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;N&lt;/tt&gt; は整数で，&lt;tt class="docutils literal"&gt;a1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;aN&lt;/tt&gt; も整数&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;最大何回 &lt;tt class="docutils literal"&gt;a1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;aN&lt;/tt&gt; を 2 で割れるか&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;discardLine&lt;/span&gt;
+  &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+
+  &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;minimum&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="n"&gt;checkShifts&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- |&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; checkShifts 0&lt;/span&gt;
+&lt;span class="c1"&gt;-- 0&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; checkShifts 2&lt;/span&gt;
+&lt;span class="c1"&gt;-- 1&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; checkShifts 20&lt;/span&gt;
+&lt;span class="c1"&gt;-- 2&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="nf"&gt;checkShifts&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;checkShifts&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;.&amp;amp;.&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt;    &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;shiftR&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;テンプレでは &lt;tt class="docutils literal"&gt;Data.Bit&lt;/tt&gt; が読み込まれてて使える．それ使って，それぞれ実際割り切れなくなるまで割ってみて，その中で一番早く割り切れなくなったやつを持ってくる．まあ，アルゴリズム的な最適化の余地は幾つかあるけど，いいでしょ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="coins"&gt;
+&lt;h3&gt;Coins&lt;a class="headerlink" href="#coins" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+a
+b
+c
+x
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;a&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;b&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;c&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;x&lt;/tt&gt; は整数&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;500 が &lt;tt class="docutils literal"&gt;a&lt;/tt&gt; 個，100 が &lt;tt class="docutils literal"&gt;b&lt;/tt&gt; 個，50 が &lt;tt class="docutils literal"&gt;c&lt;/tt&gt; 個ある状況で，ちょうど &lt;tt class="docutils literal"&gt;x&lt;/tt&gt; になるような組み合わせの数&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+
+  &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- |&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; solve 1 1 1 0&lt;/span&gt;
+&lt;span class="c1"&gt;-- 1&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="kt"&gt;[]&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;a'&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="n"&gt;b'&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;x'&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;a'&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;500&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;b'&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;100&lt;/span&gt;
+  &lt;span class="n"&gt;withFilter&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x'&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;x'&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;50&lt;/span&gt;
+  &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;withFilter&lt;/tt&gt; は Scala からの輸入で，リスト内包表記の条件式相当のやつ．基本的には 500 / 100 の範囲で全探索してる．ちゃんとやろうと思えばなんかできそう．&lt;tt class="docutils literal"&gt;OverloadedLists&lt;/tt&gt; を使ってる弊害で，リストリテラルの表記で，曖昧な型エラーが起きるので，&lt;tt class="docutils literal"&gt;Foldable&lt;/tt&gt; のインスタンスを type application で固定してる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="some-sums"&gt;
+&lt;h3&gt;Some Sums&lt;a class="headerlink" href="#some-sums" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+n a b
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;n&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;a&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;b&lt;/tt&gt; は整数&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;1 以上 &lt;tt class="docutils literal"&gt;n&lt;/tt&gt; 以下で，10 進法での各桁の和が &lt;tt class="docutils literal"&gt;a&lt;/tt&gt; 以上 &lt;tt class="docutils literal"&gt;b&lt;/tt&gt; 以下であるものの総和&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;getLineInputs&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;
+
+  &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;sum&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;k&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sumDigits&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;k&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- |&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; sumDigits 11&lt;/span&gt;
+&lt;span class="c1"&gt;-- 2&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="nf"&gt;sumDigits&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumDigits&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;mod&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;div&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;リスト内包表記も便利．特に &lt;tt class="docutils literal"&gt;length&lt;/tt&gt; とか &lt;tt class="docutils literal"&gt;sum&lt;/tt&gt; とかに食わせる場合は融合変換が効くので，気にしないで書いて良さそう．これはまあ，そのまま安直に問題文の指示通りのことをしてる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="card-game-for-two"&gt;
+&lt;h3&gt;Card Game for Two&lt;a class="headerlink" href="#card-game-for-two" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+N
+a1 ... aN
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;N&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;a1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;aN&lt;/tt&gt; は整数&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;a1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;aN&lt;/tt&gt; を大きい順に2人がそれぞれ出していった時の2人の得点差&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;discardLine&lt;/span&gt;
+  &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputsMVec&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;
+
+  &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+  &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- |&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; Vec.unsafeThaw [3, 1] &amp;gt;&amp;gt;= solve&lt;/span&gt;
+&lt;span class="c1"&gt;-- 2&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; Vec.unsafeThaw [20, 18, 2, 18] &amp;gt;&amp;gt;= solve&lt;/span&gt;
+&lt;span class="c1"&gt;-- 18&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;MVector&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sortBy&lt;/span&gt; &lt;span class="n"&gt;rcompare&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt;
+    &lt;span class="n"&gt;ifoldlMVec'&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="kr"&gt;if&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;.&amp;amp;.&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="kr"&gt;then&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="kr"&gt;else&lt;/span&gt; &lt;span class="n"&gt;negate&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;多分この問題は入力めっちゃ少ないのでそうでもないんだけど，リストのソートめっちゃばんばんメモリ使って GC のお世話になって遅くなるイメージなのでソートは基本的に mutable vector でイントロソートする方針にしてる．そのために mutable vector 向けの API もちょっと書いた．ま，そんな感じです．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="kagami-mochi"&gt;
+&lt;h3&gt;Kagami Mochi&lt;a class="headerlink" href="#kagami-mochi" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+N
+d1
+...
+dN
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;N&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;d1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;dN&lt;/tt&gt; は整数&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;d1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;dN&lt;/tt&gt; を真に小さい順に並べた時の最大の長さ&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;
+  &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;MVector&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replicateM&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+    &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+
+  &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sort&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+  &lt;span class="n"&gt;xs'&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unsafeFreeze&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+  &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;olength&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;uniq&lt;/span&gt; &lt;span class="n"&gt;xs'&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これもソートしてユニークするだけ．なんか，mutable vector は割と不遇でいろんな API が提供されてない (それは並行並列な世界を考えると当然なんだけど，競プロ的には辛い．もっとゆるふわな API が欲しい)．なんで，immutable vector との間を行ったり来たりする必要がある．後，入力部分は毎度おなじみ，曖昧な型を避けるため型指定していけって感じ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="otoshidama"&gt;
+&lt;h3&gt;Otoshidama&lt;a class="headerlink" href="#otoshidama" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+n y
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;n&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;y&lt;/tt&gt; は整数&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;n&lt;/tt&gt; 個 10000 / 5000 / 1000 を使って &lt;tt class="docutils literal"&gt;y&lt;/tt&gt; を作る組み合わせ．なお，作れない時は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;-1&lt;/span&gt; &lt;span class="pre"&gt;-1&lt;/span&gt; &lt;span class="pre"&gt;-1&lt;/span&gt;&lt;/tt&gt;&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;
+
+  &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="kt"&gt;Nothing&lt;/span&gt;           &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"-1 -1 -1"&lt;/span&gt;
+    &lt;span class="kt"&gt;Just&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;i3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;prints&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;i3&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- |&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- prop&amp;gt; maybe n (\(x, y, z) -&amp;gt; x + y + z) (solve n $ m * 1000) == n&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; solve 9 45000&lt;/span&gt;
+&lt;span class="c1"&gt;-- Just ...&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; solve 20 196&lt;/span&gt;
+&lt;span class="c1"&gt;-- Nothing&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;headMay&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;n2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt;
+  &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="n"&gt;n2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;i3&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;n2&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;y'&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;10000&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;5000&lt;/span&gt;
+  &lt;span class="n"&gt;withFilter&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;y'&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;i3&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;1000&lt;/span&gt;
+  &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;i3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;Coins と同じく安直にやってる．所詮，&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mn&gt;200&lt;/mn&gt;&lt;msup&gt;&lt;mn&gt;0&lt;/mn&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;2000^2&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;2&lt;/span&gt;&lt;span class="mord"&gt;0&lt;/span&gt;&lt;span class="mord"&gt;0&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord"&gt;0&lt;/span&gt;&lt;span class="msupsub"&gt;&lt;span class="vlist-t"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.8141079999999999em;"&gt;&lt;span style="top:-3.063em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mtight"&gt;2&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; やしいけるやろ．今回も曖昧な型回避のため type application してる．type application は特例で partial signature 使えて警告も出ないようになってる．便利．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h3&gt;白昼夢&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+s
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;s&lt;/tt&gt; は文字列&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;s&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;(dream|dreamer|erase|eraser)*&lt;/tt&gt; にマッチするか判定し，マッチするなら &lt;tt class="docutils literal"&gt;YES&lt;/tt&gt;，しないなら &lt;tt class="docutils literal"&gt;NO&lt;/tt&gt;&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;BS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLine&lt;/span&gt;
+
+  &lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="kt"&gt;True&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="s"&gt;"YES"&lt;/span&gt;
+    &lt;span class="kt"&gt;False&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="s"&gt;"NO"&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- |&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; solve "erasedream"&lt;/span&gt;
+&lt;span class="c1"&gt;-- True&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;ByteString&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;parseOnlyEof&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;BS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reverse&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="kt"&gt;Left&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+    &lt;span class="kt"&gt;Right&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;True&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Parse&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;skipMany&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;altconcat&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="kt"&gt;Parse&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;try&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;Parse&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;string&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;BS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reverse&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;ws&lt;/span&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="n"&gt;ws&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="s"&gt;"dream"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"dreamer"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"erase"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"eraser"&lt;/span&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;接頭が一致してる単語があるので，単純にパーサ書くと早食いしてしまってうまく解けないやつ．でも逆側だと曖昧さがなくなるので逆から書いたがこれは想定解なんだろうか？ ところでこの問題，正規表現があれば一発で解決するんだけど，どうやらライブラリリストから抜けてるっぽい．これは投げとくべきだったなと反省してる．今からでも間に合うんやろか？ とりあえず質問だけは投げておいた．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="traveling"&gt;
+&lt;h3&gt;Traveling&lt;a class="headerlink" href="#traveling" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+N
+t1 x1 y1
+...
+tN xN yN
+&lt;/pre&gt;
+&lt;p class="last"&gt;&lt;tt class="docutils literal"&gt;N&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;t1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;tN&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;x1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;xN&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;y1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;yN&lt;/tt&gt; は整数&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;出力&lt;/dt&gt;
+&lt;dd&gt;時刻 &lt;tt class="docutils literal"&gt;t1&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;tN&lt;/tt&gt; でその地点にいれるか判定し，可能なら &lt;tt class="docutils literal"&gt;Yes&lt;/tt&gt;，できないなら &lt;tt class="docutils literal"&gt;No&lt;/tt&gt;&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+  &lt;span class="n"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;
+
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;    &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"Yes"&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;t'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y'&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+        &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;abs&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;x'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;abs&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;y'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;td&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;t'&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+        &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;td&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;td&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;mod&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+          &lt;span class="kt"&gt;True&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;t'&lt;/span&gt; &lt;span class="n"&gt;x'&lt;/span&gt; &lt;span class="n"&gt;y'&lt;/span&gt;
+          &lt;span class="kt"&gt;False&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+            &lt;span class="n"&gt;replicateM_&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;discardLine&lt;/span&gt;
+            &lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="s"&gt;"No"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;純粋性をかなぐり捨てて書いた．まあ，これはいいでしょ．次行ってみよう．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="interactive-sorting"&gt;
+&lt;h3&gt;Interactive Sorting&lt;a class="headerlink" href="#interactive-sorting" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;入出力&lt;/dt&gt;
+&lt;dd&gt;&lt;pre class="first literal-block"&gt;
+n q
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;(n, q) = (26, 1000), (26, 100), (5, 7)&lt;/tt&gt; が最初に提示される&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;q&lt;/tt&gt; 回大文字アルファベット &lt;tt class="docutils literal"&gt;c1&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;c2&lt;/tt&gt; について&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+? c1 c2
+&lt;/pre&gt;
+&lt;p&gt;を出力でき，その度に&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+r
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;r = &amp;lt;, &amp;gt;&lt;/tt&gt; が返ってくる．最後に問合せ結果から分かる &lt;tt class="docutils literal"&gt;n&lt;/tt&gt; 文字のアルファベットをソートした文字列 &lt;tt class="docutils literal"&gt;s&lt;/tt&gt; について&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+! s
+&lt;/pre&gt;
+&lt;p class="last"&gt;を出力する．&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="s"&gt;"../src/Header.hs"&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readLineInputs&lt;/span&gt;
+  &lt;span class="n"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;iterateN&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="n"&gt;succ&lt;/span&gt; &lt;span class="sc"&gt;'A'&lt;/span&gt;
+
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Vector&lt;/span&gt; &lt;span class="kt"&gt;Char&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;solve&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;xs1&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unsafeThaw&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;
+    &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+      &lt;span class="mi"&gt;5&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go1&lt;/span&gt; &lt;span class="n"&gt;xs1&lt;/span&gt;
+      &lt;span class="mi"&gt;26&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go2&lt;/span&gt; &lt;span class="n"&gt;xs1&lt;/span&gt;
+      &lt;span class="kr"&gt;_&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="ne"&gt;error&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="s"&gt;"unexpected input:"&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="n"&gt;show&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;
+    &lt;span class="n"&gt;xs2&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unsafeFreeze&lt;/span&gt; &lt;span class="n"&gt;xs1&lt;/span&gt;
+
+    &lt;span class="n"&gt;putStr&lt;/span&gt; &lt;span class="s"&gt;"! "&lt;/span&gt;
+    &lt;span class="n"&gt;oforM_&lt;/span&gt; &lt;span class="n"&gt;xs2&lt;/span&gt; &lt;span class="n"&gt;putChar&lt;/span&gt;
+    &lt;span class="n"&gt;putEndLine&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go1&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;askSwap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+      &lt;span class="n"&gt;askSwap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+      &lt;span class="n"&gt;ask&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="kr"&gt;case&lt;/span&gt;
+        &lt;span class="kt"&gt;True&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+        &lt;span class="kt"&gt;False&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+          &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;swap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+          &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;swap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+      &lt;span class="c1"&gt;--   2 - 3&lt;/span&gt;
+      &lt;span class="c1"&gt;--  /&lt;/span&gt;
+      &lt;span class="c1"&gt;-- 0 - 1&lt;/span&gt;
+
+      &lt;span class="n"&gt;ask&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="kr"&gt;case&lt;/span&gt;
+        &lt;span class="c1"&gt;--     4&lt;/span&gt;
+        &lt;span class="c1"&gt;--    /&lt;/span&gt;
+        &lt;span class="c1"&gt;--   2 - 3&lt;/span&gt;
+        &lt;span class="c1"&gt;--  /&lt;/span&gt;
+        &lt;span class="c1"&gt;-- 0 - 1&lt;/span&gt;
+        &lt;span class="kt"&gt;True&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;askSwap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+        &lt;span class="c1"&gt;-- 4&lt;/span&gt;
+        &lt;span class="c1"&gt;--  \&lt;/span&gt;
+        &lt;span class="c1"&gt;--   2 - 3&lt;/span&gt;
+        &lt;span class="c1"&gt;--  /&lt;/span&gt;
+        &lt;span class="c1"&gt;-- 0 - 1&lt;/span&gt;
+        &lt;span class="kt"&gt;False&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+          &lt;span class="n"&gt;askSwap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+          &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;swap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+          &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;swap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+      &lt;span class="c1"&gt;-- 0 - 2 - 3 - 4&lt;/span&gt;
+      &lt;span class="c1"&gt;--  \&lt;/span&gt;
+      &lt;span class="c1"&gt;--   1&lt;/span&gt;
+
+
+      &lt;span class="n"&gt;ask&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="kr"&gt;case&lt;/span&gt;
+        &lt;span class="c1"&gt;-- 0 - 2 - 3 - 4&lt;/span&gt;
+        &lt;span class="c1"&gt;--  \     /&lt;/span&gt;
+        &lt;span class="c1"&gt;--   1 --&lt;/span&gt;
+        &lt;span class="kt"&gt;True&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;askSwap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+        &lt;span class="c1"&gt;-- 0 - 2 - 3 - 4&lt;/span&gt;
+        &lt;span class="c1"&gt;--          \&lt;/span&gt;
+        &lt;span class="c1"&gt;--           1&lt;/span&gt;
+        &lt;span class="kt"&gt;False&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+          &lt;span class="n"&gt;askSwap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+          &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;swap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+          &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;swap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+
+    &lt;span class="n"&gt;go2&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sortM&lt;/span&gt; &lt;span class="n"&gt;askChar&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+
+    &lt;span class="n"&gt;askSwap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ask&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="kr"&gt;case&lt;/span&gt;
+      &lt;span class="kt"&gt;True&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+      &lt;span class="kt"&gt;False&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;swap&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt;
+
+    &lt;span class="n"&gt;ask&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;c1&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt;
+      &lt;span class="n"&gt;c2&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt;
+      &lt;span class="n"&gt;askChar&lt;/span&gt; &lt;span class="n"&gt;c1&lt;/span&gt; &lt;span class="n"&gt;c2&lt;/span&gt;
+
+    &lt;span class="n"&gt;askChar&lt;/span&gt; &lt;span class="n"&gt;c1&lt;/span&gt; &lt;span class="n"&gt;c2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;putStrLn&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="sc"&gt;'?'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sc"&gt;' '&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;c1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sc"&gt;' '&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;c2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+      &lt;span class="n"&gt;putFlush&lt;/span&gt;
+      &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;getLine&lt;/span&gt;
+      &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+        &lt;span class="sc"&gt;'&amp;lt;'&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;True&lt;/span&gt;
+        &lt;span class="sc"&gt;'&amp;gt;'&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+        &lt;span class="kr"&gt;_&lt;/span&gt;   &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="ne"&gt;error&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="s"&gt;"unexpected input: "&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- |&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; xs &amp;lt;- mvecFromList ['B','A','E','F','D','C']&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; sortM (\x y -&amp;gt; pure $ x &amp;lt; y) xs&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;gt;&amp;gt;&amp;gt; mvecToList xs&lt;/span&gt;
+&lt;span class="c1"&gt;-- "ABCDEF"&lt;/span&gt;
+&lt;span class="c1"&gt;--&lt;/span&gt;
+&lt;span class="nf"&gt;sortM&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Char&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Char&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;MVector&lt;/span&gt; &lt;span class="kt"&gt;Char&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;sortM&lt;/span&gt; &lt;span class="n"&gt;cmp&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;v2&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;clone&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;v2&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;if&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;    &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+        &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;
+            &lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;div&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+        &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+        &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt;
+            &lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt;
+        &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+
+        &lt;span class="n"&gt;merge&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt;
+
+    &lt;span class="n"&gt;merge&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;if&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+        &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;xs2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;slice&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+        &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;ys2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;slice&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt;
+        &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt; &lt;span class="n"&gt;ys2&lt;/span&gt; &lt;span class="n"&gt;xs2&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+        &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;xs1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;slice&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+        &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;ys1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;slice&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt;
+        &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt; &lt;span class="n"&gt;ys1&lt;/span&gt; &lt;span class="n"&gt;xs1&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+        &lt;span class="n"&gt;c1&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt;
+        &lt;span class="n"&gt;c2&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt;
+        &lt;span class="n"&gt;cmp&lt;/span&gt; &lt;span class="n"&gt;c1&lt;/span&gt; &lt;span class="n"&gt;c2&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;=&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="kr"&gt;case&lt;/span&gt;
+          &lt;span class="kt"&gt;True&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+            &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;write&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;c1&lt;/span&gt;
+            &lt;span class="n"&gt;merge&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt;
+          &lt;span class="kt"&gt;False&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+            &lt;span class="kt"&gt;MVec&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;write&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;c2&lt;/span&gt;
+            &lt;span class="n"&gt;merge&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;i1&lt;/span&gt; &lt;span class="n"&gt;l1&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i2&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;l2&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;率直に言ってめんどくさい．最初に &lt;tt class="docutils literal"&gt;n&lt;/tt&gt; に関する場合分けをして，&lt;tt class="docutils literal"&gt;n = 5&lt;/tt&gt; の時は最適なソートを，それ以外の時はマージソートを行う．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;n = 5&lt;/tt&gt; の時は，decision tree の葉の数が今回は &lt;tt class="docutils literal"&gt;5! = 120&lt;/tt&gt; 必要で，2分木の葉の数の限界値は &lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;msup&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;mi&gt;h&lt;/mi&gt;&lt;/msup&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;2^h&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.849108em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord"&gt;2&lt;/span&gt;&lt;span class="msupsub"&gt;&lt;span class="vlist-t"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.849108em;"&gt;&lt;span style="top:-3.063em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mathdefault mtight"&gt;h&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; なので少なくとも &lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;h&lt;/mi&gt;&lt;mo&gt;≥&lt;/mo&gt;&lt;mn&gt;7&lt;/mn&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;h \geq 7&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.83041em;vertical-align:-0.13597em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault"&gt;h&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel"&gt;≥&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.64444em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;7&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; じゃないといけない．ここから最大 &lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mn&gt;7&lt;/mn&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;7&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.64444em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;7&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; 回比較がこのソートの最適解だと分かる．逆に言えば decision tree において，選択の幅を狭めるような早めに葉に到達してしまう選択をなるべくしない比較を考えないといけない．で，まあ結果はコードの通り．なるべく対称性を保つような比較を行っていき，徐々に要素の順序を確定させていく．&lt;/p&gt;
+&lt;p&gt;マージソートの方はそのまんまって感じ．2つの mutable vector 使ってそれぞれの再帰ステップで交互に役割を交代させながらソートしてく．ソートの際 &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; が必要で &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;vector-algorithms&lt;/span&gt;&lt;/tt&gt; が使えなかった．これは，テンプレにあったほうがいいんか？&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-4"&gt;
+&lt;h3&gt;モンスターテイマー&lt;a class="headerlink" href="#auto-id-4" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;問題文を読み解くのがめんどくさかったので，解いてない．&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-5"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;というわけで AtCoder 用のテンプレ作ったので，良かったら利用してください．僕もやっていきたい (やっていくとは言ってない)．DP 関連のサポートがちょっと薄いので，その辺おいおいやりながら整備していきたいねって感じ．&lt;/p&gt;
+&lt;p&gt;GHC 8.6.5 入ったら，Strict 拡張あるので，全部 unboxed literal と unboxed type 使って書く必要もなさそう．だいぶコーディング体験改善されそうで嬉しいっすね．こちらからは以上です．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/02/haskell-atcoder-template.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/02/haskell-atcoder-template.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="学習"></category><category term="Haskell"></category><category term="GHC"></category><category term="AtCoder"></category><category term="競技プログラミング"></category></entry><entry><title>CTMCP のために Mozart/Oz を動かす</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/" rel="alternate"></link><published>2019-04-08T19:00:00+09:00</published><updated>2019-04-08T19:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/read-ctmcp/</id><summary type="html">&lt;p&gt;ゼミの輪読で， &lt;a class="reference external" href="https://www.amazon.co.jp/dp/0262220695"&gt;Concepts, Techniques, and Models of Computer Programming (MIT Press)&lt;/a&gt; ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．&lt;/p&gt;
 &lt;div class="section" id="mozart-oz"&gt;
 &lt;h2&gt;Mozart/Oz&lt;a class="headerlink" href="#mozart-oz" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;ゼミの輪読で， &lt;a class="reference external" href="https://www.amazon.co.jp/dp/0262220695"&gt;Concepts, Techniques, and Models of Computer Programming (MIT Press)&lt;/a&gt; ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．&lt;/p&gt;
