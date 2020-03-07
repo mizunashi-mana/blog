@@ -1,0 +1,11 @@
+\begin{document}
+\begin{align*}
+  &\phantom{\iff} \mathit{fib} = n \mapsto \left\{\begin{array}{ll}
+    0 &(n = 0) \\
+    1 &(n = 1) \\
+    \mathit{fib}(m) + \mathit{fib}(m + 1) &(n = m + 2)
+  \end{array}\right. \\
+  &\iff \mathit{fib} = n \mapsto \frac{1}{\sqrt{5}}\left[\left(\frac{1 + \sqrt{5}}{2}\right)^n - \left(\frac{1 - \sqrt{5}}{2}\right)^n\right] \\
+  &\iff \phi = \frac{1 + \sqrt{5}}{2} \land \mathit{fib} = n \mapsto \frac{\phi^n - (- \phi)^{-n}}{\sqrt{5}}
+\end{align*}
+\end{document}
