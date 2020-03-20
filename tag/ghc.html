@@ -131,6 +131,27 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/#coherent-typeclass-and-orphan-instance">型クラスの Coherence と Orphan Instance</a></h2>
+    <p>
+          Posted on 金 20 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/xing-kurasu.html">型クラス</a>
+    </p>
+  </header>
+  <div>
+      <p>Haskell には型クラスと呼ばれる重要な機能がある．これは名前の通り，型をクラス分けするための機能で，その型に対してある操作が構成できることをその型の性質とみなし，性質に名前がつけられる機能だ．この機能は，アドホック多相，つまりは型による静的なオーバーロードを実現する仕組みとしての側面もある．型クラスに対しては，型ごとにそのインスタンス，つまり操作の実装を与えることができ，ある型がある型クラスに所属していることを型注釈で表明することができる．その表明は，コンパイラによるインスタンスの自動検索で解決され，解決できなかった場合は型エラーになる．</p>
+<p>さて，型クラスの仕組みは coherence という，かなり強い性質を要求する．今回は，この coherence がどういう役割を持つかを …</p>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/#coherent-typeclass-and-orphan-instance">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/02/haskell-atcoder-template/#haskell-atcoder-template">AtCoder の新環境テストの問題を解いてみる</a></h2>
     <p>
           Posted on 月 17 2月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/xue-xi.html">学習</a>
@@ -338,31 +359,6 @@
 <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support">https …</a></blockquote></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/#ghc-with-llvm">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">GHC IO モナドの中身</a></h2>
-    <p>
-          Posted on 金 17 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/io.html">IO</a>
-    </p>
-  </header>
-  <div>
-      <p>Haskell の IO モナドって，中身どうなってたんだろと気になってて，ちょっと調べてみた．そのメモ．</p>
-<div class="section" id="io-realworld">
-<h2>IO モナドと RealWorld<a class="headerlink" href="#io-realworld" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>まずは基本から． IO モナドは， Haskell の根幹となるモナドで， <tt class="docutils literal">main</tt> も IO で書く． GHC では中身は次のように定義されている <a class="footnote-reference" href="#io-monad-definition" id="auto-id-1">[1]</a>:</p>
-<pre class="literal-block">
--- In GHC.Types …</pre></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">    Continue reading
 </a>
   </div>
 </article>

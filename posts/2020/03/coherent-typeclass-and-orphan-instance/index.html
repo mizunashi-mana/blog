@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="Haskell には型クラスと呼ばれる重要な機能がある．これは名前の通り，型をクラス分けするための機能で，その型に対してある操作が構成できることをその型の性質とみなし，性質に名前がつけられる機能だ．この機能は，アドホック多相，つまりは型による静的なオーバーロードを実現する仕組みとしての側面もある．型クラスに対しては，型ごとにそのインスタンス，つまり操作の実装を与えることができ，ある型がある型クラスに所属していることを型注釈で表明することができる．その表明は，コンパイラによるインスタンスの自動検索で解決され，解決できなかった場合は型エラーになる． さて，型クラスの仕組みは coherence という，かなり強い性質を要求する．今回は，この coherence がどういう役割を持つかを …" />
+<meta name="keywords" content="Haskell, GHC, 型クラス">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="型クラスの Coherence と Orphan Instance"/>
+<meta property="og:description" content="Haskell には型クラスと呼ばれる重要な機能がある．これは名前の通り，型をクラス分けするための機能で，その型に対してある操作が構成できることをその型の性質とみなし，性質に名前がつけられる機能だ．この機能は，アドホック多相，つまりは型による静的なオーバーロードを実現する仕組みとしての側面もある．型クラスに対しては，型ごとにそのインスタンス，つまり操作の実装を与えることができ，ある型がある型クラスに所属していることを型注釈で表明することができる．その表明は，コンパイラによるインスタンスの自動検索で解決され，解決できなかった場合は型エラーになる． さて，型クラスの仕組みは coherence という，かなり強い性質を要求する．今回は，この coherence がどういう役割を持つかを …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-03-20 21:00:00+09:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="プログラミング言語"/>
+<meta property="article:tag" content="Haskell"/>
+<meta property="article:tag" content="GHC"/>
+<meta property="article:tag" content="型クラス"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; 型クラスの Coherence と Orphan Instance</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="coherent-typeclass-and-orphan-instance">型クラスの Coherence と Orphan Instance</h1>
+    <p>
+          Posted on 金 20 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>Haskell には型クラスと呼ばれる重要な機能がある．これは名前の通り，型をクラス分けするための機能で，その型に対してある操作が構成できることをその型の性質とみなし，性質に名前がつけられる機能だ．この機能は，アドホック多相，つまりは型による静的なオーバーロードを実現する仕組みとしての側面もある．型クラスに対しては，型ごとにそのインスタンス，つまり操作の実装を与えることができ，ある型がある型クラスに所属していることを型注釈で表明することができる．その表明は，コンパイラによるインスタンスの自動検索で解決され，解決できなかった場合は型エラーになる．</p>
+<p>さて，型クラスの仕組みは coherence という，かなり強い性質を要求する．今回は，この coherence がどういう役割を持つかを，Haskell を例に見ていく．また，orphan インスタンスと呼ばれる特殊なインスタンスと coherence の関係性について言及する．</p>
+<div class="section" id="auto-id-1">
+<h2>型クラス<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>型クラスとは，その名の通り型のクラスのことだ．例えば，ある型 <tt class="docutils literal">A</tt> の全ての要素同士について等価性が判定可能なことは，Haskell では以下のように表明できる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">instance</span> <span class="kt">Eq</span> <span class="kt">A</span> <span class="kr">where</span> <span class="o">...</span>
+</pre></div>
+</td></tr></table><p>これは，型 <tt class="docutils literal">A</tt> が <tt class="docutils literal">Eq</tt> 型クラスに所属するということを表す．<tt class="docutils literal">Eq</tt> 型クラスは，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">class</span> <span class="kt">Eq</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">==</span><span class="p">)</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+</pre></div>
+</td></tr></table><p>のように書け，<tt class="docutils literal">A</tt> が二分木構造を持つデータとすると，上記の表明の完成形は，以下のようになる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="kt">Leaf</span> <span class="o">|</span> <span class="kt">Node</span> <span class="kt">A</span> <span class="kt">A</span>
+
+<span class="kr">instance</span> <span class="kt">Eq</span> <span class="kt">A</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">==</span><span class="p">)</span> <span class="ow">=</span> <span class="n">go</span> <span class="kr">where</span>
+    <span class="n">go</span> <span class="n">x</span> <span class="n">y</span> <span class="ow">=</span> <span class="kr">case</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="kr">of</span>
+      <span class="p">(</span><span class="kt">Leaf</span>      <span class="p">,</span> <span class="kt">Leaf</span>      <span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">True</span>
+      <span class="p">(</span><span class="kt">Leaf</span>      <span class="p">,</span> <span class="kr">_</span>         <span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">False</span>
+      <span class="p">(</span><span class="kr">_</span>         <span class="p">,</span> <span class="kt">Leaf</span>      <span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">False</span>
+      <span class="p">(</span><span class="kt">Node</span> <span class="n">x1</span> <span class="n">x2</span><span class="p">,</span> <span class="kt">Node</span> <span class="n">y1</span> <span class="n">y2</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">go</span> <span class="n">x1</span> <span class="n">y1</span> <span class="o">&amp;&amp;</span> <span class="n">go</span> <span class="n">x2</span> <span class="n">y2</span>
+</pre></div>
+</td></tr></table><p>つまり，等価性判定の方法を具体的に与えることで，等価性判定可能であることを保証するわけだ．ところで，この仕組みは，型ごとのオーバーロードと見なすこともできる．Haskell での利用は多くの場合，後者の役割が期待されている場合が多い．上記の例では，様々な型でそれぞれ異なる等価性判定を <tt class="docutils literal"><span class="pre">(==)</span></tt> という同じ名前の演算子で参照できる．例えば，以下のようにだ:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="ow">::</span> <span class="kt">Eq</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+<span class="nf">f</span> <span class="n">x</span> <span class="n">y</span> <span class="n">z</span> <span class="ow">=</span> <span class="n">x</span> <span class="o">==</span> <span class="n">y</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="o">==</span> <span class="n">z</span>
+</pre></div>
+</td></tr></table><p>型クラスで導入された操作をメソッドと呼び，メソッドはそれぞれ型制約のついた関数として参照できる．例えば，<tt class="docutils literal"><span class="pre">(==)</span></tt> は，<tt class="docutils literal"><span class="pre">(==)</span> :: Eq a =&gt; a <span class="pre">-&gt;</span> a <span class="pre">-&gt;</span> Bool</tt> という型を持つ演算子として参照できる．型制約を持つ型は，その検査の際型制約に関する保証，つまりスコープ内に何らかのインスタンスが必ずあることを求める．<tt class="docutils literal">f</tt> 内での <tt class="docutils literal"><span class="pre">(==)</span></tt> の呼び出しは，<tt class="docutils literal">f</tt> の型制約によって <tt class="docutils literal">Eq a</tt> というインスタンスがあることが保証されるため，問題なく使用できるが，<tt class="docutils literal">f :: a <span class="pre">-&gt;</span> a <span class="pre">-&gt;</span> a <span class="pre">-&gt;</span> Bool</tt> のような型にすると型エラーになる．ただ，保証は呼び出し元の型制約だけによるものではない．例えば，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">g</span> <span class="ow">::</span> <span class="kt">A</span> <span class="ow">-&gt;</span> <span class="kt">A</span> <span class="ow">-&gt;</span> <span class="kt">A</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+<span class="nf">g</span> <span class="n">x</span> <span class="n">y</span> <span class="n">z</span> <span class="ow">=</span> <span class="n">x</span> <span class="o">==</span> <span class="n">y</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="o">==</span> <span class="n">z</span>
+</pre></div>
+</td></tr></table><p>と書いた場合，<tt class="docutils literal">g</tt> は特に型制約を必要としない．この場合，<tt class="docutils literal">A</tt> に関するインスタンスがあることから，直接保証が得られる．Haskell の型クラスの仕組みの面白い点は，インスタンスの解決方法と型推論の方法さえ与えられれば，型クラスを持たない言語に elaboration するだけ <a class="footnote-reference" href="#notice-rankntypes" id="auto-id-2">[1]</a> で実行の意味論を与えられる点だ．この方法は辞書渡しという名前で知られていて，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">class</span> <span class="kt">C</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">m1</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="kt">C</span> <span class="kt">A</span> <span class="kr">where</span>
+  <span class="n">m1</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">x</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="kt">C</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="ow">=</span> <span class="n">m1</span> <span class="o">.</span> <span class="n">m1</span>
+</pre></div>
+</td></tr></table><p>というようなプログラムを，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">DictC</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">DictC</span>
+  <span class="p">{</span> <span class="n">m1</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+  <span class="p">}</span>
+
+<span class="nf">instDictC_A</span> <span class="ow">::</span> <span class="kt">DictC</span> <span class="kt">A</span>
+<span class="nf">instDictC_A</span> <span class="ow">=</span> <span class="kt">DictC</span>
+  <span class="p">{</span> <span class="n">m1</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">x</span>
+  <span class="p">}</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="kt">DictC</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="n">d</span> <span class="ow">=</span> <span class="n">m1</span> <span class="n">d</span> <span class="o">.</span> <span class="n">m1</span> <span class="n">d</span>
+</pre></div>
+</td></tr></table><p>というように，型クラスに対応する辞書と呼ばれるデータ型を作り，その型の値を明示的に渡していくことで実現される．GHC では，この elaboration による実行時表現をそのまま採用しており，内部は辞書渡しにより実現されている．</p>
+</div>
+<div class="section" id="coherence">
+<h2>型クラスの Coherence<a class="headerlink" href="#coherence" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ところで，Haskell の型クラスのインスタンスには，以下のような制約がある．</p>
+<blockquote>
+<p>A type may not be declared as an instance of a particular class more than once in the program.</p>
+<p>プログラム中において，特定のクラスに対し，ある型をそのインスタンスとして一度より多く (複数回) 定義することはできません．</p>
+<p class="attribution">—<a class="reference external" href="https://www.haskell.org/onlinereport/haskell2010/haskellch4.html#x10-770004.3.2">Haskell Language Report 4.3.2 Instance Declarations</a></p>
+</blockquote>
+<p>この制限は時折物議を醸すわけで，実際この制限を緩和する GHC の言語拡張も幾つか存在する．しかし，言語拡張でも完全にこの制限が取り払えるわけでは無い．では，具体的に何が問題になるかを考えてみる．次のようなプログラムを考えてみよう:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">C1</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">m1</span> <span class="ow">::</span> <span class="n">a</span>
+
+<span class="kr">class</span> <span class="kt">C1</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">C2</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">m2</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="kt">C1</span> <span class="kt">Int</span> <span class="kr">where</span>
+  <span class="n">m1</span> <span class="ow">=</span> <span class="mi">0</span>
+
+<span class="kr">instance</span> <span class="kt">C2</span> <span class="kt">Int</span> <span class="kr">where</span>
+  <span class="n">m2</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">C1</span> <span class="n">a</span><span class="p">,</span> <span class="kt">C2</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="ow">=</span> <span class="n">m2</span> <span class="n">m1</span>
+
+<span class="nf">g</span> <span class="ow">::</span> <span class="kt">Int</span>
+<span class="nf">g</span> <span class="ow">=</span> <span class="n">f</span>
+</pre></div>
+</td></tr></table><p>このプログラムでは，型クラスの継承が行われている．継承とは，型があるクラスに所属している場合にのみ，そのクラスのインスタンスを定義できるという制約をかける機能で，いわばある型クラスの部分クラスを定義できる機能だ．この場合の elaboration によって得られるプログラムは，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">DictC1</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">DictC1</span>
+  <span class="p">{</span> <span class="n">m1</span> <span class="ow">::</span> <span class="n">a</span>
+  <span class="p">}</span>
+
+<span class="kr">data</span> <span class="kt">DictC2</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">DictC2</span>
+  <span class="p">{</span> <span class="n">superC1</span> <span class="ow">::</span> <span class="kt">DictC1</span> <span class="n">a</span>
+  <span class="p">,</span> <span class="n">m2</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+  <span class="p">}</span>
+
+<span class="nf">instDictC1_Int</span> <span class="ow">::</span> <span class="kt">DictC1</span> <span class="kt">Int</span>
+<span class="nf">instDictC1_Int</span> <span class="ow">=</span> <span class="kt">DictC1</span>
+  <span class="p">{</span> <span class="n">m1</span> <span class="ow">=</span> <span class="mi">0</span>
+  <span class="p">}</span>
+
+<span class="nf">instDictC2_Int</span> <span class="ow">::</span> <span class="kt">DictC2</span> <span class="kt">Int</span>
+<span class="nf">instDictC2_Int</span> <span class="ow">=</span> <span class="kt">DictC2</span>
+  <span class="p">{</span> <span class="n">superC1</span> <span class="ow">=</span> <span class="n">instDictC1_Int</span>
+  <span class="p">,</span> <span class="n">m2</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+  <span class="p">}</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="kt">DictC1</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">DictC2</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="n">d1</span> <span class="n">d2</span> <span class="ow">=</span> <span class="n">m2</span> <span class="n">d2</span> <span class="p">(</span><span class="n">m1</span> <span class="n">d1</span><span class="p">)</span>
+
+<span class="nf">g</span> <span class="ow">::</span> <span class="kt">Int</span>
+<span class="nf">g</span> <span class="ow">=</span> <span class="n">f</span> <span class="n">instDictC1_Int</span> <span class="n">instDictC2_Int</span>
+</pre></div>
+</td></tr></table><p>のように elaboration される．そうとは限らなくね？と思った人は正しくて，実は elaboration はもう一つやり方がある．それは次の部分を変えるやり方だ:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span>  f :: DictC1 a -&gt; DictC2 a -&gt; a
+<span class="gd">- f d1 d2 = m2 d2 (m1 d1)</span>
+<span class="gi">+ f _ d2 = m2 d2 (m1 d1) where</span>
+<span class="gi">+   d1 = superC1 d2</span>
+</pre></div>
+</td></tr></table><p>関数 <tt class="docutils literal">f</tt> における制約から <tt class="docutils literal">C1 a</tt> のインスタンスを保証する方法は，制約中の <tt class="docutils literal">C1 a</tt> から直接保証する方法と，<tt class="docutils literal">C2 a</tt> からその上位クラスが <tt class="docutils literal">C1 a</tt> であることを導きそこから保証する方法の2通りあり，前者が最初に示した方法，後者がその次に示した方法ということになる．ところで，この2通りの elaboration について，もし <tt class="docutils literal">Int</tt> の <tt class="docutils literal">C1</tt> に対するインスタンスが複数定義できた場合を考えてみる．この場合，elaboration において <tt class="docutils literal">DictC2</tt> の <tt class="docutils literal">superC1</tt> にその内の1つが入り，<tt class="docutils literal">g</tt> の呼び出し時に <tt class="docutils literal">f</tt> に渡す <tt class="docutils literal">DictC1 a</tt> の値は別のものが入ると，2通り示した elaboration の方法のどちらを採用するかによって，<tt class="docutils literal">g</tt> の結果が変わる可能性がある．</p>
+<p>また，もう1つ別の例を見てみよう:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">h</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="nf">h</span> <span class="ow">=</span> <span class="p">(</span><span class="n">m1</span><span class="p">,</span> <span class="n">m1</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>この例は次のように elaboration される:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">h</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="nf">h</span> <span class="ow">=</span> <span class="p">(</span><span class="n">m1</span> <span class="n">instDictC1_Int</span><span class="p">,</span> <span class="n">m1</span> <span class="n">instDictC1_Int</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>さて，この例は，<tt class="docutils literal">Int</tt> に対する <tt class="docutils literal">C1</tt> のインスタンスの定義が1つだから，何も考えずに <tt class="docutils literal">instDictC1_Int</tt> を渡すことができているわけだ．しかし，インスタンスが複数あった場合は，もちろん次のような elaboration があり得るかもしれない:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">h</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="nf">h</span> <span class="ow">=</span> <span class="p">(</span><span class="n">m1</span> <span class="n">instDictC1_Int</span><span class="p">,</span> <span class="n">m1</span> <span class="n">instDictC1_Int'</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>つまり，それぞれ異なるインスタンスが適用されるわけだ．この例だとあまり問題に対して直感的では無いかもしれないが，例えば等価性をあるプログラムで2回使った場合，等価性のためのインスタンスが2種類あった場合，最初の使用と2回目の使用で異なる等価性のアルゴリズムが動くということがあり得るということだ．これは，多くの人にとってあまり嬉しい仕様では無いだろう．この例は先ほどの例に比べたら些細な例だと思えるかもしれない．多くの場合インスタンス解決のアルゴリズムが，このような狭いスコープで異なるインスタンスを選ぶことはまずない <a class="footnote-reference" href="#notice-mean-instance-resolution" id="auto-id-3">[2]</a>．ただ，次のような状況を考えてみるとどうだろう？</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">instance</span> <span class="kt">C1</span> <span class="kt">Int</span> <span class="kr">where</span>
+  <span class="n">m1</span> <span class="ow">=</span> <span class="mi">0</span>
+
+<span class="nf">h1</span> <span class="ow">::</span> <span class="kt">Int</span>
+<span class="nf">h1</span> <span class="ow">=</span> <span class="n">m1</span>
+
+<span class="kr">instance</span> <span class="kt">C1</span> <span class="kt">Int</span> <span class="kr">where</span>
+  <span class="n">m1</span> <span class="ow">=</span> <span class="mi">1</span>
+
+<span class="nf">h2</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="nf">h2</span> <span class="ow">=</span> <span class="p">(</span><span class="n">m1</span><span class="p">,</span> <span class="n">h1</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>この場合，<tt class="docutils literal">h1</tt> での <tt class="docutils literal">m1</tt> と，<tt class="docutils literal">h2</tt> での <tt class="docutils literal">m1</tt> で異なるインスタンスを使う可能性は十分ありうる．これを是とするかどうかは，おそらく意見の分かれるところだと思う．ただ，Haskell では equational reasoning に基づく変形が好まれるため，<tt class="docutils literal">h1</tt> を直接 <tt class="docutils literal">m1</tt> に置き換える変形ができないことは，1つの問題点となりうる．</p>
+<p>一般に，型クラスのインスタンス解決は型システムに組み込まれることが多い．その場合，型検査の際インスタンス解決が行われる．そして，型検査において作られた型の導出木に対する変換により elaboration が行われる．このような変換の枠組みは，型クラス以外でも採用されることがある．具体的には，暗黙の型変換やレコード型などだ．そして，それらの場合にも上記で挙げた複数のインスタンスがある場合に起こる問題と似たような問題が起こることがある．この問題は，次のように形式化される:</p>
+<blockquote>
+型の導出木から言語への変換があった時，ある型の異なる2つの導出木において，変換を行った結果が意味論同値にならない．</blockquote>
+<p>例えば，<tt class="docutils literal">h</tt> の例では2つの <tt class="docutils literal">m1</tt> に対してそれぞれ同じインスタンスを使っても異なるインスタンスを使っても，どんなインスタンスを使っても，それが <tt class="docutils literal">Int</tt> に対する <tt class="docutils literal">C1</tt> のインスタンスであれば型検査は通るのが一般的だ．しかし，その場合使ったインスタンスに対する elaboration した結果は，他のインスタンス解決を行ってから elaboration した結果と振る舞いが変わる場合がある．逆にこのような問題がなければ，型システムに対して一定の保証が与えられる．この保証，つまり上記で形式化した問題が成り立たない型システムと elaboration の性質のことを，一般に coherence と呼ぶ <a class="footnote-reference" href="#tapl-subtyping-coherence" id="auto-id-4">[3]</a>．coherence を保証する方法論は幾つかあるが，Haskell では型クラスのインスタンスを1つしか定義できないようにすることで，coherence を保証している <a class="footnote-reference" href="#incoherent-type-class" id="auto-id-5">[4]</a>．</p>
+</div>
+<div class="section" id="orphan">
+<h2>orphan インスタンス<a class="headerlink" href="#orphan" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>さて，Haskell では coherence を保証するため，型クラスのインスタンスは型に対して1つしか定義できないようにしている．ところで，この「型クラスのインスタンスは型に対して1つしか定義できないようにする」というのは，言うだけなら単純に見えるが，幾つかの課題もある．特に著名な問題が，orphan インスタンスである．GHC では，ある型 <tt class="docutils literal">T</tt> の <tt class="docutils literal">C</tt> のインスタンス宣言において，その宣言が <tt class="docutils literal">T</tt> の宣言または <tt class="docutils literal">C</tt> の宣言と同じモジュールにあるかないかで，インスタンスに関する扱いが変わる．特に同じモジュールにない場合は，orphan インスタンスと呼ばれ，警告が表示されるようになっている．なぜこのような区分があるのだろうか？</p>
+<p>まず，Haskell ではインスタンスが暗黙的にモジュール間を伝搬する．これは，以下のように規定されている:</p>
+<blockquote>
+<p>All instances in scope within a module are always exported and any import brings all instances in from the imported module. Thus, an instance declaration is in scope if and only if a chain of import declarations leads to the module containing the instance declaration.</p>
+<p>モジュールにおいて，スコープ内の全てのインスタンスは常にエクスポートされ，任意の <tt class="docutils literal">import</tt> は，インポートしたモジュールから全てのインスタンスを取り込みます．したがって，インスタンス宣言がスコープ内にあるということは，<tt class="docutils literal">import</tt> 宣言のチェインがそのインスタンス宣言を含むモジュールにたどり着くということと同値です．</p>
+<p class="attribution">—<a class="reference external" href="https://www.haskell.org/onlinereport/haskell2010/haskellch5.html#x11-1060005.4">Haskell Language Report 5.4 Importing and Exporting Instance Declarations</a></p>
+</blockquote>
+<p>私たちにこの伝搬を止めることはできないし，制御することもできない．これは，そもそもプログラム中でインスタンスは型に対して1つしか定義できないため制御する必要が特に生じないからだ <a class="footnote-reference" href="#consider-coherence-for-instance-leading" id="auto-id-6">[5]</a>．ところで，こういう規定があるのはいいとして，実際問題として Haskell のコンパイラは，インスタンスの解決をこの規定に従って行わなければならない．もちろん，どのモジュールにインスタンスがあるか分からないため，最悪全てのモジュールを調べる必要がある．ユーザ側にとってもこの規定は問題だ．もし，重要な2つのモジュールがそれぞれある型に対しての別々のインスタンス定義を保有している場合，それらのモジュールが <tt class="docutils literal">import</tt> チェインに入ってる全てのモジュールがインスタンスの競合により使用できなくなる．</p>
+<p>ところで，ある型のあるクラスのインスタンスを使用する場合，その型とクラスに関する情報が無いとどうしようもないので，それぞれの宣言があるモジュールの情報は必ず見に行くことになる．そして，第三者がそのモジュールをいじると言うことは起こり得ない．つまり，そのいずれかのモジュールにインスタンス宣言が含まれているなら，コンパイラにとって必要な情報を見るついでにインスタンスも見れ，またユーザ側にとってももしインスタンス競合が起こったならそもそもその型やクラスを読み込めないことになるため，逆に型やクラスが読み込めればインスタンス競合がないことが保証でき嬉しい．そこで，Haskell ではある型のあるクラスに対するインスタンス宣言は，その型またはクラス宣言と同じモジュールに置くことが推奨されている．逆に独立したモジュールにあるインスタンスは orphan インスタンスと呼ばれ，なるべく控えるように勧告されている．そのため，ある型に対して独立にインスタンスが作りたい場合，<tt class="docutils literal">newtype</tt> によって新たにインスタンスの意味論だけを変える型を作り，その型に対するインスタンス宣言を行うということが行われている．</p>
+<p>なお，GHC では，orphan インスタンスがあるモジュールは内部でマークされていて，モジュールのインターフェースファイルにはそのモジュールが依存する orphan インスタンスのあるモジュールが列挙されている．そして，コンパイル時にそのリストにあるモジュールの全てのインターフェースファイルを読みに行くようになっている．よって，一旦 orphan インスタンスを作ってしまうと，そのインスタンスがあるモジュールのインターフェースファイルは，そのモジュールに依存する全てのモジュールが再コンパイルされる際，どのような変更だろうと読み込まれることになる．よって，orphan インスタンスはコンパイル時間にも悪影響を与える <a class="footnote-reference" href="#notice-orphan-instance-compiling" id="auto-id-7">[6]</a>．</p>
+</div>
+<div class="section" id="auto-id-8">
+<h2>まとめ<a class="headerlink" href="#auto-id-8" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>というわけで，型クラスのコヒーレンスと orphan インスタンスの関係性について紹介した．一応，インスタンスが型に対して1つしか作れないのと，インスタンスが暗黙に伝搬してしまうのには理由があるんだよと言う話でした．最近 Haskell のフォークみたいな言語を作ろうとしてて，そういやこの辺まとまった記事ないなあと思って書いた．ezyang 先生の <a class="reference external" href="http://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/">Type classes: confluence, coherence and global uniqueness</a> はよくまとまってるので，この辺もよかったら参照すると良さそう．</p>
+<p>なお，別の話題として型クラスの elaboration って要は暗黙的な引数の elaboration と見做せるよねと言う話題が古くからある．ただ，暗黙的引数とみるからには明示的に適用したくなるわけで，その辺の機能を入れた場合に coherence をどう考えるかという話題があったりする．この辺は一昨年の Haskell Symposium で <a class="reference external" href="https://dl.acm.org/doi/10.1145/3299711.3242752">Coherent explicit dictionary application for Haskell</a> というセッションがあったりする．この辺も近いうちに紹介できたらなと思う (思ってるだけ)．</p>
+<table class="docutils footnote" frame="void" id="notice-rankntypes" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td>なお，素の Haskell には落とせなくて，ランク2多相ぐらいが必要になる．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="notice-mean-instance-resolution" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-3">[2]</a></td><td>もちろん故意にそのようなアルゴリズムを作る場合は別だが．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="tapl-subtyping-coherence" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-4">[3]</a></td><td>みんな読んでる TaPL では，15.6 で触れられてるっぽい．ここでは，subtyping を例にとってる．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="incoherent-type-class" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-5">[4]</a></td><td>ところで，GHC では <tt class="docutils literal">INCOHERENT</tt> プラグマというものが用意されており，名前の通り coherence を捨てる代わりに複数のインスタンス定義をできるようにするプラグマだ．当然の帰結ながら，GHC ユーザの間ではあまり使わないほうがいいプラグマとして扱われている．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="consider-coherence-for-instance-leading" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-6">[5]</a></td><td>と言ってみたものの，制御する方はそれでいいとして，伝搬を止める方は実は問題があるのかよく分かってない．coherence が成り立たなくなるような気が直感的にするんだけど，インスタンスが消えるということは，型の導出がそもそもできない気がしていて，それは大丈夫そうな気もする？ ただ，equational reasoning による変形がモジュール跨ぐとできなくなる場合が生じるという点では問題．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="notice-orphan-instance-compiling" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-7">[6]</a></td><td>と言っても他の要素に比較すればそれほど大した時間ではないが．</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/03/coherent-typeclass-and-orphan-instance.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/03/coherent-typeclass-and-orphan-instance.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/xing-kurasu.html">型クラス</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/">Local Do と型クラス</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/02/haskell-atcoder-template/">AtCoder の新環境テストの問題を解いてみる</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/">State モナドの代わりに Reader モナドを使う</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/12/rankntypes-a-ghc-extension/">多相関数を第一級で取り扱う</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/11/trees-that-grow/">type family を使って再帰的 ADT をオープンにする</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

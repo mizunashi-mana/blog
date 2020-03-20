@@ -131,6 +131,31 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">GHC IO モナドの中身</a></h2>
+    <p>
+          Posted on 金 17 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/io.html">IO</a>
+    </p>
+  </header>
+  <div>
+      <p>Haskell の IO モナドって，中身どうなってたんだろと気になってて，ちょっと調べてみた．そのメモ．</p>
+<div class="section" id="io-realworld">
+<h2>IO モナドと RealWorld<a class="headerlink" href="#io-realworld" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まずは基本から． IO モナドは， Haskell の根幹となるモナドで， <tt class="docutils literal">main</tt> も IO で書く． GHC では中身は次のように定義されている <a class="footnote-reference" href="#io-monad-definition" id="auto-id-1">[1]</a>:</p>
+<pre class="literal-block">
+-- In GHC.Types …</pre></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/haskell-old-stg-syntax/#haskell-old-stg-syntax">STG Version 2.5 の動作</a></h2>
     <p>
           Posted on 日 21 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
