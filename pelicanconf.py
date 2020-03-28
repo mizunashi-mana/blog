@@ -28,6 +28,9 @@ STATIC_PATHS = [
   'articles', # mixed content
 ]
 ARTICLE_PATHS = ['articles']
+READERS = {
+  'html': None
+}
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
 CUSTOM_CSS = 'dist-asset/bundle.css'

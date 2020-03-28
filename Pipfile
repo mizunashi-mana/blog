@@ -13,6 +13,7 @@ pelican = "*"
 ghp-import = "*"
 beautifulsoup4 = "*"
 pillow = "*"
+Pygments = "*"
 
 [requires]
 python_version = "3"

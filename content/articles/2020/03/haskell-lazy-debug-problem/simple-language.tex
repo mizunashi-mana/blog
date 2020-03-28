@@ -1,0 +1,45 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{10cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\newcommand*{\BNFassign}{\mathrel{::=}}
+\newcommand*{\BNFor}{\hspace{1.4em}\mid}
+\newcommand*{\tokenc}[1]{\text{\texttt{#1}}}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \begin{array}{lll}
+  \mathit{expr}
+  &\BNFassign \mathit{iexpr1} &;\$1 \\
+  \mathit{iexpr1}
+  &\BNFassign \mathit{iexpr2}\;\tokenc{*}\;\mathit{iexpr1} &;\tokenc{InfixApp}\;\$1\;\$2 \\
+  &\BNFor \mathit{iexpr2}\;\tokenc{/}\;\mathit{iexpr1} &;\tokenc{InfixApp}\;\$1\;\$2 \\
+  \mathit{iexpr2}
+  &\BNFassign \mathit{iexpr3}\;\tokenc{+}\;\mathit{iexpr2} &;\tokenc{InfixApp}\;\$1\;\$2 \\
+  &\BNFor \mathit{iexpr3}\;\tokenc{-}\;\mathit{iexpr2} &;\tokenc{InfixApp}\;\$1\;\$2 \\
+  \mathit{iexpr3}
+  &\BNFassign \mathit{bexpr} &;\$1 \\
+  \mathit{bexpr}
+  &\BNFassign \tokenc{\textbackslash}\;\mathit{var}\;\tokenc{->}\;\mathit{expr} &;\tokenc{Abs}\;\$1\;\$2 \\
+  &\BNFor \mathit{fexpr} &;\$1 \\
+  \mathit{fexpr}
+  &\BNFassign \mathit{fexpr}\;\mathit{aexpr} &;\tokenc{App}\;\$1\;\$2 \\
+  &\BNFor \mathit{aexpr} &;\$1 \\
+  \mathit{aexpr}
+  &\BNFassign \tokenc{(}\;\mathit{expr}\;\tokenc{)} &;\$1 \\
+  &\BNFor \mathit{lit} &;\tokenc{Lit}\;\$1 \\
+  &\BNFor \mathit{var} &;\tokenc{Var}\;\$1 \\
+  \mathit{lit}
+  &\BNFassign \mathit{integer} &;\$1 \\
+  \mathit{var}
+  &\BNFassign \mathit{ident} &;\$1 \\
+  &\BNFor \tokenc{(}\;\mathit{symbol}\;\tokenc{)} &;\$1
+  \end{array}
+\end{align*}
+\end{document}
