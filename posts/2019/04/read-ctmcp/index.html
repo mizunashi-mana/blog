@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="ゼミの輪読で， Concepts, Techniques, and Models of Computer Programming (MIT Press) ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ． Mozart/Oz この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である …" />
+<meta name="keywords" content="Mozart, Oz, Emacs, 本, 環境構築">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="CTMCP のために Mozart/Oz を動かす"/>
+<meta property="og:description" content="ゼミの輪読で， Concepts, Techniques, and Models of Computer Programming (MIT Press) ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ． Mozart/Oz この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-04-08 09:50:49+09:00"/>
+<meta property="article:modified_time" content="2020-03-29 08:23:18+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="学習"/>
+<meta property="article:tag" content="Mozart"/>
+<meta property="article:tag" content="Oz"/>
+<meta property="article:tag" content="Emacs"/>
+<meta property="article:tag" content="本"/>
+<meta property="article:tag" content="環境構築"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; CTMCP のために Mozart/Oz を動かす</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="read-ctmcp">CTMCP のために Mozart/Oz を動かす</h1>
+    <p>
+          Posted on 月 08 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/xue-xi.html">学習</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>ゼミの輪読で， <a class="reference external" href="https://www.amazon.co.jp/dp/0262220695">Concepts, Techniques, and Models of Computer Programming (MIT Press)</a> ，略称 CTM または CTMCP を読むことになった．その為の準備と，ちょっとだけ読んだのでそのまとめ．</p>
+<div class="section" id="mozart-oz">
+<h2>Mozart/Oz<a class="headerlink" href="#mozart-oz" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>この本では， Oz というプログラミング言語を扱っている．と言っても， Oz の実装である Mozart に完全に焦点を当てている． Oz 自体は名前を聞いたことはあったが今まで触ったことはなかった． <a class="reference external" href="https://mozart.github.io/mozart-v1/doc-1.4.0/tutorial/index.html">公式ドキュメント</a> によると</p>
+<blockquote>
+<p>"Oz is a multi-paradigm language that is designed for advanced, concurrent, networked, soft real-time, and reactive applications."</p>
+<p>"Oz はマルチパラダイムな言語で，高度で，並行で，ネットワークを使用し，ソフトリアルタイム <a class="footnote-reference" href="#about-soft-realtime" id="auto-id-2">[1]</a> でリアクティブ <a class="footnote-reference" href="#about-reactive" id="auto-id-3">[2]</a> なアプリケーションのために設計されています．"</p>
+<p class="attribution">—Tutorial of Oz by Seif Haridi and Nils Franzén</p>
+</blockquote>
+<p>という言語らしい． Mozart は UCL の PLDC 研究グループによって開発が続けられている Oz の主要実装ということになる．</p>
+<p>ところで， Mozart/Oz でググると一番最初に出てくる <a class="reference external" href="https://qiita.com/mshioda/items/9de1399db486107f1c30">「Mozart/Oz について話します」</a> という記事の中で述べられているように，あまり積極的な開発体制が整っているわけではないようだ．また，メジャーバージョン1から現在のメジャーバージョン2に移る時に，開発体制の大規模な移行があったのか，本書で出てくるサイト <a class="reference external" href="http://www.mozart-oz.org">http://www.mozart-oz.org</a> は稼働しておらず， <a class="reference external" href="https://mozart.github.io/">https://mozart.github.io/</a> の方に移っている．</p>
+<p>ただ，開発自体は続いているようで，半年前ぐらいにメジャーバージョン2の初の安定板， <a class="reference external" href="https://github.com/mozart/mozart2/releases/tag/v2.0.1">2.0.1</a> がリリースされている．とりあえずこれをインストールしたが，今の所 (1章までしか読んでない) 本書のサンプルは問題なく動く．今後に期待という感じだろうか．</p>
+</div>
+<div class="section" id="auto-id-6">
+<h2>Mozart/Oz の使い方<a class="headerlink" href="#auto-id-6" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まずは， Mozart をインストールして，動かしてみる．インストールは macOS で行ったので，他の環境でどうなるのかは分からないが，ひとまず <a class="reference external" href="https://github.com/mozart/mozart2/releases/tag/v2.0.1">リリースページ</a> をみる限り macOS / Debian / RedHat / Windows 向けのインストーラは提供されていそう．今回は，macOS 向けの <tt class="docutils literal"><span class="pre">mozart2-2.0.1-x86_64-darwin.dmg</span></tt> をダウンロードして起動した．で，アプリケーションフォルダに <tt class="docutils literal">Mozart2.app</tt> をインストールする．後 Emacs が必要なので， <a class="reference external" href="https://emacsformacosx.com/">https://emacsformacosx.com/</a> とかから適当に入れる．</p>
+<p>で，起動すると以下の画面が出てくる:</p>
+<img alt="上下に分かれた Emacs 画面が表示される．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-emacs-screenshot.png"/>
+<p>上のバッファがプログラミングする部分，下のバッファがコンパイラの出力画面になる．上のバッファで例えば次のようにプログラミングを行える．</p>
+<img alt="``{Browse 42}`` と書くと 42 を表示するプログラムになる．コンパイルに成功し， accepted と表示されているのが分かる．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-programming-sample.png"/>
+<p>ここではプログラム <tt class="docutils literal">{Browse 42}</tt> をコンパイルしている．コンパイルは <tt class="docutils literal">Oz</tt> メニューの「Feed Buffer」という項目から行え， <tt class="docutils literal"><span class="pre">C-.</span> <span class="pre">C-b</span></tt> が割り当てられている．なおカーソル位置までを実行したかったら「Feed Region (<tt class="docutils literal"><span class="pre">C-.</span> <span class="pre">C-r</span></tt>) 」で行える．対話的なデバッグの際有用だ．「Feed Buffer」後はコンパイラの出力画面に accepted / rejected が表示され， accepted の場合今回の例だと，次のような出力ウィンドウが表示される:</p>
+<img alt="42 と表示されたウィンドウが表示される．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-output-screenshot.png"/>
+<p>ついでに， Emacs のこの GUI でなく普通のプログラミングスタイルでやりたいなら， <tt class="docutils literal">/Applications/Mozart2.app/Contents/Resources/bin</tt> の中に色々ツールが入ってるのでそれを使う．例えば，簡単な Hello World プログラムは次のように作れる:</p>
+<pre class="literal-block">
+$ export PATH=$PATH:/Applications/Mozart2.app/Contents/Resources/bin
+$ cat &gt; helloworld.oz
+functor
+import
+  System
+define
+  {System.showInfo "Hello World!"}
+end
+$ ozc -x helloworld.oz
+$ ls
+helloworld  helloworld.oz
+$ ozengine helloworld
+Hello World!
+</pre>
+<p>CTMCP を読む分には， Emacs の実行環境で問題なさそうなので，僕はそれでやる．なお，本書で紹介されてる <tt class="docutils literal">oz</tt> コマンドでの起動はうまくいかなかった．なんでだろね． <tt class="docutils literal">Mozart2.app</tt> から起動すればいいので特に困ることはないんだけど．</p>
+<p>後， <tt class="docutils literal">Browse</tt> で一々別のウィンドウが立ち上がるのがめんどいという人は， Oz Emulator というバッファが用意されているので，それを表示して， <tt class="docutils literal">Browse</tt> を適宜 <tt class="docutils literal">Show</tt> 関数に読み替えると良いっぽい．そうすると別ウィンドウが立ち上がる代わりに， Emulator の方に出力が表示される．僕は以下の画面構成で書いてる:</p>
+<img alt="下の画面を分割して，左にコンパイラ出力，右にエミュレータ出力が見えるようにしている．" src="https://mizunashi-mana.github.io/blog/posts/2019/04/read-ctmcp/read-ctmcp/oz-my-screen.png"/>
+</div>
+<div class="section" id="ctmcp-1">
+<h2>CTMCP 1章の内容<a class="headerlink" href="#ctmcp-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>準備できたので，早速読んでいく．内容の詳細説明はしないので，内容が気になる方とか Oz の文法が知りたい方は普通に読んでくれ．</p>
+<p>1章の内容は， Oz の説明と簡単な文法，それから取り入れられてる機能の説明っぽい．まあ概要だしね．これからやってく内容を，サンプルプログラムを元にちょっとずつ説明していく感じ．全くプログラミングをやったことない人にはきついが，どれかのプログラミング言語の入門書を読んだくらいのレベルなら読めそう．大体は以下の内容:</p>
+<ol class="arabic simple">
+<li>最初は簡単なプログラムから，ちょっと複雑なプログラムまで，徐々に Oz に慣らしていく．</li>
+<li>プログラムの正しさの検証の話．<ul>
+<li>数学的な推論に基づくプログラム検証の話．</li>
+<li>目次を見る限り， 13 章でやるのかな？ 後でやるとは言っているが，どれくらい後なのかは特に本文では言及されてない．</li>
+</ul>
+</li>
+<li>計算の複雑性の話．<ul>
+<li>主に，プログラムの計算量の話かな．</li>
+<li>これも特に本文では述べられていないが， 3.5 とかで出てきてそう．</li>
+</ul>
+</li>
+<li>遅延評価の話．<ul>
+<li>2.0.1 では表示が本文と違うが，多分気にしちゃいけないやつ．</li>
+<li>Oz は遅延評価関数がサポートされていて，それを使ってどういうことができるかという話．</li>
+<li>これは， 4.5 に書いてあるのかな． 3.6 とかにもありそうだし飛び飛びって感じそう．</li>
+</ul>
+</li>
+<li>高階プログラミングの話．<ul>
+<li>関数を引数にとる高階関数を使ったプログラミングの話．</li>
+<li>これは， 3.6 に説明があるのかな．</li>
+</ul>
+</li>
+<li>並行性の話<ul>
+<li>Oz は並行プログラミングがサポートされていて，それを使ってどういうことができるかの話．</li>
+<li>これは， 4 / 5 あたりが主にこの内容になってそう．あと 8 もそうだしそこかしこに出てきそう．</li>
+</ul>
+</li>
+<li>データフローの話<ul>
+<li>Oz でサポートされている，データフローに基づく並行実行のアーキテクチャの説明．</li>
+<li>これは， 4.2 / 4.9 とかなんかな．よく分からん．</li>
+</ul>
+</li>
+<li>明示的状態の話<ul>
+<li>Oz は可変な変数がサポートされていて，それを使ってどういうことができるかの話．</li>
+<li>これも同じく後で詳しくやるって言って具体的な章番号は書いていないが，多分 6 がその内容っぽい．</li>
+</ul>
+</li>
+<li>オブジェクトの話<ul>
+<li>オブジェクト指向の話っぽい． Oz では，カプセル化ができるという話が出てくる．</li>
+<li>てか，次で諸にオブジェクト指向の話が出てきた．</li>
+</ul>
+</li>
+<li>クラスの話<ul>
+<li>オブジェクトのクラスを， record と factory という機能を使って作れるよって話．</li>
+<li>後，オブジェクト指向の用語の説明とかが書いてある．</li>
+<li>何故かここでは，オブジェクト指向プログラミングは 7 章でやると書いてある．</li>
+</ul>
+</li>
+<li>非決定性の話<ul>
+<li>並行性と可変な変数による非決定性の話．</li>
+<li>レースコンディションって怖いねって話．</li>
+<li>これは， 4.7 とかなのかな．</li>
+</ul>
+</li>
+<li>不可分性の話<ul>
+<li>Oz は排他制御をサポートしていて，それを使ってどう言うことができるかの話．</li>
+<li>これは， 8.3 っぽい．</li>
+</ul>
+</li>
+</ol>
+<p>後は，演習問題って感じ．まだ 1 章しか読んでなくて，目次だけ見て「ここに出てきそう」って言ってるので出現場所の精度は期待しないでくれ．</p>
+<p>演習問題もざっと目を通したけど，自分で考えるための脚注みたいな感じだった．本文に書かれてないけど，考えておいた方がいいことを，答えを伏せて書くみたいな，行間を目に見える形にしたみたいな感じ．知識の確認にはあまり使えなそう．まあ今回はそこまでちゃんとした話ではなかったのもあるかもしれないけど．ただ，もしこの形式で演習問題が続くなら，最後に確認のためやるというよりは，それぞれの節を読んだら演習問題を見に行くぐらいの方が良さそう．</p>
+</div>
+<div class="section" id="auto-id-8">
+<h2>まとめ<a class="headerlink" href="#auto-id-8" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>CTMCP を読むための準備とか諸々をした．トピックがかなり網羅的で面白そうではあるが，内容が古そうなのは気になる． Mozart 2.0.1 だと動かないサンプルとか出てこないか心配．頑張っていくか．なお，一応 1 章のまとめは書いたが，これ以降の章は多分特にまとめとか書かない気がする．今回は環境構築メモるついでって感じだし．というわけで，よろしく．</p>
+<table class="docutils footnote" frame="void" id="about-soft-realtime" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td>ソフトリアルタイム (soft realtime) とは，制御工学の用語の一つで，リアルタイムシステムのクラスの 1 つを表す．リアルタイムシステムの中でも処理時間の期限に求める制約が一番緩いクラスで，処理時間の期限をすぎると徐々に処理結果の価値が下がっていくようなシステムのことを指す．プログラミング言語がそのようなアプリケーションに対応しているということはつまり，高度なスケジューリングシステムを備えていると言いたいのだと思う．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="about-reactive" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-3">[2]</a></td><td>一口にリアクティブ (reactive) と言っても，正直システムによって定義はかなり異なるが，一般的にはユーザからの入力に対して即座に出力を返すようなシステムのことを指す．</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/read-ctmcp.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/read-ctmcp.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/mozart.html">Mozart</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/oz.html">Oz</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/emacs.html">Emacs</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/ben.html">本</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/huan-jing-gou-zhu.html">環境構築</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/cpo-related-definitions/">CPO に関連する定義まとめ</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

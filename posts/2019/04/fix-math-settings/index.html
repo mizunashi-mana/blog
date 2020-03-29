@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録． math ディレクティブと docutils の設定 reStructuredText には math ディレクティブというものが標準で搭載されていて [1] ， TeX の記法を使って以下のように数式が埋め込める: .. math:: \forall a, b \in \mathbb{N}.\, a \leq …" />
+<meta name="keywords" content="Pelican, MathML, ブログ, reStructuredText, MathJax, JavaScript">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="MathML で数式を表示する"/>
+<meta property="og:description" content="reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録． math ディレクティブと docutils の設定 reStructuredText には math ディレクティブというものが標準で搭載されていて [1] ， TeX の記法を使って以下のように数式が埋め込める: .. math:: \forall a, b \in \mathbb{N}.\, a \leq …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-04-14 10:44:55+09:00"/>
+<meta property="article:modified_time" content="2020-03-29 08:23:18+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="Pelican"/>
+<meta property="article:tag" content="MathML"/>
+<meta property="article:tag" content="ブログ"/>
+<meta property="article:tag" content="reStructuredText"/>
+<meta property="article:tag" content="MathJax"/>
+<meta property="article:tag" content="JavaScript"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; MathML で数式を表示する</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="fix-math-settings">MathML で数式を表示する</h1>
+    <p>
+          Posted on 日 14 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録．</p>
+<div class="section" id="math-docutils">
+<h2>math ディレクティブと docutils の設定<a class="headerlink" href="#math-docutils" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>reStructuredText には math ディレクティブというものが標準で搭載されていて <a class="footnote-reference" href="#math-directive-spec" id="auto-id-1">[1]</a> ， <tt class="docutils literal">TeX</tt> の記法を使って以下のように数式が埋め込める:</p>
+<pre class="literal-block">
+.. math::
+
+  \forall a, b \in \mathbb{N}.\, a \leq b \implies \sqrt{a} \leq \sqrt{b}
+</pre>
+<p>これは特に何もしなくても <tt class="docutils literal">docutils</tt> でコンパイルして HTML にしてくれる．なので， reStructuredText を使っている場合は簡単な数式なら Pelican のブログ記事で普通に使える．これ自体は素晴らしいんだが，出される HTML は数学記号を Unicode 表現にして変数をイタリックにしただけで，空白制御とかはあまり考慮されておらず，フォントもあまり良くない．なので，もうちょっと何とか出来ないかということで，色々調べた．</p>
+<p><tt class="docutils literal">docutils</tt> の出力オプションとして <a class="reference external" href="http://docutils.sourceforge.net/docs/user/config.html#math-output">math_output</a> というオプションがあり色々弄れるらしい．ここに指定できる出力の仕方は，以下の 4 通り:</p>
+<dl class="docutils">
+<dt>HTML</dt>
+<dd>デフォルトの出力方法． <tt class="docutils literal">i</tt> タグや <tt class="docutils literal">sup</tt> タグなどを駆使して簡単な数式レンダリングを行う．カスタムCSSファイルを引数として指定すると， CSS が必要な時だけ埋め込んでくれる．</dd>
+<dt>MathJax</dt>
+<dd>MathJax を使ってレンダリングを行う．引数に MathJax のライブラリファイルの指定が必須．</dd>
+<dt>MathML</dt>
+<dd>MathML を使ってレンダリングを行う．引数にコマンドを指定すると，そのコマンドでコンパイルしてくれる．</dd>
+<dt>LaTeX</dt>
+<dd>数式表現をそのまま埋め込む．</dd>
+</dl>
+<p>で，今回は気になったので MathML を使ってみた．引数にコマンドを指定しない場合標準のコンパイラで MathML に変換してくれる．なお，標準のは <tt class="docutils literal">\ldotp</tt> が使えなかったりちょっと不便なところがあるが， <tt class="docutils literal">latexml</tt> などを使うと使える記号をもうちょっと増やせるみたい．今回は，妥協してフルに <tt class="docutils literal">LaTeX</tt> 使いたかったら PDF で埋め込めばええやろという気持ちで，標準のをそのまま使うことにした．</p>
+<p><tt class="docutils literal">pelicanconf.py</tt> に次の設定を足すだけで， MathML が使えるようになる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span>  DOCUTILS_SETTINGS = {
+    ...
+<span class="gi">+   'math_output': 'MathML',</span>
+  }
+</pre></div>
+</td></tr></table></div>
+<div class="section" id="auto-id-2">
+<h2>MathML のフォールバック<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ところで， MathML を使う場合気になるのが，ブラウザの対応状況だ．というわけで， <a class="reference external" href="https://caniuse.com/#feat=mathml">サポート状況</a> を覗きに行ってみると，見事に壊滅状態にあってサポートしてるの Firefox / Safari ぐらいやんってなった． Edge は現状サポート予定はなくて， Chrome は提案は出てるもののやっぱりサポート予定はないっぽい．</p>
+<p>なので， MathML のフォールバックを行うことを考えたい． MathJax が MathML での入力に対応してるので導入してみたのだが，これが webpack とかなり相性が悪い構成になっているっぽい．本家にも <a class="reference external" href="https://github.com/mathjax/MathJax/issues/1629">イシュー</a> が立っているわけだが，現状の構成でとても対応できるとは思えない．で，色々探っていたら，次期 MathJax v3 では TypeScript を使って書いていていい感じにモジュール構成を取り入れているため， webpack にももちろん対応できるという話が上がっていた．で，まだ正式リリースじゃなくてベータ版なんだけど，使ってみるかってなった．どうせレンダリング失敗しても， MathML 見れる環境なら問題ないはずだし．</p>
+<p>まず， npm で <tt class="docutils literal">mathjax3</tt> をインストールする:</p>
+<pre class="literal-block">
+npm install -S mathjax3
+</pre>
+<p>で， <tt class="docutils literal">webpack.config.js</tt> に以下の設定を足す:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre></div></td><td class="code"><div class="highlight"><pre><span></span>  resolve: {
+    alias: {
+      ...
+<span class="gi">+     mathjax3$: 'mathjax3/mathjax3/mathjax.js',</span>
+<span class="gi">+     mathjax3: 'mathjax3/mathjax3',</span>
+    }
+  }
+  ...
+  plugins: [
+    ...
+<span class="gi">+   // to disable asyncLoad()</span>
+<span class="gi">+   new webpack.NormalModuleReplacementPlugin(</span>
+<span class="gi">+     /AsyncLoad\.js/,</span>
+<span class="gi">+     (resource) =&gt; {</span>
+<span class="gi">+       if (resource.context.endsWith('mathjax3/util')) {</span>
+<span class="gi">+         resource.request = resource.request.replace(/AsyncLoad/,"AsyncLoad-disabled");</span>
+<span class="gi">+       }</span>
+<span class="gi">+     }</span>
+<span class="gi">+   )</span>
+  ],
+</pre></div>
+</td></tr></table><p>最初の設定はいいとして，2番目の設定についてだけど， webpack はコード解析して依存関係を解決してるんだけどその解析が MathJax v3 の <tt class="docutils literal">AsyncLoad</tt> モジュールで死ぬという問題があるらしい．で， webpack 使ってバンドルする場合そもそも非同期 import いらないねって話があって， MathJax v3 では webpack 向けに <tt class="docutils literal"><span class="pre">AsyncLoad-disabled.js</span></tt> というモジュールを提供することにしたらしい <a class="footnote-reference" href="#mathjax3-issue-88" id="auto-id-5">[2]</a> ．で， webpack を使う場合は <tt class="docutils literal">AsyncLoad</tt> モジュールを <tt class="docutils literal"><span class="pre">AsyncLoad-disabled</span></tt> モジュールに置換することでその問題を解決できる．それをやるのが上のコード．</p>
+<p>後は， JavaScript で，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">MathJax</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'mathjax3'</span><span class="p">;</span>
+<span class="kr">import</span> <span class="p">{</span> <span class="nx">MathML</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'mathjax3/input/mathml'</span><span class="p">;</span>
+<span class="kr">import</span> <span class="p">{</span> <span class="nx">CHTML</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'mathjax3/output/chtml'</span><span class="p">;</span>
+<span class="kr">import</span> <span class="p">{</span> <span class="nx">browserAdaptor</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'mathjax3/adaptors/browserAdaptor'</span><span class="p">;</span>
+<span class="kr">import</span> <span class="p">{</span> <span class="nx">RegisterHTMLHandler</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'mathjax3/handlers/html'</span><span class="p">;</span>
+
+<span class="nx">RegisterHTMLHandler</span><span class="p">(</span><span class="nx">browserAdaptor</span><span class="p">());</span>
+
+<span class="kr">const</span> <span class="nx">MathJaxDocument</span> <span class="o">=</span> <span class="nx">MathJax</span><span class="p">.</span><span class="nb">document</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">InputJax</span><span class="o">:</span> <span class="k">new</span> <span class="nx">MathML</span><span class="p">(),</span>
+  <span class="nx">OutputJax</span><span class="o">:</span> <span class="k">new</span> <span class="nx">CHTML</span><span class="p">({</span>
+    <span class="nx">fontURL</span><span class="o">:</span> <span class="s1">'https://cdn.rawgit.com/mathjax/mathjax-v3/3.0.0-beta.3/mathjax2/css'</span><span class="p">,</span>
+  <span class="p">}),</span>
+<span class="p">});</span>
+
+<span class="kr">export</span> <span class="kd">function</span> <span class="nx">loadMathJaxDocument</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">MathJaxDocument</span>
+    <span class="p">.</span><span class="nx">findMath</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">compile</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">getMetrics</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">typeset</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">updateDocument</span><span class="p">()</span>
+    <span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table><p>みたいなんを書いて， DOM のロード後のタイミングで <tt class="docutils literal">loadMathJaxDocument</tt> 関数を呼び出せば良い． MathJax v3 は結構モジュールの導入のおかげで治安が良くなってて良い．以下が最終的なレンダリング結果になる:</p>
+<div class="math block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∀</mi><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo>∈</mo><mi mathvariant="double-struck">N</mi><mi mathvariant="normal">.</mi><mtext> </mtext><mi>a</mi><mo>≤</mo><mi>b</mi><mtext>  </mtext><mo>⟹</mo><mtext>  </mtext><msqrt><mi>a</mi></msqrt><mo>≤</mo><msqrt><mi>b</mi></msqrt></mrow><annotation encoding="application/x-tex">
+\forall a, b \in \mathbb{N}.\, a \leq b \implies \sqrt{a} \leq \sqrt{b}
+</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord">∀</span><span class="mord mathdefault">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">b</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.82486em;vertical-align:-0.13597em;"></span><span class="mord"><span class="mord mathbb">N</span></span><span class="mord">.</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">a</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.71844em;vertical-align:-0.024em;"></span><span class="mord mathdefault">b</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⟹</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.04em;vertical-align:-0.190845em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8491550000000001em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord mathdefault">a</span></span></span><span style="top:-2.809155em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg height="1.08em" preserveaspectratio="xMinYMin slice" viewbox="0 0 400000 1080" width="400em"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"></path></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.190845em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.04em;vertical-align:-0.058904999999999985em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.981095em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord mathdefault">b</span></span></span><span style="top:-2.941095em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg height="1.08em" preserveaspectratio="xMinYMin slice" viewbox="0 0 400000 1080" width="400em"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"></path></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.058904999999999985em;"><span></span></span></span></span></span></span></span></span></span></div>
+<p>レンダリングがちゃんと出来ていなかったら，ぜひ使ってるブラウザを教えて欲しい．修正するかは分からないけど．</p>
+</div>
+<div class="section" id="auto-id-6">
+<h2>まとめ<a class="headerlink" href="#auto-id-6" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ブログの数式表示を改善した． MathJax v3 がまだベータ版なので，ちょっとまめに更新は確認していきたい．</p>
+<p>後ちょっとレンダリングが遅めなのが気になるがまあしゃーないね． MathML 標準対応してほちい．</p>
+<table class="docutils footnote" frame="void" id="math-directive-spec" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-1">[1]</a></td><td><a class="reference external" href="http://docutils.sourceforge.net/docs/ref/rst/directives.html#math">http://docutils.sourceforge.net/docs/ref/rst/directives.html#math</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="mathjax3-issue-88" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-5">[2]</a></td><td><a class="reference external" href="https://github.com/mathjax/mathjax-v3/issues/88">https://github.com/mathjax/mathjax-v3/issues/88</a></td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/fix-math-settings.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/fix-math-settings.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/mathml.html">MathML</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/restructuredtext.html">reStructuredText</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/mathjax.html">MathJax</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/">MathML にバイバイして， KaTeX に移行した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/">KaTeX コードを静的にレンダリングする</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/">脚注のためのツールチップ追加</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/">ブログに共有ボタンを追加した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/">ブログの overflow 時のスタイル設定を見直す</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

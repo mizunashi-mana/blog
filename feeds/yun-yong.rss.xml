@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel><title>続くといいな日記 - 運用</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 29 Mar 2020 08:23:18 +0900</lastBuildDate><item><title>babel と core-js を使って，古いブラウザをサポートする</title><link>https://mizunashi-mana.github.io/blog/posts/2019/11/support-more-web-using-babel/</link><description>&lt;p&gt;Sentry でたまに，古い OS からのアクセスによるエラーレポートが来る．現状，このブログの JS は &lt;tt class="docutils literal"&gt;let&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;const&lt;/tt&gt; 普通に使ってるし， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;for-of&lt;/span&gt;&lt;/tt&gt; なども使っている．なので，一世代前のブラウザなどを使っていると，そこら辺の機能に対応していなくてエラーになる．試しにこの辺を改善してみると，どうなるかのか観測してみたいなと思って，ちょっとサイト設定をいじってみた．そのメモ．&lt;/p&gt;
+&lt;p&gt;なお，使った環境は以下のもの:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="50%"/&gt;
+&lt;col width="50%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;babel&lt;/td&gt;
+&lt;td&gt;7 …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Wed, 27 Nov 2019 08:19:16 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-11-27:/blog/posts/2019/11/support-more-web-using-babel/</guid><category>運用</category><category>Web</category><category>JavaScript</category><category>Webpack</category><category>Babel</category><category>ブログ</category></item><item><title>iptables から nftables への移行</title><link>https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/</link><description>&lt;p&gt;Debian GNU/Linux 10 ，コードネーム buster が安定板リリースを迎え結構経ったので，そろそろアップグレード案件やるかみたいな感じになった．&lt;/p&gt;
+&lt;p&gt;さて， buster からは iptables に代わり nftables が採用されている．なので， iptables から nftables に移行が推奨されている．で，既存の iptables のルールセットを nftables …&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Fri, 20 Sep 2019 22:10:24 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-09-20:/blog/posts/2019/09/nftables-on-debian/</guid><category>運用</category><category>Debian</category><category>iptables</category><category>nftables</category><category>ファイアウォール</category></item><item><title>Sentry でエラー監視</title><link>https://mizunashi-mana.github.io/blog/posts/2019/05/add-sentry-monitoring/</link><description>&lt;p&gt;クロスプラットフォームのエラー監視を行う Sentry というサービスがある．ブログに試しに導入してみたので，それについて書く．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;Sentry について&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Sentry は，提供されている SDK を PHP コードや JavaScript コードに埋め込むことで，エラーを Sentry に送り，管理画面から確認できるようにするサービスだ．コードが &lt;a class="reference external" href="https://github.com/getsentry/sentry"&gt;https://github.com/getsentry …&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Thu, 02 May 2019 07:43:30 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-05-02:/blog/posts/2019/05/add-sentry-monitoring/</guid><category>運用</category><category>ブログ</category><category>監視</category><category>JavaScript</category></item><item><title>KaTeX コードを静的にレンダリングする</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/</link><description>&lt;p&gt;ふと， KaTeX ってサーバサイドレンダリングできないかと思って試してみたら，普通に楽にできそうだったので，ブログでやってみることにした．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;KaTeX をサーバサイドレンダリングする&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;特に難しいことはなくて， KaTeX は Node.js 上で動くっぽく，以下のようにすれば HTML を生成できるっぽい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ node --eval 'const KaTeX = require("katex"); console.log(KaTeX …&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Sun, 28 Apr 2019 07:10:54 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-28:/blog/posts/2019/04/to-use-serverside-katex/</guid><category>運用</category><category>KaTeX</category><category>Pelican</category><category>ブログ</category><category>Python</category><category>Node.js</category><category>JavaScript</category></item><item><title>MathML にバイバイして， KaTeX に移行した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/</link><description>&lt;p&gt;以前ブログで数式環境を， MathML と MathJax で導入した．ただ色々敗北したので KaTeX を使うことにした．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="mathml"&gt;
+&lt;h2&gt;MathML に敗北した&lt;a class="headerlink" href="#mathml" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;正確には， MathML は悪くないんだが，現状の MathML + MathJax 環境は色々辛いものがあった．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;\mathit&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;\mathrel&lt;/tt&gt; などの基本的なコマンドに対応していない．&lt;/li&gt;
+&lt;li&gt;MathJax のレンダリングが遅い．&lt;/li&gt;
+&lt;li&gt;MathJax …&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Sun, 21 Apr 2019 17:33:08 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-21:/blog/posts/2019/04/bye-mathml-hello-katex/</guid><category>運用</category><category>Pelican</category><category>MathML</category><category>ブログ</category><category>reStructuredText</category><category>JavaScript</category><category>CSS</category></item><item><title>脚注のためのツールチップ追加</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/</link><description>&lt;p&gt;脚注をツールチップで見れるようにしたので，それについて．&lt;/p&gt;
+&lt;div class="section" id="restructuredtext"&gt;
+&lt;h2&gt;reStructuredText の脚注&lt;a class="headerlink" href="#restructuredtext" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;reStructuredText では脚注が使える．これは，以下のように書けばいい:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+some text[#footnote-ref]_ .
+
+.. [#footnote-ref] some footnote content.
+&lt;/pre&gt;
+&lt;p&gt;こうすると，自動でナンバリングが行われ，それぞれ脚注へのリンクと元の文書へのバックリンクが生成される．分かりづらいがバックリンクは，数字の部分に当てがわれ，それをクリックすることで戻れる．ただ，これをクリックするのがめんどかったので，ツールチップで表示してみることにした …&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 15 Apr 2019 13:06:18 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/add-tooltip-for-footnote/</guid><category>運用</category><category>ブログ</category><category>Pelican</category><category>JavaScript</category><category>CSS</category></item><item><title>ブログの overflow 時のスタイル設定を見直す</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/</link><description>&lt;p&gt;ブログの CSS で，幅がはみ出るような要素のスタイルを幾つか修正したので，その対応記録．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;経緯&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;うちのブログではタイプライタ体や数式をよく使う．これは僕がプログラミングと数学寄りの記事を良く書くからだけど，ちょっと問題も起きていた．パソコンでの閲覧時はそれほど大きな問題にはならないんだが，スマフォなどの画面幅が短いモバイル端末ではタイプライタ体の文字が画面幅からはみ出て表示されて，閲覧の快適さがあまりなかった (誰から言われたとかではなく，単に僕が見る時不便だと感じていた)．&lt;/p&gt;
+&lt;p&gt;問題となっていた要素は，以下のもの:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;インラインリテラル&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;``inline literal``&lt;/tt&gt; で書けるやつ．プログラム片とかを書くのに使っていて， &lt;tt class="docutils literal"&gt;tt&lt;/tt&gt; タグを使って変換される．&lt;/dd&gt;
+&lt;dt&gt;数式&lt;/dt&gt;
+&lt;dd&gt;&lt;p class="first"&gt;以下の記法で書けるやつ …&lt;/p&gt;&lt;/dd&gt;&lt;/dl&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 15 Apr 2019 04:27:48 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-15:/blog/posts/2019/04/fix-overflow-settings/</guid><category>運用</category><category>Pelican</category><category>ブログ</category><category>CSS</category></item><item><title>MathML で数式を表示する</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-math-settings/</link><description>&lt;p&gt;reStructuredText は数式表示に対応している．ただデフォルトのレンダリング表示がいまいちだったので，ちょっといじった．その備忘録．&lt;/p&gt;
+&lt;div class="section" id="math-docutils"&gt;
+&lt;h2&gt;math ディレクティブと docutils の設定&lt;a class="headerlink" href="#math-docutils" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;reStructuredText には math ディレクティブというものが標準で搭載されていて &lt;a class="footnote-reference" href="#math-directive-spec" id="auto-id-1"&gt;[1]&lt;/a&gt; ， &lt;tt class="docutils literal"&gt;TeX&lt;/tt&gt; の記法を使って以下のように数式が埋め込める:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+.. math::
+
+  \forall a, b \in \mathbb{N}.\, a \leq …&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Sun, 14 Apr 2019 10:44:55 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-14:/blog/posts/2019/04/fix-math-settings/</guid><category>運用</category><category>Pelican</category><category>MathML</category><category>ブログ</category><category>reStructuredText</category><category>MathJax</category><category>JavaScript</category></item><item><title>sitemap の追加</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-sitemap/</link><description>&lt;p&gt;sitemap とかを追加してみたので，それの備忘録．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;sitemap 周辺ファイルの追加&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;まず Pelican で sitemap を生成させる．これは &lt;tt class="docutils literal"&gt;sitemap&lt;/tt&gt; プラグインを追加するだけでいい:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;  PLUGINS = [
+    ...
+&lt;span class="gi"&gt;+   'sitemap',&lt;/span&gt;
+  ]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;後は &lt;tt class="docutils literal"&gt;SITEMAP&lt;/tt&gt; に設定を書く．以下の感じのことを書いた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+SITEMAP = {
+  'format' …&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Wed, 10 Apr 2019 05:06:02 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-10:/blog/posts/2019/04/add-sitemap/</guid><category>運用</category><category>SEO</category><category>ブログ</category><category>Pelican</category><category>Google Analytics</category></item><item><title>Google Analytics の導入</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-google-analytics/</link><description>&lt;p&gt;Google Analytics を導入したので，やったことをまとめた．&lt;/p&gt;
+&lt;div class="section" id="id"&gt;
+&lt;h2&gt;トラッキング ID の設定&lt;a class="headerlink" href="#id" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;既に Analytics のアカウントは持っていたので，そのアカウントのプロパティを追加してトラッキング ID を入手するだけ．以下の手順を行うだけだった:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://analytics.google.com/analytics"&gt;https://analytics.google.com/analytics&lt;/a&gt; の管理ページ表示&lt;/li&gt;
+&lt;li&gt;「プロパティを作成」ボタンを押す．&lt;/li&gt;
+&lt;li&gt;プロパティの項目を埋めていく．大体以下の感じ:&lt;ul&gt;
+&lt;li&gt;ウェブサイトの名前 …&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 08 Apr 2019 03:33:29 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-08:/blog/posts/2019/04/add-google-analytics/</guid><category>運用</category><category>Pelican</category><category>ブログ</category><category>Google Analytics</category><category>SEO</category></item><item><title>ブログに共有ボタンを追加した</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/</link><description>&lt;p&gt;ブログに共有ボタンを追加して， JavaScript を呼べるようにした．&lt;/p&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;導入までの経緯&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Pelican には CSS を追加する仕組みはあるが， JavaScript を追加する仕組みはない．なので，テーマで対応していない JavaScript を使う機能は入れられない．これでは不便なので， JavaScript を無理やり追加することにした．&lt;/p&gt;
+&lt;p&gt;また，共有ボタンも現状テーマで対応していないため，無理やり JavaScript で追加することにした．静的に埋め込むこともできるのだが，どうせ JavaScript …&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Thu, 04 Apr 2019 18:51:33 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-04:/blog/posts/2019/04/add-share-button/</guid><category>運用</category><category>Pelican</category><category>ブログ</category><category>Python</category><category>JavaScript</category></item><item><title>ブログのデザイン調整</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/</link><description>&lt;p&gt;ブログの改良をちょっと色々やってたので，そのご報告．&lt;/p&gt;
+&lt;div class="section" id="circle-ci"&gt;
+&lt;h2&gt;Circle CI での謎の警告解消&lt;a class="headerlink" href="#circle-ci" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;今まで Circle CI 上だと以下の警告が出てた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available …&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Mon, 01 Apr 2019 21:17:35 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-01:/blog/posts/2019/04/fix-blog-config/</guid><category>運用</category><category>Python</category><category>Pelican</category><category>ブログ</category><category>CircleCI</category></item><item><title>ブログ始めました</title><link>https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/</link><description>&lt;p&gt;色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
+今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが，
+ちゃんとしてないやつも書いていこうかなってことで．&lt;/p&gt;
+&lt;p&gt;ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが，
+調査不足だったり，よく分からない系とか徒然なるままな感じのことだったりとか，あと主に自分のためにしたこととかを書いていこっかなって感じです．&lt;/p&gt;
+&lt;p&gt;で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていく．&lt;/p&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;サイトジェネレータの選定基準&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， &lt;a class="reference external" href="https://www.staticgen.com/"&gt;https://www.staticgen …&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Sun, 31 Mar 2019 14:00:38 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-03-31:/blog/posts/2019/03/start-blog/</guid><category>運用</category><category>Python</category><category>Pelican</category><category>ブログ</category><category>GitHub</category></item></channel></rss>

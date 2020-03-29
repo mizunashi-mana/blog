@@ -1,0 +1,465 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="色々あって，技術的なことを書くブログを始めようと思いました (まる) ． 今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが， ちゃんとしてないやつも書いていこうかなってことで． ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが， 調査不足だったり，よく分からない系とか徒然なるままな感じのことだったりとか，あと主に自分のためにしたこととかを書いていこっかなって感じです． で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていく． サイトジェネレータの選定基準 まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， https://www.staticgen …" />
+<meta name="keywords" content="Python, Pelican, ブログ, GitHub">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="ブログ始めました"/>
+<meta property="og:description" content="色々あって，技術的なことを書くブログを始めようと思いました (まる) ． 今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが， ちゃんとしてないやつも書いていこうかなってことで． ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが， 調査不足だったり，よく分からない系とか徒然なるままな感じのことだったりとか，あと主に自分のためにしたこととかを書いていこっかなって感じです． で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていく． サイトジェネレータの選定基準 まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， https://www.staticgen …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/03/start-blog/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-03-31 14:00:38+09:00"/>
+<meta property="article:modified_time" content="2020-03-29 08:23:18+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="Python"/>
+<meta property="article:tag" content="Pelican"/>
+<meta property="article:tag" content="ブログ"/>
+<meta property="article:tag" content="GitHub"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; ブログ始めました</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="start-blog">ブログ始めました</h1>
+    <p>
+          Posted on 日 31 3月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>色々あって，技術的なことを書くブログを始めようと思いました (まる) ．
+今までは， Advent Calendar の時期だけ Qiita に記事を書いてたりしたんですが，
+ちゃんとしてないやつも書いていこうかなってことで．</p>
+<p>ちゃんとした系の記事は，出来るだけ外部に出していこうと思いますが，
+調査不足だったり，よく分からない系とか徒然なるままな感じのことだったりとか，あと主に自分のためにしたこととかを書いていこっかなって感じです．</p>
+<p>で，早速ですが一応ブログ立てたんで，立てる際した事とかを書いていく．</p>
+<div class="section" id="auto-id-2">
+<h2>サイトジェネレータの選定基準<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まず，ブログに使うサイトジェネレータどうしよっかなあと悩んでいた．サイトジェネレータ一覧人気順は， <a class="reference external" href="https://www.staticgen.com/">https://www.staticgen.com/</a> から見れるっぽい．だいたい人気の上位陣は，</p>
+<ul class="simple">
+<li>Jekyll</li>
+<li>Next</li>
+<li>Hugo</li>
+</ul>
+<p>っぽい． Hugo は使ったことあって，割と使いやすくはあったんだけど，今回は見送った．理由は Markdown しか基本的に書けないから．
+常々， Markdown は明示的に拡張記法を導入できないし，脚注とかが拡張だったりして機能的にたりない面があったりで，ちょっと辛いなあと思ってた．
+なのでブログでは， Org-mode か reStructuredText を使いたいなと思ってた．</p>
+<ul class="simple">
+<li>Org-mode の場合 Emacs に HTML 出力させればいいので，大半のジェネレータでいける</li>
+<li>reStructuredText は変換に Python の docutils を使うか， pandoc を使うといける</li>
+</ul>
+<p>で，色々探してた結果， Python 製の Pelican というジェネレータがあるらしく，標準で reStructuredText に対応してたしハイライトは Pygments を使って何とかできそうだったし，結構 Python を使うと色々ライブラリとの相性が良さそうだったので，今回はそれでいくことにしてみた．</p>
+<p>テーマも良さそうなのがあったし，設定も結構簡単だったので，とりあえず満足してる．</p>
+</div>
+<div class="section" id="pelican">
+<h2>Pelican の設定<a class="headerlink" href="#pelican" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p><a class="reference external" href="https://docs.getpelican.com/en/stable/quickstart.html">https://docs.getpelican.com/en/stable/quickstart.html</a> を見ながら，適当に自分の必要な感じでカスタマイズしてやった．</p>
+<div class="section" id="pipenv">
+<h3>Pipenv の設定<a class="headerlink" href="#pipenv" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>まずは， Pipenv を使って依存ライブラリを入れてく:</p>
+<pre class="literal-block">
+pip install pipenv
+pipenv install pelican
+</pre>
+</div>
+<div class="section" id="auto-id-3">
+<h3>Pelican の設定<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<pre class="literal-block">
+pipenv run pelican-quickstart
+</pre>
+<p>をやって，適当に質問に答えていく．今回は， GitHub Pages にデプロイする前提なのでそういう感じで答えていく．あと， Makefile の方が使いたかったのでそっちを使って，作られた <tt class="docutils literal">tasks.py</tt> は消しといた．ただ作られたやつそのままだとちょっと不便なので， <tt class="docutils literal">Makefile</tt> の以下の箇所は変えた．</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="gd">- PELICAN?=pelican</span>
+<span class="gd">- GHP_IMPORT?=ghp-import</span>
+<span class="gi">+ PELICAN?=pipenv run pelican</span>
+<span class="gi">+ GHP_IMPORT?=pipenv run ghp-import</span>
+
+<span class="gd">- GITHUB_PAGES_BRANCH=master</span>
+<span class="gi">+ GITHUB_PAGES_BRANCH=gh-pages</span>
+</pre></div>
+</td></tr></table><p>GitHub へのデプロイのためには， <tt class="docutils literal"><span class="pre">ghp-import</span></tt> というパッケージが必要っぽいのでそれも入れた:</p>
+<pre class="literal-block">
+pipenv install ghp-import
+</pre>
+<p>後は， <a class="reference external" href="https://docs.getpelican.com/en/stable/settings.html">https://docs.getpelican.com/en/stable/settings.html</a> を見ながら， <tt class="docutils literal">pelicanconf.py</tt> と <tt class="docutils literal">publishconf.py</tt> を適当にいじった．最終的な結果は，右上の GitHub ボタンからソースに飛べるので適当に見てください．</p>
+<p>2つだけ言っておくと，</p>
+<ul class="simple">
+<li><tt class="docutils literal">pelicanconf.py</tt> の内容は選ぶテーマによってかなり書く内容が異なる．後， Pelican の本体とテーマでパラメータ名が異なったりする．なので，パラメータが効かなかった場合，テーマのテンプレートを読みにいかないといけない場合がある．</li>
+<li><tt class="docutils literal">make html</tt> では <tt class="docutils literal">pelicanconf.py</tt> が， <tt class="docutils literal">make publish</tt> では <tt class="docutils literal">publishconf.py</tt> が参照されてビルドされる．この時， <tt class="docutils literal">MENUITEMS</tt> などに他ページへのリンクを書いたりすると，公開する URL によってはリンクの調整が必要になったりする．今回は <tt class="docutils literal">/blog/</tt> 以下に公開するので，リンクを <tt class="docutils literal">/somefile</tt> とか書くとずれる．見た感じ Pelican ではこの調整をしてくれないので，今回は <tt class="docutils literal">publishconf.py</tt> で調整を明示的にやるコードを書いた．</li>
+</ul>
+<p>後ディレクトリ構成は，基本的に <tt class="docutils literal">content</tt> の下に</p>
+<ul class="simple">
+<li><tt class="docutils literal">articles</tt>: 記事を書いて置く．</li>
+<li><tt class="docutils literal">pages</tt>: 記事でない静的文書コンテンツを置く．</li>
+<li><tt class="docutils literal">asset</tt>: 文書でない静的ファイルを置く．</li>
+</ul>
+<p>みたいな構成にした (<tt class="docutils literal">asset</tt> 以外は標準の配置) ．後 <tt class="docutils literal">asset</tt> は <tt class="docutils literal">STATIC_PATHS</tt> に指定して Pelican にコピーしてもらう必要があるので，それもやった．</p>
+</div>
+<div class="section" id="auto-id-4">
+<h3>テーマの選別<a class="headerlink" href="#auto-id-4" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>だいぶ見にくいけど， <a class="reference external" href="http://www.pelicanthemes.com/">http://www.pelicanthemes.com/</a> からテーマが色々見れるっぽい．とりあえず良さそうで開発も活発そうな <a class="reference external" href="https://github.com/alexandrevicenzi/Flex">Flex</a> を使うことにした．</p>
+<p>Git submodule を使ってテーマをリポジトリに追加する:</p>
+<pre class="literal-block">
+git submodule add https://github.com/alexandrevicenzi/Flex.git themes/Flex
+</pre>
+<p>後は， <tt class="docutils literal">pelicanconf.py</tt> に以下を足せばいい:</p>
+<pre class="literal-block">
+THEME = './themes/Flex'
+</pre>
+<p><a class="reference external" href="https://github.com/alexandrevicenzi/Flex/tree/master/docs">https://github.com/alexandrevicenzi/Flex/tree/master/docs</a> を参考に <tt class="docutils literal">pelicanconf.py</tt> を色々修正．後，気になったデザインを修正して， <tt class="docutils literal">content/asset/custom.css</tt> に置いた．これを <tt class="docutils literal">CUSTOM_CSS</tt> パラメータに指定すると Flex テーマが読み込んでくれる．</p>
+</div>
+<div class="section" id="auto-id-5">
+<h3>プラグインの設定<a class="headerlink" href="#auto-id-5" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>公式プラグインが全て1つのリポジトリで管理されてるっぽい．とりあえずそれを， Git submodule で追加:</p>
+<pre class="literal-block">
+git submodule add https://github.com/getpelican/pelican-plugins.git plugins
+</pre>
+<p>後は， <tt class="docutils literal">pelicanconf.py</tt> に以下を追加する:</p>
+<pre class="literal-block">
+PLUGIN_PATHS = ['plugins']
+</pre>
+<p>とりあえず，</p>
+<ul class="simple">
+<li><tt class="docutils literal">tipue_search</tt></li>
+<li><tt class="docutils literal">related_posts</tt></li>
+</ul>
+<p>の2つを導入しといた．まあ，機を見て他にも導入したり導入やめたりするかも．</p>
+</div>
+<div class="section" id="auto-id-6">
+<h3>プライバシーポリシーとか諸々の設置<a class="headerlink" href="#auto-id-6" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>左にある諸々を書いた． <tt class="docutils literal">pages</tt> 以下に置くと自動で認識して表示される．順番を制御したかったので， <tt class="docutils literal">pelicanconf.py</tt> に以下の記述を足した:</p>
+<pre class="literal-block">
+PAGES_SORT_ATTRIBUTE = 'source_path'
+</pre>
+<p>このパラメータは Flex テーマで処理される．標準で <tt class="docutils literal">PAGE_ORDER_BY</tt> というパラメータもあるんだけど，現状未対応っぽい <a class="footnote-reference" href="#support-page-order-in-flex-theme" id="auto-id-7">[4]</a>．後はページを表示したい順に，ファイル名に接頭辞で番号をつければ良い．</p>
+<p>Google Analytics とかの導入を見据えて，いくつかのサイトを参考にしながらプライバシーポリシーを設置した．参考にしたのは以下のサイト:</p>
+<dl class="docutils">
+<dt>Quora のプライバシー規定</dt>
+<dd><p class="first">かなりの部分参考にしたって感じ．
+デザインは結構終わってるけど，かなり詳細に書いてあって好感が持てる内容だった．</p>
+<p class="last"><a class="reference external" href="https://jp.quora.com/about/privacy">https://jp.quora.com/about/privacy</a></p>
+</dd>
+<dt>Google のプライバシーポリシー</dt>
+<dd><p class="first">2番目に参考にした．
+こちらも内容が丁寧で好感が持てる．
+ただ， Quora とのユーザ層の違いと多分法務部がかなりちゃんとチェックしてるんだろうけど，
+ところどころぼかしてあったり，エンジニアの対外的な態度と違う内容 (危険性を説明すべきところを，まるで問題ないように説明している)
+が書いてあったりする．そこら辺は，さすが大企業だなって感じだった (こなみ) ．</p>
+<p class="last"><a class="reference external" href="https://policies.google.com/privacy?hl=ja">https://policies.google.com/privacy?hl=ja</a></p>
+</dd>
+<dt>Qiita のプライバシーポリシー</dt>
+<dd><p class="first">一応参考にした．
+ただ，どっちかというと他の2つより規定みたいな感じだった．
+よく言えばちゃんとしている，悪く言えば説明する気がないみたいな感じ．
+正直どこら辺参照したかすら覚えてない．</p>
+<p class="last"><a class="reference external" href="https://qiita.com/privacy">https://qiita.com/privacy</a></p>
+</dd>
+</dl>
+<p>Google Analytics 的には， Cookie の使用と Google Analytics の使用が明示されていれば良いっぽい <a class="footnote-reference" href="#google-analytics-privacy-rule" id="auto-id-8">[3]</a>． 後は，免責事項とか適当に足したサイトの説明とかも足した．</p>
+</div>
+</div>
+<div class="section" id="github-pages">
+<h2>GitHub Pages の設定<a class="headerlink" href="#github-pages" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<div class="section" id="auto-id-9">
+<h3>GitHub Pages の有効化<a class="headerlink" href="#auto-id-9" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>リポジトリの Settings から <tt class="docutils literal"><span class="pre">gh-pages</span></tt> ブランチの内容を GitHub Pages で表示させるようにした．</p>
+<p>後，パーソナルサイトは今の所作る予定がないので， <a class="reference external" href="https://mizunashi-mana.github.io/">https://mizunashi-mana.github.io/</a> は <a class="reference external" href="https://mizunashi-mana.github.io/blog/">https://mizunashi-mana.github.io/blog/</a> にリダイレクトされるようにした．内容は <a class="reference external" href="https://github.com/mizunashi-mana/mizunashi-mana.github.io/blob/ed6aebc132267360a7ccd95717d7b5fe64ec7fa2/index.html">https://github.com/mizunashi-mana/mizunashi-mana.github.io/blob/ed6aebc132267360a7ccd95717d7b5fe64ec7fa2/index.html</a> にあるけど，単純に <tt class="docutils literal">refresh</tt> でリダイレクト指定して，それでだめなら JavaScript にフォールバックする感じ．</p>
+<p>これで， <tt class="docutils literal">make github</tt> すると GitHub Pages にデプロイされるようになる．</p>
+</div>
+<div class="section" id="circle-ci">
+<h3>Circle CI による自動デプロイ環境<a class="headerlink" href="#circle-ci" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>事故を防ぐため， PR で記事を追加していくことにした． <tt class="docutils literal">master</tt> はプロテクトして基本プッシュせず， PR がマージされた時に Circle CI を回すようにした．</p>
+<p>Circle CI は <a class="reference external" href="https://circleci.com/docs/2.0/language-python/">https://circleci.com/docs/2.0/language-python/</a> を参考に Python のバージョンを 3.7 にして，色々書くみたいなことやった．最終的な内容は， <a class="reference external" href="https://github.com/mizunashi-mana/blog/blob/master/.circleci/config.yml">https://github.com/mizunashi-mana/blog/blob/master/.circleci/config.yml</a> から見れるので気になったらどうぞ．</p>
+<p>後， <tt class="docutils literal"><span class="pre">gh-pages</span></tt> の方はビルドを止めるため，何のタスクもない設定ファイルを追加した:</p>
+<pre class="literal-block">
+version: 2
+jobs: {}
+workflows:
+  version: 2
+</pre>
+<p>後は， <tt class="docutils literal">GITHUB_TOKEN</tt> 環境変数を既に Circle CI 使ってるプロジェクトから import してくればおk．一から作る場合は， <a class="reference external" href="https://github.com/settings/tokens">https://github.com/settings/tokens</a> から適当に発行すれば良さそう．</p>
+</div>
+</div>
+<div class="section" id="auto-id-10">
+<h2>他にやりたいこと<a class="headerlink" href="#auto-id-10" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>現状幾つか解決したい問題と追加したい機能もあって，</p>
+<ul class="simple">
+<li>VSCode の reStructuredText プラグインのアンダーライン補完が日本語だとうまく動かないので，これを修正したい．</li>
+<li>全文検索に対応したい．</li>
+<li>各メニューを日本語対応させたい．</li>
+<li>シェアボタンを追加したい．</li>
+<li>Google Analytics を追加したい．</li>
+</ul>
+<p>ぐらいはやりたい．</p>
+<p>VSCode の件は，プラグインは日本語文字の width を 1 とカウントしているのに対し，
+docutils の方は East-Asian Width を考慮して換算してるっぽくて <a class="footnote-reference" href="#docutils-column-width" id="auto-id-11">[1]</a> ，
+結果補完されるアンダーラインが短い判定を受けてしまうという感じ．
+これぐらいならすぐ直せそうなので，近いうちに PR を送ると思う．</p>
+<p>全文検索は， Tipue Search 用の JSON を吐き出してくれるプラグインが既にあるっぽくて <a class="footnote-reference" href="#pelican-tipue-search-plugin" id="auto-id-12">[2]</a> ，
+後はテーマが対応していれば問題ないみたい．
+しかも，使ってるテーマのイシューに検索対応したいみたいなことが <a class="reference external" href="https://github.com/alexandrevicenzi/Flex/issues/49">書いてある</a> ．
+なのでこちらも近いうちに， PR 送ってみようかなと．</p>
+<p>後メニュー日本語対応は， <a class="reference external" href="https://github.com/alexandrevicenzi/Flex/blob/v2.2.0/translations/en/LC_MESSAGES/messages.po">https://github.com/alexandrevicenzi/Flex/blob/v2.2.0/translations/en/LC_MESSAGES/messages.po</a> の翻訳版を投げれば良さそうなので，これも近いうちにやる．アーカイブページの日付表示も変えられるようにしたい．これも近いうちにやる．</p>
+<p>シェアボタンを表示する仕組みはテーマにはなさそう． Disqus を追加するとついでに付いてくるやつで凌ごうか悩み中．</p>
+<p>Google Analytics はアカウント設定がちょっと億劫でやってないけど，そのうちやる．</p>
+<p>(やるとは言っていない)</p>
+</div>
+<div class="section" id="auto-id-14">
+<h2>あまり乗り気じゃないもの<a class="headerlink" href="#auto-id-14" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>以下は一応考えてはいるけど，現状あんまり乗り気じゃないもの．</p>
+<ul class="simple">
+<li>広告表示</li>
+<li>コメント機能</li>
+<li>CSS Rhythmic Sizing</li>
+<li>GDPR (ePrivacy) 対応</li>
+</ul>
+<p>大体テーマで対応してるので，それほど追加は手間ではないんだけど，とりあえず様子見．</p>
+<p>広告表示は，収益出るようだったら Google Adsense とか設置したいけど，今はいいかな．</p>
+<p>コメント機能も Disqus を登録すればいいんだけど， Disqus 利用者そんなにいなさそうだしはてなブックマークとかで良さそう．</p>
+<p>CSSについては，今は適当に <tt class="docutils literal"><span class="pre">line-height:</span> 2.0;</tt> とかしてるんだけど， Vertical Rhythm を導入したい気持ちがある．ただ確か現状 CSS 標準ではなかったはずなので，ちょっと見送ってる (あんまり調べてない) ．気が変わるか安定したら対応するかもしれない．</p>
+<p>GDPR (ePrivacy) 対応は現状は特に Cookie を使用していないので問題ないはず．今後 Google Analytics や Google Adsense を導入する場合どうなるかの話だけど，正直どういう対応をすればいいか分からないので保留中．まあ， Cookie の制限については， ポップアップで Cookie の同意をとってから Google Analytics のコードとかを起動すればいいだけだし，その他については Google Analytics は修正条項が適用されたモードで起動すれば大丈夫っぽい．ただそもそも日本語で書かれたマイナーコンテンツを EU 圏がそこまで見るかって話だし，熱心に対応する予定はない．</p>
+</div>
+<div class="section" id="auto-id-15">
+<h2>まとめ<a class="headerlink" href="#auto-id-15" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>雑に続けていければなと思うので，よろしくお願いします．</p>
+<table class="docutils footnote" frame="void" id="docutils-column-width" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-11">[1]</a></td><td><a class="reference external" href="https://github.com/docutils-mirror/docutils/blob/e88c5fb08d5cdfa8b4ac1020dd6f7177778d5990/docutils/utils/__init__.py#L628to">https://github.com/docutils-mirror/docutils/blob/e88c5fb08d5cdfa8b4ac1020dd6f7177778d5990/docutils/utils/__init__.py#L628to</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="pelican-tipue-search-plugin" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-12">[2]</a></td><td><a class="reference external" href="https://github.com/getpelican/pelican-plugins/tree/master/tipue_search">https://github.com/getpelican/pelican-plugins/tree/master/tipue_search</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="google-analytics-privacy-rule" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-8">[3]</a></td><td>Google Analytics の <a class="reference external" href="https://www.google.com/intl/ja/analytics/terms/jp.html">利用規約</a> 7. プライバシー に記載あり．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="support-page-order-in-flex-theme" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-7">[4]</a></td><td><a class="reference external" href="https://github.com/alexandrevicenzi/Flex/issues/170">https://github.com/alexandrevicenzi/Flex/issues/170</a></td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/03/start-blog.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/03/start-blog.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/github.html">GitHub</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/to-use-serverside-katex/">KaTeX コードを静的にレンダリングする</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-share-button/">ブログに共有ボタンを追加した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/">ブログのデザイン調整</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/bye-mathml-hello-katex/">MathML にバイバイして， KaTeX に移行した</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/">脚注のためのツールチップ追加</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

@@ -1,0 +1,431 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="DokuWiki で Markdown が書けるプラグインを結構前に作った．で，たまにメンテしてるんだけど，そのメンテのために色々備忘録を残しておこうと思ったので，そのメモ． DokuWiki のプラグイン作成 DokuWiki のプラグインの作成方法は， https://www.dokuwiki.org/devel:plugins に大体まとまっている． DokuWiki では，以下の種類のプラグインを書ける． 構文拡張プラグイン 文法を拡張するプラグイン． 動作拡張プラグイン …" />
+<meta name="keywords" content="PHP, Wiki, DokuWiki, プラグイン">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="DokuWiki の構文拡張プラグインの作り方"/>
+<meta property="og:description" content="DokuWiki で Markdown が書けるプラグインを結構前に作った．で，たまにメンテしてるんだけど，そのメンテのために色々備忘録を残しておこうと思ったので，そのメモ． DokuWiki のプラグイン作成 DokuWiki のプラグインの作成方法は， https://www.dokuwiki.org/devel:plugins に大体まとまっている． DokuWiki では，以下の種類のプラグインを書ける． 構文拡張プラグイン 文法を拡張するプラグイン． 動作拡張プラグイン …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/07/dokuwiki-syntax-plugin/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-07-20 13:21:29+09:00"/>
+<meta property="article:modified_time" content="2020-03-29 08:23:18+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="ツール"/>
+<meta property="article:tag" content="PHP"/>
+<meta property="article:tag" content="Wiki"/>
+<meta property="article:tag" content="DokuWiki"/>
+<meta property="article:tag" content="プラグイン"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; DokuWiki の構文拡張プラグインの作り方</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="dokuwiki-syntax-plugin">DokuWiki の構文拡張プラグインの作り方</h1>
+    <p>
+          Posted on 土 20 7月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/tsuru.html">ツール</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>DokuWiki で Markdown が書けるプラグインを結構前に作った．で，たまにメンテしてるんだけど，そのメンテのために色々備忘録を残しておこうと思ったので，そのメモ．</p>
+<div class="section" id="auto-id-1">
+<h2>DokuWiki のプラグイン作成<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>DokuWiki のプラグインの作成方法は， <a class="reference external" href="https://www.dokuwiki.org/devel:plugins">https://www.dokuwiki.org/devel:plugins</a> に大体まとまっている． DokuWiki では，以下の種類のプラグインを書ける．</p>
+<dl class="docutils">
+<dt>構文拡張プラグイン</dt>
+<dd>文法を拡張するプラグイン．</dd>
+<dt>動作拡張プラグイン</dt>
+<dd>DokuWiki の動作を拡張するプラグイン． Wiki のページを作った際にテンプレートを適用したりできる．</dd>
+<dt>管理者向けプラグイン</dt>
+<dd>管理者の操作を拡張するプラグイン． Wiki のアップグレード画面を追加したりできる．</dd>
+<dt>ヘルパープラグイン</dt>
+<dd>他のプラグイン向けに関数を提供したりできる．</dd>
+<dt>表示拡張プラグイン</dt>
+<dd>DokuWiki の表示を拡張するプラグイン．</dd>
+<dt>API拡張プラグイン</dt>
+<dd>DokuWiki の API を拡張するプラグイン．どういうことができるのかはあんまり分かってない．</dd>
+<dt>認証拡張プラグイン</dt>
+<dd>新たに認証方式を追加できるプラグイン．</dd>
+<dt>CLI拡張プラグイン</dt>
+<dd>コマンドを新たに追加できるプラグイン．どういうことができるのかはあんまり分かってない．</dd>
+</dl>
+<p>各プラグインはそれぞれの名前にあった PHP ファイルを用意し，専用の抽象クラスを継承した具象クラスを作成することで，作成できる．今回対象にするのは構文拡張プラグイン．プラグインは，管理者ページの拡張機能管理画面から管理できる．インストールは， DokuWiki のパッケージインデックスから持ってくる方法とアーカイブファイルからインストール方法がある．</p>
+<p>なおプラグインのファイル構造は， <a class="reference external" href="https://www.dokuwiki.org/devel:plugin_file_structure">https://www.dokuwiki.org/devel:plugin_file_structure</a> に載ってる通り．必須なのは <tt class="docutils literal">plugin.info.txt</tt> で，そこにプラグイン名や情報を書く．後は <tt class="docutils literal">conf</tt> ディレクトリに設定項目を書いたりする．</p>
+<p>DokuWiki のパッケージインデックスは実はそんなに高等なものではなくて，単なる <a class="reference external" href="https://www.dokuwiki.org">本家のDokuWiki</a> にプラグインのページを探すだけ．プラグインの著者はアーカイブファイルのダウンロード URL を作成し，そのページに登録しておく．プラグインのインストールはそこから行われる．</p>
+</div>
+<div class="section" id="auto-id-3">
+<h2>構文拡張プラグイン<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>構文拡張プラグイン (Syntax Plugin) の作り方は， <a class="reference external" href="https://www.dokuwiki.org/devel:syntax_plugins">https://www.dokuwiki.org/devel:syntax_plugins</a> に書いてある通り， <tt class="docutils literal">syntax.php</tt> という名前のファイルに <tt class="docutils literal">DokuWiki_Syntax_Plugin</tt> クラスを継承して <tt class="docutils literal">syntax_plugin_[プラグイン名]</tt> という名前のクラスを作る．このクラスは次のメソッドを実装する必要がある:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="nb">define</span><span class="p">(</span><span class="s1">'PLUGIN_NAME'</span><span class="p">,</span> <span class="s1">'example'</span><span class="p">);</span>
+
+<span class="k">class</span> <span class="nc">syntax_plugin_example</span> <span class="k">extends</span> <span class="nx">DokuWiki_Syntax_Plugin</span> <span class="p">{</span>
+  <span class="c1">// パースの仕方を制御するための情報を返す．</span>
+  <span class="c1">// https://www.dokuwiki.org/devel:syntax_plugins#syntax_types に一覧がある．</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">getType</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">'protected'</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 追加する構文の種類を制御する．</span>
+  <span class="c1">// 指定しない場合，インライン構文として認識される．</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">getPType</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">'block'</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// パースの優先度を設定する．</span>
+  <span class="c1">// 標準の優先度は https://www.dokuwiki.org/devel:parser:getsort_list に載ってる</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">getSort</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mi">69</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 構文がマッチする条件を登録する．</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">connectTo</span><span class="p">(</span><span class="nv">$mode</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">Lexer</span><span class="o">-&gt;</span><span class="na">addEntryPattern</span><span class="p">(</span><span class="s1">'&lt;example&gt;(?=.*&lt;/example&gt;)'</span><span class="p">,</span> <span class="nv">$mode</span><span class="p">,</span> <span class="s1">'plugin_'</span> <span class="o">.</span> <span class="nx">PLUGIN_NAME</span><span class="p">);</span>
+
+  <span class="p">}</span>
+
+  <span class="c1">// 構文が終了する条件を登録する．</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">postConnect</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">Lexer</span><span class="o">-&gt;</span><span class="na">addExitPattern</span><span class="p">(</span><span class="s1">'&lt;/example&gt;'</span><span class="p">,</span> <span class="s1">'plugin_'</span> <span class="o">.</span> <span class="nx">PLUGIN_NAME</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// マッチした内容を前処理する．</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">handle</span><span class="p">(</span><span class="nv">$match</span><span class="p">,</span> <span class="nv">$state</span><span class="p">,</span> <span class="nv">$pos</span><span class="p">,</span> <span class="nx">Doku_Handler</span> <span class="nv">$handler</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="nv">$state</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="nx">DOKU_LEXER_UNMATCHED</span><span class="o">:</span>
+        <span class="k">return</span> <span class="p">[</span>
+          <span class="s1">'render'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
+          <span class="s1">'match'</span> <span class="o">=&gt;</span> <span class="nv">$match</span><span class="p">,</span>
+        <span class="p">];</span>
+      <span class="k">default</span><span class="o">:</span>
+        <span class="k">return</span> <span class="p">[</span>
+          <span class="s1">'render'</span> <span class="o">=&gt;</span> <span class="k">false</span><span class="p">,</span>
+        <span class="p">];</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 前処理したデータをレンダリングする．</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">render</span><span class="p">(</span><span class="nv">$format</span><span class="p">,</span> <span class="nx">Doku_Renderer</span> <span class="nv">$renderer</span><span class="p">,</span> <span class="nv">$data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$data</span><span class="p">[</span><span class="s1">'render'</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nv">$match</span> <span class="o">=</span> <span class="nv">$data</span><span class="p">[</span><span class="s1">'match'</span><span class="p">];</span>
+
+    <span class="nv">$renderer</span><span class="o">-&gt;</span><span class="na">cdata</span><span class="p">(</span><span class="nv">$match</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table><p>この場合， <tt class="docutils literal"><span class="pre">&lt;example&gt;...&lt;/example&gt;</span></tt> という構文が追加され，その中身をそのまま表示するようになる．</p>
+</div>
+<div class="section" id="api">
+<h2>レンダラのAPI<a class="headerlink" href="#api" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p><tt class="docutils literal">render</tt> メソッドが受け取る <tt class="docutils literal">$renderer</tt> は，それぞれのレンダモードに対応したレンダリングを行う API をいくつか持っている． API は， <a class="reference external" href="https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/renderer.php.html#doku_renderer">https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/renderer.php.html#doku_renderer</a> に載ってる:</p>
+<ul class="simple">
+<li>table</li>
+<li>list</li>
+<li>horizontal line</li>
+<li>strong</li>
+</ul>
+<p>など， HTML のいくつかのタグに対応するレンダAPIがあり，こいつらを使うと DokuWiki で使われてるスタイルに合わせたレンダリングができる．</p>
+<p>レンダラは内部でバッファを持っていて，各APIはそれを更新していく．そいつに直接書き込むこともできる:</p>
+<pre class="literal-block">
+$renderer-&gt;doc .= 'something';
+</pre>
+<p>例えば XHTML モードの場合， <a class="reference external" href="https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/xhtml.php.source.html#l315">https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/xhtml.php.source.html#l315</a> を見れば分かる通り，大体は API の名前に対応する HTML タグをそのままバッファに追加してるだけ．</p>
+<p>実際の DokuWiki がどういうレンダリングをするかは， <a class="reference external" href="https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/handler.php.source.html#l5">https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/handler.php.source.html#l5</a> をみれば分かる．例えばリンクの処理部分は， <a class="reference external" href="https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/handler.php.source.html#l527">https://xref.dokuwiki.org/reference/dokuwiki/nav.html?inc/parser/handler.php.source.html#l527</a> になる．URLと名前で区切って内部リンクか外部リンクかなどを判別して適切にレンダAPIを呼び出していく．APIの呼び出しは， 実際にはこのハンドラ内では呼び出されず，呼び出し登録が <tt class="docutils literal">_addCall</tt> というメソッドで行われているだけで，その後積まれた API 呼び出しの登録が実行されるようになっている．呼び出し登録は文書のデータ構造を把握する際に役に立つらしい <a class="footnote-reference" href="#instruction-for-analysis" id="auto-id-4">[1]</a> ．例えば，</p>
+<pre class="literal-block">
+===== Read More =====
+
+All documentation and additional information besides the [[syntax|syntax description]] is maintained in the DokuWiki at [[doku&gt;|www.dokuwiki.org]].
+</pre>
+<p>のような DokuWiki の文書があった場合，</p>
+<pre class="literal-block">
+array(
+  array('document_start', array()),
+  array('header',         array('Header', 2, 0)),
+  array('section_open',   array(2)),
+  array('p_open',         array()),
+  array('cdata',          array("\nAll documentation and additional information besides the ")),
+  array('internallink',   array('syntax', 'syntax description')),
+  array('cdata',          array(' is maintained in the DokuWiki at ')),
+  array('internallink',   array('doku&gt;', 'www.dokuwiki.org')),
+  array('cdata',          array('.')),
+  array('p_close',        array()),
+  array('document_end',   array()),
+)
+</pre>
+<p>みたいな呼び出し登録が生成される．</p>
+</div>
+<div class="section" id="auto-id-5">
+<h2>まとめ<a class="headerlink" href="#auto-id-5" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>DokuWiki のプラグイン開発ってかなり狭い領域だと思うけど，まあ誰かの参考になればという感じで．公式にも色々ドキュメントがあるのでのぞいてみると良さそう．て感じで．</p>
+<table class="docutils footnote" frame="void" id="instruction-for-analysis" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-4">[1]</a></td><td>実際にレンダリングをしてしまうと単なる文字列になってしまい，文書の構造の情報がなくなってしまうが，呼び出し登録は少なくともレンダラの API の呼び出し順序などが見れる．</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/07/dokuwiki-syntax-plugin.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/07/dokuwiki-syntax-plugin.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/php.html">PHP</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/wiki.html">Wiki</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/dokuwiki.html">DokuWiki</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/puraguin.html">プラグイン</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

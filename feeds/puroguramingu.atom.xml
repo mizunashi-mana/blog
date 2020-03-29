@@ -1,0 +1,1272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguramingu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-03-29T08:23:18+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>State モナドの代わりに Reader モナドを使う</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/" rel="alternate"></link><published>2020-01-30T20:23:21+09:00</published><updated>2020-03-29T08:23:18+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-01-30:/blog/posts/2020/01/use-reader-instead-of-state/</id><summary type="html">&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;strong&gt;注意&lt;/strong&gt;&lt;/dt&gt;
+&lt;dd&gt;この記事は公開当時主張に誤りを含んでいたため，大幅に書き直しています．また，公開当時の主張の誤りについても，付録として載せておきました．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う …&lt;/p&gt;</summary><content type="html">&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;strong&gt;注意&lt;/strong&gt;&lt;/dt&gt;
+&lt;dd&gt;この記事は公開当時主張に誤りを含んでいたため，大幅に書き直しています．また，公開当時の主張の誤りについても，付録として載せておきました．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う．&lt;/p&gt;
+&lt;p&gt;なお，環境として以下を想定している．&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="69%"/&gt;
+&lt;col width="31%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;GHC のバージョン&lt;/td&gt;
+&lt;td&gt;8.6.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Cabal のバージョン&lt;/td&gt;
+&lt;td&gt;3.0.0.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class="section" id="ioref"&gt;
+&lt;h2&gt;IORef の神話&lt;a class="headerlink" href="#ioref" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Haskell はかなり多くの神話を持つ言語だ．その中の一つに，以下のものがある．&lt;/p&gt;
+&lt;blockquote&gt;
+IORef を使うとパフォーマンスは良いが純粋性を損なう．なので，パフォーマンスを気にしないなら State モナドを使うべきだ．&lt;/blockquote&gt;
+&lt;p&gt;巷の多くの例では，この言葉は都市伝説に過ぎない．まずは，その辺について見ておこう．これは，IORef などの可変参照と State モナドの違いを理解する上でも役に立つはずだし，本記事の良い導入となるだろう．&lt;/p&gt;
+&lt;p&gt;さて，以下のサンプルコードを見てみる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Control.Monad.State.Strict&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.IORef&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;execState&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kt"&gt;[]&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;xs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;modify'&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;newIORef&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+    &lt;span class="n"&gt;readIORef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="kt"&gt;[]&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;xs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;modifyIORef'&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この場合，&lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; でどちらがどれくらい良いパフォーマンスを期待できるだろうか？ まずは，実測してみよう．&lt;a class="reference external" href="https://hackage.haskell.org/package/criterion"&gt;criterion&lt;/a&gt; を使って，ベンチマークコードを書いてみる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;Main&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="k"&gt;qualified&lt;/span&gt; &lt;span class="nn"&gt;Criterion.Main&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;Criterion&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Criterion&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;defaultMain&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="n"&gt;bgroup&lt;/span&gt; &lt;span class="s"&gt;"sumByState"&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;Criterion&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;nf&lt;/span&gt; &lt;span class="n"&gt;sumByState&lt;/span&gt;
+    &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bgroup&lt;/span&gt; &lt;span class="s"&gt;"sumByIORef"&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Criterion&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;nfIO&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;sumByIORef&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;bgroup&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Criterion&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bgroup&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;benches&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;
+
+    &lt;span class="n"&gt;benches&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
+      &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="kt"&gt;Criterion&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bench&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"n="&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="n"&gt;show&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;samples&lt;/span&gt;
+      &lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="n"&gt;samples&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+      &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="o"&gt;^&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;
+      &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;このコードによる測定結果を，グラフにプロットしてみると以下のようになる:&lt;/p&gt;
+&lt;img alt="``sumByState`` より ``sumByIORef`` の時間の方が常に長い" class="align-center" src="https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/use-reader-instead-of-state/state-vs-ioref.png"/&gt;
+&lt;p&gt;どちらの軸も対数でとってることに注意．見ての通り，常に &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; の方が &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; より速い．この場合，State モナドは，IORef を使う場合に比べ，「パフォーマンスが良くて，しかも純粋性を損なわない」わけだ．さて，なぜこのような結果になるのだろう？ Haskell は純粋性を持つコードを贔屓しているのだろうか？ それとも State モナドの実装は，裏で高度な技術が使われていて，それによって高効率な動作をするようになっているのだろうか？&lt;/p&gt;
+&lt;p&gt;実は，State モナドと IORef のコードは，やってることはそう違いはない．これは，大局的に見てという話ではなく，本当にそれぞれの操作が割と対応したコードになっているのだ．にも関わらず違いが出るのは何故なのだろう？ このカラクリを紐解いていこう．GHC では通常最適化レベル 1 でコンパイルをするわけだが，まずは他のレベルでどうなるか見てみよう．&lt;tt class="docutils literal"&gt;cabal&lt;/tt&gt; を使っている場合は，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+cabal build --enable-optimization=n &amp;amp;&amp;amp; cabal --enable-optimization=n exec ...
+&lt;/pre&gt;
+&lt;p&gt;というようにすれば，試せる．結果は，大体以下のような結果になる:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;最適化レベル2&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; の方はあまり変わらないが，&lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; はさらに性能が良くなり，両者の性能差が浮き彫りになる．&lt;/dd&gt;
+&lt;dt&gt;最適化レベル0&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; の方が &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; に比べ2倍ほど速くなる．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;最適化レベル0の結果から分かる通り，実は State モナドと IORef の性能差は，最適化によって生まれる．最適化レベル1において， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; はそれぞれ概ね次のようなコードに最適化される:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE MagicHash     #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE UnboxedTuples #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;GHC.Base&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;GHC.Prim&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+      &lt;span class="kt"&gt;[]&lt;/span&gt;   &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt;
+    &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s0&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;newMutVar&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;STRef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="n"&gt;s1&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;  &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;readMutVar&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;s2&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;IORef&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;State&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kt"&gt;RealWorld&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kt"&gt;State&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kt"&gt;RealWorld&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+      &lt;span class="kt"&gt;[]&lt;/span&gt;   &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+        &lt;span class="n"&gt;r'&lt;/span&gt;&lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;STRef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;readMutVar&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s0&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;writeMutVar&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;s2&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="n"&gt;r'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="n"&gt;s2&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;幾人かは，このコードがまだ最適化の余地を残していることに気づくだろう．実際，最適化レベル2では，さらに w/w という最適化が入り，どちらも余計な処理が省かれる．特に， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; はその省かれた処理によって，かなり高速化される．ところでパッと見で， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; より &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; の最適化コードは複雑に見える．多くの場合，ミクロな視点で見れば，コードは複雑なものより単純なものの方が速い．実際今回は， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; の方が優っていた．ところが，この2つのコード，実際にやっていることにそう違いはない．IORef は，通常あるヒープ領域を指すポインタとして実装される．そして，そのヒープ領域には，実データのクロージャを指すポインタがやっぱり入っている．そこで，両者の違いは，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;実データのクロージャを指すポインタを直接参照するか，一旦実データを指すポインタを参照しさらにそこから実データを参照する2段階の参照か&lt;/li&gt;
+&lt;li&gt;Haskell の単純な構文を保っているか，&lt;tt class="docutils literal"&gt;readMutVar#&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;writeMutVar#&lt;/tt&gt; などのプリミティブな命令が露出しているか&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;になる．ただ，2段階の参照になっても他の処理と比べて相対的にそこまで遅くなるというわけではなく，プリミティブな命令もコード生成時には単純にメモリ参照の命令に置き換わり，特別なランタイム API の呼び出しなどは通常起きない．なので，これらの違いは直接的にはパフォーマンスの違いに影響を及ばさないのだが，間接的には大きな影響を与える．一般に，GHC で IORef が通常の State モナドよりパフォーマンスで劣る点は以下のものだ:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;プリミティブな命令をコード生成まで展開できず，そこまでの最適化が阻害される．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;writeMutVar#&lt;/tt&gt; は重い処理であり，単純に参照を取り換えるだけでなく，GC への特別な処理を要求する &lt;a class="footnote-reference" href="#notice-write-barrier" id="auto-id-1"&gt;[1]&lt;/a&gt; ．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;1つ目の問題は，最適化レベル1ではそこまで現れていないが，最適化レベル2で &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; に性能差を広げられたことの主な要因になる．w/w 変換で， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; は次のように最適化できる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+      &lt;span class="kt"&gt;[]&lt;/span&gt;   &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;I&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+        &lt;span class="kt"&gt;I&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ys&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;acc&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="o"&gt;+#&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;本来の &lt;tt class="docutils literal"&gt;+&lt;/tt&gt; では， &lt;tt class="docutils literal"&gt;I#&lt;/tt&gt; を取って &lt;tt class="docutils literal"&gt;+#&lt;/tt&gt; で計算した結果をまた &lt;tt class="docutils literal"&gt;I#&lt;/tt&gt; で包むといったことをしてたのが，こうするとその処理が省ける他， &lt;tt class="docutils literal"&gt;Int#&lt;/tt&gt; の値をいちいちヒープに入れなくて良くなり，かなり速度の改善が見込める．実際，速度はかなり改善する．IORef の方も似たようなことをやってるので，このような最適化を適用しようと思えばできるのだが，残念ながら適用されない．なぜなら，プリミティブ命令は実行コード生成時まで展開されず，最適化の適用にはプリミティブ命令の展開が必要だが，最適化は実行コード生成前に行われるため，結果的にミスマッチにより最適化が適用されないということが起こるからだ．つまり，最適化レベル2での &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; の対決は，片方は &lt;tt class="docutils literal"&gt;I#&lt;/tt&gt; によるラップ処理を省きスタックへの参照のみで完結，もう片方は &lt;tt class="docutils literal"&gt;I#&lt;/tt&gt; のラップ処理が必要で一々ヒープに書き込む操作も必要といったプログラム同士の悲惨な対決となってしまう．&lt;/p&gt;
+&lt;p&gt;2つ目の問題は，知るところでは知られた問題だ．一般に writeIORef は幾つかの側面から多用はやめた方がいいと言う通説がある．これは，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;evalState&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;get&lt;/span&gt;
+      &lt;span class="n"&gt;when&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;mod&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="n"&gt;put&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+      &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;newIORef&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readIORef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+      &lt;span class="n"&gt;when&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;mod&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="n"&gt;writeIORef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+      &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように， &lt;tt class="docutils literal"&gt;writeIORef&lt;/tt&gt; を抑えたプログラムで速度を実測してみると分かるが，この場合当初は 40% ほどの性能差だったのが 10% ほどになる．つまり，最適化レベル1 での性能悪化の主な要因は，大雑把に言えば &lt;tt class="docutils literal"&gt;writeIORef&lt;/tt&gt; の多用にあると言うことだ．&lt;/p&gt;
+&lt;p&gt;これまでの議論 &lt;a class="footnote-reference" href="#notice-optimization-0" id="auto-id-2"&gt;[2]&lt;/a&gt; から，IORef が State モナドよりパフォーマンスの悪化を招きやすい，少なくとも State モナドより速くなることはないというのが，大方の結論になる．よって，GHC では，IORef より State モナドを使う方が，純粋な計算で完結でき，しかも速いのだ．これが，最初の話題が神話である所以だ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;IORef 再考&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;という話で終わると，単なる注意喚起になってしまうのだが，本題はここからだ．さて，IORef の問題点は以下の2点だった．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;プリミティブな命令をコード生成まで展開できず，そこまでの最適化が阻害される．&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;writeMutVar#&lt;/tt&gt; は重い処理であり，あまり多用してはいけない．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;これは，別の言い方をすれば，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;プリミティブ命令を展開するような最適化が，そこまでパフォーマンスに大きく影響しない&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;writeMutVar#&lt;/tt&gt; をそこまで多用しない&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;コードであれば，IORef は有効ということになるのではないだろうか？ 1つ目の用件は，スタック領域だけで完結しないような状態，つまり &lt;tt class="docutils literal"&gt;Int&lt;/tt&gt; のようなものでなく &lt;tt class="docutils literal"&gt;Bool&lt;/tt&gt; のような本質的に boxed なデータを扱うコードであれば，大体クリアできる． &lt;tt class="docutils literal"&gt;writeMutVar#&lt;/tt&gt; についても，頻繁に変更しないが，参照は頻繁に行うような要件はいくらでもあるだろう．特に，今回対象にしたいのが，グローバルコンテキストだ．グローバルコンテキストの賛否はともかくとして，現実の多くのプログラムは，巨大で常駐し続けるプログラムの設定を管理するデータを持っている．通常グローバルコンテキストは，幾つかのフィールドから構成されていて，ネストされていたりもする．フィールドの中身はヒープに確保しなければいけないため，1つ目の条件を満たす．さらに，その中の幾つかのフィールドは変更可能なものになっている場合があり，起動してからいくつかのタイミングで更新される可能性がある．しかし，それほど頻繁な変更ではないため，2つ目の条件も満たすことになる．つまり，グローバルコンテキストは先ほど挙げた2点を満たしているのだ．このような状況設定だと，IORef と State モナドのパフォーマンスは同等になる場合が多い．例えば，次の例を見てみる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE StrictData #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;SubContext&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param1&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param3&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Ordering&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param4&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;SubContext&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;SubContext&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;subparam2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;subparam3&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;subparam4&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Ordering&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;initialContext&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;initialContext&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;SubContext&lt;/span&gt;
+      &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;subparam2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+      &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;subparam3&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"str1"&lt;/span&gt;
+      &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;subparam4&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;EQ&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;True&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"str2"&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param3&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;EQ&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param4&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;execState&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;initialContext&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;State&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kt"&gt;[]&lt;/span&gt;     &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;xs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+      &lt;span class="mi"&gt;10000&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+      &lt;span class="kr"&gt;_&lt;/span&gt;     &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+        &lt;span class="n"&gt;goUpdate&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+        &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+    &lt;span class="n"&gt;goUpdate&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;get&lt;/span&gt;
+      &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="n"&gt;put&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+          &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;
+          &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;IORef&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;newIORef&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;initialContext&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;IORef&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;   &lt;span class="kt"&gt;[]&lt;/span&gt;     &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;xs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+      &lt;span class="mi"&gt;10000&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+      &lt;span class="kr"&gt;_&lt;/span&gt;     &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+        &lt;span class="n"&gt;goUpdate&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+        &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+    &lt;span class="n"&gt;goUpdate&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+      &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readIORef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+      &lt;span class="n"&gt;writeIORef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この例は色々細工がしてあるが，とにかくこの場合，入力リストの長さを 100000 より大きくすると，最適化レベル1 / 2 両方で， &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; は大体同等の性能か，IORef の方がほんの少し速くなる．細工の内容としては，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;コンテキストの更新の合間に，余計な Integer オブジェクトを作り出し GC させることで，コンテキストの内容自体の世代を成長させてから GC に回収させる．&lt;/li&gt;
+&lt;li&gt;フィールドを多くすることで，State モナドの場合に更新に手間がかかるようにしている．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;という感じ．この例は結構無理やり作っているけど，実際コンテキストはそこそこフィールドが多くネストしていて，書き込みが少ないことから内容も世代を超えやすいはずなので，現実の条件を擬似的に作り出してる例と言えると思う．よって，グローバルコンテキストに対し IORef を適用するならば，パフォーマンス的な心配はしなくて良いと言えるのではないだろうか？ さらに，IORef が State モナドより勝る点として以下のものがある．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;可変なフィールドを明示することができ，データ定義から可変な箇所がわかるようになる．&lt;/li&gt;
+&lt;li&gt;値の変更の際，State モナドでは読み込み，書き込み両方でデータのネスト構造を辿る必要があったのが，IORef では読み込みのみでよくなる．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;今回の例は， &lt;tt class="docutils literal"&gt;Context Int&lt;/tt&gt; をちゃんと書き下せば， &lt;tt class="docutils literal"&gt;subparam1&lt;/tt&gt; フィールドを unpack できる．この場合， IORef は boxed なものしか扱えないため，ちょっと不利かもしれないが，そこら辺も &lt;a class="reference external" href="https://hackage.haskell.org/package/unboxed-ref"&gt;unboxed-ref&lt;/a&gt; 使えばいい勝負ができるんじゃないかなと思ってる (が，試してない．また時間があれば，試してみたい)．&lt;/p&gt;
+&lt;p&gt;ただ注意として， &lt;tt class="docutils literal"&gt;writeIORef&lt;/tt&gt; は局所的に頻繁に呼び出すような場面には向いてないので，その場合は一旦 IORef から取り出して再帰関数の累積引数として引き回したり，そういう時こそ State モナドで最終的な値を作ってから，IORef に入れ直すのが無難．更新の間に色々処理が挟まるようだったら， &lt;tt class="docutils literal"&gt;writeIORef&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;modifyIORef&lt;/tt&gt; 使ってもいいかもねって感じ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="reader-ioref"&gt;
+&lt;h2&gt;Reader + IORef&lt;a class="headerlink" href="#reader-ioref" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;さて，先ほど挙げた &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; は Reader モナドを使うと次のように書き換えられる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Control.Monad.Reader&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Control.Monad.IO.Class&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;App&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;ReaderT&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;IORef&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;App&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;App&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kt"&gt;[]&lt;/span&gt;     &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;xs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+      &lt;span class="mi"&gt;10000&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+      &lt;span class="kr"&gt;_&lt;/span&gt;     &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+        &lt;span class="n"&gt;goUpdate&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+        &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+    &lt;span class="n"&gt;goUpdate&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;ask&lt;/span&gt;
+      &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+      &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;liftIO&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;readIORef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+      &lt;span class="n"&gt;liftIO&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;writeIORef&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;本来， &lt;tt class="docutils literal"&gt;State&lt;/tt&gt; が補っていた部分を，読み込み部分は &lt;tt class="docutils literal"&gt;ReaderT&lt;/tt&gt; に，可変部分は &lt;tt class="docutils literal"&gt;IORef&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; に任せる感じだ．このようなプログラミングスタイルは，何も僕が思いついたわけではなく， &lt;a class="reference external" href="https://www.fpcomplete.com/blog/2017/06/readert-design-pattern"&gt;ReaderT パターン&lt;/a&gt; と呼ばれていて，結構最近は浸透しつつあるんかな？ 今まで挙げたコードの清潔さを担保するという他にも，このスタイルはメリットがあり，もうちょっと周辺のツールも整備されてたりするんだけど，まあ詳細は &lt;a class="reference external" href="https://www.fpcomplete.com/blog/2017/06/readert-design-pattern"&gt;元記事&lt;/a&gt; の方を読んでくれ．(飽きてきた．)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-5"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;というわけで，状態更新を行う時の代表手法として紹介される State モナドだけど，Reader + IORef を使った方が見通しがいい場合もあるよという話でした．パフォーマンス面での話は，誰も挙げていない気がしたので書いた感じ．&lt;/p&gt;
+&lt;p&gt;大雑把には，State モナドより Reader + IORef を使った方がいい場合として，状態が&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;大きくてネストしていたりというように，ほどほどに複雑で&lt;/li&gt;
+&lt;li&gt;頻繁には変更しなくて&lt;/li&gt;
+&lt;li&gt;局所的な変更が多くて (変更しない部分も多くて)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;という条件を満たす時というのがある．この場合は，State よりも Reader + IORef の方がコードの簡潔さ的に良い場合があり，パフォーマンス面でもそこまで有意差はないよという感じ．今回は，IORef しか紹介しなかったけど，これは TVar とかにも通じる話だし，STRef 使えば全体として純粋に計算できる場合もある．ま，そういう感じで (ざつぅ)．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-6"&gt;
+&lt;h2&gt;誤りのあった主張&lt;a class="headerlink" href="#auto-id-6" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;そもそもの目算として，ネストするような状態で奥深くを更新する場合は，IORef の方がパフォーマンス的にも優位なのではないかというのがあったんだけど，これはあまり大きな差ではなさそうだった．まず，当初この記事で挙げていた以下の例で，ネストする状態の分解と構成が重いため， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; より &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; の方が速いという主張は誤りだった ( &lt;a class="reference external" href="https://github.com/maoe"&gt;maoe&lt;/a&gt; さんの &lt;a class="reference external" href="https://github.com/mizunashi-mana/blog/pull/85#discussion_r373787772"&gt;指摘&lt;/a&gt; で判明した． &lt;a class="reference external" href="https://github.com/maoe"&gt;maoe&lt;/a&gt; さん，ありがとうございます)．&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;SubContext&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param1&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;SubContext&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;SubContext&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;subparam2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;initialContext&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;SubContext&lt;/span&gt;
+      &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;subparam2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;True&lt;/span&gt;
+  &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;param2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="s"&gt;""&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;sumByState&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;execState&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;initialContext&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kt"&gt;[]&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;xs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;modify'&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+      &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;IO&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Context&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;IORef&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nf"&gt;sumByIORef&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;newIORef&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;initialContext&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+    &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;   &lt;span class="kt"&gt;[]&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pure&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;xs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+      &lt;span class="n"&gt;modifyIORef'&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;xs&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この例で問題だったのは， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; の&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;modify'&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;の部分で，大幅に効率が悪かったのはこの部分でスペースリークが発生していたからだった．この場合 &lt;tt class="docutils literal"&gt;modify'&lt;/tt&gt; が更新値を WHNF に評価しても，ネストした部分の &lt;tt class="docutils literal"&gt;subctx&lt;/tt&gt; に入る値は評価されずサンクになる．このサンクは，最終的に返ってくる &lt;tt class="docutils literal"&gt;Context Int&lt;/tt&gt; の値を NF に評価するまで積み上がり，その評価の時点で初めて潰されることになる．このスペースリークが， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; が遅くなっていた要因で，解決策は &lt;tt class="docutils literal"&gt;Context a&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;SubContext a&lt;/tt&gt; を &lt;tt class="docutils literal"&gt;StrictData&lt;/tt&gt; にするか，以下のように &lt;tt class="docutils literal"&gt;subparam1&lt;/tt&gt; に入れる値を NF にすれば良い:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;modify'&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt;
+  &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+  &lt;span class="kr"&gt;in&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subctx&lt;/span&gt; &lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;subparam1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;こうすると， &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; より速くなり，パフォーマンスが改善するというのは誤りだったということになる．では，実際状態の分解と構成はまるっきり無視できるかというと，一応は影響するらしい．今回差し替えた，色々細工を加えた例では，最適化レベル1では 10% ほど &lt;tt class="docutils literal"&gt;sumByState&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;sumByIORef&lt;/tt&gt; より性能が悪化するという結果になった．ところが，最適化レベル2になると，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+
+&lt;span class="nf"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;n2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;n2&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="n"&gt;n1&lt;/span&gt; &lt;span class="n"&gt;n2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="n"&gt;n2&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;n1&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;を，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+
+&lt;span class="nf"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;f&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;I&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;n1&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;I&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;n2&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;n1&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;n2&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;  &lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;I&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="o"&gt;-#&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;#&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;にするような最適化 &lt;a class="footnote-reference" href="#notice-datatype-ww" id="auto-id-8"&gt;[3]&lt;/a&gt; が入り，ネストも平坦になるため一切分解と構成のオーバーヘッドはかからない．また，内部の値も unbox 化されるので，結構コスト削減になってるはずなのだが，代わりにかなり多くの引数を再帰関数で引き回す必要があるため，そこらへんがオーバーヘッドになって，結局 IORef と同程度にしかパフォーマンスが出せてないみたい (ちょっと詳細はまだ調査できていない)．&lt;/p&gt;
+&lt;p&gt;とりあえず，当初の IORef の場合 State モナドに比べてパフォーマンスが改善する場合もあるというのは，事実となる場合もあるはあるがそこまで大きな有意差ではなく，書くコードと入る最適化によって十分覆る程度のものみたい．なので，パフォーマンスが改善するというよりは，パフォーマンスにそこまで有意差はないと言った方が実態に即している気がしたので，全体的に取り下げることにした．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-write-barrier" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;GHC では，GC の捕捉のため旧世代から新世代への参照が作られた場合の更新通知を，mutator が行う必要がある．この通知を &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/storage/gc/remembered-sets"&gt;write barrier&lt;/a&gt; と呼んでいて，writeMutVar# も write barrier を内部で行う．しかし，write barrier があまりにも多いと，内部の仕組み的に GC の性能が下がるという問題が知られている．一般に，GHC の GC は可変なオブジェクトについてあまり良いサポートを提供できていないと言う &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/issues/7662"&gt;話&lt;/a&gt; もある．その意味では，純粋性を贔屓しているというのは正しい．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-optimization-0" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;最適化レベル0，つまり最適化なしの場合，IORef の方が速くなる現象にはここまで触れなかったが，実はこれは State のせいというより mtl のせいという側面が大きい．普段私たちはそこまで意識していないのだが，実は型クラスを使うのにはそれなりの実行時コストがかかる．これらは，最適化によってそれなりに排除されている．しかし，最適化なしの場合はこのコストはもろに影響してくる．今回の場合は， &lt;tt class="docutils literal"&gt;IO&lt;/tt&gt; モナドだけを使ったコードと比較し， &lt;tt class="docutils literal"&gt;State&lt;/tt&gt; モナドのコードは mtl の API を使ったので &lt;tt class="docutils literal"&gt;Monad&lt;/tt&gt; 型クラスと &lt;tt class="docutils literal"&gt;MonadState&lt;/tt&gt; 型クラスの抽象化に依存している．つまり，その分コストが増えてしまったということになる．なので，最適化なしの場合は，あまり本質的な違いとは言えないだろう．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-datatype-ww" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-8"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;データ型に対する w/w の一種みたい: &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/data-types#the-constructor-wrapper-functions"&gt;https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/data-types#the-constructor-wrapper-functions&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/01/use-reader-instead-of-state.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/01/use-reader-instead-of-state.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="プログラミング"></category><category term="Haskell"></category><category term="GHC"></category><category term="モナド"></category></entry><entry><title>type family を使って再帰的 ADT をオープンにする</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/11/trees-that-grow/" rel="alternate"></link><published>2019-11-17T06:42:24+09:00</published><updated>2020-03-29T08:23:18+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-11-17:/blog/posts/2019/11/trees-that-grow/</id><summary type="html">&lt;p&gt;元ネタは &lt;a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/"&gt;Trees that grow&lt;/a&gt; ． Haskell では代数的データ型 (ADT) を使ってプログミングに使うデータ構造を定義し，その構造を操作することによりプログラミングを行う． ADT はパターンマッチが容易で，再帰的に定義でき，基本的に閉じた構造になっている．そのため便利な反面，その機能が保守で仇となる場合もある．この問題は古くから知られており，いくつかの解決策も提案されてきた．今回はこのうち，現在 GHC で採用されつつある type family を使った解決方法を紹介する．&lt;/p&gt;
+&lt;p&gt;なお …&lt;/p&gt;</summary><content type="html">&lt;p&gt;元ネタは &lt;a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/"&gt;Trees that grow&lt;/a&gt; ． Haskell では代数的データ型 (ADT) を使ってプログミングに使うデータ構造を定義し，その構造を操作することによりプログラミングを行う． ADT はパターンマッチが容易で，再帰的に定義でき，基本的に閉じた構造になっている．そのため便利な反面，その機能が保守で仇となる場合もある．この問題は古くから知られており，いくつかの解決策も提案されてきた．今回はこのうち，現在 GHC で採用されつつある type family を使った解決方法を紹介する．&lt;/p&gt;
+&lt;p&gt;なお，環境として以下を想定している．&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="69%"/&gt;
+&lt;col width="31%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;GHC のバージョン&lt;/td&gt;
+&lt;td&gt;8.8.1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class="section" id="the-expression-problem"&gt;
+&lt;h2&gt;The Expression Problem&lt;a class="headerlink" href="#the-expression-problem" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;プログラミング，特に Haskell を使用したプログラミングにおいて，データ型は非常に重要な役割を持つ．特に，一部のプログラムにおいては，根幹をなすデータ型がいくつか存在するような場合もある．この場合データ型の扱いをどうするかは設計段階において非常に重要になる．例えば，コンパイラを作る場合を想定すると，多くの場合 AST の定義とコンテキストの定義が非常に重要になるだろう．この場合に， AST に話を絞ると，プログラムのフェーズによって AST に対し少し情報を足したりしたい場合がある．この場合データ型自体は異なるが，ほぼ基盤は変わらない．このため，それぞれデータ型を定義するとなると，共通の処理関数やインターフェースなども再定義する必要に迫られ，ボイラープレートが大量に生まれることになる．また，元々あった構文を脱糖し，その後はその構文がない前提で話を進めたい場合などもあるだろう．この場合も，脱糖後用に新たにデータ型を定義し直すのは手間である．&lt;/p&gt;
+&lt;p&gt;一般に上のように，場合分け可能なデータ型に対し，既存の処理関数やデータ型を再定義することなく，新たな場合分けを追加できるかという問題は Expression Problem と名付けられている &lt;a class="footnote-reference" href="#the-expression-problem-detail" id="auto-id-1"&gt;[1]&lt;/a&gt; ．特に純粋な ADT しか持たないような Haskell などの言語は Expression Problem に弱く， Scala などのオブジェクト指向を採用してる言語はこのような問題にはかなり強い．例えば，足算を行う電卓の例を考えてみる． AST の定義とそれに対しての実行関数だけ書いてみると，それぞれ以下のようになるだろう:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;-- Haskell&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Add&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Num&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+
+&lt;span class="nf"&gt;eval&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;AST&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;eval&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Add&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+&lt;span class="nf"&gt;eval&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Num&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;   &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;// Scala&lt;/span&gt;
+
+&lt;span class="k"&gt;trait&lt;/span&gt; &lt;span class="nc"&gt;Ast&lt;/span&gt;
+
+&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Add&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;extends&lt;/span&gt; &lt;span class="nc"&gt;Ast&lt;/span&gt;
+&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Num&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;extends&lt;/span&gt; &lt;span class="nc"&gt;Ast&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nc"&gt;Add&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+  &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nc"&gt;Num&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;    &lt;span class="k"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これらのプログラムで遊び終えたら，多くの人はこの電卓に新たな機能を足したいと思うはずだ．例えば，掛け算を追加してみることを考えたい．上のプログラムを全く変えないで，行末に何かを追加するだけで，掛け算も計算できるようにならないだろうか？ 残念ながら今回の場合は，不可能だ．しかし， Scala の場合少し工夫するだけでこの目標を達成できる．最初のプログラムを以下のように作っておくのだ:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;// Scala&lt;/span&gt;
+
+&lt;span class="k"&gt;trait&lt;/span&gt; &lt;span class="nc"&gt;Ast&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+
+&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Add&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;extends&lt;/span&gt; &lt;span class="nc"&gt;Ast&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+
+&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Num&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;extends&lt;/span&gt; &lt;span class="nc"&gt;Ast&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この場合，掛け算を追加したかったら，行末に以下を追記すれば良い:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Mul&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;extends&lt;/span&gt; &lt;span class="nc"&gt;Ast&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;eval&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;残念ながら， Haskell では同じことをやろうとすると，大規模な改築が必要になる．原因はデータ型が再帰的であることによる． &lt;tt class="docutils literal"&gt;Ast&lt;/tt&gt; は再帰的であるため，単純に以下のようなことをしても掛け算を追加したことにはならない:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Ast2&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Orig&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Mul&lt;/span&gt; &lt;span class="kt"&gt;Ast2&lt;/span&gt; &lt;span class="kt"&gt;Ast2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なぜなら， &lt;tt class="docutils literal"&gt;(2 * 3) + 1&lt;/tt&gt; のようなものをこのデータ型では表現できないからだ．つまり，元々の再帰構造自体はデータ型を定義した時点で既に確定してしまっており，後から付け入る隙がないのだ．逆に Scala では再帰部分をベースのトレイトで定義しており，後から派生クラスをいくらでも追加することができる．一般にオブジェクト指向型の言語では，再帰部分をオブジェクトの基底インターフェースにすることで，自然なプログラミングスタイルながら後から再帰部分をいくらでも派生させることができる．このような特性は，開いた再帰 (open recursion) と呼ばれる．これは，オブジェクト指向を搭載する言語の大きな強みだと個人的には思っている &lt;a class="footnote-reference" href="#open-vs-close" id="auto-id-2"&gt;[2]&lt;/a&gt; ．&lt;/p&gt;
+&lt;p&gt;Haskell では，この問題の解決が結構昔から取り組まれており， tagless final &lt;a class="footnote-reference" href="#finally-tagless-ref" id="auto-id-3"&gt;[3]&lt;/a&gt; ， data types a la carte &lt;a class="footnote-reference" href="#data-types-a-la-carte-ref" id="auto-id-4"&gt;[4]&lt;/a&gt; などの手法が存在する．今回は，これらの提案の手法のうち，比較的新しく GHC で使われている， type family を使った手法について紹介する．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-5"&gt;
+&lt;h2&gt;Trees That Grow&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;この手法の面白いところは，他の手法と比べ，かなり自然な Haskell プログラミングの形でデータ型を拡張できることにある．つまりかなり単純な手法で，拡張性を持つデータ型を扱え，オープン性を type family のオープン性を使って担保するだけだ．&lt;/p&gt;
+&lt;p&gt;type family とは， GHC の言語拡張で提供される機能で，その名の通り型の族，つまりある型に対して別の型を結びつけるような写像を定義できる機能だ．例えば，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE TypeFamilies #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE PolyKinds    #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.Kind&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;family&lt;/span&gt; &lt;span class="kt"&gt;ElemType&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;ElemType&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;        &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;ElemType&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;ElemType&lt;/span&gt; &lt;span class="kt"&gt;Text&lt;/span&gt;       &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Char&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;ElemType&lt;/span&gt; &lt;span class="kt"&gt;ByteString&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Word8&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように書くと， &lt;tt class="docutils literal"&gt;ElemType String&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;ElemType Text&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;Char&lt;/tt&gt; 型のエイリアスとして使えるようになる．型でパターンマッチできる，型エイリアスだと思っても良いだろう．ただ，この機能の面白いところは，パターンマッチを後からいくらでも足せるところにある &lt;a class="footnote-reference" href="#closed-type-families" id="auto-id-6"&gt;[5]&lt;/a&gt;　．この機能を使うと，上の電卓の例を次のように修正することができる．&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE ScopedTypeVariables #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE TypeApplications    #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Add&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Num&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;XAst&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XAst&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;family&lt;/span&gt; &lt;span class="kt"&gt;XAst&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt;
+
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;EvalXAst&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;evalXAst&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;XAst&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt;
+
+&lt;span class="nf"&gt;eval&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;forall&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="kt"&gt;EvalXAst&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt;
+&lt;span class="nf"&gt;eval&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;goXAst&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;evalXAst&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt;
+
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Add&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Num&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;   &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XAst&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;goXAst&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;OldAst&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XAst&lt;/span&gt; &lt;span class="kt"&gt;OldAst&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Void&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;EvalXAst&lt;/span&gt; &lt;span class="kt"&gt;OldAst&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;evalXAst&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;absurd&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;WithMul&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Mul&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;NewAst&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XAst&lt;/span&gt; &lt;span class="kt"&gt;NewAst&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;WithMul&lt;/span&gt; &lt;span class="kt"&gt;NewAst&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;EvalXAst&lt;/span&gt; &lt;span class="kt"&gt;NewAst&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;evalXAst&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Mul&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;ちょっと複雑に見えるのが，基幹部は &lt;tt class="docutils literal"&gt;Ast p&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;XAst&lt;/tt&gt; というデータコンストラクタだ． &lt;tt class="docutils literal"&gt;XAst&lt;/tt&gt; データコンストラクタは type family で定義されたデータ型を受け取るようになっており， type family のインスタンスを後から挿入できるようになっている． &lt;tt class="docutils literal"&gt;EvalXAst&lt;/tt&gt; は後から挿入するコンストラクタの，パターンマッチ部分を受けとるようになっていて， &lt;tt class="docutils literal"&gt;eval&lt;/tt&gt; はそいつを受け取って完成するようになっている．その下が実際のパターンマッチを後付けしてる部分で， &lt;tt class="docutils literal"&gt;Ast OldAst&lt;/tt&gt; は元々の足し算しかない電卓の動作， &lt;tt class="docutils literal"&gt;Ast NewAst&lt;/tt&gt; は掛け算も追加した電卓の動作が行えるようになっている．このように， type family をデータ型に埋め込むことで，データ型を一部オープンにすることができるようになる．さらに，この手法は上の Scala の例と異なり，様々なバリエーションのデータ型を双方共存させることができる．&lt;/p&gt;
+&lt;p&gt;この手法は， Expression Problem 以外にも応用できる．最初にあげた，フェーズごとに異なる情報を入れるようなデータ型にも対応できる．例えば，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;NumType&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;ArrowType&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;App&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Abs&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ast&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Var&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XVar&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Num&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;family&lt;/span&gt; &lt;span class="kt"&gt;XVar&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Parsed&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XVar&lt;/span&gt; &lt;span class="kt"&gt;Parsed&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;NoExt&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Renamed&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XVar&lt;/span&gt; &lt;span class="kt"&gt;Renamed&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;TypeChecked&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XVar&lt;/span&gt; &lt;span class="kt"&gt;TypeChecked&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XVar&lt;/span&gt; &lt;span class="kt"&gt;Renamed&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいなデータ型を作ると，パース時は何の情報もないのが，リネーム時に元々の変数名を，型検査時に変数の型を， AST のデータ型に付与することができる．&lt;/p&gt;
+&lt;p&gt;さらに， type family のインスタンスはモジュールを超えて定義できるため，インポートするモジュールを変更することでデータ型に付加する拡張を変更することもできる．かなり応用が効くだろう．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ghc"&gt;
+&lt;h2&gt;GHC での利用&lt;a class="headerlink" href="#ghc" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;GHC での移行計画は， &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/implementing-trees-that-grow"&gt;GHC Wiki&lt;/a&gt; に記載されている．ゴールとして，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;GHC で使っている AST&lt;/li&gt;
+&lt;li&gt;Template Haskell で使っている AST&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;haskell-src-exts&lt;/span&gt;&lt;/tt&gt; で使っている AST&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;を共通化するという壮大な計画のようだ．現在は， trees that grow 用の type family は， &lt;a class="reference external" href="https://downloads.haskell.org/~ghc/latest/docs/html/libraries/ghc-8.8.1/HsExtension.html"&gt;HsExtension&lt;/a&gt; モジュールに纏まっている．そして，内部の AST に関するデータ型は，次のようになっている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;HsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;HsVar&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XVar&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Located&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;IdP&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;XExpr&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XXExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XVar&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;GhcPass&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;NoExt&lt;/span&gt;
+&lt;span class="o"&gt;...&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XXExpr&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;GhcPass&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;NoExt&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;それぞれの基幹となるデータ型は，次のようになっている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE DataKinds #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;NoExt&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;NoExt&lt;/span&gt;
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;GhcPass&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Pass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Pass&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Parsed&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Renamed&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Typechecked&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;GhcPs&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GhcPass&lt;/span&gt; &lt;span class="kt"&gt;'Parsed&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;GhcRn&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GhcPass&lt;/span&gt; &lt;span class="kt"&gt;'Renamed&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;GhcTc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GhcPass&lt;/span&gt; &lt;span class="kt"&gt;'Typechecked&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;例えば，演算子適用を表すコンストラクタは，次のようになっている:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;LHsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Located&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;HsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;HsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;OpApp&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XOpApp&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;LHsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;LHsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;LHsExpr&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XOpApp&lt;/span&gt; &lt;span class="kt"&gt;GhcPs&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;NoExt&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XOpApp&lt;/span&gt; &lt;span class="kt"&gt;GhcRn&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Fixity&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;XOpApp&lt;/span&gt; &lt;span class="kt"&gt;GhcTc&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Fixity&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;演算子適用は，パース時は全て優先順位同じで左結合として扱われ，リネーム時に結合や優先順位が解決される．その解決された情報が，リネーム時から入ってるというわけだ．で，拡張部分については随時制約が用意されていて，例えば &lt;tt class="docutils literal"&gt;HsExpr&lt;/tt&gt; 用には，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;ForallXExpr&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Constraint&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt;
+     &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XVar&lt;/span&gt;            &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+     &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+     &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;XXExpr&lt;/span&gt;          &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+     &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;みたいなエイリアスが &lt;a class="reference external" href="https://downloads.haskell.org/~ghc/latest/docs/html/libraries/ghc-8.8.1/HsExtension.html"&gt;HsExtension&lt;/a&gt; モジュールにあったりする．クラスインスタンスを作りたいときは，このエイリアスを使って作っていくという感じになるだろう．その書き換えとともにパーサやリネーム部分のリファクタリング計画もあるようで，今現在遂行中という感じっぽい．とりあえず， GHC で &lt;tt class="docutils literal"&gt;X&lt;/tt&gt; と付くデータ型が出てきたら， tree that grows のものと思っていいと思う．内部的にはそこまで本格的な対応は入っていなくて， &lt;tt class="docutils literal"&gt;XExpr&lt;/tt&gt; コンストラクタなどは来ない前提で来たら &lt;tt class="docutils literal"&gt;panic&lt;/tt&gt; にするという処理になっているっぽいけど．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-7"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-7" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;というわけで，今回は type family による拡張性を持ったデータ型の定義方法について紹介した．この手法は結構示唆に富んでいると思う． Haskell では通常その定義内で閉じたデータ型しか作れない訳だけど， type family を使うことで定義を外から容易に拡張できるようにできる訳だ．つまり，オープン性を type family により調整できる訳だ．最もオブジェクト指向では，多くの場合もっと細かく権限が制御できたりする訳だけど，残念ながら type family だとそこまで細かく制御はできない．細かい制御がそこまでいるかというのは議論の余地があるかもしれないけど，そこらへんも現在の機能でなんとかできるか考えてみると面白いかもなと思ったりした．&lt;/p&gt;
+&lt;p&gt;とりあえず， GHC で本格的に用いられるようになってきた機能なので， GHC のコードを読む時用と Haskell プログラミングの技術の一つとしてまとめておいた．実はそこまで真面目に元論文を読んでないので，機会があればもうちょっと真面目に元論文読んでおきたい．今回は以上．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="the-expression-problem-detail" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;名付け親は Wadler 先生で，大学のプログラミング言語開発チームの ML で初めて使ったとされている．ML に投稿されたメールは， &lt;a class="reference external" href="http://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt"&gt;http://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt&lt;/a&gt; で公開されている．なお，厳密にはここでの定義は元々の定義と違っていて，元々の定義は「元々あるコードの再コンパイルやキャストなどの型変換操作を必要とせずに，新たな場合分けを追加できるか」というもの．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="open-vs-close" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;デフォルトで open か close かは，それぞれ一長一短でもあり， open は拡張性がある反面，第三者が契約外の拡張を加えてしまう可能性があり，それらを保守の際きちんと管理する責任が生まれる．逆に close の場合そのような管理責任は生まれないが，拡張性のなさをボイラープレートなど冗長な作業により埋めなければならない．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="finally-tagless-ref" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-3"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="http://okmij.org/ftp/tagless-final/index.html"&gt;http://okmij.org/ftp/tagless-final/index.html&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="data-types-a-la-carte-ref" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[4]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://dl.acm.org/citation.cfm?id=1394795"&gt;https://dl.acm.org/citation.cfm?id=1394795&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="closed-type-families" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-6"&gt;[5]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なお，パターンマッチを後から足せないようにする機能も用意されており， &lt;tt class="docutils literal"&gt;type family&lt;/tt&gt; 宣言の際 &lt;tt class="docutils literal"&gt;where&lt;/tt&gt; を書くと，その後に書いたインスタンス以外はインスタンスを登録できないようになる．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/11/trees-that-grow.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/11/trees-that-grow.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="プログラミング"></category><category term="Haskell"></category><category term="GHC"></category><category term="GHC拡張"></category></entry><entry><title>Scala の Map.flatMap の罠</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/09/scala-map-flatmap-trap/" rel="alternate"></link><published>2019-09-03T12:07:45+09:00</published><updated>2020-03-29T08:23:18+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-09-03:/blog/posts/2019/09/scala-map-flatmap-trap/</id><summary type="html">&lt;p&gt;Scala のコレクションライブラリは難しい．最近，強くそう思える事案に出くわしたので，そのメモ．なお，使った環境は以下の通り:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="39%"/&gt;
+&lt;col width="61%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;Scala のバージョン&lt;/td&gt;
+&lt;td&gt;2.13.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Java Runtime のバージョン&lt;/td&gt;
+&lt;td&gt;Java(TM) SE Runtime Environment 1.8.0_131&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Java Hotspot …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</summary><content type="html">&lt;p&gt;Scala のコレクションライブラリは難しい．最近，強くそう思える事案に出くわしたので，そのメモ．なお，使った環境は以下の通り:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="39%"/&gt;
+&lt;col width="61%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;Scala のバージョン&lt;/td&gt;
+&lt;td&gt;2.13.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Java Runtime のバージョン&lt;/td&gt;
+&lt;td&gt;Java(TM) SE Runtime Environment 1.8.0_131&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Java Hotspot のバージョン&lt;/td&gt;
+&lt;td&gt;Java HotSpot(TM) 64-Bit Server VM 25.131&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;出くわした謎挙動&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;次のプログラムの結果は何になるだろうか？&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+    &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+    &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(),&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+  &lt;span class="o"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;自分はこのプログラムを以下の結果が得られると期待して書いた:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nc"&gt;List&lt;/span&gt;&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;[(&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;)]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;しかし，実際に得られるのは次の結果だ:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nc"&gt;List&lt;/span&gt;&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;[(&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;)]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;このプログラムで自分が意図したことは， &lt;tt class="docutils literal"&gt;Map&lt;/tt&gt; の要素の配列をフラットにして，キーと結びつけて返すことだが，何か良からぬ力が働いて，実際には &lt;tt class="docutils literal"&gt;Map&lt;/tt&gt; の最後の要素しか取得できていない．&lt;/p&gt;
+&lt;p&gt;もう一問．次のプログラムの結果は何になるだろうか？&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+    &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+    &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(),&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+  &lt;span class="o"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;_&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;さっきと変わったのは &lt;tt class="docutils literal"&gt;k&lt;/tt&gt; を結果に使わなかっただけ．実際に動かすと，次の結果が得られる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nc"&gt;List&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この結果は意図通りになった．今回は全要素を全てフラットにできているようだ．さて，先ほどのプログラムの違いはなんなのだろうか？&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-2"&gt;
+&lt;h2&gt;種明かし&lt;a class="headerlink" href="#auto-id-2" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;for-yield&lt;/span&gt;&lt;/tt&gt; は， &lt;tt class="docutils literal"&gt;flatMap&lt;/tt&gt; ， &lt;tt class="docutils literal"&gt;map&lt;/tt&gt; ， &lt;tt class="docutils literal"&gt;withFilter&lt;/tt&gt; (または &lt;tt class="docutils literal"&gt;filter&lt;/tt&gt;) を使ったコードに変換される糖衣構文だ．先ほどのプログラムは次のプログラムと一致する:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+  &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+  &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(),&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+&lt;span class="o"&gt;).&lt;/span&gt;&lt;span class="n"&gt;flatMap&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="k"&gt;=&amp;gt;&lt;/span&gt;
+  &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;flatMap&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;=&amp;gt;&lt;/span&gt;
+    &lt;span class="n"&gt;vs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="k"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;}&lt;/span&gt;
+  &lt;span class="o"&gt;}&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;さて，この2個目の &lt;tt class="docutils literal"&gt;flatMap&lt;/tt&gt; に注目してみる．こいつが何を返しているか調べてみる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;scala&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;)).&lt;/span&gt;&lt;span class="n"&gt;flatMap&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="k"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="o"&gt;}&lt;/span&gt;
+&lt;span class="n"&gt;res0&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;scala.collection.immutable.Map&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;皆さん原因が分かったと思うが，2個目の &lt;tt class="docutils literal"&gt;flatMap&lt;/tt&gt; が生成するのは &lt;tt class="docutils literal"&gt;Map&lt;/tt&gt; だ．その実装は， &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;IterableOnce[(K,&lt;/span&gt; V)]&lt;/tt&gt; を受け取ると，それぞれのタプルの一つ目をキー，二つ目を値だと思って，どんどん空の &lt;tt class="docutils literal"&gt;Map&lt;/tt&gt; に追加していく &lt;a class="footnote-reference" href="#map-builder-impl" id="auto-id-3"&gt;[1]&lt;/a&gt; ．なので，キーごとに最後に書き込まれた値だけが残るというわけだ．後は， &lt;tt class="docutils literal"&gt;Map[K, V]&lt;/tt&gt; 自体は &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;Iterable[(K,&lt;/span&gt; V)]&lt;/tt&gt; というトレイト条件を満たすので， &lt;tt class="docutils literal"&gt;Seq[V1]&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;flatMap: (V1 =&amp;gt; IterableOnce[V2]) =&amp;gt; Seq[V2]&lt;/tt&gt; によってタプルを要素に持つ &lt;tt class="docutils literal"&gt;Seq&lt;/tt&gt; データとして，結果が構築される．&lt;/p&gt;
+&lt;p&gt;ところで，二問目の結果はこれでは説明がつかない．こちらはなぜ全ての要素が消えずに残るのだろう？ 実は， &lt;tt class="docutils literal"&gt;Map[K, V]&lt;/tt&gt; に対しての &lt;tt class="docutils literal"&gt;flatMap&lt;/tt&gt; は，オーバーロードされた以下の2通りの実装があり，結果の型によってどちらかが選ばれる &lt;a class="footnote-reference" href="#iterableonce-flatmap" id="auto-id-4"&gt;[2]&lt;/a&gt; ．&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;MapOps&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;flatMap[K2, &lt;span class="pre"&gt;V2](f:&lt;/span&gt; ((K, V)) =&amp;gt; &lt;span class="pre"&gt;IterableOnce[(K2,&lt;/span&gt; &lt;span class="pre"&gt;V2)]):&lt;/span&gt; Map[K, V]&lt;/tt&gt;&lt;/li&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;IterableOps&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;flatMap[B](f:&lt;/span&gt; (K, V) =&amp;gt; &lt;span class="pre"&gt;IterableOnce[B]):&lt;/span&gt; Iterable[B]&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;一つ目のプログラムではタプルを返しているので &lt;tt class="docutils literal"&gt;MapOps&lt;/tt&gt; のものが，二つ目では &lt;tt class="docutils literal"&gt;IterableOps&lt;/tt&gt; のものが使われている． &lt;tt class="docutils literal"&gt;IterableOps&lt;/tt&gt; のものが自分が意図したものだが，一つ目のものは &lt;tt class="docutils literal"&gt;MapOps&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;flatMap&lt;/tt&gt; が呼ばれていたため，一見不思議な動作になったと言うわけだ．&lt;/p&gt;
+&lt;p&gt;なおこの動作につまづいた時，以下のように書き換えても同じ動作をすることが不思議だった:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+    &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+    &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(),&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+  &lt;span class="o"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toIterable&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;よく分かってないのだけど， &lt;tt class="docutils literal"&gt;toIterable&lt;/tt&gt; はデフォルトでは単に自身をその型のまま返すらしく， &lt;tt class="docutils literal"&gt;Map&lt;/tt&gt; もそれを踏襲しているため何の意味もないっぽい．実際にこのプログラムを意図した動作にしたい場合，次のような修正が考えられる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+    &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+    &lt;span class="nc"&gt;Map&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(),&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;)),&lt;/span&gt;
+  &lt;span class="o"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="k"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;Iterable&lt;/span&gt;&lt;span class="o"&gt;[(&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="o"&gt;])]&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;vs&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なお，修正方法は他にもいくつかあって，とにかく &lt;tt class="docutils literal"&gt;MapOps&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;flatMap&lt;/tt&gt; が選ばれないようにすればいいので，イテレータを返すとかでも回避できる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-5"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-5" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Scala のコレクションライブラリむずい．てかこの動作，多分一年後に正確に出力を答えられる自信がない．とりあえず， &lt;tt class="docutils literal"&gt;Map&lt;/tt&gt; に対して &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;for-yield&lt;/span&gt;&lt;/tt&gt; 使ったり &lt;tt class="docutils literal"&gt;flatMap&lt;/tt&gt; を他のコレクションと混ぜて使ったりするのはやめたほうが良さそうだなと思った．&lt;/p&gt;
+&lt;p&gt;後， Intellij さんの Scala プラグインが強くて，上の &lt;tt class="docutils literal"&gt;.toIterable&lt;/tt&gt; とかの何の意味もないメソッドチェーン使うと灰色にしてくれたり， deprecated なメソッドチェーンは取り消し線引いてくれたりする．ただ， Scala 力が低すぎて &lt;tt class="docutils literal"&gt;.toIterable&lt;/tt&gt; は何の意味もないよと Intellij さんが教えてくれてるのに，は？んなわけねえだろとか思ってたので，これからは Intellij さんを信じていきたい．こちらからは以上です．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="map-builder-impl" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-3"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;実際には， &lt;tt class="docutils literal"&gt;Map&lt;/tt&gt; 用の可変ビルダに突っ込む．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="iterableonce-flatmap" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;実は &lt;tt class="docutils literal"&gt;IterableOnce&lt;/tt&gt; にも &lt;tt class="docutils literal"&gt;flatMap&lt;/tt&gt; が生えていて，こちらは deprecated になっている．&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/09/scala-map-flatmap-trap.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/09/scala-map-flatmap-trap.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="プログラミング"></category><category term="Scala"></category><category term="Collection Library"></category><category term="Map"></category><category term="標準ライブラリ"></category></entry><entry><title>Python の datetime が難しい</title><link href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/" rel="alternate"></link><published>2019-04-03T14:34:50+09:00</published><updated>2020-03-29T08:23:18+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2019-04-03:/blog/posts/2019/04/python-datetime/</id><summary type="html">&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+&lt;div class="section" id="aware-naive"&gt;
+&lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;
+&lt;p&gt;そもそもドキュメントをちゃんと読めという話なんだけど， &lt;a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html"&gt;https …&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+&lt;div class="section" id="aware-naive"&gt;
+&lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;
+&lt;p&gt;そもそもドキュメントをちゃんと読めという話なんだけど， &lt;a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html"&gt;https://docs.python.org/ja/3/library/datetime.html&lt;/a&gt; で普通に説明されている．端的に言えば，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;aware: 実時刻を表し，タイムゾーンや夏時間情報を持つ．&lt;/li&gt;
+&lt;li&gt;naive: 時刻情報だけを表現する．タイムゾーンなどの情報は持たず，その時刻がどういう意味を持つかは処理する側に委ねられる．&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;の2種類があるらしい． aware か naive かは， &lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; プロパティが &lt;tt class="docutils literal"&gt;None&lt;/tt&gt; かどうかで判定できる． &lt;tt class="docutils literal"&gt;None&lt;/tt&gt; なら naive になる．ところで，ほとんどの場合 &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールの API は naive なオブジェクトを製造する． &lt;tt class="docutils literal"&gt;datetime.datetime.now()&lt;/tt&gt; でさえ naive な &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトを返す． aware なオブジェクトを取得したい場合明確にタイムゾーン情報を指定する必要がある．例えば，現在時刻を UTC で取得したい場合， &lt;tt class="docutils literal"&gt;datetime.datetime.utcnow()&lt;/tt&gt; ではなく， &lt;tt class="docutils literal"&gt;datetime.datetime.now(datetime.timezone.utc)&lt;/tt&gt; と書く．前者は naive なオブジェクトになり，後者は aware なオブジェクトになる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="aware-naive-tzinfo"&gt;
+&lt;h2&gt;aware / naive の相互変換と tzinfo&lt;a class="headerlink" href="#aware-naive-tzinfo" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;それぞれのオブジェクトの相互変換は， &lt;tt class="docutils literal"&gt;replace&lt;/tt&gt; を使うことで以下のように可能:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+def aware_to_naive(d):
+  return d.replace(tzinfo=None)
+
+def naive_to_aware(d, tzinfo):
+  return d.replace(tzinfo=tzinfo)
+&lt;/pre&gt;
+&lt;p&gt;3.5 までは， naive と aware の区別はかなり厳密で，例えば &lt;tt class="docutils literal"&gt;astimezone&lt;/tt&gt; は naive に対しては呼べなかった．これは， 3.6 で実行環境のローカルなタイムゾーンによる時刻だと解釈して呼ばれるよう変更されている．&lt;/p&gt;
+&lt;p&gt;なお，呼び方によって naive と aware のどちらが返ってくるかが別れる API も幾つかある． &lt;tt class="docutils literal"&gt;strptime&lt;/tt&gt; はタイムゾーン指定があると aware なオブジェクトを返し，ないと naive なオブジェクトを返す:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; datetime.datetime.strptime('2019-01-01T00:00:00Z', '%Y-%m-%dT%H:%M:%S%z')
+datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
+&amp;gt;&amp;gt;&amp;gt; datetime.datetime.strptime('2019-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S')
+datetime.datetime(2019, 1, 1, 0, 0)
+&lt;/pre&gt;
+&lt;p&gt;ロケール込みの情報としてパースしたい場合，タイムゾーン情報を明示的に付与して aware に変換する必要がある:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; datetime.datetime.strptime('2019-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S') \
+...   .replace(tzinfo=datetime.timezone.utc)
+datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
+&lt;/pre&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; は抽象クラスになっていて，自分でカスタムしたオブジェクトを作れるようになっている．標準的にはタイムゾーン情報を元にした &lt;tt class="docutils literal"&gt;tzinfo&lt;/tt&gt; オブジェクトの実装を提供する &lt;tt class="docutils literal"&gt;timezone&lt;/tt&gt; クラスを使っておけば問題ない． &lt;tt class="docutils literal"&gt;timezone&lt;/tt&gt; オブジェクトは UTC からの時間差から作成できる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt;&amp;gt;&amp;gt; datetime.datetime.strptime('2019-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S') \
+...   .replace(tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=32400)))
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ちゃんとドキュメントは読もうと思いました (まる) ． &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュール， 3.5 - 3.7 の間に結構変わってて厳しい気持ちになる． &lt;tt class="docutils literal"&gt;fromisoformat&lt;/tt&gt; が使えるのは 3.7 からだし， &lt;tt class="docutils literal"&gt;strptime&lt;/tt&gt; の &lt;tt class="docutils literal"&gt;%Z&lt;/tt&gt; で「:」付きの表現をパースしてくれるのも 3.7 からっぽい．&lt;/p&gt;
+&lt;p&gt;世の中は厳しいなあって感じでした．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/04/python-datetime.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/04/python-datetime.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="プログラミング"></category><category term="Python"></category><category term="標準ライブラリ"></category></entry></feed>

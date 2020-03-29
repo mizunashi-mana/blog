@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel><title>続くといいな日記 - プログラミング</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 29 Mar 2020 08:23:18 +0900</lastBuildDate><item><title>State モナドの代わりに Reader モナドを使う</title><link>https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/</link><description>&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;strong&gt;注意&lt;/strong&gt;&lt;/dt&gt;
+&lt;dd&gt;この記事は公開当時主張に誤りを含んでいたため，大幅に書き直しています．また，公開当時の主張の誤りについても，付録として載せておきました．&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う …&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Thu, 30 Jan 2020 20:23:21 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2020-01-30:/blog/posts/2020/01/use-reader-instead-of-state/</guid><category>プログラミング</category><category>Haskell</category><category>GHC</category><category>モナド</category></item><item><title>type family を使って再帰的 ADT をオープンにする</title><link>https://mizunashi-mana.github.io/blog/posts/2019/11/trees-that-grow/</link><description>&lt;p&gt;元ネタは &lt;a class="reference external" href="https://www.microsoft.com/en-us/research/publication/trees-that-grow/"&gt;Trees that grow&lt;/a&gt; ． Haskell では代数的データ型 (ADT) を使ってプログミングに使うデータ構造を定義し，その構造を操作することによりプログラミングを行う． ADT はパターンマッチが容易で，再帰的に定義でき，基本的に閉じた構造になっている．そのため便利な反面，その機能が保守で仇となる場合もある．この問題は古くから知られており，いくつかの解決策も提案されてきた．今回はこのうち，現在 GHC で採用されつつある type family を使った解決方法を紹介する．&lt;/p&gt;
+&lt;p&gt;なお …&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Sun, 17 Nov 2019 06:42:24 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-11-17:/blog/posts/2019/11/trees-that-grow/</guid><category>プログラミング</category><category>Haskell</category><category>GHC</category><category>GHC拡張</category></item><item><title>Scala の Map.flatMap の罠</title><link>https://mizunashi-mana.github.io/blog/posts/2019/09/scala-map-flatmap-trap/</link><description>&lt;p&gt;Scala のコレクションライブラリは難しい．最近，強くそう思える事案に出くわしたので，そのメモ．なお，使った環境は以下の通り:&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="39%"/&gt;
+&lt;col width="61%"/&gt;
+&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;Scala のバージョン&lt;/td&gt;
+&lt;td&gt;2.13.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Java Runtime のバージョン&lt;/td&gt;
+&lt;td&gt;Java(TM) SE Runtime Environment 1.8.0_131&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Java Hotspot …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Tue, 03 Sep 2019 12:07:45 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-09-03:/blog/posts/2019/09/scala-map-flatmap-trap/</guid><category>プログラミング</category><category>Scala</category><category>Collection Library</category><category>Map</category><category>標準ライブラリ</category></item><item><title>Python の datetime が難しい</title><link>https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/</link><description>&lt;p&gt;色々ハマったので，メモをしておく．&lt;/p&gt;
+&lt;div class="section" id="aware-naive"&gt;
+&lt;h2&gt;aware と naive&lt;a class="headerlink" href="#aware-naive" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Python の &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; モジュールでは，日付情報を表現する &lt;tt class="docutils literal"&gt;date&lt;/tt&gt; オブジェクト，日中時間を表現する &lt;tt class="docutils literal"&gt;time&lt;/tt&gt; オブジェクト，そしてその両方の組である &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトが提供されている．そして，実は &lt;tt class="docutils literal"&gt;datetime&lt;/tt&gt; オブジェクトは2種類ある．この扱いの差が分からなくてまずつまづいてた．&lt;/p&gt;
+&lt;p&gt;そもそもドキュメントをちゃんと読めという話なんだけど， &lt;a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html"&gt;https …&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Mizunashi Mana</dc:creator><pubDate>Wed, 03 Apr 2019 14:34:50 +0900</pubDate><guid isPermaLink="false">tag:mizunashi-mana.github.io,2019-04-03:/blog/posts/2019/04/python-datetime/</guid><category>プログラミング</category><category>Python</category><category>標準ライブラリ</category></item></channel></rss>

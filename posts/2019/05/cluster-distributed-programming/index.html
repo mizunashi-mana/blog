@@ -1,0 +1,589 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="ちょっと興味があったので， Apache Spark 関連についていくつか調べたことメモる．なお，僕は最近まで Apache Spark は MapReduce してると思ってたぐらいだし， Hadoop も Spark も触ったことない人間なんで，完全に信憑性はないです．そこはよろしく． 分散処理の抽象 Apache Spark 周りってほぼ歴史の話なんで，まずはそこから． Google の MapReduce …" />
+<meta name="keywords" content="並列分散処理, Spark, Hadoop, MapReduce, グラフ">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="Apache Spark についての覚書"/>
+<meta property="og:description" content="ちょっと興味があったので， Apache Spark 関連についていくつか調べたことメモる．なお，僕は最近まで Apache Spark は MapReduce してると思ってたぐらいだし， Hadoop も Spark も触ったことない人間なんで，完全に信憑性はないです．そこはよろしく． 分散処理の抽象 Apache Spark 周りってほぼ歴史の話なんで，まずはそこから． Google の MapReduce …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-05-12 13:29:06+09:00"/>
+<meta property="article:modified_time" content="2020-03-29 08:23:18+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="フレームワーク"/>
+<meta property="article:tag" content="並列分散処理"/>
+<meta property="article:tag" content="Spark"/>
+<meta property="article:tag" content="Hadoop"/>
+<meta property="article:tag" content="MapReduce"/>
+<meta property="article:tag" content="グラフ"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; Apache Spark についての覚書</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="cluster-distributed-programming">Apache Spark についての覚書</h1>
+    <p>
+          Posted on 日 12 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>ちょっと興味があったので， Apache Spark 関連についていくつか調べたことメモる．なお，僕は最近まで Apache Spark は MapReduce してると思ってたぐらいだし， Hadoop も Spark も触ったことない人間なんで，完全に信憑性はないです．そこはよろしく．</p>
+<div class="section" id="auto-id-1">
+<h2>分散処理の抽象<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Apache Spark 周りってほぼ歴史の話なんで，まずはそこから． Google の MapReduce から色々分散処理の抽象化が提唱されてきた．それぞれが Apache Spark の元になってるやつ．他にも色々あるっぽいけど，とりあえず目についたのをまとめてみた．</p>
+<div class="section" id="mapreduce">
+<h3>MapReduce<a class="headerlink" href="#mapreduce" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>Google が提案した技術で，最近の潮流の出所なんかな？ 気持ちを知りたい時は， Google の有名な論文を読むのが正直早い気がするし，確実な気がする <a class="footnote-reference" href="#less-document-refered" id="auto-id-2">[1]</a> ．以下のやつ:</p>
+<blockquote>
+Jeffrey, D., &amp; Sanjay, G. (2004). MapReduce: simplified data processing on large clusters. In 6th OSDI 2004 (pp. 137–150). Retrieved from <a class="reference external" href="https://www.usenix.org/legacy/events/osdi04/tech/dean.html">https://www.usenix.org/legacy/events/osdi04/tech/dean.html</a></blockquote>
+<p>論文と聞くと身構える人いるかもだけど，ページ数としては 13 ページで，かなり抽象化して大事な部分だけが書かれてるので，多分読みやすいと思う．特に 4 節だけでも読むのがいいかもしれない．これは， Apache Spark の構成知る上でも役に立つ知識だと思う．</p>
+<p>基本的な考え方は簡単で，キーバリューペアの列に対して map / reduce の 2 種類の処理で分散処理プログラミングを行うというもの．例えば，よく使われるワードカウントの例だと，擬似コードになるけど，以下の感じ:</p>
+<pre class="literal-block">
+map(key: String, value: String):
+  for w in value.Words():
+    EmitIntermediate(key: w, value: "1")
+
+reduce(key: String, values: Iterator&lt;String&gt;):
+  let result: Int = 0
+  for v in values:
+    result += ParseInt(v)
+
+  Emit(AsString(result))
+</pre>
+<p>この例は最初にドキュメントのパス名と内容の文字列が大量に与えられ，それに対して単語ごとの出現回数を数え出力することを想定している．やってることは大体想像つくと思うけど，</p>
+<ol class="arabic simple">
+<li>map 処理で各ドキュメントの文字列を単語ごとに区切り，それぞれ単語をキーとしてカウント 1 を中間出力する．</li>
+<li>reduce で中間出力の各カウント結果を，単語ごとに合計して出力する．</li>
+</ol>
+<p>ここで，中間出力は 1 が出てくることは決まってるんだから， <tt class="docutils literal">result += ParseInt(v)</tt> なんて書かずに <tt class="docutils literal">result++</tt> って書けばいいじゃんって思う人がいるかもだけど，これは Combiner 最適化というものを想定しているため．これについては，後述する．</p>
+<p>考え方だけだとこんな感じなんだけど，この実装をどうするかという問題があり，これについて上の論文で簡潔な説明と分かりやすい図が載ってるのでそこだけ紹介しておく．</p>
+<a class="reference external image-reference" href="https://www.usenix.org/legacy/events/osdi04/tech/full_papers/dean/dean_html/index.html#fig:overview"><img alt="以下で説明される手順が，可視化されている．" class="align-center" src="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/cluster-distributed-programming/mapreduce-impl-image.png"/></a>
+<p>まず，上の図を見れば分かると思うけど， MapReduce には 4 人登場人物がいる．それぞれ</p>
+<dl class="docutils">
+<dt>ユーザプログラム</dt>
+<dd>通常 1 つで， map / reduce 処理及び入出力ファイルのフォーマットなどが書かれている．</dd>
+<dt>マスターサーバ</dt>
+<dd>通常 1 つで，ユーザプログラムを元にタスクを生成・管理する．</dd>
+<dt>ワーカサーバ</dt>
+<dd>たくさんあって，マスターサーバから割り当てられたタスクを忠実にこなす．</dd>
+<dt>ストレージ</dt>
+<dd>ワーカサーバ度に用意されていて，仮想的に分散ファイルシステムにより統合する形で構成されている．</dd>
+</dl>
+<p>となる．これらの登場人物が以下の処理を行うことで，全体の処理を完遂する:</p>
+<ol class="arabic simple">
+<li>ユーザプログラムは，入力 (デフォルトは，改行区切りで一列がキーバリューペア一個に相当するもの) を <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span></span></span></span></span> 個に区切ってストレージに置いておく．次に，マスターサーバ，ワーカサーバが起動され，ユーザプログラムから，区切られた入力とそれをキーバリューペアにパースする方法， map / reduce の処理内容が与えられる．</li>
+<li>マスターサーバは， <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span></span></span></span></span> 個の map タスクを map 処理から， <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.00773em;">R</span></span></span></span></span> 個の reduce タスクを reduce 処理から生成し，処理待ち状態のワーカサーバに割り当てていく．</li>
+<li>map タスクが割り当てられたワーカサーバは，区切られた入力の中から自身のためのものを選び，パースして順に map 処理に投げていく．</li>
+<li>map タスクが割り当てられたワーカサーバは，受け取った中間結果をローカルディスクに <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.00773em;">R</span></span></span></span></span> 個に区切って置いていく．この区切り方がポイントなんだけど，それについては後で．そして処理が終わったら，結果を置いた場所をマスターサーバに通知する．</li>
+<li>reduce タスクが割り当てられたワーカサーバは，中間結果の場所を受け取ると，その場所をリモートアクセスで参照し，キーごとにまとめる．</li>
+<li>reduce タスクが割り当てられたわーかサーバは，全ての中間結果を受け取ったら，加工した中間結果を reduce 処理になげ，出てきた結果を出力ファイルに追加する．</li>
+<li>マスターサーバは全てのタスクが終了したら，ユーザプログラムに処理を戻す．</li>
+</ol>
+<p>なお， map タスクが生成した中間結果を， reduce タスクでキーごとにまとめる処理は，一般にシャッフルと呼ばれてるっぽい．大雑把には次のステップを行う:</p>
+<dl class="docutils">
+<dt>パーティション</dt>
+<dd>map タスクはシャッフルの際，任意のキーに紐づくデータを 1 つの reduce タスクから参照できるように，中間結果を振り分ける必要がある．これは，例えばキーのハッシュ値の <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.00773em;">R</span></span></span></span></span> での剰余 <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">h</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">h</mi></mrow><mo stretchy="false">(</mo><mrow><mi>k</mi><mi>e</mi><mi>y</mi></mrow><mo stretchy="false">)</mo><mtext> </mtext><mo lspace="0.22em" rspace="0.22em"><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow></mo><mtext> </mtext><mi>R</mi></mrow><annotation encoding="application/x-tex">\mathrm{hash}(\mathit{key}) \bmod R</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathrm">h</span><span class="mord mathrm">a</span><span class="mord mathrm">s</span><span class="mord mathrm">h</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathit">k</span><span class="mord mathit">e</span><span class="mord mathit">y</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mspace" style="margin-right:0.05555555555555555em;"></span><span class="mbin"><span class="mord"><span class="mord mathrm">m</span><span class="mord mathrm">o</span><span class="mord mathrm">d</span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mspace" style="margin-right:0.05555555555555555em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.00773em;">R</span></span></span></span></span> を振り分け先としてやれば，同じキーはハッシュ値が等しいため特に調整をしなくても同じ振り分け先となる．この処理はパーティションと呼ばれている．</dd>
+<dt>ソート</dt>
+<dd>中間結果をキーごとにまとめるために， reduce タスクはデータをソートする．こうすると，前から順に処理をしていけばキーが変わらない範囲がキーごとにまとまった範囲であることが分かる．この方法は，データが大量にありメモリに収まりきらない場合に，ソートにおいても範囲チェックにおいても対応が可能という点でこうしてるっぽい．</dd>
+</dl>
+<p>なお，この辺用語がいまいち分からないんだけど，資料によってシャッフルが指す範囲が変わることがあって，パーティションは含んだり含まなかったりもするので注意してほしい．</p>
+<p>さて，クラスタベースの分散処理で一番ネックとなるのがネットワーク通信の部分だ．通信するデータを削減すれば，一般的にマシンパワーを改善するより劇的にパフォーマンスが変わる場合が多い． MapReduce では，大きなネットワーク通信を必要とするのがシャッフルを行うときだ．そこで reduce タスクに渡す前に map タスクの方で通信量を減らすための最適化手法， Combiner 最適化が知られている．これは， reduce タスクの実装パターンのよくある傾向を利用する．一般的に， reduce タスクは可換性と結合性を持つ演算で実装される場合が多い．つまり，部分的に先に計算して後からそれを総計する手法がとれる場合が多い．この部分的に先に計算する部分をユーザから追加で与えてもらい， map タスクが終わった後ワーカごとに処理する．そして，それをシャッフルにかける．この部分的に先に計算する処理が combiner と呼ばれる．先に出したワードカウントの例だと reduce の処理を combiner として設定することで， map タスクが終了したらシャッフル時にワーカ度のワード総計がまず行われ，その後その総計がパーティションされた後ソートされ，最終的にその値を元に全体の総計をとるといった流れになる． combiner 最適化はあくまで最適化なので，その適用方法は実装によって異なるし，もちろん combiner をかけることにより情報が欠落すると問題が起きる処理には適用できないので，この最適化が適用できるかはユーザ判断ということになる．ただ性能が劇的に改善する場合が多いので，割と一般的に使われてるようだ．</p>
+</div>
+<div class="section" id="pregel">
+<h3>Pregel<a class="headerlink" href="#pregel" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>これもまた， Google が出所の技術で，やっぱり論文が出てるのでそれを読むのが良さそう:</p>
+<blockquote>
+Malewicz, G., Austern, M. H., Bik, A. J. ., Dehnert, J. C., Horn, I., Leiser, N., &amp; Czajkowski, G. (2010). Pregel: A System for Large-Scale Graph Processing. In Proceedings of the 2010 international conference on Management of data - SIGMOD ’10 (p. 135). New York, New York, USA: ACM Press. <a class="reference external" href="https://doi.org/10.1145/1807167.1807184">https://doi.org/10.1145/1807167.1807184</a></blockquote>
+<p>こっちも 11 ページぐらいなので，読んでみるのがいいと思うけど， MapReduce のよりちょっと読みにくいかも．</p>
+<p>Pregel はグラフ処理の分散プログラミングに特化した抽象で，グラフが与えられた時にそれを分散処理してグラフを出力するプログラミングを支援する．考え方的には，グラフの頂点単位で処理を行わせ，メッセージ送受信で協調させることで，分散化を図るというもの．まずはどのようにプログラムを書くのかの例を見てもらった方が分かりやすいと思うので，擬似コードを挙げてみる．例えば，頂点に数値が割り当てられてる場合の，単一始点最短経路問題を解くプログラムは以下の感じになる:</p>
+<pre class="literal-block">
+const sourceId: VertexId = 0
+
+compute(v: Vertex, msgs: Iterator&lt;Message&gt;):
+  let mindist: Int =
+    if v.Id() == sourceId then 0 else MaxInt()
+  for msg in msgs:
+    mindist = Min(mindist, msg.Value())
+
+  if mindist &lt; v.Value():
+    for e in v.OutEdges():
+      SendMessageTo(
+        targetId: edge.TargetVertexId(),
+        value: mindist + e.Value(),
+        )
+
+  VoteToHalt()
+</pre>
+<p>このプログラムは，最終的に頂点番号 0 からの最短距離を各頂点が値として持つようなグラフを出力する．Pregel での処理内容は，大雑把には，</p>
+<ol class="arabic simple">
+<li>全ての頂点の状態を Active にする．</li>
+<li>状態が Active な各頂点毎に compute を実行する．</li>
+<li>全ての compute を実行しメッセージの送信を終えたら，全ての頂点の状態を更新する．</li>
+<li>2 に戻る．</li>
+</ol>
+<p>を繰り返す．ここで特徴として，頂点は Active / InActive の 2 種類の状態を持ち，全ての頂点が InActive になれば自動的に処理が終わるようになっている．で，頂点状態の更新で状態は切り替わる．この切り替えの仕方は以下の手順で行われる．</p>
+<ol class="arabic simple">
+<li>VoteToHalt が compute で呼ばれていた場合， InActive になる．</li>
+<li>メッセージを受信した場合， Active になる．</li>
+</ol>
+<p>なお， 2 は例え VoteToHalt が呼ばれたとしても，元々頂点が InActive で compute を実行していなくても，強制的に発動することに注意してほしい．で，分散処理なので MapReduce の時と同じくマスターとワーカがあり，マスターはグラフの頂点毎にタスクをワーカに発行するのが， Pregel モデルになる．</p>
+<p>Pregel モデルの特徴は，同期にある．つまり，単純に頂点毎にタスクを発行してそれぞれ好き勝手に進めさせるのではなく， compute を実行する度に同期して一斉に頂点の状態更新を行いまたもう一度 compute を実行するという流れだ．これは元々バルク同期並列に着想を得たものらしく， Pregel モデルでもこの同期をバルク同期並列と呼んでいる．また，同期を挟むまでの一回の計算単位を 1 スーパーステップという単位で呼んでいる．メッセージの受信は同期を挟んだタイミングで行われ，あるスーパーステップではその前のスーパーステップで送信されたメッセージしか取り扱えない．このようなモデルにより，グラフ分散処理を実装に合わせながら，それなりに書きやすい抽象で提供している．</p>
+<p>なお， <tt class="docutils literal">SendMessageTo</tt> は送り先の頂点番号が分かれば実際にはどの頂点にもメッセージを送れるのだが，送付先として情報が分かるのが隣接頂点ぐらいなので，自然処理は限られてくる．ただ，実際には全頂点で値を共有したいということがよくある．そこで，集約器 (aggregator) という仕組みも用意されていて，各頂点から値を受け取ってその値を演算して一つの値にし，その値を次のスーパーステップで参照できるようになっている．</p>
+<p>また， Pregel モデルでも Combiner 最適化が有効で，メッセージをワーカ度に先にまとめてしまって，その後頂点でまとめたものをさらに処理することが問題なくできる場合に， combiner を追加することで性能を改善できる．最短経路の例だと以下の感じ:</p>
+<pre class="literal-block">
+const sourceId: VertexId = 0
+
+compute(v: Vertex, msgs: Iterator&lt;Message&gt;):
+  let mindist: Int =
+    if v.Id() == sourceId then 0 else MaxInt()
+  for msg in msgs:
+    mindist = Min(mindist, msg.Value())
+
+  if mindist &lt; v.Value():
+    for e in v.OutEdges():
+      SendMessageTo(
+        targetId: edge.TargetVertexId(),
+        value: mindist + e.Value(),
+        )
+
+  VoteToHalt()
+
+#[combiner]
+combine(msgs: Iterator&lt;Message&gt;, v: Vertex):
+  let mindist: Int = MaxInt()
+  for msg in msgs:
+    mindist = Min(mindist, msg.Value())
+
+  Emit(mindist)
+</pre>
+<p>これにより，メッセージはワーカの中で最小のものだけが送られるようになり，さらにそれぞれのワーカから送られたきたものの中から最小のものが compute で計算される．</p>
+<p>なお， Pregel モデルは MapReduce に落とし込むことができ，単純に compute を map に，同期を reduce にすれば良い．一応，論文には実装のアウトラインも載っているが，そこまで目新しいことはないと思うので，こちらは割愛する．興味があれば読んでみてくれという感じ．</p>
+</div>
+<div class="section" id="auto-id-3">
+<h3>分散ストリーム処理<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>分散ストリーム処理は，リアルタイムかつ継続性のある分散処理に特化した抽象．なんか一応出したけど，あんまり調べてない．とりあえず，文献だけ．</p>
+<p>Google の実装である MillWheel の紹介</p>
+<blockquote>
+Akidau, T., Whittle, S., Balikov, A., Bekiroğlu, K., Chernyak, S., Haberman, J., … Nordstrom, P. (2013). MillWheel: fault-tolerant stream processing at internet scale. Proceedings of the VLDB Endowment, 6(11), 1033–1044. <a class="reference external" href="https://doi.org/10.14778/2536222.2536229">https://doi.org/10.14778/2536222.2536229</a></blockquote>
+<p>Spark Streaming の仕組みの紹介</p>
+<blockquote>
+Zaharia, M., Das, T., Li, H., Hunter, T., Shenker, S., &amp; Stoica, I. (2013). Discretized streams: fault-tolerant streaming computation at scale. In Proceedings of the Twenty-Fourth ACM Symposium on Operating Systems Principles - SOSP ’13 (pp. 423–438). New York, New York, USA: ACM Press. <a class="reference external" href="https://doi.org/10.1145/2517349.2522737">https://doi.org/10.1145/2517349.2522737</a></blockquote>
+<p>Spark の Structured Streaming の仕組みの紹介</p>
+<blockquote>
+Armbrust, M., Das, T., Torres, J., Yavuz, B., Zhu, S., Xin, R., … Zaharia, M. (2018). Structured Streaming: A Declarative API for Real-Time Applications in Apache Spark. In Proceedings of the 2018 International Conference on Management of Data - SIGMOD ’18 (pp. 601–613). New York, New York, USA: ACM Press. <a class="reference external" href="https://doi.org/10.1145/3183713.3190664">https://doi.org/10.1145/3183713.3190664</a></blockquote>
+<p>処理系を実装する際には，時間の整合性とか色々考えることがありそうだけど，実装された処理系を使う分には， MapReduce を使うにしろ他の抽象を使うにしろ，それほど大きくプログラミングスタイルは変わらないものが多いのかな．この辺は，触ってみないとなんとも言えなそう．</p>
+</div>
+</div>
+<div class="section" id="auto-id-4">
+<h2>Apache Spark について<a class="headerlink" href="#auto-id-4" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>さて，それぞれの抽象にはそれにあった実装が，古今東西色々存在している． MapReduce の代表的なオープンソース実装としては Apache Hadoop MapReduce が有名だし， Pregel 実装としては Apache Giraph が有名だ．分散ストリーム処理は， Apache Storm があるのかな．まあ大半は Hadoop MapReduce 上の実装だったりするんだけど，それは置いておいて，元々 MapReduce はそれ自体がかなり用途を制限していて分散処理基盤としてもっと汎用的なものが欲しいという需要があったようだ．それを解決するため新たに MapReduce の代替として生み出されたのが， Apache Spark らしい．ただ，半分宣伝のためにメリットしか言ってないみたいなところもあって，実際にはかなり良し悪しがあるみたいだけど．</p>
+<p>とりあえず，以下の文献にお世話になりながら，調べたことを書いておく．</p>
+<ul class="simple">
+<li><a class="reference external" href="https://spark.apache.org/docs/latest/rdd-programming-guide.html">https://spark.apache.org/docs/latest/rdd-programming-guide.html</a></li>
+<li><a class="reference external" href="https://stanford.edu/~rezab/sparkclass/slides/itas_workshop.pdf">https://stanford.edu/~rezab/sparkclass/slides/itas_workshop.pdf</a></li>
+<li><a class="reference external" href="https://github.com/JerryLead/SparkInternals">https://github.com/JerryLead/SparkInternals</a></li>
+<li><a class="reference external" href="https://www.slideshare.net/AGrishchenko/apache-spark-architecture">https://www.slideshare.net/AGrishchenko/apache-spark-architecture</a></li>
+</ul>
+<div class="section" id="auto-id-5">
+<h3>Apache Spark の構成<a class="headerlink" href="#auto-id-5" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>基本的に， Apache Spark は Hadoop 全体を塗り替えるものではなく， Hadoop のエコシステムのうち，分散処理エンジンの部分 Hadoop MapReduce の代替を目指すものっぽい．なので， Apache Spark は Hadoop のように分散ファイルシステムを持っていなくて，その代わり HDFS (Hadoop の分散ファイルシステム) が利用できるようになっている．また，クラスタマネージャは持ってるので自前で動かすこともできるが， Hadoop の YARN や Apache Mesos などでの管理にも対応してるっぽい．</p>
+<p>ここら辺はちょっと使ったことがないので分からないが，一応 <a class="reference external" href="https://spark.apache.org/docs/latest/cluster-overview.html">公式のデプロイガイド</a> に書いてあるのを読む限りはそうっぽい．</p>
+<p>Spark はそのまま生で使える DSL の他に，以下のライブラリを提供してる:</p>
+<dl class="docutils">
+<dt>Spark SQL</dt>
+<dd><p class="first">SQL クエリで Spark を操作するための機構を提供する．</p>
+<p class="last"><a class="reference external" href="https://spark.apache.org/docs/latest/sql-programming-guide.html">https://spark.apache.org/docs/latest/sql-programming-guide.html</a></p>
+</dd>
+<dt>Structured Streaming</dt>
+<dd><p class="first">Spark SQL 上で分散ストリーム処理をするための機構を提供する．</p>
+<p class="last"><a class="reference external" href="https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html">https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html</a></p>
+</dd>
+<dt>MLlib</dt>
+<dd><p class="first">分散処理上での機械学習に特化した API を提供する．</p>
+<p class="last"><a class="reference external" href="https://spark.apache.org/docs/latest/ml-guide.html">https://spark.apache.org/docs/latest/ml-guide.html</a></p>
+</dd>
+<dt>GraphX</dt>
+<dd><p class="first">Pregel に対応したグラフ分散処理の機構を提供する．</p>
+<p class="last"><a class="reference external" href="https://spark.apache.org/docs/latest/graphx-programming-guide.html">https://spark.apache.org/docs/latest/graphx-programming-guide.html</a></p>
+</dd>
+<dt>Spark Streaming</dt>
+<dd><p class="first">分散ストリーム処理をするための機構を提供する．</p>
+<p class="last"><a class="reference external" href="https://spark.apache.org/docs/latest/streaming-programming-guide.html">https://spark.apache.org/docs/latest/streaming-programming-guide.html</a></p>
+</dd>
+</dl>
+</div>
+<div class="section" id="auto-id-7">
+<h3>Apache Spark のアーキテクチャ<a class="headerlink" href="#auto-id-7" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h3>
+<p>Apache Spark は，内部はかなり複雑になっていて， MapReduce とか Pregel ほど単純ではない．ただ，プログラム自体はかなり自然に書けて，以下のようになる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">example.spark</span>
+
+<span class="k">import</span> <span class="nn">java.util.Random</span>
+<span class="k">import</span> <span class="nn">org.apache.spark._</span>
+
+<span class="k">object</span> <span class="nc">SparkSample</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">numMappers</span> <span class="k">=</span> <span class="mi">100</span>
+    <span class="k">val</span> <span class="n">numReducers</span> <span class="k">=</span> <span class="mi">50</span>
+    <span class="k">val</span> <span class="n">numPairs</span> <span class="k">=</span> <span class="mi">1000</span>
+    <span class="k">val</span> <span class="n">numSize</span> <span class="k">=</span> <span class="mi">1000</span>
+
+    <span class="k">val</span> <span class="n">sparkConf</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SparkConf</span><span class="o">().</span><span class="n">setAppName</span><span class="o">(</span><span class="s">"Spark Example"</span><span class="o">)</span>
+    <span class="k">val</span> <span class="n">sc</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SparkContext</span><span class="o">(</span><span class="n">sparkConf</span><span class="o">)</span>
+
+    <span class="k">val</span> <span class="n">pairs</span> <span class="k">=</span> <span class="n">sc</span>
+      <span class="o">.</span><span class="n">parallelize</span><span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">numMappers</span><span class="o">,</span> <span class="n">numMappers</span><span class="o">)</span>
+      <span class="o">.</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">p</span> <span class="k">=&gt;</span>
+        <span class="k">val</span> <span class="n">ranGen</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Random</span>
+        <span class="k">val</span> <span class="n">arr</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">])](</span><span class="n">numPairs</span><span class="o">)</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="mi">0</span> <span class="n">until</span> <span class="n">numPairs</span><span class="o">)</span> <span class="o">{</span>
+          <span class="k">val</span> <span class="n">byteArr</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">](</span><span class="n">numSize</span><span class="o">)</span>
+          <span class="n">ranGen</span><span class="o">.</span><span class="n">nextBytes</span><span class="o">(</span><span class="n">byteArr</span><span class="o">)</span>
+          <span class="n">arr</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=</span> <span class="o">(</span><span class="n">ranGen</span><span class="o">.</span><span class="n">nextInt</span><span class="o">(</span><span class="nc">Int</span><span class="o">.</span><span class="nc">MaxValue</span><span class="o">),</span> <span class="n">byteArr</span><span class="o">)</span>
+        <span class="o">}</span>
+
+        <span class="n">arr</span>
+      <span class="o">}</span>
+      <span class="o">.</span><span class="n">cache</span><span class="o">()</span>
+
+    <span class="c1">// Enforce the calculation for cache</span>
+    <span class="n">pairs</span><span class="o">.</span><span class="n">count</span><span class="o">()</span>
+
+    <span class="n">println</span><span class="o">(</span><span class="n">pairs</span><span class="o">.</span><span class="n">groupByKey</span><span class="o">(</span><span class="n">numReducers</span><span class="o">).</span><span class="n">countByKey</span><span class="o">())</span>
+
+    <span class="n">sc</span><span class="o">.</span><span class="n">stop</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table><p>Scala で書く場合，ほぼコレクション API と使い勝手が同じ感じになる． MapReduce ではそれぞれのタスクが自明にメソッド 1 つに対応してたけど， Spark の場合見ての通りメソッドチェーンで書かれていて，そこまで自明ではない．では，これがどのようにタスクに変換されるかだけど，大体以下の手順を通るらしい:</p>
+<ol class="arabic simple">
+<li>メソッドチェーンから論理プラン (データ依存グラフ) が作成される．</li>
+<li>論理プランから物理プラン (有向非巡回グラフ) が作成される．</li>
+<li>物理プランを元にタスクを生成し，ワーカに割り当て実行する．</li>
+</ol>
+<p>上のコードを例に，それぞれのやってることを大雑把に書いておく．</p>
+<p>まずは Spark のプログラミングの基本から． Spark の処理メソッドは， <a class="reference external" href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.rdd.RDD">RDD (Resilient Distributed Dataset)</a> と呼ばれるオブジェクトを返してくる．上の例だと</p>
+<ul class="simple">
+<li><tt class="docutils literal">parallelize</tt></li>
+<li><tt class="docutils literal">flatMap</tt></li>
+<li><tt class="docutils literal">groupByKey</tt></li>
+</ul>
+<p>がそれぞれ RDD オブジェクトを返す．見ての通り， RDD オブジェクトは連鎖させることができ，入力から RDD を生成するメソッドと RDD オブジェクトを元に RDD オブジェクトを生成するものが存在する． RDD を連鎖によって生成した場合，その連鎖はオブジェクトに記録されている．ただ，注意して欲しいのは，メソッド 1 つに RDD 一つが必ずしも紐づくとは限らず， <tt class="docutils literal">groupByKey</tt> は 2 つの RDD を連鎖させる．これについては，後述する．なお， Spark ではこのような RDD オブジェクトを生成するメソッドは全て遅延され，特にタスクが生成されることはないしファイルが読み込まれたりすることもない．このようなメソッドは，変換 (transformation) と呼ばれてるらしい．</p>
+<p>逆に， RDD 以外の結果だったり <tt class="docutils literal">Unit</tt> だったりを返してくるメソッドも存在する．上の例だと</p>
+<ul class="simple">
+<li><tt class="docutils literal">count</tt></li>
+<li><tt class="docutils literal">countByKey</tt></li>
+</ul>
+<p>がそう．こいつらが呼ばれると初めてタスクの振り分け・実行が行われる．この辺は O/R マッパーとかと同じ．これをアクション (action) と呼ぶ．</p>
+<p>生成される RDD は変換ごとに異なる．変換の処理内容によってもそうなのだが，主に元となった RDD の結果がどう生成した RDD に依存しているかが，論理プランを決めるとき重要になる．さて， Spark では MapReduce と同じように入出力データはいくつかの区分に区切られている．これをパーティション (partition) と呼ぶ．それぞれの RDD では異なるパーティション構成が用いられる． RDD のデータ依存関係とは出力する RDD (親 RDD) のパーティションとそれを受け取る RDD (子 RDD) のパーティションがどのように依存しあってるかを表す関係である．論理プランは，このパーティションを頂点としてデータ依存関係を辺とするデータ依存グラフになる．なお今回出していないが，親 RDD は 1 つの子 RDD に対し複数ある場合もあって， <tt class="docutils literal">join</tt> / <tt class="docutils literal">union</tt> などのオペレータはそういう子 RDD を作る．</p>
+<p>Spark のデータ依存関係は大きく 2 種類ある <a class="footnote-reference" href="#general-data-dependency" id="auto-id-8">[2]</a> :</p>
+<dl class="docutils">
+<dt>限定依存 (narrow dependency)</dt>
+<dd>親 RDD のパーティションは全て，高々 1 つの子 RDD のパーティションに依存する．</dd>
+<dt>広域依存 (shuffle dependency / wide dependency)</dt>
+<dd>親 RDD のパーティションに対し，子 RDD の複数のパーティションが紐づく場合がある．</dd>
+</dl>
+<p>この依存関係の違いは，シャッフルが必要あるかないかで，限定依存はシャッフルが必要ないため依存関係がネットワーク越しにならないようタスクを振り分ければ速く処理できるが，広域依存はシャッフルが必要になる．</p>
+<ul class="simple">
+<li><tt class="docutils literal">map</tt> は入力と出力が 1 対 1 対応してるので限定依存</li>
+<li><tt class="docutils literal">groupByKey</tt> は一般にどのキーがどのパーティションに含まれるか，実行前に判別することは難しいので，広域依存扱い</li>
+</ul>
+<p>という感じになる．上のプログラムだと以下の論理プランが生成されるっぽい:</p>
+<img alt="flatMap は限定依存， groupByKey は広域依存になる．" class="align-center" src="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/cluster-distributed-programming/example-logical-plan.png"/>
+<p>点線は RDD を，実線はパーティションを表している．それぞれの RDD は</p>
+<dl class="docutils">
+<dt>ParallelCollection</dt>
+<dd><tt class="docutils literal">parallelize</tt> に対応し，指定された数だけパーティションを作る．</dd>
+<dt>FlatMapped</dt>
+<dd><tt class="docutils literal">flatMap</tt> に対応し，親 RDD のパーティションの数だけパーティションを作る．</dd>
+<dt>Shuffled</dt>
+<dd><tt class="docutils literal">groupByKey</tt> の前処理に対応し，シャッフルして指定された数だけパーティションを作り，同じキーを持つ要素をかき集める．</dd>
+<dt>MapPartitions</dt>
+<dd><tt class="docutils literal">groupByKey</tt> の後処理に対応し，この RDD 自体はパーティションごとに変換を行う．今回は同じキーを持つ要素を一つの要素にまとめる．</dd>
+</dl>
+<p>みたいな感じになる．</p>
+<p>論理プランは以上の感じでデータ依存グラフを作る．この論理プランを元に，実際の実行フローに合わせたグラフ，物理プランが作られる．物理プランは以下の手順で作られる，タスクを頂点として，変換を辺としたグラフになる:</p>
+<ol class="arabic">
+<li><p class="first">まず，論理プランを部分グラフに分けるらしい．この部分グラフをステージと呼ぶ．</p>
+<p>なお，ステージの分け方としては大雑把に言えば，出力から逆向きに辿り広域依存を区切りに分けるらしい．</p>
+</li>
+<li><p class="first">ステージそれぞれで最後の RDD のパーティションごとにタスクを生成する．</p>
+<p>ステージがアクション結果を生成するなら result タスク，それ以外の場合 shuffle-map タスクを割り当てる．shuffle-map タスクは生成結果にシャッフルを必要とする．</p>
+</li>
+</ol>
+<p>上のプログラムだと以下の物理プランが生成されるっぽい:</p>
+<img alt="ステージは出力から逆順にナンバリングされていく．" class="align-center" src="https://mizunashi-mana.github.io/blog/posts/2019/05/cluster-distributed-programming/cluster-distributed-programming/example-physical-plan.png"/>
+<p>赤線が shuffle-map タスク，青線が result タスクになる．ステージもタスクも，出力側から見て区切っていくけど，グラフ自体は入力側から辺が張られるのかな？ この辺ちょっと分からなかったので，辺は書かなかった．まあ，こんな感じのが出来上がるっぽい．</p>
+<p>後は，入力側のステージのタスクから，各ステージごとに順に実行していくみたい．そろそろ疲れたきたので，今日はこの辺で．</p>
+</div>
+</div>
+<div class="section" id="auto-id-9">
+<h2>まとめ<a class="headerlink" href="#auto-id-9" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ここらへん話聞くだけでかなり知らない領域だったので，実際に調べてみて結構色々知れたのは良かったと思う．ただ，キャッシュの仕組みとかシャッフルの仕組みにも Hadoop での経験を生かした工夫があるらしく，そこら辺ちょっと調べきれてないので，また時間があったら調べてみたい．後， Spark をすぐ起動できる Docker イメージとかあるっぽいので，近いうちに触ってみようかなと思った． Spark は spark shell とかいう対話式でプログラム実行できるやつがあるらしく，結構色々充実してそう．後， Spark SQL とか Hive とかは中で SQL を RDD や MapReduce に変換してるらしく <a class="footnote-reference" href="#sql-to-rdd" id="auto-id-10">[3]</a> ，その辺の仕組みとかもちょっと興味があるので調べてみたい．</p>
+<p>ま，気が向いたらその辺の記事とかも書くかもねってことで，以上．</p>
+<table class="docutils footnote" frame="void" id="less-document-refered" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td>あんまり文献読んでない人並みの感想</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="general-data-dependency" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-8">[2]</a></td><td>なお，違う定義の分け方もあるらしく，この辺の用語はちょっと怪しいかも．まあ重要なのは用語ではなく，なぜこの分け方をするかなので，今回はシャッフルが自明に必要あるかないかで分ける定義を採用した． Spark 内部で実際どの種類分けがされているかは調べた方が良さそうと思って調べてない．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="sql-to-rdd" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-10">[3]</a></td><td>まあ単純に SQL パースして， JOIN とか GROUP BY はシャッフルを入れたりして，対応する変換を出力するとかっぽいけど．ただそれが分かると，Spark や Hadoop 上で SQL 実行する時のパフォーマンス予想とかできそうで，役に立ちそうでもある．</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2019/05/cluster-distributed-programming.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2019/05/cluster-distributed-programming.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/bing-lie-fen-san-chu-li.html">並列分散処理</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/spark.html">Spark</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/hadoop.html">Hadoop</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/mapreduce.html">MapReduce</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/gurahu.html">グラフ</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/">Apache Spark のお試し環境を作る</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>
