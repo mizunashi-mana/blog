@@ -1,5 +1,265 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-03-20T21:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>型クラスの Coherence と Orphan Instance</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/" rel="alternate"></link><published>2020-03-20T21:00:00+09:00</published><updated>2020-03-20T21:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-20:/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/</id><summary type="html">&lt;p&gt;Haskell には型クラスと呼ばれる重要な機能がある．これは名前の通り，型をクラス分けするための機能で，その型に対してある操作が構成できることをその型の性質とみなし，性質に名前がつけられる機能だ．この機能は，アドホック多相，つまりは型による静的なオーバーロードを実現する仕組みとしての側面もある．型クラスに対しては，型ごとにそのインスタンス，つまり操作の実装を与えることができ，ある型がある型クラスに所属していることを型注釈で表明することができる．その表明は，コンパイラによるインスタンスの自動検索で解決され，解決できなかった場合は型エラーになる．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-03-29T18:00:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>遅延評価でデバッグが困難になる状況</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/" rel="alternate"></link><published>2020-03-29T18:00:00+09:00</published><updated>2020-03-29T18:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-29:/blog/posts/2020/03/haskell-lazy-debug-problem/</id><summary type="html">&lt;p&gt;先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。&lt;/p&gt;
+&lt;p&gt;なお、かなり主観に寄っていて、結構書き殴ってる部分が多いので、厳密な議論をするにはあまり良い例ではないかもしれない。個人的には、備忘録的な意味合いも強くて、今まで詰まったやつをまとめておくかみたいな感じでもある。&lt;/p&gt;
+&lt;p&gt;先に結論を書いておくと、&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;プログラム自体が大きくて &lt;a class="footnote-reference" href="#simple-example" id="auto-id-2"&gt;[1]&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;複雑な制御構造をしていて&lt;/li&gt;
+&lt;li&gt;&lt;dl class="first docutils"&gt;
+&lt;dt&gt;(optional) 以下のいずれかの条件を満たす&lt;/dt&gt;
+&lt;dd&gt;&lt;ul class="first last"&gt;
+&lt;li&gt;遅延評価を機能として使っている …&lt;/li&gt;&lt;/ul&gt;&lt;/dd&gt;&lt;/dl&gt;&lt;/li&gt;&lt;/ul&gt;</summary><content type="html">&lt;p&gt;先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。&lt;/p&gt;
+&lt;p&gt;なお、かなり主観に寄っていて、結構書き殴ってる部分が多いので、厳密な議論をするにはあまり良い例ではないかもしれない。個人的には、備忘録的な意味合いも強くて、今まで詰まったやつをまとめておくかみたいな感じでもある。&lt;/p&gt;
+&lt;p&gt;先に結論を書いておくと、&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;プログラム自体が大きくて &lt;a class="footnote-reference" href="#simple-example" id="auto-id-2"&gt;[1]&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;複雑な制御構造をしていて&lt;/li&gt;
+&lt;li&gt;&lt;dl class="first docutils"&gt;
+&lt;dt&gt;(optional) 以下のいずれかの条件を満たす&lt;/dt&gt;
+&lt;dd&gt;&lt;ul class="first last"&gt;
+&lt;li&gt;遅延評価を機能として使っている&lt;/li&gt;
+&lt;li&gt;デバッグ対象が効率に関するバグである&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;なプログラムは、遅延評価によるデバッグの難易度が高い傾向にあると思う。後、遅延評価によるデバッグ作業は、正格評価のそれに比べ、経験がかなりものを言うと思っている。&lt;/p&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;問題1: 無限ループするパーサコンビネータ&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Haskell にはモナディックパーサコンビネータと呼ばれるライブラリ群がある。これは、名前の通りプリミティブなパーサをモナディックに繋げていくことで、目的のパーサを書けるようなライブラリで、&lt;tt class="docutils literal"&gt;Parsec&lt;/tt&gt; の名前を冠する系統が有名だ。パーサコンビネータのチュートリアルは、Hutton &amp;amp; Meijer &lt;a class="footnote-reference" href="#hutton-1998" id="auto-id-4"&gt;[2]&lt;/a&gt; &lt;a class="footnote-reference" href="#hutton-1996" id="auto-id-5"&gt;[3]&lt;/a&gt; &lt;a class="footnote-reference" href="#notice-hutton-meijer-performance" id="auto-id-6"&gt;[4]&lt;/a&gt; がおすすめなので、見てみるといいと思う。Hutton &amp;amp; Meijer では、パーサを &lt;tt class="docutils literal"&gt;StateT String []&lt;/tt&gt; で作るわけだけど、ここではそれを拡張して、&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;Parser&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Parser&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;unParser&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;ParseState&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;ParseResult&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;ParseState&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;Position&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;ParseState&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;ParseState&lt;/span&gt; &lt;span class="kt"&gt;Position&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;ParseResult&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;ParseSuccess&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;NonEmpty&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;ParseFailure&lt;/span&gt; &lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="kt"&gt;Position&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のようなパーサを使っていくことにする。Hutton &amp;amp; Meijer との違いは、&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;状態が後読むべき文字列 &lt;tt class="docutils literal"&gt;String&lt;/tt&gt; でなく、現在の位置と後読むべき &lt;tt class="docutils literal"&gt;t&lt;/tt&gt; 型トークンの列になってること&lt;/li&gt;
+&lt;li&gt;パース結果が空だった場合、エラーとみなして、エラー位置とメッセージを載せられるようになってること&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;だ。&lt;tt class="docutils literal"&gt;ParseResult&lt;/tt&gt; はそれ単体でモナドになり、結果的に &lt;tt class="docutils literal"&gt;Parser&lt;/tt&gt; は &lt;tt class="docutils literal"&gt;StateT (ParseResult t) ParseResult&lt;/tt&gt; と同じと考えれば、やはりモナドになる。このパーサを使って、以下の文法を持つ言語をパースしていきたい:&lt;/p&gt;
+&lt;img alt="Haskell の型クラスとか諸々ないサブセット" class="align-center" src="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/haskell-lazy-debug-problem/simple-language.png"/&gt;
+&lt;p&gt;&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;mi&gt;d&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;mi&gt;t&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;\mathit{ident}&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.69444em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord mathit"&gt;i&lt;/span&gt;&lt;span class="mord mathit"&gt;d&lt;/span&gt;&lt;span class="mord mathit"&gt;e&lt;/span&gt;&lt;span class="mord mathit"&gt;n&lt;/span&gt;&lt;span class="mord mathit"&gt;t&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;、&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;s&lt;/mi&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mi&gt;m&lt;/mi&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mi&gt;o&lt;/mi&gt;&lt;mi&gt;l&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;\mathit{symbol}&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord mathit"&gt;s&lt;/span&gt;&lt;span class="mord mathit"&gt;y&lt;/span&gt;&lt;span class="mord mathit"&gt;m&lt;/span&gt;&lt;span class="mord mathit"&gt;b&lt;/span&gt;&lt;span class="mord mathit"&gt;o&lt;/span&gt;&lt;span class="mord mathit"&gt;l&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;、&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;mi&gt;t&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;mi&gt;g&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;mi&gt;r&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;\mathit{integer}&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.8498000000000001em;vertical-align:-0.19444em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord mathit"&gt;i&lt;/span&gt;&lt;span class="mord mathit"&gt;n&lt;/span&gt;&lt;span class="mord mathit"&gt;t&lt;/span&gt;&lt;span class="mord mathit"&gt;e&lt;/span&gt;&lt;span class="mord mathit"&gt;g&lt;/span&gt;&lt;span class="mord mathit"&gt;e&lt;/span&gt;&lt;span class="mord mathit"&gt;r&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; やその他の記号は字句解析済で渡ってくるとする。AST は以下のようになる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Expr&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;App&lt;/span&gt; &lt;span class="kt"&gt;Expr&lt;/span&gt; &lt;span class="kt"&gt;Expr&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;InfixApp&lt;/span&gt; &lt;span class="kt"&gt;Expr&lt;/span&gt; &lt;span class="kt"&gt;Var&lt;/span&gt; &lt;span class="kt"&gt;Expr&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Abs&lt;/span&gt; &lt;span class="kt"&gt;Var&lt;/span&gt; &lt;span class="kt"&gt;Expr&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Var&lt;/span&gt; &lt;span class="kt"&gt;Var&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Lit&lt;/span&gt; &lt;span class="kt"&gt;Lit&lt;/span&gt;
+
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;Lit&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;Var&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;String&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;で、文法で示した属性規則に従って、AST を得たいわけだ。さて、勢いで書いてみたプログラムが、&lt;a class="reference external" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/haskell-lazy-debug-problem/Problem01.html"&gt;Problem01.hs&lt;/a&gt; になる。ところが、動かしてみるとどうもどこかで無限ループしているようだ。最終的に、あなたにはこのプログラムを4つの例の結果がちゃんと返るように修正して欲しい。&lt;/p&gt;
+&lt;p&gt;この問題の修正例は、&lt;a class="reference external" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/haskell-lazy-debug-problem/Problem01A.html"&gt;Problem01A.hs&lt;/a&gt; になる。&lt;/p&gt;
+&lt;p&gt;さて、一般にパーサコンビネータライブラリは遅延評価を機能として利用している。これは、複雑なパーサのデバッグにおいて、個人的には常に厄介だ。今回の問題は、かなり難易度を緩めにしていて &lt;a class="footnote-reference" href="#notice-problem-hardness" id="auto-id-7"&gt;[5]&lt;/a&gt; 、常に無限ループが起こるわけだが、これがある (かなり特殊なケースの) プログラムでしか無限ループが起きないことを想定してみて欲しい。実際に、無限ループの原因を特定した人なら分かるはずだが、このような出来事は結構頻繁に起こる。このデバッグはかなりしんどく、なんならデバッグ文表示のために、変に評価を入れようものなら、通常問題ないところまで無限ループし始めるという大惨事が発生する。&lt;/p&gt;
+&lt;p&gt;また、パーサコンビネータのデバッグは、&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;パーサの構築の際に問題があるのか&lt;/li&gt;
+&lt;li&gt;パース結果の操作に問題があるのか&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;の切り分けが難しい。そのために、色々問題を切り分ける必要が出てくるが、その際にも遅延評価は結構悩みの種になる。なぜなら、パーサの構築と結果の操作が同時進行で、しかもデータの依存関係に沿って起こるからだ。多くの場合、データの依存関係とプログラマが想定する時系列はあっていない事が多く、結果トレースがめちゃくちゃになる。&lt;/p&gt;
+&lt;p&gt;で、解決策だけど、僕はパーサコンビネータを捨てて、&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;複雑なパースには Happy などのパーサジェネレータ&lt;/li&gt;
+&lt;li&gt;簡単なパースには、正規表現&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;を使うようになった。これはデバッグが辛い事だけが理由ではないけれど、この理由も大きい。なお、字句解析など、比較的簡単な、でも正規表現だけではやりにくい奴については、パーサコンビネータを使うこともある。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="zipper"&gt;
+&lt;h2&gt;問題2: Zipper による複雑怪奇な評価器&lt;a class="headerlink" href="#zipper" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;次のような構造を考える:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Inst&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;GetChild&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Inst&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Put&lt;/span&gt; &lt;span class="kt"&gt;Char&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Inst&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Var&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Bottom&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この構造は、次のような意味論を持つ:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;Value&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;VPut&lt;/span&gt; &lt;span class="kt"&gt;Char&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Value&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;VBottom&lt;/span&gt;
+
+&lt;span class="nf"&gt;evalInst&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Inst&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Value&lt;/span&gt;
+&lt;span class="nf"&gt;evalInst&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="kr"&gt;case&lt;/span&gt;
+      &lt;span class="kt"&gt;GetChild&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;getChild&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+      &lt;span class="kt"&gt;Put&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;ts&lt;/span&gt;     &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;VPut&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+      &lt;span class="kt"&gt;Var&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;        &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="kt"&gt;Bottom&lt;/span&gt;       &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;VBottom&lt;/span&gt;
+
+&lt;span class="nf"&gt;getChild&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Value&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Value&lt;/span&gt;
+&lt;span class="nf"&gt;getChild&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="kr"&gt;case&lt;/span&gt;
+  &lt;span class="kt"&gt;VPut&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;case&lt;/span&gt; &lt;span class="n"&gt;drop&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="kr"&gt;of&lt;/span&gt;
+    &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+    &lt;span class="kt"&gt;[]&lt;/span&gt;  &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;VBottom&lt;/span&gt;
+  &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="kt"&gt;VBottom&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;つまり、&lt;tt class="docutils literal"&gt;Inst a&lt;/tt&gt; は、文字による木とエラー値を値に持ち、&lt;tt class="docutils literal"&gt;GetChild&lt;/tt&gt; という木の &lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;i&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.65952em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault"&gt;i&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; 番目の子供を取得するプリミティブな操作と変数が入ったシステムになる。ところで、このシステムは書き換えシステムとして実装することもできる。今回は、Zipper を使って変数への代入を行わない書き換えシステムを実装してみたい。さて、勢いで書いてみたプログラムが、&lt;a class="reference external" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/haskell-lazy-debug-problem/Problem02.html"&gt;Problem02.hs&lt;/a&gt; になる。ところが、動かしてみても、結果が著しく異なる。最終的に、あなたにはこのプログラムを4つの例の結果がちゃんと返るように修正して欲しい。&lt;/p&gt;
+&lt;p&gt;この問題の修正例は、&lt;a class="reference external" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/haskell-lazy-debug-problem/Problem02A.html"&gt;Problem02A.hs&lt;/a&gt; になる。&lt;/p&gt;
+&lt;p&gt;さて、Haskell のプログラム例の多くは、再帰的な木に対してそれに沿って再帰を回すというものである。ところが、現実世界ではその形に沿わない状況も多い。その典型例がグラフ処理である。グラフは、あっちにいったりこっちに行ったりということを条件によって行う。また、停止性の条件も非自明な場合が多い。Haskell でグラフを扱うのは、少し厄介なので、今回はその気分を Zipper を使って再現してみた。こちらも難易度は控えめにしてある &lt;a class="footnote-reference" href="#notice-problem-hardness-2" id="auto-id-8"&gt;[6]&lt;/a&gt; 。&lt;/p&gt;
+&lt;p&gt;遅延評価は、一般に複雑な制御構造を持つプログラムのデバッグ難易度を結構上げる代物だと思う。というのは、そういうプログラムは、多くの場合制御フローが間違っているわけで、どこのフローが間違っているかを突き止める作業が主になるが、遅延評価はそもそもユーザが意図したフローで動いていない場合が多いからだ。意図したフローで動いていなくても結果は同じというのが遅延評価の特徴なわけだが、制御フローのデバッグは結果より過程が重要になり、過程が突き止めにくいことは大きな障壁になる。例えば、トレースを安直に挿入すると、トレース結果が意図したものと逆の時系列が出る経験をしたことはないだろうか？ これは、まあ慣れた Haskell プログラマなら、どういう場所に挿入したか想像がつくと思うが、個人的には一回はギョッとする奴だと思ってる。こういうトレース場所をよく考えて挿入しなきゃいけないというのは、結構不安を呼ぶ。トレースがちゃんとでない場合、それは制御フローがバグってるのか、自分が浅はかで評価フロー的に大事なポイントにトレースがちゃんと挿入できていないのかが一見して分からないからだ。&lt;/p&gt;
+&lt;p&gt;ところで、GHC 8.0 から &lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; 拡張が追加された。これはとりあえずあらゆるところで bang pattern を付け、コンストラクタのフィールドも全部正格フラグをつけるというやつで、ちょっと厄介ポイントはあるものの、不安は結構解消される。僕は、最近この拡張デフォルト有効でプログラムを書いていて、正直 &lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; 拡張ない頃には戻りたくないですね。なお、この拡張はパフォーマンス解析にも役に立つ。その理由はここで挙げた点と同じで、やはり評価フローが大体自分が意図した通りというのは大事という感じ。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-9"&gt;
+&lt;h2&gt;問題3: ちゃんと機能しないベンチマーク&lt;a class="headerlink" href="#auto-id-9" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;以下のようなプログラムを考える:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;BinTree&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Node&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;BinTree&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;BinTree&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;Leaf&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="nf"&gt;findRightOdd&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;BinTree&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;findRightOdd&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt;
+  &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Leaf&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;maybeOdd&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Node&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="n"&gt;lt&lt;/span&gt; &lt;span class="n"&gt;rt&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="ow"&gt;=&lt;/span&gt;   &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;rt&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;|&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;maybeOdd&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;|&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;lt&lt;/span&gt;
+
+    &lt;span class="n"&gt;maybeOdd&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;mod&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Just&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+      &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt;      &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Nothing&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なんて事のないプログラムで、数値を値に持つ二分木が与えられた場合に、一番右側にある奇数の値を取得するプログラムになる。さて、このプログラムは奇数が見つかればそこで木の探索を終了するはずなので、奇数が早めに見つかる場合は、全部探索して奇数を見つけるプログラムより速いはずだ。そこで、&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;一番右側に奇数がある木&lt;/li&gt;
+&lt;li&gt;奇数がない木&lt;/li&gt;
+&lt;li&gt;ランダムに値を埋め込んだ木&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;を作って、プログラムの速度を実測してみたところ、&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;mo&gt;≪&lt;/mo&gt;&lt;mn&gt;3&lt;/mn&gt;&lt;mo&gt;≪&lt;/mo&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;1 \ll 3 \ll 2&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68354em;vertical-align:-0.0391em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;1&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel"&gt;≪&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68354em;vertical-align:-0.0391em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;3&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel"&gt;≪&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.64444em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;2&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; を期待したのに、&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;mo&gt;≪&lt;/mo&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;mo&gt;≪&lt;/mo&gt;&lt;mn&gt;3&lt;/mn&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;1 \ll 2 \ll 3&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68354em;vertical-align:-0.0391em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;1&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel"&gt;≪&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68354em;vertical-align:-0.0391em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;2&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel"&gt;≪&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.64444em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord"&gt;3&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; という結果が得られた。一体上の簡単なプログラムのどこに間違いがあったんだろう？ 実測に使ったプログラムは、&lt;a class="reference external" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/haskell-lazy-debug-problem/Problem03.html"&gt;Problem03.hs&lt;/a&gt; になる。このプログラムに間違いがあれば指摘して欲しい。&lt;/p&gt;
+&lt;p&gt;この問題の修正例は、&lt;a class="reference external" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/haskell-lazy-debug-problem/Problem03A.html"&gt;Problem03A.hs&lt;/a&gt; になる。&lt;/p&gt;
+&lt;p&gt;最後は、疲れちゃったので、易しい問題で。修正の仕方は色々考えられると思う。作者自身は、ちゃんとベンチマークしたいわけじゃなくて、プログラムが意図通り動いていそうか軽く確認したいというのがポイントだ。さて、デフォルト遅延評価でのパフォーマンス予測は常に厄介で、大体外れる (個人の感想です)。この原因は、主にパフォーマンスの問題が各関数で完結しておらず、相互作用によって決まる傾向にあるというのも大きいと思う。なので、Haskell でない言語でもイテレータやジェネレータを扱う場合のパフォーマンス解析は結構しんどい。ただ、そういう言語でも相互作用に決まるものと決まらないものはちゃんと区別されている。Haskell では区別されていない。これが一番きつい。これは、問題2でも共通だが、どこを疑えばいいのかが得られたデータからは判別しづらいからだと思う。なので、判別には経験が試される。&lt;/p&gt;
+&lt;p&gt;今回の場合、直接 &lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; 拡張が役に立つわけではないが、&lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; 拡張を使う事自体は判断の助けになるだろう。実はこのプログラムは、後輩が詰まっていた問題から着想を得ているんだけど、Haskell の経験が特にない人が Haskell を使って何かする必要に迫られ、しかもそれがパフォーマンスに関係する事である場合、まずは &lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; 拡張を有効にする事をお勧めする。これは速くなるとかではなくて、単にパフォーマンス解析のしやすさからだ。後、Haskell では、何の気なしに結構遅延評価を使っている場合が多く、しかも案外ネック部分に知らない間に適用されており、&lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; 拡張を有効にすると (アルゴリズムを変える必要があるレベルの) 大規模な改修が必要になったりする。そういう場面に気づくためにも、&lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; 拡張は使っておいた方がいい。その結果、遅延評価の機能が使いたくなったら、lazy pattern なり lazy flag なりで使えば良いと思う。ただ、デフォルトは &lt;tt class="docutils literal"&gt;Strict&lt;/tt&gt; 拡張有効の方が、変なところでつまづく確率が下がると思う。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-10"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-10" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;ということで、個人的に遅延評価で苦しい奴を3個ほど例示してみた。個人的には、最初に言った通り、&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;プログラム自体が大きくて&lt;/li&gt;
+&lt;li&gt;複雑な制御構造をしていて&lt;/li&gt;
+&lt;li&gt;&lt;dl class="first docutils"&gt;
+&lt;dt&gt;(optional) 以下のいずれかの条件を満たす&lt;/dt&gt;
+&lt;dd&gt;&lt;ul class="first last"&gt;
+&lt;li&gt;遅延評価を機能として使っている&lt;/li&gt;
+&lt;li&gt;デバッグ対象が効率に関するバグである&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;なプログラムにおいて、デフォルト遅延評価によるデバッグはかなり辛いと思っている。問題1は遅延評価を機能として使っている例、問題3は効率に関するバグの例になる。もっとそれぞれの例を洗練して、ちゃんと議論しやすい土壌に持ってくのが良いとは思ってる。思ってるが、正直苦心してそういう例を考えたくないほど遅延評価辛いので、誰かよろしくって感じ。後、こういう問題には、こう対処すると良いみたいなんがあれば、是非教えて欲しい。&lt;/p&gt;
+&lt;p&gt;GHC の抽象機械や GC 自体は遅延評価を想定してる面があるし、遅延評価由来の最適化も結構色々あって面白いとは思う。おそらく Haskell がデフォルト遅延評価を選んでいなければ、ここまでの発展はなかったんじゃないだろうか。それを考えると、技術的には面白いとは思うんだけど、如何せんプログラミングユーザとしては辛すぎるので、僕は遅延評価捨てて欲しいです。よろしくお願いします。&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="simple-example" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;最初シンプルな例を挙げよという話だったんだけど、基本的にはそれは前提が間違ってると思っていて、遅延評価は積もり積もるとデバッグの難易度が上がりやすいと思ってる。これは、正格評価でも同じではないかという話はあると思うけど、遅延評価の方が特定に時間がかかる上、余計なところに時間が取られやすいと思っている (定量的な話は出来ないけど。そもそも定量的な話ができるなら、ブログに書かないと言う話がある)。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="hutton-1998" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Hutton, G., &amp;amp; Meijer, E. (1998). Monadic parsing in Haskell. Journal of Functional Programming, 8(4), 437–444. &lt;a class="reference external" href="https://doi.org/10.1017/S0956796898003050"&gt;https://doi.org/10.1017/S0956796898003050&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="hutton-1996" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-5"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Hutton, G., &amp;amp; Meijer, E. (1996). Monadic Parser Combinators. Retrieved from &lt;a class="reference external" href="http://eprints.nottingham.ac.uk/237/"&gt;http://eprints.nottingham.ac.uk/237/&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-hutton-meijer-performance" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-6"&gt;[4]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なお、Hutton &amp;amp; Meijer のパーサは、遅いしメモリも食うしみたいな事が知られている。で、普通はリストを捨てて継続を使ったり、先読みやエラー情報の保持を工夫したりする。もし、あなたが自身のプログラムでパーサコンビネータを使いたかったら、そのような工夫がされている Megaparsec / Attoparsec などを使うことをお勧めする。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-problem-hardness" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-7"&gt;[5]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;難易度が緩めになってるのは、まず難易度が高めの問題を僕がデバッグしたくないのと、そこまで時間をかけたくなかったというのがある。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-problem-hardness-2" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-8"&gt;[6]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なお、実は故意に含んだバグと安直に実装したら埋め込まれたバグがある。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/03/haskell-lazy-debug-problem.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/03/haskell-lazy-debug-problem.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="プログラミング言語"></category><category term="Haskell"></category><category term="遅延評価"></category><category term="デバッグ"></category></entry><entry><title>型クラスの Coherence と Orphan Instance</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/" rel="alternate"></link><published>2020-03-20T21:00:00+09:00</published><updated>2020-03-20T21:00:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-20:/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/</id><summary type="html">&lt;p&gt;Haskell には型クラスと呼ばれる重要な機能がある．これは名前の通り，型をクラス分けするための機能で，その型に対してある操作が構成できることをその型の性質とみなし，性質に名前がつけられる機能だ．この機能は，アドホック多相，つまりは型による静的なオーバーロードを実現する仕組みとしての側面もある．型クラスに対しては，型ごとにそのインスタンス，つまり操作の実装を与えることができ，ある型がある型クラスに所属していることを型注釈で表明することができる．その表明は，コンパイラによるインスタンスの自動検索で解決され，解決できなかった場合は型エラーになる．&lt;/p&gt;
 &lt;p&gt;さて，型クラスの仕組みは coherence という，かなり強い性質を要求する．今回は，この coherence がどういう役割を持つかを …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Haskell には型クラスと呼ばれる重要な機能がある．これは名前の通り，型をクラス分けするための機能で，その型に対してある操作が構成できることをその型の性質とみなし，性質に名前がつけられる機能だ．この機能は，アドホック多相，つまりは型による静的なオーバーロードを実現する仕組みとしての側面もある．型クラスに対しては，型ごとにそのインスタンス，つまり操作の実装を与えることができ，ある型がある型クラスに所属していることを型注釈で表明することができる．その表明は，コンパイラによるインスタンスの自動検索で解決され，解決できなかった場合は型エラーになる．&lt;/p&gt;
 &lt;p&gt;さて，型クラスの仕組みは coherence という，かなり強い性質を要求する．今回は，この coherence がどういう役割を持つかを，Haskell を例に見ていく．また，orphan インスタンスと呼ばれる特殊なインスタンスと coherence の関係性について言及する．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;

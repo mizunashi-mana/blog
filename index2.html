@@ -130,6 +130,34 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/#lint-bslit-by-ghc-plugin">リテラルをコンパイラ時にチェックする</a></h2>
+    <p>
+          Posted on 月 28 10月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/riteraru.html">リテラル</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghckuo-zhang.html">GHC拡張</a>
+    </p>
+  </header>
+  <div>
+      <p>Haskell はいくつかのリテラルで型クラスを使用したオーバーロードを許容している．例えば，Haskell で <tt class="docutils literal">1</tt> と書いた場合，この型は <tt class="docutils literal">1 :: Num a =&gt; a</tt> になり， <tt class="docutils literal">Num</tt> のインスタンスを定義することで，リテラルに対する実体をユーザも制御できるようになっている．GHC拡張で文字列に対してのオーバーロードなども提供されている．ただ，提供するデータ型とリテラルによっては，プログラムが意図通りに動かなかったりクラッシュしてしまったりすることがある．これを事前にチェックする仕組みを，コンパイラプラグインで実装する方法を紹介する．</p>
+<p>なお，環境として以下を想定している．</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="69%"/>
+<col width="31%"/>
+</colgroup>
+<tbody valign="top">
+<tr><td>GHC …</td></tr></tbody></table>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/#lint-bslit-by-ghc-plugin">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/09/nftables-on-debian/#nftables-on-debian">iptables から nftables への移行</a></h2>
     <p>
           Posted on 土 21 9月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
@@ -343,26 +371,6 @@
 <p>では …</p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/06/graded-monad-to-monad/#graded-monad-to-monad">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/06/graded-monad-in-scala/#graded-monad-in-scala">Scala (Dotty) での Graded Monad によるメタ言語の実装</a></h2>
-    <p>
-          Posted on 金 07 6月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/gou-xiang.html">構想</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/ehuekutoshisutemu.html">エフェクトシステム</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/monado.html">モナド</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/scala.html">Scala</a>
-    </p>
-  </header>
-  <div>
-      <p>Graded Monad のメタ言語，普通にプログラミング言語で実装できそうやなって思って，ちょっとやってみることにした．で，前ねこはるさんが extensible effects に Dotty の union types 使う話してたの思い出して，それと同じ感じで powerset による preordered monoid に対する graded monad ぐらいなら実装できるんじゃねと思ったので， Dotty …</p>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/06/graded-monad-in-scala/#graded-monad-in-scala">    Continue reading
 </a>
   </div>
 </article>

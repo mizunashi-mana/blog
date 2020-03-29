@@ -131,6 +131,35 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/#haskell-lazy-debug-problem">遅延評価でデバッグが困難になる状況</a></h2>
+    <p>
+          Posted on 日 29 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/chi-yan-ping-jia.html">遅延評価</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/debatsugu.html">デバッグ</a>
+    </p>
+  </header>
+  <div>
+      <p>先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。</p>
+<p>なお、かなり主観に寄っていて、結構書き殴ってる部分が多いので、厳密な議論をするにはあまり良い例ではないかもしれない。個人的には、備忘録的な意味合いも強くて、今まで詰まったやつをまとめておくかみたいな感じでもある。</p>
+<p>先に結論を書いておくと、</p>
+<ul class="simple">
+<li>プログラム自体が大きくて <a class="footnote-reference" href="#simple-example" id="auto-id-2">[1]</a></li>
+<li>複雑な制御構造をしていて</li>
+<li><dl class="first docutils">
+<dt>(optional) 以下のいずれかの条件を満たす</dt>
+<dd><ul class="first last">
+<li>遅延評価を機能として使っている …</li></ul></dd></dl></li></ul>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/#haskell-lazy-debug-problem">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/#coherent-typeclass-and-orphan-instance">型クラスの Coherence と Orphan Instance</a></h2>
     <p>
           Posted on 金 20 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
@@ -333,34 +362,6 @@ sudo apt update
 sudo …</pre></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/11/pipenv-on-wsl-debian/#pipenv-on-wsl-debian">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/#lint-bslit-by-ghc-plugin">リテラルをコンパイラ時にチェックする</a></h2>
-    <p>
-          Posted on 月 28 10月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/riteraru.html">リテラル</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghckuo-zhang.html">GHC拡張</a>
-    </p>
-  </header>
-  <div>
-      <p>Haskell はいくつかのリテラルで型クラスを使用したオーバーロードを許容している．例えば，Haskell で <tt class="docutils literal">1</tt> と書いた場合，この型は <tt class="docutils literal">1 :: Num a =&gt; a</tt> になり， <tt class="docutils literal">Num</tt> のインスタンスを定義することで，リテラルに対する実体をユーザも制御できるようになっている．GHC拡張で文字列に対してのオーバーロードなども提供されている．ただ，提供するデータ型とリテラルによっては，プログラムが意図通りに動かなかったりクラッシュしてしまったりすることがある．これを事前にチェックする仕組みを，コンパイラプラグインで実装する方法を紹介する．</p>
-<p>なお，環境として以下を想定している．</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="69%"/>
-<col width="31%"/>
-</colgroup>
-<tbody valign="top">
-<tr><td>GHC …</td></tr></tbody></table>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/#lint-bslit-by-ghc-plugin">    Continue reading
 </a>
   </div>
 </article>

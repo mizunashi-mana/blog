@@ -131,6 +131,35 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/#haskell-lazy-debug-problem">遅延評価でデバッグが困難になる状況</a></h2>
+    <p>
+          Posted on 日 29 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/chi-yan-ping-jia.html">遅延評価</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/debatsugu.html">デバッグ</a>
+    </p>
+  </header>
+  <div>
+      <p>先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。</p>
+<p>なお、かなり主観に寄っていて、結構書き殴ってる部分が多いので、厳密な議論をするにはあまり良い例ではないかもしれない。個人的には、備忘録的な意味合いも強くて、今まで詰まったやつをまとめておくかみたいな感じでもある。</p>
+<p>先に結論を書いておくと、</p>
+<ul class="simple">
+<li>プログラム自体が大きくて <a class="footnote-reference" href="#simple-example" id="auto-id-2">[1]</a></li>
+<li>複雑な制御構造をしていて</li>
+<li><dl class="first docutils">
+<dt>(optional) 以下のいずれかの条件を満たす</dt>
+<dd><ul class="first last">
+<li>遅延評価を機能として使っている …</li></ul></dd></dl></li></ul>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/#haskell-lazy-debug-problem">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/#coherent-typeclass-and-orphan-instance">型クラスの Coherence と Orphan Instance</a></h2>
     <p>
           Posted on 金 20 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
@@ -334,31 +363,6 @@
 <p>線形型の提案は， GHC Proposals (<a class="reference external" href="https://github.com/ghc-proposals/ghc-proposals/pull/111">https://github.com/ghc-proposals/ghc-proposals/pull/111</a>) で議論されている． <a class="reference external" href="https://arxiv.org/abs/1710.09756">https://arxiv.org/abs …</a></p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/06/linear-types-in-docker/#linear-types-in-docker">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/#ghc-with-llvm">GHC で LLVM を通したビルドを行う</a></h2>
-    <p>
-          Posted on 金 17 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huan-jing-gou-zhu.html">環境構築</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/llvm.html">LLVM</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/macos.html">macOS</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/homebrew.html">Homebrew</a>
-    </p>
-  </header>
-  <div>
-      <p>GHC で LLVM を通してビルドをしたかったので，設定した．その備忘録．</p>
-<div class="section" id="macos-llvm-ghc">
-<h2>macOS で LLVM を GHC が使えるようにする<a class="headerlink" href="#macos-llvm-ghc" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>GHC が対応してる LLVM のバージョンは，標準で入ってるのよりちょっと古くって，さらにバージョンごとにサポートされてる範囲が違う．各 GHC でサポートされてる LLVM のバージョンは，以下に載ってる:</p>
-<blockquote>
-<a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/compiler/backends/llvm/installing#llvm-support">https …</a></blockquote></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-with-llvm/#ghc-with-llvm">    Continue reading
 </a>
   </div>
 </article>
