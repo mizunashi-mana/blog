@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 29 Mar 2020 08:23:18 +0900</lastBuildDate><item><title>遅延評価でデバッグが困難になる状況</title><link>https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/</link><description>&lt;p&gt;先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Sun, 29 Mar 2020 09:49:38 +0900</lastBuildDate><item><title>遅延評価でデバッグが困難になる状況</title><link>https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/</link><description>&lt;p&gt;先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。&lt;/p&gt;
 &lt;p&gt;なお、かなり主観に寄っていて、結構書き殴ってる部分が多いので、厳密な議論をするにはあまり良い例ではないかもしれない。個人的には、備忘録的な意味合いも強くて、今まで詰まったやつをまとめておくかみたいな感じでもある。&lt;/p&gt;
 &lt;p&gt;先に結論を書いておくと、&lt;/p&gt;
 &lt;ul class="simple"&gt;

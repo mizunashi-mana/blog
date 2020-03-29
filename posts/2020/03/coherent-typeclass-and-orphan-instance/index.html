@@ -58,7 +58,7 @@
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/"/>
 <meta property="og:type" content="article"/>
 <meta property="article:published_time" content="2020-03-20 11:43:29+09:00"/>
-<meta property="article:modified_time" content="2020-03-29 08:23:18+09:00"/>
+<meta property="article:modified_time" content="2020-03-29 09:49:38+09:00"/>
 <meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
 <meta property="article:section" content="プログラミング言語"/>
 <meta property="article:tag" content="Haskell"/>
@@ -256,7 +256,7 @@
 14
 15
 16
-17</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">C1</span> <span class="n">a</span> <span class="kr">where</span>
+17</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">class</span> <span class="kt">C1</span> <span class="n">a</span> <span class="kr">where</span>
   <span class="n">m1</span> <span class="ow">::</span> <span class="n">a</span>
 
 <span class="kr">class</span> <span class="kt">C1</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">C2</span> <span class="n">a</span> <span class="kr">where</span>
