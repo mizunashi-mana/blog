@@ -14,6 +14,7 @@ ghp-import = "*"
 beautifulsoup4 = "*"
 pillow = "*"
 Pygments = "*"
+gitpython = "*"
 
 [requires]
 python_version = "3"
