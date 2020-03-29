@@ -98,7 +98,7 @@ Haskell には型クラスと呼ばれる重要な機能がある．これは名
 
 .. code-block:: haskell
 
-  data C1 a where
+  class C1 a where
     m1 :: a
 
   class C1 a => C2 a where
