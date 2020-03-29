@@ -1,7 +1,6 @@
 Scala の Map.flatMap の罠
 =========================
 
-:date: 2019-09-03 21:00
 :tags: Scala, Collection Library, Map, 標準ライブラリ
 :category: プログラミング
 

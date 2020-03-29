@@ -1,7 +1,6 @@
 pipenv を WSL/Debian で使う際の注意事項
 =======================================
 
-:date: 2019-11-14 18:00
 :tags: Python, Debian, WSL
 :category: 環境構築
 

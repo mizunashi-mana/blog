@@ -1,7 +1,6 @@
 STG Version 2.5 の動作
 ======================
 
-:date: 2019-04-21 22:00
 :tags: Haskell, 抽象機械, GHC
 :category: プログラミング言語
 

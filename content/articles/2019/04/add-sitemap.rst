@@ -1,7 +1,6 @@
 sitemap の追加
 ==============
 
-:date: 2019-04-10
 :tags: SEO, ブログ, Pelican, Google Analytics
 :category: 運用
 

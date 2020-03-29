@@ -1,7 +1,6 @@
 Python の datetime が難しい
 ===========================
 
-:date: 2019-04-03
 :tags: Python, 標準ライブラリ
 :category: プログラミング
 

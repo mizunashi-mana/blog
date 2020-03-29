@@ -1,7 +1,6 @@
 ブログ始めました
 ====================
 
-:date: 2019-03-29 19:00
 :tags: Python, Pelican, ブログ, GitHub
 :category: 運用
 

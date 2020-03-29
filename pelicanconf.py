@@ -115,6 +115,7 @@ PLUGINS = [
   'embed_customjs',
   'sitemap',
   'katex_math_render',
+  'filetime_from_git',
 ]
 
 RELATIVE_URLS = True

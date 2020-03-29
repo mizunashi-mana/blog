@@ -1,7 +1,6 @@
 KaTeX コードを静的にレンダリングする
 ====================================
 
-:date: 2019-04-28 18:00
 :tags: KaTeX, Pelican, ブログ, Python, Node.js, JavaScript
 :category: 運用
 

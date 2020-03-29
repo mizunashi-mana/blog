@@ -1,7 +1,6 @@
 Apache Spark のお試し環境を作る
 ===============================
 
-:date: 2019-05-21 15:00
 :tags: 並列分散処理, Spark, Hadoop, Docker
 :category: 環境構築
 

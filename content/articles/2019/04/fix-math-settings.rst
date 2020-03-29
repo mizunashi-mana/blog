@@ -1,7 +1,6 @@
 MathML で数式を表示する
 =======================
 
-:date: 2019-04-14
 :tags: Pelican, MathML, ブログ, reStructuredText, MathJax, JavaScript
 :category: 運用
 

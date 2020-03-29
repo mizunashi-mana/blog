@@ -1,7 +1,6 @@
 Sentry でエラー監視
 ===================
 
-:date: 2019-05-02 18:00
 :tags: ブログ, 監視, JavaScript
 :category: 運用
 
