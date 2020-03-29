@@ -1,7 +1,6 @@
 Google Analytics の導入
 =======================
 
-:date: 2019-04-08 12:30
 :tags: Pelican, ブログ, Google Analytics, SEO
 :category: 運用
 

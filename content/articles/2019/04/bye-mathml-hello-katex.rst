@@ -1,7 +1,6 @@
 MathML にバイバイして， KaTeX に移行した
 ========================================
 
-:date: 2019-04-22 3:00
 :tags: Pelican, MathML, ブログ, reStructuredText, JavaScript, CSS
 :category: 運用
 

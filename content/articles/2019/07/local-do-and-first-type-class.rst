@@ -1,7 +1,6 @@
 Local Do と型クラス
 ===================
 
-:date: 2019-07-27 15:30
 :tags: Haskell, GHC, GHC拡張, do構文, 型クラス
 :category: プログラミング言語
 

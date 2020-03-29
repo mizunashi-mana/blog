@@ -1,7 +1,6 @@
 iptables から nftables への移行
 ===============================
 
-:date: 2019-09-21 08:00
 :tags: Debian, iptables, nftables, ファイアウォール
 :category: 運用
 

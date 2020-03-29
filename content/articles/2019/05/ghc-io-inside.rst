@@ -1,7 +1,6 @@
 GHC IO モナドの中身
 ===================
 
-:date: 2019-05-17 15:00
 :tags: Haskell, GHC, IO
 :category: プログラミング言語
 

@@ -1,7 +1,6 @@
 Functor / Applicative / Monad が表すもの
 ========================================
 
-:date: 2019-04-13 20:00
 :tags: Haskell, GHC, GHC拡張, 標準ライブラリ
 :category: 直感
 

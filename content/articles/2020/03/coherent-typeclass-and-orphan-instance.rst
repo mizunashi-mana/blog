@@ -1,7 +1,6 @@
 型クラスの Coherence と Orphan Instance
 =======================================
 
-:date: 2020-03-20 21:00
 :tags: Haskell, GHC, 型クラス
 :category: プログラミング言語
 

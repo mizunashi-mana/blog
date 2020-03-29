@@ -1,7 +1,6 @@
 Scala コードの裏側
 ==================
 
-:date: 2019-04-24 14:00
 :tags: Scala, Java, JVM, 最適化
 :category: プログラミング言語
 

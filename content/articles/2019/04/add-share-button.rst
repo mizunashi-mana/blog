@@ -1,7 +1,6 @@
 ブログに共有ボタンを追加した
 ============================
 
-:date: 2019-04-05
 :tags: Pelican, ブログ, Python, JavaScript
 :category: 運用
 

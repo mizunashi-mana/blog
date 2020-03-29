@@ -1,7 +1,6 @@
 babel と core-js を使って，古いブラウザをサポートする
 =====================================================
 
-:date: 2019-11-27 18:00
 :tags: Web, JavaScript, Webpack, Babel, ブログ
 :category: 運用
 

@@ -1,7 +1,6 @@
 GHC で LLVM を通したビルドを行う
 ================================
 
-:date: 2019-05-17 15:01
 :tags: Haskell, GHC, LLVM, macOS, Homebrew
 :category: 環境構築
 

@@ -1,7 +1,6 @@
 CTMCP のために Mozart/Oz を動かす
 =================================
 
-:date: 2019-04-08 19:00
 :tags: Mozart, Oz, Emacs, 本, 環境構築
 :category: 学習
 
