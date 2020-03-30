@@ -1,0 +1,769 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="Haskell では、ボイラープレートは非常に嫌われており、それを撲滅するため強力な型システムの他にも幾つか機能が組み込まれている。その中で非常に強力な機能が、deriving だ。この機能は、データ型の型クラスインスタンスを、その名の通り導出してくれる機能である。Haskell 標準では、幾つかの標準の型クラスにおいて、事前に用意されたアルゴリズムによる導出ができるだけの機能だったが、GHC ではさらに3つの戦略を追加し、広範囲の型クラスの導出が行えるようになっている。特に最近入った DerivingVia と呼ばれる拡張の戦略は、deriving の可能性を大いに引き上げてくれる拡張である。 ところで、実は DerivingVia …" />
+<meta name="keywords" content="GHC, Haskell, GHC拡張">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="DerivingVia で deriving 戦略を模倣する"/>
+<meta property="og:description" content="Haskell では、ボイラープレートは非常に嫌われており、それを撲滅するため強力な型システムの他にも幾つか機能が組み込まれている。その中で非常に強力な機能が、deriving だ。この機能は、データ型の型クラスインスタンスを、その名の通り導出してくれる機能である。Haskell 標準では、幾つかの標準の型クラスにおいて、事前に用意されたアルゴリズムによる導出ができるだけの機能だったが、GHC ではさらに3つの戦略を追加し、広範囲の型クラスの導出が行えるようになっている。特に最近入った DerivingVia と呼ばれる拡張の戦略は、deriving の可能性を大いに引き上げてくれる拡張である。 ところで、実は DerivingVia …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2020/03/deriving-strategies-by-deriving-via/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-03-30 08:28:37+09:00"/>
+<meta property="article:modified_time" content="2020-03-30 08:28:37+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="プログラミング言語"/>
+<meta property="article:tag" content="GHC"/>
+<meta property="article:tag" content="Haskell"/>
+<meta property="article:tag" content="GHC拡張"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; DerivingVia で deriving 戦略を模倣する</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="deriving-strategies-by-deriving-via">DerivingVia で deriving 戦略を模倣する</h1>
+    <p>
+          Posted on 月 30 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>Haskell では、ボイラープレートは非常に嫌われており、それを撲滅するため強力な型システムの他にも幾つか機能が組み込まれている。その中で非常に強力な機能が、deriving だ。この機能は、データ型の型クラスインスタンスを、その名の通り導出してくれる機能である。Haskell 標準では、幾つかの標準の型クラスにおいて、事前に用意されたアルゴリズムによる導出ができるだけの機能だったが、GHC ではさらに3つの戦略を追加し、広範囲の型クラスの導出が行えるようになっている。特に最近入った <tt class="docutils literal">DerivingVia</tt> と呼ばれる拡張の戦略は、deriving の可能性を大いに引き上げてくれる拡張である。</p>
+<p>ところで、実は <tt class="docutils literal">DerivingVia</tt> があれば他の戦略は大方模倣できる。今回は、<tt class="docutils literal">DerivingVia</tt> で各戦略を模倣しながら、簡単な紹介をしていこうと思う。</p>
+<div class="section" id="auto-id-1">
+<h2>型クラスインスタンスの導出<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Haskell は、データ型を代数的データ型、つまり直積と直和とプリミティブ型から構築できる型で定義する言語である。このため、型クラスが直積と直和に閉じているようなものであれば、大半インスタンス実装は同じような流れになる。例えば、<tt class="docutils literal">Eq</tt> 型クラスの例を見てみる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">D1</span>
+  <span class="ow">=</span> <span class="kt">D1_C1</span> <span class="kt">Int</span> <span class="kt">D1</span>
+  <span class="o">|</span> <span class="kt">D1_C2</span> <span class="kt">Bool</span>
+
+<span class="kr">instance</span> <span class="kt">Eq</span> <span class="kt">D1</span> <span class="kr">where</span>
+  <span class="kt">D1_C1</span> <span class="n">x1</span> <span class="n">y1</span> <span class="o">==</span> <span class="kt">D1_C1</span> <span class="n">x1</span> <span class="n">y2</span> <span class="ow">=</span> <span class="n">x1</span> <span class="o">==</span> <span class="n">x2</span> <span class="o">&amp;&amp;</span> <span class="n">y1</span> <span class="o">==</span> <span class="n">y2</span>
+  <span class="kt">D1_C1</span><span class="p">{}</span>     <span class="o">==</span> <span class="kt">D1_C2</span><span class="p">{}</span>     <span class="ow">=</span> <span class="kt">False</span>
+  <span class="kt">D1_C2</span><span class="p">{}</span>     <span class="o">==</span> <span class="kt">D1_C1</span><span class="p">{}</span>     <span class="ow">=</span> <span class="kt">False</span>
+  <span class="kt">D1_C2</span> <span class="n">b1</span>    <span class="o">==</span> <span class="kt">D1_C2</span> <span class="n">b2</span>    <span class="ow">=</span> <span class="n">b1</span> <span class="o">==</span> <span class="n">b2</span>
+
+<span class="kr">data</span> <span class="kt">D2</span>
+  <span class="ow">=</span> <span class="kt">D2_C1</span> <span class="kt">Int</span> <span class="kt">D2</span>
+  <span class="o">|</span> <span class="kt">D2_C2</span> <span class="kt">Bool</span>
+
+<span class="kr">instance</span> <span class="kt">Eq</span> <span class="kt">D2</span> <span class="kr">where</span>
+  <span class="kt">D2_C1</span> <span class="n">x1</span> <span class="n">y1</span> <span class="o">==</span> <span class="kt">D2_C1</span> <span class="n">x1</span> <span class="n">y2</span> <span class="ow">=</span> <span class="n">x1</span> <span class="o">==</span> <span class="n">x2</span> <span class="o">&amp;&amp;</span> <span class="n">y1</span> <span class="o">==</span> <span class="n">y2</span>
+  <span class="kt">D2_C1</span><span class="p">{}</span>     <span class="o">==</span> <span class="kt">D2_C2</span><span class="p">{}</span>     <span class="ow">=</span> <span class="kt">False</span>
+  <span class="kt">D2_C2</span><span class="p">{}</span>     <span class="o">==</span> <span class="kt">D2_C1</span><span class="p">{}</span>     <span class="ow">=</span> <span class="kt">False</span>
+  <span class="kt">D2_C2</span> <span class="n">b1</span>    <span class="o">==</span> <span class="kt">D2_C2</span> <span class="n">b2</span>    <span class="ow">=</span> <span class="n">b1</span> <span class="o">==</span> <span class="n">b2</span>
+</pre></div>
+</td></tr></table><p>このプログラムにおいて、<tt class="docutils literal">D1</tt> と <tt class="docutils literal">D2</tt> は同型であり、実装もコンストラクタの名前が異なるだけでやってる内容は特に変わらない。さらには、このプログラムは直和に対するインスタンス実装と直積に対するインスタンス実装の合わせ技であり、</p>
+<ol class="arabic simple">
+<li>まず直和の等価性により異なるコンストラクタ同士の比較は偽に、同じコンストラクタの比較は中身の等価性で判断する</li>
+<li>中身は有限直積になっているため、有限直積の等価性により、それぞれの要素をポイントワイズに比較し、その結果の論理積をとる</li>
+</ol>
+<p>というようになる。このようなインスタンス実装をいちいちデータ型毎に書くのは、Haskeller にとって苦痛であり、これぐらい自動的に実装して欲しいというクレームが多数寄せられることになる。そこで、直和と直積に閉じた型クラスで、標準で提供されているものに関しては、多くの場合自動的にインスタンスを実装してくれる機能が用意されている。それが、deriving だ。先ほどのプログラムは、以下のように書くこともできる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">D1</span>
+  <span class="ow">=</span> <span class="kt">D1_C1</span> <span class="kt">Int</span> <span class="kt">D1</span>
+  <span class="o">|</span> <span class="kt">D1_C2</span> <span class="kt">Bool</span>
+  <span class="kr">deriving</span> <span class="kt">Eq</span>
+
+<span class="kr">data</span> <span class="kt">D2</span>
+  <span class="ow">=</span> <span class="kt">D2_C1</span> <span class="kt">Int</span> <span class="kt">D2</span>
+  <span class="o">|</span> <span class="kt">D2_C2</span> <span class="kt">Bool</span>
+  <span class="kr">deriving</span> <span class="kt">Eq</span>
+</pre></div>
+</td></tr></table><p>随分と記述量が減り、プログラムとしても見やすくなっただろう。具体的に deriving が使える型クラスはどう言うものがあるのかについては、後述する。</p>
+<p>ところで、このようなインスタンス導出のやり方は、型クラス決め打ちのものであり、それぞれの型クラスに対してコンパイラが導出アルゴリズムを用意してあげなければならない。しかし、それはあまりに拡張性がない。そこで、GHC では標準の導出戦略の他に3つの導出戦略を追加し、ユーザが一定のコードを用意さえすれば、それを利用してインスタンスを自動で導出するように拡張を加えている。それぞれの戦略は、</p>
+<dl class="docutils">
+<dt><tt class="docutils literal">stock</tt></dt>
+<dd>標準の導出戦略で、型クラスそれぞれに対しコンパイラが導出アルゴリズムを用意し、それを使用して導出を行う。</dd>
+<dt><tt class="docutils literal">newtype</tt></dt>
+<dd><tt class="docutils literal">newtype</tt> で宣言したデータ型に対して使える戦略で、元の型のインスタンス実装をそのまま流用する。</dd>
+<dt><tt class="docutils literal">anyclass</tt></dt>
+<dd>インスタンス実装を空の実装として導出する。型クラスにデフォルトの実装が用意されてる場合、それが利用される。</dd>
+<dt><tt class="docutils literal">via</tt></dt>
+<dd>指定されたキャストできる範囲のデータ型のインスタンスを、流用する。</dd>
+</dl>
+<p>なお、型クラスとデータ型の組み合わせによって、使用できる戦略が複数ある場合がある。その場合に使用する戦略を明示的に書くことを可能にする拡張も用意されている。それが、<tt class="docutils literal">DerivingStrategies</tt> という拡張である。この拡張下では、先ほどのプログラムは次のように書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">D1</span>
+  <span class="ow">=</span> <span class="kt">D1_C1</span> <span class="kt">Int</span> <span class="kt">D1</span>
+  <span class="o">|</span> <span class="kt">D1_C2</span> <span class="kt">Bool</span>
+  <span class="kr">deriving</span> <span class="n">stock</span> <span class="kt">Eq</span>
+
+<span class="kr">data</span> <span class="kt">D2</span>
+  <span class="ow">=</span> <span class="kt">D2_C1</span> <span class="kt">Int</span> <span class="kt">D2</span>
+  <span class="o">|</span> <span class="kt">D2_C2</span> <span class="kt">Bool</span>
+  <span class="kr">deriving</span> <span class="n">stock</span> <span class="kt">Eq</span>
+</pre></div>
+</td></tr></table><p>なお、何も指定しない場合は、GHC が規定する <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/compiler/deriving-strategies#the-deriving-strategy-resolution-algorithm">解決の流れ</a> に沿って解決が行われる。ただ、基本的には戦略を明示するのがいいだろう <a class="footnote-reference" href="#notice-ghc-88" id="auto-id-3">[1]</a> 。以降は、この拡張を有効にしたとして、戦略を明示して書くようにする。では、3つの戦略と標準の導出戦略の詳細を見ていこうと思う。</p>
+</div>
+<div class="section" id="derivingvia">
+<h2>DerivingVia による導出<a class="headerlink" href="#derivingvia" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">MyMaybe</span> <span class="n">a</span>
+  <span class="ow">=</span> <span class="kt">MyJust</span> <span class="n">a</span>
+  <span class="o">|</span> <span class="kt">MyNothing</span>
+</pre></div>
+</td></tr></table><p>このデータ型に対して <tt class="docutils literal">Semigroup</tt> のインスタンス実装をしたいとする。この時、インスタンス候補は幾つかある。まず、自明なインスタンスは以下のようなものだ:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="kr">_</span> <span class="o">&lt;&gt;</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">x</span>
+</pre></div>
+</td></tr></table><p>もう一つ自明なものがある:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="n">x</span> <span class="o">&lt;&gt;</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">x</span>
+</pre></div>
+</td></tr></table><p>他にも、例えば <tt class="docutils literal">Applicative</tt> のインスタンスがあれば、次のように書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">instance</span> <span class="kt">Functor</span> <span class="kt">MyMaybe</span> <span class="kr">where</span> <span class="o">...</span>
+<span class="kr">instance</span> <span class="kt">Applicative</span> <span class="kt">MyMaybe</span> <span class="kr">where</span> <span class="o">...</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="n">x1</span> <span class="o">&lt;&gt;</span> <span class="n">x2</span> <span class="ow">=</span> <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="o">&lt;$&gt;</span> <span class="n">x1</span> <span class="o">&lt;*&gt;</span> <span class="n">x2</span>
+</pre></div>
+</td></tr></table><p>さらに <tt class="docutils literal">Alternative</tt> のインスタンスがあれば、次のように書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">instance</span> <span class="kt">Alternative</span> <span class="kt">MyMaybe</span> <span class="kr">where</span> <span class="o">...</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="n">x1</span> <span class="o">&lt;&gt;</span> <span class="n">x2</span> <span class="ow">=</span> <span class="n">x1</span> <span class="o">&lt;|&gt;</span> <span class="n">x2</span>
+</pre></div>
+</td></tr></table><p>これらのインスタンス実装は、<tt class="docutils literal">MyMaybe</tt> 固有のものではなく、条件さえ満たしていれば他のデータ型にも流用できそうである。また、インスタンス実装が、このデータ型固有のものではなく、共通の自然な導出によるものであることを明示できれば、それはコードを管理する上でもアドバンテージになるだろう。<tt class="docutils literal">DerivingVia</tt> はまさにそのような導出戦略を明示できる機能だ。上記のインスタンス実装は、<tt class="docutils literal">DerivingVia</tt> を使えばそれぞれ次のように書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE DerivingVia #-}</span>
+
+<span class="kr">import</span> <span class="nn">Data.Semigroup</span>
+<span class="kr">import</span> <span class="nn">Data.Monoid</span>
+
+<span class="kr">data</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="kt">Semigroup</span> <span class="n">via</span> <span class="kt">Last</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="kr">data</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="kt">Semigroup</span> <span class="n">via</span> <span class="kt">First</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="kr">data</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="kt">Semigroup</span> <span class="n">via</span> <span class="kt">Ap</span> <span class="kt">MyMaybe</span> <span class="n">a</span>
+
+<span class="kr">data</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="kt">Semigroup</span> <span class="n">via</span> <span class="kt">Alt</span> <span class="kt">MyMaybe</span> <span class="n">a</span>
+</pre></div>
+</td></tr></table><p>これは、気持ち的にはそれぞれ次のようにインスタンスを生成する:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE TypeApplications    #-}</span>
+<span class="cm">{-# LANGUAGE ScopedTypeVariables #-}</span>
+
+<span class="kr">import</span> <span class="nn">Data.Coerce</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">Last</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">))</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="o">@</span><span class="p">(</span><span class="kt">Last</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">))</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">First</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">))</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="o">@</span><span class="p">(</span><span class="kt">First</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">))</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">Ap</span> <span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="o">@</span><span class="p">(</span><span class="kt">Ap</span> <span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">Alt</span> <span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="o">@</span><span class="p">(</span><span class="kt">Alt</span> <span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>気持ち的にはと言ったのは、最終的に制約部分が単純化され、最低限の制約に展開されるからだ <a class="footnote-reference" href="#notice-semigroup-has-multi-methods" id="auto-id-4">[2]</a> 。例えば、<tt class="docutils literal">Semigroup (Last (MyMaybe a))</tt> や <tt class="docutils literal">Semigroup (First (MyMaybe a))</tt> は常に制約が満たされるので除去され、<tt class="docutils literal">Semigroup (Ap MyMaybe a)</tt> や <tt class="docutils literal">Semigroup (Alt MyMaybe a)</tt> はそれぞれ <tt class="docutils literal">(Applicative MyMaybe, Semigroup a)</tt>、<tt class="docutils literal">Alternative MyMaybe</tt> に展開される。さらに単純化によって、<tt class="docutils literal">Applicative MyMaybe</tt> や <tt class="docutils literal">Alternative MyMaybe</tt> はその場で計算され、インスタンスがない場合はエラーになる。なお、単純化の計算結果を使いたくない場合、<tt class="docutils literal">StandaloneDeriving</tt> を使うと良い。<tt class="docutils literal">StandaloneDeriving</tt> はインスタンス導出を、データ型宣言とは独立にできる GHC 拡張で、インスタンスのヘッド部分を明示することができる。今回の場合は、上の <tt class="docutils literal">DerivingVia</tt> を使った例は次のようにも書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE StandaloneDeriving #-}</span>
+
+<span class="kr">deriving</span> <span class="n">via</span> <span class="kt">Last</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="kr">deriving</span> <span class="n">via</span> <span class="kt">First</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="kr">deriving</span> <span class="n">via</span> <span class="kt">Ap</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="c1">-- または、推奨されないが Applicative インスタンスの判定を、次のように遅延させることも可能</span>
+<span class="kr">deriving</span> <span class="n">via</span> <span class="kt">Ap</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="kr">instance</span> <span class="p">(</span><span class="kt">Applicative</span> <span class="kt">MyMaybe</span><span class="p">,</span> <span class="kt">Semigroup</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="kr">deriving</span> <span class="n">via</span> <span class="kt">Alt</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="c1">-- または、Ap と同じく Alternative インスタンスの判定を、次のように遅延させることも可能</span>
+<span class="kr">deriving</span> <span class="n">via</span> <span class="kt">Alt</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="kr">instance</span> <span class="kt">Alternative</span> <span class="kt">MyMaybe</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p><tt class="docutils literal">StandaloneDeriving</tt> を使う場合は、制約の単純化は必要ないため、<tt class="docutils literal">DerivingVia</tt> が行うことは、主に <tt class="docutils literal">coerce</tt> によって実装元から実装を持ってくることになる。もちろん、<tt class="docutils literal">coerce</tt> できないものから実装を持ってくることはできないので、例えば次のようなことは書けない:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">deriving</span> <span class="n">via</span> <span class="kt">Maybe</span> <span class="n">a</span> <span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>この場合、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="o">@</span><span class="p">(</span><span class="kt">Maybe</span> <span class="n">a</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>という実装が作られることになり、<tt class="docutils literal">Coercible (Maybe a <span class="pre">-&gt;</span> Maybe a <span class="pre">-&gt;</span> Maybe a) (MyMaybe a <span class="pre">-&gt;</span> MyMaybe a <span class="pre">-&gt;</span> MyMaybe a)</tt> の制約が満たされなければならない。<tt class="docutils literal"><span class="pre">(-&gt;)</span></tt> は両方 <tt class="docutils literal">representation</tt> ロールを持つ <a class="footnote-reference" href="#notice-runtimereps" id="auto-id-5">[3]</a> ので、この制約は <tt class="docutils literal">Coercible (Maybe a) (MyMaybe a)</tt> が成り立つかによって決まる。そして、この制約は残念ながら成り立たない。よって、上記のインスタンス実装は型検査に失敗する。</p>
+<p>このように <tt class="docutils literal">DerivingVia</tt> は全ての継承できそうなインスタンスを継承できるわけではないが、かなり広い範囲のインスタンスの自動実装が可能だ。しかも、その仕組みはみた通りかなり単純だ。もし、あるクラスがインスタンスを自動で導出できそうな状況であれば、</p>
+<ol class="arabic simple">
+<li>そのインスタンスを実装する <tt class="docutils literal">newtype</tt> を作る</li>
+<li>その <tt class="docutils literal">newtype</tt> を元に、<tt class="docutils literal">DerivingVia</tt> を使う</li>
+</ol>
+<p>という手順で、ユーザ定義により自動でインスタンス導出を行うことができる。この手順は通常の Haskell プログラミングからそうかけ離れたものでなく、マクロなどのメタプログラミングも必要ない、かなり強力な機能だ。さらには、<tt class="docutils literal">DerivingVia</tt> は他の導出戦略を模倣可能だ。では、他の戦略を見ていこう。</p>
+</div>
+<div class="section" id="generalizednewtypederiving-gnd">
+<h2>GeneralizedNewtypeDeriving (GND) による導出<a class="headerlink" href="#generalizednewtypederiving-gnd" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p><tt class="docutils literal">newtype</tt> 戦略は、<tt class="docutils literal">newtype</tt> によって定義されたデータ型に特化した戦略だ。この戦略は、<tt class="docutils literal">GeneralizedNewtypeDeriving</tt>、通称 GND という拡張で利用可能だ。この戦略を使って、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span>
+
+<span class="kr">newtype</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">MyMaybe</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="n">a</span><span class="p">)</span>
+  <span class="kr">deriving</span> <span class="kr">newtype</span> <span class="kt">Semigroup</span>
+</pre></div>
+</td></tr></table><p>と書くと、気分的には次のようなインスタンス実装が作られる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">MyMaybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="o">@</span><span class="p">(</span><span class="kt">Maybe</span> <span class="n">a</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>なお、制約部分は、最終的に <tt class="docutils literal">DerivingVia</tt> の時と同じく単純化され、<tt class="docutils literal">Semigroup a</tt> に置き換わる。なお、<tt class="docutils literal">StandaloneDeriving</tt> で遅延できる話も同じだ。さらに、インスタンス実装の形も良くにている。実際、<tt class="docutils literal">newtype</tt> 戦略は、<tt class="docutils literal">DerivingVia</tt> で簡単に書き直せる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE DerivingVia #-}</span>
+
+<span class="kr">newtype</span> <span class="kt">MyMaybe</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">MyMaybe</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="n">a</span><span class="p">)</span>
+  <span class="kr">deriving</span> <span class="kt">Semigroup</span> <span class="n">via</span> <span class="kt">Maybe</span> <span class="n">a</span>
+</pre></div>
+</td></tr></table><p>見ての通りそのままになる。冗長ではあるが、この方がどのデータ型のインスタンスを流用するのかが分かりやすいと思う。これについては、いいだろう。GND は <tt class="docutils literal">DerivingVia</tt> の特殊なバージョンということができるだろう。</p>
+</div>
+<div class="section" id="deriveanyclass">
+<h2>DeriveAnyClass による導出<a class="headerlink" href="#deriveanyclass" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>さて、Haskell 業界には、一切メソッドを実装しなくても、自動的にメソッドを作ってくれるクラスがいくつかある。代表的なものが <tt class="docutils literal">Hashable</tt> クラスだ。<tt class="docutils literal">Hashable</tt> クラスは、<tt class="docutils literal">hashable</tt> パッケージで提供されているクラスで、<tt class="docutils literal"><span class="pre">unordered-containers</span></tt> パッケージなどハッシュ値の計算を必要とするデータ構造を提供するパッケージにおいて、ハッシュ値を計算できるクラスとして用いられている。ただ、ハッシュ値の計算自体は冗長なのに対しほぼボイラープレート化することが多い。そこで、デフォルトで <tt class="docutils literal">Generic</tt> のインスタンスがあれば自動でハッシュ値の計算方法を実装してくれるようになっている。このため、ユーザは特になんのメソッドも書かずにインスタンスを定義できる。具体的には、次のようにだ:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+
+<span class="kr">instance</span> <span class="kt">Hashable</span> <span class="kt">A</span>
+</pre></div>
+</td></tr></table><p>なお、このインスタンス実装は、導出戦略としても使える。それを行うのが、<tt class="docutils literal">anyclass</tt> 戦略だ。<tt class="docutils literal">anyclass</tt> 戦略は <tt class="docutils literal">DeriveAnyClass</tt> 拡張で利用可能になっており、次のように書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE DeriveAnyClass #-}</span>
+
+<span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="n">anyclass</span> <span class="kt">Hashable</span>
+</pre></div>
+</td></tr></table><p>なお、名前の由来は、この戦略がその名の通りどのクラスに対しても適用可能なことから来ている。実は、Haskell はどのクラスに対しても空の実装を持つインスタンスが書ける。例えそのクラスが実装を必要とするメソッドを持っていたとしてもだ。例えば、次のようなことが書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="kt">A</span>
+</pre></div>
+</td></tr></table><p>このコードは、概ね次のように展開される:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="kt">A</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">undefined</span>
+</pre></div>
+</td></tr></table><p>実際には、もう少し丁寧なエラーメッセージが付いたりするが、実行時エラーになるのは変わらない。<tt class="docutils literal">anyclass</tt> 戦略は、これと同じことをするので、上記のことは次のようにも書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="n">anyclass</span> <span class="kt">Semigroup</span>
+</pre></div>
+</td></tr></table><p>ただこれはあまりにもあんまりなので、GHC では独自に実装するべきメソッドが管理されていて、そのメソッドが実装されていないと警告が出るようになっている。</p>
+<p>さて、実装がデータ型によらず決まるというのは、<tt class="docutils literal">DerivingVia</tt> お得意というかそもそもそういう時のために生まれてきたという状況で、<tt class="docutils literal">anyclass</tt> 戦略は <tt class="docutils literal">DerivingVia</tt> で自然に模倣できる。例えば、<tt class="docutils literal">Hashable</tt> の場合、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">newtype</span> <span class="kt">FromGeneric'</span> <span class="n">r</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">FromGeneric</span> <span class="n">a</span>
+<span class="kr">type</span> <span class="kt">FromGeneric</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">FromGeneric'</span> <span class="p">(</span><span class="kt">Rep</span> <span class="n">a</span><span class="p">)</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="p">(</span><span class="kt">Generic</span> <span class="n">a</span><span class="p">,</span> <span class="kt">Rep</span> <span class="n">a</span> <span class="o">~</span> <span class="n">r</span><span class="p">,</span> <span class="kt">CanDeriveHashable</span> <span class="n">r</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Hashable</span> <span class="p">(</span><span class="kt">FromGeneric'</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="o">...</span>
+</pre></div>
+</td></tr></table><p>というようなフレームワークを用意しておけば、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="n">stock</span> <span class="kt">Generic</span>
+  <span class="kr">deriving</span> <span class="kt">Hashable</span> <span class="n">via</span> <span class="kt">FromGeneric</span> <span class="kt">A</span>
+</pre></div>
+</td></tr></table><p>と書ける。こちらの方が、どういうインスタンスの導出戦略を使っているかが明示的で分かりやすいだろう。なお、もちろん、危険な方のインスタンス導出も、次のように模倣できる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">newtype</span> <span class="kt">AnyClass</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">AnyClass</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">AnyClass</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="kt">Semigroup</span> <span class="n">via</span> <span class="kt">AnyClass</span> <span class="kt">A</span>
+</pre></div>
+</td></tr></table><p>ただ、このような使用用途はもちろん推奨されない。</p>
+<p><tt class="docutils literal">anyclass</tt> 戦略では危険な導出戦略と安全な導出戦略が混在していたわけで、それを見分ける方法は警告だけだったわけだが、<tt class="docutils literal">DerivingVia</tt> では元とする型によってそれをきっちりと分けることができる。さらに、<tt class="docutils literal">anyclass</tt> を前提とする場合デフォルト実装は一つしか提供できない。ところが、<tt class="docutils literal">DerivingVia</tt> はいくらでも戦略を増やすことができる。ハッシュ値の計算は、幾つかアルゴリズムの選択肢があるが、<tt class="docutils literal">DerivingVia</tt> と型レベルプログラミングを使えばどれを使用するか自由に選べたりする。なお、<tt class="docutils literal">anyclass</tt> 戦略でできて <tt class="docutils literal">via</tt> 戦略ではできない例は思いついていないんだけど、これはもしかしたらあるかもしれない <a class="footnote-reference" href="#conjecture-anyclass-by-via" id="auto-id-6">[4]</a> 。誰か知ってたら教えて欲しい。大半は <tt class="docutils literal">via</tt> 戦略で模倣できると思うので、<tt class="docutils literal">anyclass</tt> 戦略もやはり <tt class="docutils literal">via</tt> 戦略の特殊なバージョンと思えるだろう。</p>
+</div>
+<div class="section" id="auto-id-7">
+<h2>標準の導出戦略<a class="headerlink" href="#auto-id-7" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>最後は、<tt class="docutils literal">stock</tt> 戦略の紹介になる。と言っても、これに関してはあまり言うことはない。<tt class="docutils literal">deriving Eq</tt> とか書いておくと、GHC が勝手にどうやってるのか知らんけどインスタンス実装してくれるやつである。最初に触れたように、これは基本的に直積と直和からインスタンスを類推している。なお、<tt class="docutils literal">StandaloneDeriving</tt> を使わない場合は、型検査が自明に通るようなインスタンスしか実装されず、<tt class="docutils literal">DerivingVia</tt> などに比べコンパイル時間も削減できたりする。標準の範囲では、次のクラスが <tt class="docutils literal">stock</tt> 戦略で導出可能だ:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal">Eq</tt></dt>
+<dd>等価性判定ができるクラス</dd>
+<dt><tt class="docutils literal">Ord</tt></dt>
+<dd>順序比較ができるクラス</dd>
+<dt><tt class="docutils literal">Enum</tt></dt>
+<dd>整列ができるクラス</dd>
+<dt><tt class="docutils literal">Bounded</tt></dt>
+<dd>上限と下限があるクラス</dd>
+<dt><tt class="docutils literal">Show</tt></dt>
+<dd>文字列表示ができるクラス</dd>
+<dt><tt class="docutils literal">Read</tt></dt>
+<dd>文字列からの読み込みができるクラス</dd>
+<dt><tt class="docutils literal">Ix</tt></dt>
+<dd>上下を設定した範囲内で整列ができるクラス</dd>
+</dl>
+<p>GHC では他に、幾つかのクラスの導出ができるようになっている。GHC 8.8 現在で追加されているクラスは、以下の通りだ <a class="footnote-reference" href="#notice-derive-data-typeable" id="auto-id-8">[5]</a> :</p>
+<dl class="docutils">
+<dt><tt class="docutils literal">Data</tt></dt>
+<dd>型を超えてデータを一般的に扱うことができるクラス。<tt class="docutils literal">DeriveDataTypeable</tt> 拡張が必要。</dd>
+<dt><tt class="docutils literal">Generic</tt> / <tt class="docutils literal">Generic1</tt></dt>
+<dd>データ型のメタ情報が取得できるクラス。<tt class="docutils literal">DeriveGeneric</tt> 拡張が必要。</dd>
+<dt><tt class="docutils literal">Foldable</tt></dt>
+<dd>リストへの変換が可能なクラス。<tt class="docutils literal">DeriveFoldable</tt> 拡張が必要。</dd>
+<dt><tt class="docutils literal">Functor</tt></dt>
+<dd>任意の関数を対象の高次なデータ型への関数へと持ち上げることができるクラス。<tt class="docutils literal">DeriveFunctor</tt> 拡張が必要。</dd>
+<dt><tt class="docutils literal">Traversable</tt></dt>
+<dd>文脈付きの探索ができるクラス。<tt class="docutils literal">DeriveTraversable</tt> 拡張が必要。</dd>
+<dt><tt class="docutils literal">Lift</tt></dt>
+<dd>TemplateHaskell 上の構文木に変換できるクラス。<tt class="docutils literal">DeriveLift</tt> 拡張が必要。</dd>
+</dl>
+<p>ここで挙げたクラスを導出したい場合、特に何かこだわりがあるわけでなく、<tt class="docutils literal">stock</tt> 戦略で導出可能なら、自前でインスタンスを書かず <tt class="docutils literal">stock</tt> 戦略を使うことをお勧めする。これは、無用な混乱を避けるためだ。</p>
+<p>ところで、<tt class="docutils literal">stock</tt> 戦略があるのであまり実益としての意味はないのだが、<tt class="docutils literal">stock</tt> 戦略の多くは <tt class="docutils literal">Generic</tt> と <tt class="docutils literal">DerivingVia</tt> で模倣できる。例えば、<tt class="docutils literal">Eq</tt> クラスの導出は次のように書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE ScopedTypeVariables #-}</span>
+
+<span class="kr">newtype</span> <span class="kt">FromGeneric'</span> <span class="n">r</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">FromGeneric</span> <span class="n">a</span>
+<span class="kr">type</span> <span class="kt">FromGeneric</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">FromGeneric'</span> <span class="p">(</span><span class="kt">Rep</span> <span class="n">a</span><span class="p">)</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="p">(</span><span class="kt">Generic</span> <span class="n">a</span><span class="p">,</span> <span class="n">r</span> <span class="o">~</span> <span class="kt">Rep</span> <span class="n">a</span><span class="p">,</span> <span class="kt">Eq</span> <span class="p">(</span><span class="n">r</span> <span class="nb">()</span><span class="p">))</span> <span class="ow">=&gt;</span> <span class="kt">Eq</span> <span class="p">(</span><span class="kt">FromGeneric'</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="kt">FromGeneric</span> <span class="n">x1</span> <span class="o">==</span> <span class="kt">FromGeneric</span> <span class="n">x2</span> <span class="ow">=</span> <span class="n">from</span> <span class="n">x1</span> <span class="o">==</span> <span class="p">(</span><span class="n">from</span> <span class="n">x2</span> <span class="ow">::</span> <span class="n">r</span> <span class="nb">()</span><span class="p">)</span>
+
+<span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="n">stock</span> <span class="kt">Generic</span>
+  <span class="kr">deriving</span> <span class="kt">Eq</span> <span class="n">via</span> <span class="kt">FromGeneric</span> <span class="kt">A</span>
+</pre></div>
+</td></tr></table><p><tt class="docutils literal">stock</tt> 戦略に比べ変換を一度かます必要はあるものの、実際の計算フロー的には <tt class="docutils literal">stock</tt> 戦略で作られたインスタンスと上のインスタンスは、同じことをしている。<tt class="docutils literal">Ord</tt> やちょっと工夫は必要だが他の標準のクラスも同じような方法で導出するシステムを作れるし、GHC で用意されてるものも <tt class="docutils literal">Generic1</tt> から作れる。ここから分かるように、<tt class="docutils literal">DerivingVia</tt> は結構強力な機能になる。</p>
+</div>
+<div class="section" id="auto-id-9">
+<h2>おまけ: デフォルト実装を模倣する<a class="headerlink" href="#auto-id-9" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>さて、Haskell にはクラスメソッドのデフォルト実装という機能がある。インスタンス定義において、未実装のメソッドは、デフォルト実装が用意されていればその実装で埋められ、無ければ実行時エラーが埋められる。デフォルト実装は、通常実装する必要のあるメソッドを使って実装されることが多い。例えば、今まで誤魔化してきたのだが、<tt class="docutils literal">Semigroup</tt> は実際には3つのメソッドを持ち、次のように定義される:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">class</span> <span class="kt">Semigroup</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+
+  <span class="n">sconcat</span> <span class="ow">::</span> <span class="kt">NonEmpty</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+  <span class="n">sconcat</span> <span class="p">(</span><span class="n">a</span> <span class="kt">:|</span> <span class="n">as</span><span class="p">)</span> <span class="ow">=</span> <span class="n">go</span> <span class="n">a</span> <span class="n">as</span> <span class="kr">where</span>
+    <span class="n">go</span> <span class="n">b</span> <span class="p">(</span><span class="n">c</span><span class="kt">:</span><span class="n">cs</span><span class="p">)</span> <span class="ow">=</span> <span class="n">b</span> <span class="o">&lt;&gt;</span> <span class="n">go</span> <span class="n">c</span> <span class="n">cs</span>
+    <span class="n">go</span> <span class="n">b</span> <span class="kt">[]</span>     <span class="ow">=</span> <span class="n">b</span>
+
+  <span class="n">stimes</span> <span class="ow">::</span> <span class="kt">Integral</span> <span class="n">b</span> <span class="ow">=&gt;</span> <span class="n">b</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+  <span class="n">stimes</span> <span class="ow">=</span> <span class="o">...</span>
+</pre></div>
+</td></tr></table><p><tt class="docutils literal">stimes</tt> のデフォルト実装はちょっと複雑になるので省略する。<tt class="docutils literal">sconcat</tt> のデフォルト実装を見ると分かる通り、<tt class="docutils literal"><span class="pre">(&lt;&gt;)</span></tt> を定義内で使っているが、後は依存が完結している。よって、<tt class="docutils literal"><span class="pre">(&lt;&gt;)</span></tt> の実装さえあれば、この実装は動くようになっている。ところで、<tt class="docutils literal">deriving</tt> とは少々外れるが、このようなデフォルト実装を <tt class="docutils literal">DerivingVia</tt> で模倣することもできる。次のようにだ:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE ScopedTypeVariables #-}</span>
+<span class="cm">{-# LANGUAGE TypeApplications    #-}</span>
+
+<span class="kr">class</span> <span class="kt">SemigroupMinimal</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">minimalAppend</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+
+<span class="kr">newtype</span> <span class="kt">FromMinimal</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">FromMinimal</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="kt">SemigroupMinimal</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="p">(</span><span class="kt">FromMinimal</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="n">minimalAppend</span> <span class="o">@</span><span class="n">a</span>
+
+  <span class="n">sconcat</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="n">sconcatDefault</span> <span class="o">@</span><span class="n">a</span>
+  <span class="n">stimes</span> <span class="ow">=</span> <span class="n">coerce</span> <span class="o">$</span> <span class="n">stimeDefault</span> <span class="o">@</span><span class="n">a</span>
+
+<span class="nf">sconcatDefault</span> <span class="ow">::</span> <span class="kt">SemigroupMinimal</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">NonEmpty</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">sconcatDefault</span> <span class="ow">=</span> <span class="o">...</span>
+
+<span class="nf">stimesDefault</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">SemigroupMinimal</span> <span class="n">a</span><span class="p">,</span> <span class="kt">Integral</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="n">b</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">stimesDefault</span> <span class="ow">=</span> <span class="o">...</span>
+</pre></div>
+</td></tr></table><p>このフレームワークを使えば、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+
+<span class="kr">instance</span> <span class="kt">Semigroup</span> <span class="kt">A</span> <span class="kr">where</span>
+  <span class="p">(</span><span class="o">&lt;&gt;</span><span class="p">)</span> <span class="ow">=</span> <span class="o">...</span>
+</pre></div>
+</td></tr></table><p>は、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+  <span class="kr">deriving</span> <span class="kt">Semigroup</span> <span class="n">via</span> <span class="kt">FromMinimal</span> <span class="kt">A</span>
+
+<span class="kr">instance</span> <span class="kt">SemigroupMinimal</span> <span class="kt">A</span> <span class="kr">where</span>
+  <span class="n">minimalAppend</span> <span class="ow">=</span> <span class="o">...</span>
+</pre></div>
+</td></tr></table><p>と書ける。むしろ冗長かしていてボイラープレートは増えているが、その代わり暗黙的なデフォルト実装は明示できる。また、デフォルト実装は一通りの実装パターンしか選べないが、他にもデフォルト実装のパターンがある場合、このような工夫は生きてくる。その場合、<tt class="docutils literal">DerivingVia</tt> でどのデフォルト実装セットを使うか選べるからだ。また、デフォルト実装のパターンは後からいくらでも追加できるし、サードパーティの人も追加できるようになる。このように単純な仕組みに対して、実装の可能性がかなり広がるのが、<tt class="docutils literal">DerivingVia</tt> の強力なところだと思う。</p>
+</div>
+<div class="section" id="auto-id-10">
+<h2>まとめ<a class="headerlink" href="#auto-id-10" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>というわけで、各導出戦略の紹介、もとい <tt class="docutils literal">DerivingVia</tt> の紹介でした。これはかなり未来感じる機能だと思うし、少なくとも <tt class="docutils literal">newtype</tt> / <tt class="docutils literal">anyclass</tt> 戦略はもう必要なくない？ みたいな気持ちでいる。</p>
+<p>なお、デフォルト実装も上手く扱えるよう <tt class="docutils literal">DerivingVia</tt> を拡張するのはどうすればいいかな的なことは、たまに考えてる。<tt class="docutils literal">DerivingVia</tt> の前後、つまり実装に必要なメソッド定義を与えるのと、<tt class="docutils literal">DerivingVia</tt> で定義されたメソッドを上書きするみたいな機能があると、もっと柔軟になりそうだけど、それはそれで機能過多かもしれないとも思う。<tt class="docutils literal">deriving</tt> 自体は、インスタンス実装を隠蔽できるという性質も持っていて、<tt class="docutils literal">DerivingVia</tt> はさらにその機能を強力にできるという側面もある。まあ、色々可能性ひろがリングね。てことで、今回は以上。</p>
+<table class="docutils footnote" frame="void" id="notice-ghc-88" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-3">[1]</a></td><td>なお、GHC 8.10 からは戦略を指定しないで <tt class="docutils literal">newtype</tt> / <tt class="docutils literal">anyclass</tt> 戦略を使おうとすると、警告が出るようになった。</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="notice-semigroup-has-multi-methods" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-4">[2]</a></td><td>さらに厳密に言えば、<tt class="docutils literal">coerce</tt> されるのは <tt class="docutils literal"><span class="pre">(&lt;&gt;)</span></tt> メソッドだけではないというのもある。<tt class="docutils literal">Semigroup</tt> は他に <tt class="docutils literal">sconcat</tt>、<tt class="docutils literal">stimes</tt> メソッドを持っているので、これらも <tt class="docutils literal">coerce</tt> される。ただ、ここではそれらを省略している。</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="notice-runtimereps" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-5">[3]</a></td><td>厳密には、<tt class="docutils literal"><span class="pre">(-&gt;)</span></tt> は GHC 8.8 現在だと4つの引数を持ち、<tt class="docutils literal"><span class="pre">(-&gt;)::</span> (q :: RuntimeRep) <span class="pre">-&gt;</span> (r :: RuntimeRep) <span class="pre">-&gt;</span> (a :: TYPE q) <span class="pre">-&gt;</span> (b :: TYPE r) <span class="pre">-&gt;</span> Type</tt> という種をしている。このうち、最初の <tt class="docutils literal">q</tt>、<tt class="docutils literal">r</tt> が <tt class="docutils literal">nominal</tt> で、次の <tt class="docutils literal">a</tt>、<tt class="docutils literal">b</tt> が <tt class="docutils literal">representational</tt> である。</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="conjecture-anyclass-by-via" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-6">[4]</a></td><td>おそらくないと思う。</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="notice-derive-data-typeable" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-8">[5]</a></td><td>実はもう一個 <tt class="docutils literal">Typeable</tt> と言うクラスが、<tt class="docutils literal">DeriveDataTypeable</tt> で導出可能だ。しかし、ある問題からこれは非推奨になっている。詳しくは、<a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/wikis/typeable">https://gitlab.haskell.org/ghc/ghc/-/wikis/typeable</a> を覗いてみるといいと思う。なお、現状全てのデータ型は <tt class="docutils literal">Typeable</tt> インスタンスが自動で作られるようになっており、独自にインスタンスを書いたり <tt class="docutils literal">deriving</tt> を使ったりしても完全に無視される。</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/03/deriving-strategies-by-deriving-via.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/03/deriving-strategies-by-deriving-via.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/ghckuo-zhang.html">GHC拡張</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/12/rankntypes-a-ghc-extension/">多相関数を第一級で取り扱う</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/11/trees-that-grow/">type family を使って再帰的 ADT をオープンにする</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/">リテラルをコンパイラ時にチェックする</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/">Local Do と型クラス</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/generalizing-transformation/">Functor / Applicative / Monad が表すもの</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>

@@ -131,6 +131,32 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/11/pipenv-on-wsl-debian/#pipenv-on-wsl-debian">pipenv を WSL/Debian で使う際の注意事項</a></h2>
+    <p>
+          Posted on 木 14 11月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huan-jing-gou-zhu.html">環境構築</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/debian.html">Debian</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/wsl.html">WSL</a>
+    </p>
+  </header>
+  <div>
+      <p>久しぶりに Windows 上で環境構築をすることになったんだけど，その際 Pipenv をインストールするのにちょっと躓いたので，その備忘録．</p>
+<div class="section" id="pipenv">
+<h2>Pipenv を入れた時のエラー<a class="headerlink" href="#pipenv" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Windows 上で開発する際は， WSL/Debian を使っている．で，新しい環境でもこれで行くことにして， Pipenv を Python3 環境で使いたかったので，次のようにして入れた:</p>
+<pre class="literal-block">
+sudo apt update
+sudo …</pre></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/11/pipenv-on-wsl-debian/#pipenv-on-wsl-debian">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/10/lint-bslit-by-ghc-plugin/#lint-bslit-by-ghc-plugin">リテラルをコンパイラ時にチェックする</a></h2>
     <p>
           Posted on 月 28 10月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
@@ -348,30 +374,6 @@
 <li>rustc: <tt class="docutils literal"><span class="pre">1 …</span></tt></li></ul>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/06/rust-generics-inside/#rust-generics-inside">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/06/graded-monad-to-monad/#graded-monad-to-monad">graded monad から monad への埋め込み</a></h2>
-    <p>
-          Posted on 木 13 6月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/shu-xue.html">数学</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/ehuekutoshisutemu.html">エフェクトシステム</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/monado.html">モナド</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/quan-lun.html">圏論</a>
-    </p>
-  </header>
-  <div>
-      <p>graded monad から monad への埋め込みについて，考えたので，その覚書．</p>
-<div class="section" id="monad">
-<h2>エフェクトシステムを monad で近似する<a class="headerlink" href="#monad" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>エフェクトシステムによって，静的型情報をより詳細にできるわけだが，実行機械を作る時にはこのエフェクト情報を特に使わない実行方法が得られる場合が多い．もし， graded monad による言語を monad による言語に近似できれば， graded monad 用の実行方法をわざわざ作らなくても， monad の実行方法を流用できる．</p>
-<p>では …</p></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/06/graded-monad-to-monad/#graded-monad-to-monad">    Continue reading
 </a>
   </div>
 </article>

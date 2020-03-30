@@ -1,5 +1,545 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-03-29T09:49:38+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>遅延評価でデバッグが困難になる状況</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/" rel="alternate"></link><published>2020-03-29T08:12:41+09:00</published><updated>2020-03-29T08:23:18+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-29:/blog/posts/2020/03/haskell-lazy-debug-problem/</id><summary type="html">&lt;p&gt;先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-03-30T08:28:37+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>DerivingVia で deriving 戦略を模倣する</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/deriving-strategies-by-deriving-via/" rel="alternate"></link><published>2020-03-30T08:28:37+09:00</published><updated>2020-03-30T08:28:37+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-30:/blog/posts/2020/03/deriving-strategies-by-deriving-via/</id><summary type="html">&lt;p&gt;Haskell では、ボイラープレートは非常に嫌われており、それを撲滅するため強力な型システムの他にも幾つか機能が組み込まれている。その中で非常に強力な機能が、deriving だ。この機能は、データ型の型クラスインスタンスを、その名の通り導出してくれる機能である。Haskell 標準では、幾つかの標準の型クラスにおいて、事前に用意されたアルゴリズムによる導出ができるだけの機能だったが、GHC ではさらに3つの戦略を追加し、広範囲の型クラスの導出が行えるようになっている。特に最近入った &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; と呼ばれる拡張の戦略は、deriving の可能性を大いに引き上げてくれる拡張である。&lt;/p&gt;
+&lt;p&gt;ところで、実は &lt;tt class="docutils literal"&gt;DerivingVia …&lt;/tt&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;Haskell では、ボイラープレートは非常に嫌われており、それを撲滅するため強力な型システムの他にも幾つか機能が組み込まれている。その中で非常に強力な機能が、deriving だ。この機能は、データ型の型クラスインスタンスを、その名の通り導出してくれる機能である。Haskell 標準では、幾つかの標準の型クラスにおいて、事前に用意されたアルゴリズムによる導出ができるだけの機能だったが、GHC ではさらに3つの戦略を追加し、広範囲の型クラスの導出が行えるようになっている。特に最近入った &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; と呼ばれる拡張の戦略は、deriving の可能性を大いに引き上げてくれる拡張である。&lt;/p&gt;
+&lt;p&gt;ところで、実は &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; があれば他の戦略は大方模倣できる。今回は、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; で各戦略を模倣しながら、簡単な紹介をしていこうと思う。&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;型クラスインスタンスの導出&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Haskell は、データ型を代数的データ型、つまり直積と直和とプリミティブ型から構築できる型で定義する言語である。このため、型クラスが直積と直和に閉じているようなものであれば、大半インスタンス実装は同じような流れになる。例えば、&lt;tt class="docutils literal"&gt;Eq&lt;/tt&gt; 型クラスの例を見てみる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;D1&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;D1_C1&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kt"&gt;D1&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;D1_C2&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt; &lt;span class="kt"&gt;D1&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="kt"&gt;D1_C1&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="n"&gt;y1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;D1_C1&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="n"&gt;y2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;x2&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;y1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;y2&lt;/span&gt;
+  &lt;span class="kt"&gt;D1_C1&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;     &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;D1_C2&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+  &lt;span class="kt"&gt;D1_C2&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;     &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;D1_C1&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+  &lt;span class="kt"&gt;D1_C2&lt;/span&gt; &lt;span class="n"&gt;b1&lt;/span&gt;    &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;D1_C2&lt;/span&gt; &lt;span class="n"&gt;b2&lt;/span&gt;    &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;b1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;b2&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;D2&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;D2_C1&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kt"&gt;D2&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;D2_C2&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt; &lt;span class="kt"&gt;D2&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="kt"&gt;D2_C1&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="n"&gt;y1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;D2_C1&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="n"&gt;y2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;x2&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;y1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;y2&lt;/span&gt;
+  &lt;span class="kt"&gt;D2_C1&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;     &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;D2_C2&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+  &lt;span class="kt"&gt;D2_C2&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;     &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;D2_C1&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;
+  &lt;span class="kt"&gt;D2_C2&lt;/span&gt; &lt;span class="n"&gt;b1&lt;/span&gt;    &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;D2_C2&lt;/span&gt; &lt;span class="n"&gt;b2&lt;/span&gt;    &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;b1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;b2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;このプログラムにおいて、&lt;tt class="docutils literal"&gt;D1&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;D2&lt;/tt&gt; は同型であり、実装もコンストラクタの名前が異なるだけでやってる内容は特に変わらない。さらには、このプログラムは直和に対するインスタンス実装と直積に対するインスタンス実装の合わせ技であり、&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;まず直和の等価性により異なるコンストラクタ同士の比較は偽に、同じコンストラクタの比較は中身の等価性で判断する&lt;/li&gt;
+&lt;li&gt;中身は有限直積になっているため、有限直積の等価性により、それぞれの要素をポイントワイズに比較し、その結果の論理積をとる&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;というようになる。このようなインスタンス実装をいちいちデータ型毎に書くのは、Haskeller にとって苦痛であり、これぐらい自動的に実装して欲しいというクレームが多数寄せられることになる。そこで、直和と直積に閉じた型クラスで、標準で提供されているものに関しては、多くの場合自動的にインスタンスを実装してくれる機能が用意されている。それが、deriving だ。先ほどのプログラムは、以下のように書くこともできる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;D1&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;D1_C1&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kt"&gt;D1&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;D1_C2&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;D2&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;D2_C1&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kt"&gt;D2&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;D2_C2&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;随分と記述量が減り、プログラムとしても見やすくなっただろう。具体的に deriving が使える型クラスはどう言うものがあるのかについては、後述する。&lt;/p&gt;
+&lt;p&gt;ところで、このようなインスタンス導出のやり方は、型クラス決め打ちのものであり、それぞれの型クラスに対してコンパイラが導出アルゴリズムを用意してあげなければならない。しかし、それはあまりに拡張性がない。そこで、GHC では標準の導出戦略の他に3つの導出戦略を追加し、ユーザが一定のコードを用意さえすれば、それを利用してインスタンスを自動で導出するように拡張を加えている。それぞれの戦略は、&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;stock&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;標準の導出戦略で、型クラスそれぞれに対しコンパイラが導出アルゴリズムを用意し、それを使用して導出を行う。&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; で宣言したデータ型に対して使える戦略で、元の型のインスタンス実装をそのまま流用する。&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;インスタンス実装を空の実装として導出する。型クラスにデフォルトの実装が用意されてる場合、それが利用される。&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;via&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;指定されたキャストできる範囲のデータ型のインスタンスを、流用する。&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;なお、型クラスとデータ型の組み合わせによって、使用できる戦略が複数ある場合がある。その場合に使用する戦略を明示的に書くことを可能にする拡張も用意されている。それが、&lt;tt class="docutils literal"&gt;DerivingStrategies&lt;/tt&gt; という拡張である。この拡張下では、先ほどのプログラムは次のように書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;D1&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;D1_C1&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kt"&gt;D1&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;D1_C2&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;stock&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;D2&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;D2_C1&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="kt"&gt;D2&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;D2_C2&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;stock&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なお、何も指定しない場合は、GHC が規定する &lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/compiler/deriving-strategies#the-deriving-strategy-resolution-algorithm"&gt;解決の流れ&lt;/a&gt; に沿って解決が行われる。ただ、基本的には戦略を明示するのがいいだろう &lt;a class="footnote-reference" href="#notice-ghc-88" id="auto-id-3"&gt;[1]&lt;/a&gt; 。以降は、この拡張を有効にしたとして、戦略を明示して書くようにする。では、3つの戦略と標準の導出戦略の詳細を見ていこうと思う。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="derivingvia"&gt;
+&lt;h2&gt;DerivingVia による導出&lt;a class="headerlink" href="#derivingvia" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MyJust&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kt"&gt;MyNothing&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;このデータ型に対して &lt;tt class="docutils literal"&gt;Semigroup&lt;/tt&gt; のインスタンス実装をしたいとする。この時、インスタンス候補は幾つかある。まず、自明なインスタンスは以下のようなものだ:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;もう一つ自明なものがある:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="kr"&gt;_&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;他にも、例えば &lt;tt class="docutils literal"&gt;Applicative&lt;/tt&gt; のインスタンスがあれば、次のように書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Functor&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Applicative&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;$&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;さらに &lt;tt class="docutils literal"&gt;Alternative&lt;/tt&gt; のインスタンスがあれば、次のように書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Alternative&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;|&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これらのインスタンス実装は、&lt;tt class="docutils literal"&gt;MyMaybe&lt;/tt&gt; 固有のものではなく、条件さえ満たしていれば他のデータ型にも流用できそうである。また、インスタンス実装が、このデータ型固有のものではなく、共通の自然な導出によるものであることを明示できれば、それはコードを管理する上でもアドバンテージになるだろう。&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; はまさにそのような導出戦略を明示できる機能だ。上記のインスタンス実装は、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; を使えばそれぞれ次のように書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE DerivingVia #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.Semigroup&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.Monoid&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Last&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;First&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Ap&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Alt&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これは、気持ち的にはそれぞれ次のようにインスタンスを生成する:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE TypeApplications    #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE ScopedTypeVariables #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.Coerce&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Last&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Last&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;First&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;First&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ap&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Ap&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Alt&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Alt&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;気持ち的にはと言ったのは、最終的に制約部分が単純化され、最低限の制約に展開されるからだ &lt;a class="footnote-reference" href="#notice-semigroup-has-multi-methods" id="auto-id-4"&gt;[2]&lt;/a&gt; 。例えば、&lt;tt class="docutils literal"&gt;Semigroup (Last (MyMaybe a))&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;Semigroup (First (MyMaybe a))&lt;/tt&gt; は常に制約が満たされるので除去され、&lt;tt class="docutils literal"&gt;Semigroup (Ap MyMaybe a)&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;Semigroup (Alt MyMaybe a)&lt;/tt&gt; はそれぞれ &lt;tt class="docutils literal"&gt;(Applicative MyMaybe, Semigroup a)&lt;/tt&gt;、&lt;tt class="docutils literal"&gt;Alternative MyMaybe&lt;/tt&gt; に展開される。さらに単純化によって、&lt;tt class="docutils literal"&gt;Applicative MyMaybe&lt;/tt&gt; や &lt;tt class="docutils literal"&gt;Alternative MyMaybe&lt;/tt&gt; はその場で計算され、インスタンスがない場合はエラーになる。なお、単純化の計算結果を使いたくない場合、&lt;tt class="docutils literal"&gt;StandaloneDeriving&lt;/tt&gt; を使うと良い。&lt;tt class="docutils literal"&gt;StandaloneDeriving&lt;/tt&gt; はインスタンス導出を、データ型宣言とは独立にできる GHC 拡張で、インスタンスのヘッド部分を明示することができる。今回の場合は、上の &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; を使った例は次のようにも書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE StandaloneDeriving #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Last&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;First&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Ap&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- または、推奨されないが Applicative インスタンスの判定を、次のように遅延させることも可能&lt;/span&gt;
+&lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Ap&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Applicative&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Alt&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- または、Ap と同じく Alternative インスタンスの判定を、次のように遅延させることも可能&lt;/span&gt;
+&lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Alt&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Alternative&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;StandaloneDeriving&lt;/tt&gt; を使う場合は、制約の単純化は必要ないため、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; が行うことは、主に &lt;tt class="docutils literal"&gt;coerce&lt;/tt&gt; によって実装元から実装を持ってくることになる。もちろん、&lt;tt class="docutils literal"&gt;coerce&lt;/tt&gt; できないものから実装を持ってくることはできないので、例えば次のようなことは書けない:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この場合、&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;という実装が作られることになり、&lt;tt class="docutils literal"&gt;Coercible (Maybe a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Maybe a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Maybe a) (MyMaybe a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; MyMaybe a &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; MyMaybe a)&lt;/tt&gt; の制約が満たされなければならない。&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(-&amp;gt;)&lt;/span&gt;&lt;/tt&gt; は両方 &lt;tt class="docutils literal"&gt;representation&lt;/tt&gt; ロールを持つ &lt;a class="footnote-reference" href="#notice-runtimereps" id="auto-id-5"&gt;[3]&lt;/a&gt; ので、この制約は &lt;tt class="docutils literal"&gt;Coercible (Maybe a) (MyMaybe a)&lt;/tt&gt; が成り立つかによって決まる。そして、この制約は残念ながら成り立たない。よって、上記のインスタンス実装は型検査に失敗する。&lt;/p&gt;
+&lt;p&gt;このように &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; は全ての継承できそうなインスタンスを継承できるわけではないが、かなり広い範囲のインスタンスの自動実装が可能だ。しかも、その仕組みはみた通りかなり単純だ。もし、あるクラスがインスタンスを自動で導出できそうな状況であれば、&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;そのインスタンスを実装する &lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; を作る&lt;/li&gt;
+&lt;li&gt;その &lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; を元に、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; を使う&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;という手順で、ユーザ定義により自動でインスタンス導出を行うことができる。この手順は通常の Haskell プログラミングからそうかけ離れたものでなく、マクロなどのメタプログラミングも必要ない、かなり強力な機能だ。さらには、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; は他の導出戦略を模倣可能だ。では、他の戦略を見ていこう。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="generalizednewtypederiving-gnd"&gt;
+&lt;h2&gt;GeneralizedNewtypeDeriving (GND) による導出&lt;a class="headerlink" href="#generalizednewtypederiving-gnd" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; 戦略は、&lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; によって定義されたデータ型に特化した戦略だ。この戦略は、&lt;tt class="docutils literal"&gt;GeneralizedNewtypeDeriving&lt;/tt&gt;、通称 GND という拡張で利用可能だ。この戦略を使って、&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE GeneralizedNewtypeDeriving #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;と書くと、気分的には次のようなインスタンス実装が作られる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なお、制約部分は、最終的に &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; の時と同じく単純化され、&lt;tt class="docutils literal"&gt;Semigroup a&lt;/tt&gt; に置き換わる。なお、&lt;tt class="docutils literal"&gt;StandaloneDeriving&lt;/tt&gt; で遅延できる話も同じだ。さらに、インスタンス実装の形も良くにている。実際、&lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; 戦略は、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; で簡単に書き直せる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE DerivingVia #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;MyMaybe&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;Maybe&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;見ての通りそのままになる。冗長ではあるが、この方がどのデータ型のインスタンスを流用するのかが分かりやすいと思う。これについては、いいだろう。GND は &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; の特殊なバージョンということができるだろう。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="deriveanyclass"&gt;
+&lt;h2&gt;DeriveAnyClass による導出&lt;a class="headerlink" href="#deriveanyclass" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;さて、Haskell 業界には、一切メソッドを実装しなくても、自動的にメソッドを作ってくれるクラスがいくつかある。代表的なものが &lt;tt class="docutils literal"&gt;Hashable&lt;/tt&gt; クラスだ。&lt;tt class="docutils literal"&gt;Hashable&lt;/tt&gt; クラスは、&lt;tt class="docutils literal"&gt;hashable&lt;/tt&gt; パッケージで提供されているクラスで、&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;unordered-containers&lt;/span&gt;&lt;/tt&gt; パッケージなどハッシュ値の計算を必要とするデータ構造を提供するパッケージにおいて、ハッシュ値を計算できるクラスとして用いられている。ただ、ハッシュ値の計算自体は冗長なのに対しほぼボイラープレート化することが多い。そこで、デフォルトで &lt;tt class="docutils literal"&gt;Generic&lt;/tt&gt; のインスタンスがあれば自動でハッシュ値の計算方法を実装してくれるようになっている。このため、ユーザは特になんのメソッドも書かずにインスタンスを定義できる。具体的には、次のようにだ:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Hashable&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なお、このインスタンス実装は、導出戦略としても使える。それを行うのが、&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略だ。&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略は &lt;tt class="docutils literal"&gt;DeriveAnyClass&lt;/tt&gt; 拡張で利用可能になっており、次のように書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE DeriveAnyClass #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;anyclass&lt;/span&gt; &lt;span class="kt"&gt;Hashable&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;なお、名前の由来は、この戦略がその名の通りどのクラスに対しても適用可能なことから来ている。実は、Haskell はどのクラスに対しても空の実装を持つインスタンスが書ける。例えそのクラスが実装を必要とするメソッドを持っていたとしてもだ。例えば、次のようなことが書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;このコードは、概ね次のように展開される:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;undefined&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;実際には、もう少し丁寧なエラーメッセージが付いたりするが、実行時エラーになるのは変わらない。&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略は、これと同じことをするので、上記のことは次のようにも書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;anyclass&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;ただこれはあまりにもあんまりなので、GHC では独自に実装するべきメソッドが管理されていて、そのメソッドが実装されていないと警告が出るようになっている。&lt;/p&gt;
+&lt;p&gt;さて、実装がデータ型によらず決まるというのは、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; お得意というかそもそもそういう時のために生まれてきたという状況で、&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略は &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; で自然に模倣できる。例えば、&lt;tt class="docutils literal"&gt;Hashable&lt;/tt&gt; の場合、&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric'&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric'&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Rep&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Generic&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Rep&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;CanDeriveHashable&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Hashable&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;FromGeneric'&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="o"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;というようなフレームワークを用意しておけば、&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;stock&lt;/span&gt; &lt;span class="kt"&gt;Generic&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Hashable&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;と書ける。こちらの方が、どういうインスタンスの導出戦略を使っているかが明示的で分かりやすいだろう。なお、もちろん、危険な方のインスタンス導出も、次のように模倣できる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;AnyClass&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;AnyClass&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;AnyClass&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;AnyClass&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;ただ、このような使用用途はもちろん推奨されない。&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略では危険な導出戦略と安全な導出戦略が混在していたわけで、それを見分ける方法は警告だけだったわけだが、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; では元とする型によってそれをきっちりと分けることができる。さらに、&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; を前提とする場合デフォルト実装は一つしか提供できない。ところが、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; はいくらでも戦略を増やすことができる。ハッシュ値の計算は、幾つかアルゴリズムの選択肢があるが、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; と型レベルプログラミングを使えばどれを使用するか自由に選べたりする。なお、&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略でできて &lt;tt class="docutils literal"&gt;via&lt;/tt&gt; 戦略ではできない例は思いついていないんだけど、これはもしかしたらあるかもしれない &lt;a class="footnote-reference" href="#conjecture-anyclass-by-via" id="auto-id-6"&gt;[4]&lt;/a&gt; 。誰か知ってたら教えて欲しい。大半は &lt;tt class="docutils literal"&gt;via&lt;/tt&gt; 戦略で模倣できると思うので、&lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略もやはり &lt;tt class="docutils literal"&gt;via&lt;/tt&gt; 戦略の特殊なバージョンと思えるだろう。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-7"&gt;
+&lt;h2&gt;標準の導出戦略&lt;a class="headerlink" href="#auto-id-7" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;最後は、&lt;tt class="docutils literal"&gt;stock&lt;/tt&gt; 戦略の紹介になる。と言っても、これに関してはあまり言うことはない。&lt;tt class="docutils literal"&gt;deriving Eq&lt;/tt&gt; とか書いておくと、GHC が勝手にどうやってるのか知らんけどインスタンス実装してくれるやつである。最初に触れたように、これは基本的に直積と直和からインスタンスを類推している。なお、&lt;tt class="docutils literal"&gt;StandaloneDeriving&lt;/tt&gt; を使わない場合は、型検査が自明に通るようなインスタンスしか実装されず、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; などに比べコンパイル時間も削減できたりする。標準の範囲では、次のクラスが &lt;tt class="docutils literal"&gt;stock&lt;/tt&gt; 戦略で導出可能だ:&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Eq&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;等価性判定ができるクラス&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Ord&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;順序比較ができるクラス&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Enum&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;整列ができるクラス&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Bounded&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;上限と下限があるクラス&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Show&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;文字列表示ができるクラス&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Read&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;文字列からの読み込みができるクラス&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Ix&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;上下を設定した範囲内で整列ができるクラス&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;GHC では他に、幾つかのクラスの導出ができるようになっている。GHC 8.8 現在で追加されているクラスは、以下の通りだ &lt;a class="footnote-reference" href="#notice-derive-data-typeable" id="auto-id-8"&gt;[5]&lt;/a&gt; :&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Data&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;型を超えてデータを一般的に扱うことができるクラス。&lt;tt class="docutils literal"&gt;DeriveDataTypeable&lt;/tt&gt; 拡張が必要。&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Generic&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;Generic1&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;データ型のメタ情報が取得できるクラス。&lt;tt class="docutils literal"&gt;DeriveGeneric&lt;/tt&gt; 拡張が必要。&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Foldable&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;リストへの変換が可能なクラス。&lt;tt class="docutils literal"&gt;DeriveFoldable&lt;/tt&gt; 拡張が必要。&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Functor&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;任意の関数を対象の高次なデータ型への関数へと持ち上げることができるクラス。&lt;tt class="docutils literal"&gt;DeriveFunctor&lt;/tt&gt; 拡張が必要。&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Traversable&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;文脈付きの探索ができるクラス。&lt;tt class="docutils literal"&gt;DeriveTraversable&lt;/tt&gt; 拡張が必要。&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;Lift&lt;/tt&gt;&lt;/dt&gt;
+&lt;dd&gt;TemplateHaskell 上の構文木に変換できるクラス。&lt;tt class="docutils literal"&gt;DeriveLift&lt;/tt&gt; 拡張が必要。&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;ここで挙げたクラスを導出したい場合、特に何かこだわりがあるわけでなく、&lt;tt class="docutils literal"&gt;stock&lt;/tt&gt; 戦略で導出可能なら、自前でインスタンスを書かず &lt;tt class="docutils literal"&gt;stock&lt;/tt&gt; 戦略を使うことをお勧めする。これは、無用な混乱を避けるためだ。&lt;/p&gt;
+&lt;p&gt;ところで、&lt;tt class="docutils literal"&gt;stock&lt;/tt&gt; 戦略があるのであまり実益としての意味はないのだが、&lt;tt class="docutils literal"&gt;stock&lt;/tt&gt; 戦略の多くは &lt;tt class="docutils literal"&gt;Generic&lt;/tt&gt; と &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; で模倣できる。例えば、&lt;tt class="docutils literal"&gt;Eq&lt;/tt&gt; クラスの導出は次のように書ける:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE ScopedTypeVariables #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric'&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="kr"&gt;type&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric'&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Rep&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Generic&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="kt"&gt;Rep&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;FromGeneric'&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="kt"&gt;FromGeneric&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric&lt;/span&gt; &lt;span class="n"&gt;x2&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;from&lt;/span&gt; &lt;span class="n"&gt;x1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;from&lt;/span&gt; &lt;span class="n"&gt;x2&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="nb"&gt;()&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="n"&gt;stock&lt;/span&gt; &lt;span class="kt"&gt;Generic&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Eq&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;FromGeneric&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;stock&lt;/tt&gt; 戦略に比べ変換を一度かます必要はあるものの、実際の計算フロー的には &lt;tt class="docutils literal"&gt;stock&lt;/tt&gt; 戦略で作られたインスタンスと上のインスタンスは、同じことをしている。&lt;tt class="docutils literal"&gt;Ord&lt;/tt&gt; やちょっと工夫は必要だが他の標準のクラスも同じような方法で導出するシステムを作れるし、GHC で用意されてるものも &lt;tt class="docutils literal"&gt;Generic1&lt;/tt&gt; から作れる。ここから分かるように、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; は結構強力な機能になる。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-9"&gt;
+&lt;h2&gt;おまけ: デフォルト実装を模倣する&lt;a class="headerlink" href="#auto-id-9" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;さて、Haskell にはクラスメソッドのデフォルト実装という機能がある。インスタンス定義において、未実装のメソッドは、デフォルト実装が用意されていればその実装で埋められ、無ければ実行時エラーが埋められる。デフォルト実装は、通常実装する必要のあるメソッドを使って実装されることが多い。例えば、今まで誤魔化してきたのだが、&lt;tt class="docutils literal"&gt;Semigroup&lt;/tt&gt; は実際には3つのメソッドを持ち、次のように定義される:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+  &lt;span class="n"&gt;sconcat&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;NonEmpty&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="n"&gt;sconcat&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kt"&gt;:|&lt;/span&gt; &lt;span class="n"&gt;as&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;as&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;cs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;cs&lt;/span&gt;
+    &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="kt"&gt;[]&lt;/span&gt;     &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+
+  &lt;span class="n"&gt;stimes&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Integral&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="n"&gt;stimes&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;&lt;tt class="docutils literal"&gt;stimes&lt;/tt&gt; のデフォルト実装はちょっと複雑になるので省略する。&lt;tt class="docutils literal"&gt;sconcat&lt;/tt&gt; のデフォルト実装を見ると分かる通り、&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(&amp;lt;&amp;gt;)&lt;/span&gt;&lt;/tt&gt; を定義内で使っているが、後は依存が完結している。よって、&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(&amp;lt;&amp;gt;)&lt;/span&gt;&lt;/tt&gt; の実装さえあれば、この実装は動くようになっている。ところで、&lt;tt class="docutils literal"&gt;deriving&lt;/tt&gt; とは少々外れるが、このようなデフォルト実装を &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; で模倣することもできる。次のようにだ:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;{-# LANGUAGE ScopedTypeVariables #-}&lt;/span&gt;
+&lt;span class="cm"&gt;{-# LANGUAGE TypeApplications    #-}&lt;/span&gt;
+
+&lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="kt"&gt;SemigroupMinimal&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;minimalAppend&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="kr"&gt;newtype&lt;/span&gt; &lt;span class="kt"&gt;FromMinimal&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;FromMinimal&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;SemigroupMinimal&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;FromMinimal&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;minimalAppend&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;
+
+  &lt;span class="n"&gt;sconcat&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;sconcatDefault&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;
+  &lt;span class="n"&gt;stimes&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;coerce&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;stimeDefault&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="nf"&gt;sconcatDefault&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;SemigroupMinimal&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;NonEmpty&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;sconcatDefault&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+
+&lt;span class="nf"&gt;stimesDefault&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;SemigroupMinimal&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Integral&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+&lt;span class="nf"&gt;stimesDefault&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;このフレームワークを使えば、&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;は、&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+  &lt;span class="kr"&gt;deriving&lt;/span&gt; &lt;span class="kt"&gt;Semigroup&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="kt"&gt;FromMinimal&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt;
+
+&lt;span class="kr"&gt;instance&lt;/span&gt; &lt;span class="kt"&gt;SemigroupMinimal&lt;/span&gt; &lt;span class="kt"&gt;A&lt;/span&gt; &lt;span class="kr"&gt;where&lt;/span&gt;
+  &lt;span class="n"&gt;minimalAppend&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;と書ける。むしろ冗長かしていてボイラープレートは増えているが、その代わり暗黙的なデフォルト実装は明示できる。また、デフォルト実装は一通りの実装パターンしか選べないが、他にもデフォルト実装のパターンがある場合、このような工夫は生きてくる。その場合、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; でどのデフォルト実装セットを使うか選べるからだ。また、デフォルト実装のパターンは後からいくらでも追加できるし、サードパーティの人も追加できるようになる。このように単純な仕組みに対して、実装の可能性がかなり広がるのが、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; の強力なところだと思う。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-10"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-10" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;というわけで、各導出戦略の紹介、もとい &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; の紹介でした。これはかなり未来感じる機能だと思うし、少なくとも &lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略はもう必要なくない？ みたいな気持ちでいる。&lt;/p&gt;
+&lt;p&gt;なお、デフォルト実装も上手く扱えるよう &lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; を拡張するのはどうすればいいかな的なことは、たまに考えてる。&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; の前後、つまり実装に必要なメソッド定義を与えるのと、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; で定義されたメソッドを上書きするみたいな機能があると、もっと柔軟になりそうだけど、それはそれで機能過多かもしれないとも思う。&lt;tt class="docutils literal"&gt;deriving&lt;/tt&gt; 自体は、インスタンス実装を隠蔽できるという性質も持っていて、&lt;tt class="docutils literal"&gt;DerivingVia&lt;/tt&gt; はさらにその機能を強力にできるという側面もある。まあ、色々可能性ひろがリングね。てことで、今回は以上。&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-ghc-88" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-3"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;なお、GHC 8.10 からは戦略を指定しないで &lt;tt class="docutils literal"&gt;newtype&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;anyclass&lt;/tt&gt; 戦略を使おうとすると、警告が出るようになった。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-semigroup-has-multi-methods" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-4"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;さらに厳密に言えば、&lt;tt class="docutils literal"&gt;coerce&lt;/tt&gt; されるのは &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(&amp;lt;&amp;gt;)&lt;/span&gt;&lt;/tt&gt; メソッドだけではないというのもある。&lt;tt class="docutils literal"&gt;Semigroup&lt;/tt&gt; は他に &lt;tt class="docutils literal"&gt;sconcat&lt;/tt&gt;、&lt;tt class="docutils literal"&gt;stimes&lt;/tt&gt; メソッドを持っているので、これらも &lt;tt class="docutils literal"&gt;coerce&lt;/tt&gt; される。ただ、ここではそれらを省略している。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-runtimereps" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-5"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;厳密には、&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(-&amp;gt;)&lt;/span&gt;&lt;/tt&gt; は GHC 8.8 現在だと4つの引数を持ち、&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;(-&amp;gt;)::&lt;/span&gt; (q :: RuntimeRep) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (r :: RuntimeRep) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (a :: TYPE q) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (b :: TYPE r) &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; Type&lt;/tt&gt; という種をしている。このうち、最初の &lt;tt class="docutils literal"&gt;q&lt;/tt&gt;、&lt;tt class="docutils literal"&gt;r&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;nominal&lt;/tt&gt; で、次の &lt;tt class="docutils literal"&gt;a&lt;/tt&gt;、&lt;tt class="docutils literal"&gt;b&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;representational&lt;/tt&gt; である。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="conjecture-anyclass-by-via" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-6"&gt;[4]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;おそらくないと思う。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="notice-derive-data-typeable" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-8"&gt;[5]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;実はもう一個 &lt;tt class="docutils literal"&gt;Typeable&lt;/tt&gt; と言うクラスが、&lt;tt class="docutils literal"&gt;DeriveDataTypeable&lt;/tt&gt; で導出可能だ。しかし、ある問題からこれは非推奨になっている。詳しくは、&lt;a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/wikis/typeable"&gt;https://gitlab.haskell.org/ghc/ghc/-/wikis/typeable&lt;/a&gt; を覗いてみるといいと思う。なお、現状全てのデータ型は &lt;tt class="docutils literal"&gt;Typeable&lt;/tt&gt; インスタンスが自動で作られるようになっており、独自にインスタンスを書いたり &lt;tt class="docutils literal"&gt;deriving&lt;/tt&gt; を使ったりしても完全に無視される。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/03/deriving-strategies-by-deriving-via.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/03/deriving-strategies-by-deriving-via.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="プログラミング言語"></category><category term="GHC"></category><category term="Haskell"></category><category term="GHC拡張"></category></entry><entry><title>遅延評価でデバッグが困難になる状況</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/" rel="alternate"></link><published>2020-03-29T08:12:41+09:00</published><updated>2020-03-29T08:23:18+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-29:/blog/posts/2020/03/haskell-lazy-debug-problem/</id><summary type="html">&lt;p&gt;先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。&lt;/p&gt;
 &lt;p&gt;なお、かなり主観に寄っていて、結構書き殴ってる部分が多いので、厳密な議論をするにはあまり良い例ではないかもしれない。個人的には、備忘録的な意味合いも強くて、今まで詰まったやつをまとめておくかみたいな感じでもある。&lt;/p&gt;
 &lt;p&gt;先に結論を書いておくと、&lt;/p&gt;
 &lt;ul class="simple"&gt;
