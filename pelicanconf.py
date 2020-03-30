@@ -109,13 +109,10 @@ PLUGIN_PATHS = [
   'plugins/custom',
 ]
 PLUGINS = [
-  'tipue_search',
-  'related_posts',
   'headerid',
   'embed_customjs',
-  'sitemap',
   'katex_math_render',
-  'filetime_from_git',
+  'autocorrect_filetime',
 ]
 
 RELATIVE_URLS = True

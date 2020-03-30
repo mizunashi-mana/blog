@@ -42,4 +42,11 @@ LINKS = add_site_url_to_items(LINKS)
 SOCIAL = add_site_url_to_items(SOCIAL)
 MENUITEMS = add_site_url_to_items(MENUITEMS)
 
+PLUGINS.extend([
+  'filetime_from_git',
+  'sitemap',
+  'tipue_search',
+  'related_posts',
+])
+
 GOOGLE_ANALYTICS = "UA-110810716-2"
