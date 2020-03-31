@@ -154,29 +154,29 @@ data Expr
 type TokenParser = Parser Token
 
 exprP :: TokenParser Expr
-exprP = infixExpr1P <* eofP
-
-infixExpr1P :: TokenParser Expr
-infixExpr1P
-  =   (InfixApp <$> infixExpr2P <*> varopTokenP "*" <*> infixExpr1P)
-  <|> (InfixApp <$> infixExpr2P <*> varopTokenP "/" <*> infixExpr1P)
-  <|> infixExpr2P
-
-infixExpr2P :: TokenParser Expr
-infixExpr2P
-  =   (InfixApp <$> infixExpr3P <*> varopTokenP "+" <*> infixExpr2P)
-  <|> (InfixApp <$> infixExpr3P <*> varopTokenP "-" <*> infixExpr2P)
-  <|> infixExpr3P
-
-infixExpr3P :: TokenParser Expr
-infixExpr3P = blockExprP
+exprP = blockExprP <* eofP
 
 blockExprP :: TokenParser Expr
 blockExprP
     =   absP
-    <|> fexprP
+    <|> infixExpr1P
   where
     absP = Abs <$> (tokenP TBackSlash *> varP) <*> (tokenP TArrow *> exprP)
+
+infixExpr1P :: TokenParser Expr
+infixExpr1P
+  =   (InfixApp <$> infixExpr2P <*> varopTokenP "+" <*> infixExpr1P)
+  <|> (InfixApp <$> infixExpr2P <*> varopTokenP "-" <*> infixExpr1P)
+  <|> infixExpr2P
+
+infixExpr2P :: TokenParser Expr
+infixExpr2P
+  =   (InfixApp <$> infixExpr3P <*> varopTokenP "*" <*> infixExpr2P)
+  <|> (InfixApp <$> infixExpr3P <*> varopTokenP "/" <*> infixExpr2P)
+  <|> infixExpr3P
+
+infixExpr3P :: TokenParser Expr
+infixExpr3P = fexprP
 
 fexprP :: TokenParser Expr
 fexprP

@@ -16,18 +16,18 @@
 \begin{align*}
   \begin{array}{lll}
   \mathit{expr}
-  &\BNFassign \mathit{iexpr1} &;\$1 \\
-  \mathit{iexpr1}
-  &\BNFassign \mathit{iexpr2}\;\tokenc{*}\;\mathit{iexpr1} &;\tokenc{InfixApp}\;\$1\;\$2 \\
-  &\BNFor \mathit{iexpr2}\;\tokenc{/}\;\mathit{iexpr1} &;\tokenc{InfixApp}\;\$1\;\$2 \\
-  \mathit{iexpr2}
-  &\BNFassign \mathit{iexpr3}\;\tokenc{+}\;\mathit{iexpr2} &;\tokenc{InfixApp}\;\$1\;\$2 \\
-  &\BNFor \mathit{iexpr3}\;\tokenc{-}\;\mathit{iexpr2} &;\tokenc{InfixApp}\;\$1\;\$2 \\
-  \mathit{iexpr3}
   &\BNFassign \mathit{bexpr} &;\$1 \\
   \mathit{bexpr}
   &\BNFassign \tokenc{\textbackslash}\;\mathit{var}\;\tokenc{->}\;\mathit{expr} &;\tokenc{Abs}\;\$1\;\$2 \\
-  &\BNFor \mathit{fexpr} &;\$1 \\
+  &\BNFor \mathit{iexpr1} &;\$1 \\
+  \mathit{iexpr1}
+  &\BNFassign \mathit{iexpr2}\;\tokenc{+}\;\mathit{iexpr1} &;\tokenc{InfixApp}\;\$1\;\tokenc{"+"}\;\$2 \\
+  &\BNFor \mathit{iexpr2}\;\tokenc{-}\;\mathit{iexpr1} &;\tokenc{InfixApp}\;\$1\;\tokenc{"-"}\;\$2 \\
+  \mathit{iexpr2}
+  &\BNFassign \mathit{iexpr3}\;\tokenc{*}\;\mathit{iexpr2} &;\tokenc{InfixApp}\;\$1\;\tokenc{"*"}\;\$2 \\
+  &\BNFor \mathit{iexpr3}\;\tokenc{/}\;\mathit{iexpr2} &;\tokenc{InfixApp}\;\$1\;\tokenc{"/"}\;\$2 \\
+  \mathit{iexpr3}
+  &\BNFassign \mathit{fexpr} &;\$1 \\
   \mathit{fexpr}
   &\BNFassign \mathit{fexpr}\;\mathit{aexpr} &;\tokenc{App}\;\$1\;\$2 \\
   &\BNFor \mathit{aexpr} &;\$1 \\
