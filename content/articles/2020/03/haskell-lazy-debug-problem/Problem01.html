@@ -570,29 +570,29 @@ body .il { color: #666666 } /* Literal.Number.Integer.Long */
 <a name="line-154"></a><span class="kr">type</span> <span class="kt">TokenParser</span> <span class="ow">=</span> <span class="kt">Parser</span> <span class="kt">Token</span>
 <a name="line-155"></a>
 <a name="line-156"></a><span class="nf">exprP</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
-<a name="line-157"></a><span class="nf">exprP</span> <span class="ow">=</span> <span class="n">infixExpr1P</span> <span class="o">&lt;*</span> <span class="n">eofP</span>
+<a name="line-157"></a><span class="nf">exprP</span> <span class="ow">=</span> <span class="n">blockExprP</span> <span class="o">&lt;*</span> <span class="n">eofP</span>
 <a name="line-158"></a>
-<a name="line-159"></a><span class="nf">infixExpr1P</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
-<a name="line-160"></a><span class="nf">infixExpr1P</span>
-<a name="line-161"></a>  <span class="ow">=</span>   <span class="p">(</span><span class="kt">InfixApp</span> <span class="o">&lt;$&gt;</span> <span class="n">infixExpr2P</span> <span class="o">&lt;*&gt;</span> <span class="n">varopTokenP</span> <span class="s">&quot;*&quot;</span> <span class="o">&lt;*&gt;</span> <span class="n">infixExpr1P</span><span class="p">)</span>
-<a name="line-162"></a>  <span class="o">&lt;|&gt;</span> <span class="p">(</span><span class="kt">InfixApp</span> <span class="o">&lt;$&gt;</span> <span class="n">infixExpr2P</span> <span class="o">&lt;*&gt;</span> <span class="n">varopTokenP</span> <span class="s">&quot;/&quot;</span> <span class="o">&lt;*&gt;</span> <span class="n">infixExpr1P</span><span class="p">)</span>
-<a name="line-163"></a>  <span class="o">&lt;|&gt;</span> <span class="n">infixExpr2P</span>
-<a name="line-164"></a>
-<a name="line-165"></a><span class="nf">infixExpr2P</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
-<a name="line-166"></a><span class="nf">infixExpr2P</span>
-<a name="line-167"></a>  <span class="ow">=</span>   <span class="p">(</span><span class="kt">InfixApp</span> <span class="o">&lt;$&gt;</span> <span class="n">infixExpr3P</span> <span class="o">&lt;*&gt;</span> <span class="n">varopTokenP</span> <span class="s">&quot;+&quot;</span> <span class="o">&lt;*&gt;</span> <span class="n">infixExpr2P</span><span class="p">)</span>
-<a name="line-168"></a>  <span class="o">&lt;|&gt;</span> <span class="p">(</span><span class="kt">InfixApp</span> <span class="o">&lt;$&gt;</span> <span class="n">infixExpr3P</span> <span class="o">&lt;*&gt;</span> <span class="n">varopTokenP</span> <span class="s">&quot;-&quot;</span> <span class="o">&lt;*&gt;</span> <span class="n">infixExpr2P</span><span class="p">)</span>
-<a name="line-169"></a>  <span class="o">&lt;|&gt;</span> <span class="n">infixExpr3P</span>
-<a name="line-170"></a>
-<a name="line-171"></a><span class="nf">infixExpr3P</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
-<a name="line-172"></a><span class="nf">infixExpr3P</span> <span class="ow">=</span> <span class="n">blockExprP</span>
-<a name="line-173"></a>
-<a name="line-174"></a><span class="nf">blockExprP</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
-<a name="line-175"></a><span class="nf">blockExprP</span>
-<a name="line-176"></a>    <span class="ow">=</span>   <span class="n">absP</span>
-<a name="line-177"></a>    <span class="o">&lt;|&gt;</span> <span class="n">fexprP</span>
-<a name="line-178"></a>  <span class="kr">where</span>
-<a name="line-179"></a>    <span class="n">absP</span> <span class="ow">=</span> <span class="kt">Abs</span> <span class="o">&lt;$&gt;</span> <span class="p">(</span><span class="n">tokenP</span> <span class="kt">TBackSlash</span> <span class="o">*&gt;</span> <span class="n">varP</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="p">(</span><span class="n">tokenP</span> <span class="kt">TArrow</span> <span class="o">*&gt;</span> <span class="n">exprP</span><span class="p">)</span>
+<a name="line-159"></a><span class="nf">blockExprP</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
+<a name="line-160"></a><span class="nf">blockExprP</span>
+<a name="line-161"></a>    <span class="ow">=</span>   <span class="n">absP</span>
+<a name="line-162"></a>    <span class="o">&lt;|&gt;</span> <span class="n">infixExpr1P</span>
+<a name="line-163"></a>  <span class="kr">where</span>
+<a name="line-164"></a>    <span class="n">absP</span> <span class="ow">=</span> <span class="kt">Abs</span> <span class="o">&lt;$&gt;</span> <span class="p">(</span><span class="n">tokenP</span> <span class="kt">TBackSlash</span> <span class="o">*&gt;</span> <span class="n">varP</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="p">(</span><span class="n">tokenP</span> <span class="kt">TArrow</span> <span class="o">*&gt;</span> <span class="n">exprP</span><span class="p">)</span>
+<a name="line-165"></a>
+<a name="line-166"></a><span class="nf">infixExpr1P</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
+<a name="line-167"></a><span class="nf">infixExpr1P</span>
+<a name="line-168"></a>  <span class="ow">=</span>   <span class="p">(</span><span class="kt">InfixApp</span> <span class="o">&lt;$&gt;</span> <span class="n">infixExpr2P</span> <span class="o">&lt;*&gt;</span> <span class="n">varopTokenP</span> <span class="s">&quot;+&quot;</span> <span class="o">&lt;*&gt;</span> <span class="n">infixExpr1P</span><span class="p">)</span>
+<a name="line-169"></a>  <span class="o">&lt;|&gt;</span> <span class="p">(</span><span class="kt">InfixApp</span> <span class="o">&lt;$&gt;</span> <span class="n">infixExpr2P</span> <span class="o">&lt;*&gt;</span> <span class="n">varopTokenP</span> <span class="s">&quot;-&quot;</span> <span class="o">&lt;*&gt;</span> <span class="n">infixExpr1P</span><span class="p">)</span>
+<a name="line-170"></a>  <span class="o">&lt;|&gt;</span> <span class="n">infixExpr2P</span>
+<a name="line-171"></a>
+<a name="line-172"></a><span class="nf">infixExpr2P</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
+<a name="line-173"></a><span class="nf">infixExpr2P</span>
+<a name="line-174"></a>  <span class="ow">=</span>   <span class="p">(</span><span class="kt">InfixApp</span> <span class="o">&lt;$&gt;</span> <span class="n">infixExpr3P</span> <span class="o">&lt;*&gt;</span> <span class="n">varopTokenP</span> <span class="s">&quot;*&quot;</span> <span class="o">&lt;*&gt;</span> <span class="n">infixExpr2P</span><span class="p">)</span>
+<a name="line-175"></a>  <span class="o">&lt;|&gt;</span> <span class="p">(</span><span class="kt">InfixApp</span> <span class="o">&lt;$&gt;</span> <span class="n">infixExpr3P</span> <span class="o">&lt;*&gt;</span> <span class="n">varopTokenP</span> <span class="s">&quot;/&quot;</span> <span class="o">&lt;*&gt;</span> <span class="n">infixExpr2P</span><span class="p">)</span>
+<a name="line-176"></a>  <span class="o">&lt;|&gt;</span> <span class="n">infixExpr3P</span>
+<a name="line-177"></a>
+<a name="line-178"></a><span class="nf">infixExpr3P</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
+<a name="line-179"></a><span class="nf">infixExpr3P</span> <span class="ow">=</span> <span class="n">fexprP</span>
 <a name="line-180"></a>
 <a name="line-181"></a><span class="nf">fexprP</span> <span class="ow">::</span> <span class="kt">TokenParser</span> <span class="kt">Expr</span>
 <a name="line-182"></a><span class="nf">fexprP</span>
