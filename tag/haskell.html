@@ -131,6 +131,27 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-implicit-parameter/#coherent-implicit-parameter">Coherent Implicit Parameter</a></h2>
+    <p>
+          Posted on 火 31 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/xing-kurasu.html">型クラス</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/xing-shisutemu.html">型システム</a>
+    </p>
+  </header>
+  <div>
+      <p>アドホック多相を実現する方法として，型クラスがある．型クラスは，辞書渡しと呼ばれる方法により，かなり自然に elaboration ができる．ところで，この elaboration は暗黙的引数にも転用できることが知られている。特に、型クラスを搭載した Haskell では，その処理系 GHC の内部実装を利用して暗黙的引数を実現する <a class="reference external" href="https://hackage.haskell.org/package/reflection">reflection パッケージ</a> が知られている．</p>
+<p>ところで，暗黙的引数の仕組みは，単純に型クラスの型システムを転用するだけでは，coherence …</p>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-implicit-parameter/#coherent-implicit-parameter">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/deriving-strategies-by-deriving-via/#deriving-strategies-by-deriving-via">DerivingVia で deriving 戦略を模倣する</a></h2>
     <p>
           Posted on 月 30 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
@@ -337,30 +358,6 @@
 <p>Haskell の …</p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/#local-do-and-first-type-class">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/call-arity-and-oneshot/#call-arity-and-oneshot">Call Arity と融合変換</a></h2>
-    <p>
-          Posted on 金 26 7月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/rong-he-bian-huan.html">融合変換</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/konpaira.html">コンパイラ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/zui-shi-hua.html">最適化</a>
-    </p>
-  </header>
-  <div>
-      <p>GHC は，最適化のため Call Arity と呼ばれるコード解析を行っている．この解析で，自由変数が何個引数を持っていいかを判定し，イータ展開を可能にする．リストにおける融合変換とも密接な関係のある解析だ．こいつの存在とどういうことをやっているかはだいたい知っていたんだけど，ちょっと詳しく知りたい事例があったので調べてみた．そのメモ．</p>
-<p>なお元ネタは，Breitner (nomeata) 先生の <a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S1477842416300756">Call Arity</a> ．</p>
-<div class="section" id="auto-id-2">
-<h2>イータ展開と最適化<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>Haskell は知っての通り関数型プログラミング言語なので，息を吐くように関数を第1級として使うし，標準ライブラリに無数の高階関数がある．関数は全てカリー化されていて …</p></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/07/call-arity-and-oneshot/#call-arity-and-oneshot">    Continue reading
 </a>
   </div>
 </article>

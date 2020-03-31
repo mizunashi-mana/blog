@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/</loc>
-<lastmod>2020-03-30T08:32:44-00:00</lastmod>
+<lastmod>2020-03-31T07:36:20-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/archives.html</loc>
-<lastmod>2020-03-30T08:32:44-00:00</lastmod>
+<lastmod>2020-03-31T07:36:20-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tags.html</loc>
-<lastmod>2020-03-30T08:32:44-00:00</lastmod>
+<lastmod>2020-03-31T07:36:20-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/categories.html</loc>
-<lastmod>2020-03-30T08:32:44-00:00</lastmod>
+<lastmod>2020-03-31T07:36:20-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -50,6 +50,13 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <lastmod>2019-05-02T07:33:29+09:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.6</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-implicit-parameter/</loc>
+<lastmod>2020-03-31T07:30:54+09:00</lastmod>
+<changefreq>monthly</changefreq>
+<priority>0.7</priority>
 </url>
 
 <url>
@@ -418,7 +425,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html</loc>
-<lastmod>2020-03-30T08:28:37+09:19</lastmod>
+<lastmod>2020-03-31T07:30:54+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -459,14 +466,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 </url>
 
 <url>
-<loc>https://mizunashi-mana.github.io/blog/tag/ghc.html</loc>
-<lastmod>2020-03-30T08:28:37+09:19</lastmod>
+<loc>https://mizunashi-mana.github.io/blog/tag/haskell.html</loc>
+<lastmod>2020-03-31T07:30:54+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
-<loc>https://mizunashi-mana.github.io/blog/tag/haskell.html</loc>
+<loc>https://mizunashi-mana.github.io/blog/tag/xing-kurasu.html</loc>
+<lastmod>2020-03-31T07:30:54+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/xing-shisutemu.html</loc>
+<lastmod>2020-03-31T07:30:54+09:19</lastmod>
+<changefreq>daily</changefreq>
+<priority>0.5</priority>
+</url>
+
+<url>
+<loc>https://mizunashi-mana.github.io/blog/tag/ghc.html</loc>
 <lastmod>2020-03-30T08:28:37+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
@@ -489,13 +510,6 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/debatsugu.html</loc>
 <lastmod>2020-03-29T08:23:18+09:19</lastmod>
-<changefreq>daily</changefreq>
-<priority>0.5</priority>
-</url>
-
-<url>
-<loc>https://mizunashi-mana.github.io/blog/tag/xing-kurasu.html</loc>
-<lastmod>2020-03-29T09:49:38+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -1062,7 +1076,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html</loc>
-<lastmod>2020-03-30T08:28:37+09:19</lastmod>
+<lastmod>2020-03-31T07:30:54+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>

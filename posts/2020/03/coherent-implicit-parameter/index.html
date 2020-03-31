@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="アドホック多相を実現する方法として，型クラスがある．型クラスは，辞書渡しと呼ばれる方法により，かなり自然に elaboration ができる．ところで，この elaboration は暗黙的引数にも転用できることが知られている。特に、型クラスを搭載した Haskell では，その処理系 GHC の内部実装を利用して暗黙的引数を実現する reflection パッケージ が知られている． ところで，暗黙的引数の仕組みは，単純に型クラスの型システムを転用するだけでは，coherence …" />
+<meta name="keywords" content="Haskell, 型クラス, 型システム">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="Coherent Implicit Parameter"/>
+<meta property="og:description" content="アドホック多相を実現する方法として，型クラスがある．型クラスは，辞書渡しと呼ばれる方法により，かなり自然に elaboration ができる．ところで，この elaboration は暗黙的引数にも転用できることが知られている。特に、型クラスを搭載した Haskell では，その処理系 GHC の内部実装を利用して暗黙的引数を実現する reflection パッケージ が知られている． ところで，暗黙的引数の仕組みは，単純に型クラスの型システムを転用するだけでは，coherence …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-implicit-parameter/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-03-31 07:30:54+09:00"/>
+<meta property="article:modified_time" content="2020-03-31 07:30:54+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="プログラミング言語"/>
+<meta property="article:tag" content="Haskell"/>
+<meta property="article:tag" content="型クラス"/>
+<meta property="article:tag" content="型システム"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; Coherent Implicit Parameter</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="coherent-implicit-parameter">Coherent Implicit Parameter</h1>
+    <p>
+          Posted on 火 31 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>アドホック多相を実現する方法として，型クラスがある．型クラスは，辞書渡しと呼ばれる方法により，かなり自然に elaboration ができる．ところで，この elaboration は暗黙的引数にも転用できることが知られている。特に、型クラスを搭載した Haskell では，その処理系 GHC の内部実装を利用して暗黙的引数を実現する <a class="reference external" href="https://hackage.haskell.org/package/reflection">reflection パッケージ</a> が知られている．</p>
+<p>ところで，暗黙的引数の仕組みは，単純に型クラスの型システムを転用するだけでは，coherence を壊してしまう．そのため，coherence を保証しながら暗黙的引数を実現する方法がいくつか研究されている．今回は，暗黙的引数と型クラスの関係，それから少し最近考えている， coherence を保って，型クラスの仕組みを少し拡張するだけで暗黙的引数を実現するアイデアを紹介したいと思う．</p>
+<div class="section" id="auto-id-1">
+<h2>暗黙的引数と型クラス<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>型クラスを，型クラスを持たない言語に elaboration する方法として，型クラスを暗黙的引数と見て引数を明示するようにする変換が知られている．例えば，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">class</span> <span class="kt">C</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">m</span> <span class="ow">::</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="kt">C</span> <span class="kt">Int</span> <span class="kr">where</span>
+  <span class="n">m</span> <span class="ow">=</span> <span class="mi">0</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="kt">C</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="ow">=</span> <span class="n">m</span>
+
+<span class="nf">g</span> <span class="ow">::</span> <span class="kt">Int</span>
+<span class="nf">g</span> <span class="ow">=</span> <span class="n">f</span>
+</pre></div>
+</td></tr></table><p>のようなプログラムは，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">C</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">C</span>
+  <span class="p">{</span> <span class="n">m</span> <span class="ow">::</span> <span class="n">a</span>
+  <span class="p">}</span>
+
+<span class="nf">instanceC_Int</span> <span class="ow">::</span> <span class="kt">C</span> <span class="kt">Int</span>
+<span class="nf">instanceC_Int</span> <span class="ow">=</span> <span class="kt">C</span>
+  <span class="p">{</span> <span class="n">m</span> <span class="ow">=</span> <span class="mi">0</span>
+  <span class="p">}</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="kt">C</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="n">d</span> <span class="ow">=</span> <span class="n">m</span> <span class="n">d</span>
+
+<span class="nf">g</span> <span class="ow">::</span> <span class="kt">Int</span>
+<span class="nf">g</span> <span class="ow">=</span> <span class="n">f</span> <span class="n">instanceC_Int</span>
+</pre></div>
+</td></tr></table><p>というように elaboration される．この方法は辞書渡し (dictionary passing) と名前で知られており，Haskell の処理系 GHC でも採用されている．GHC ではメソッドが1つの型クラスは <tt class="docutils literal">newtype</tt> を使って elaboration される．例えば，上の例は GHC では次のように elaboration される:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">newtype</span> <span class="kt">C</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">C</span>
+  <span class="p">{</span> <span class="n">m</span> <span class="ow">::</span> <span class="n">a</span>
+  <span class="p">}</span>
+
+<span class="nf">instanceC_Int</span> <span class="ow">::</span> <span class="kt">C</span> <span class="kt">Int</span>
+<span class="nf">instanceC_Int</span> <span class="ow">=</span> <span class="kt">C</span>
+  <span class="p">{</span> <span class="n">m</span> <span class="ow">=</span> <span class="mi">0</span>
+  <span class="p">}</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="kt">C</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="n">d</span> <span class="ow">=</span> <span class="n">m</span> <span class="n">d</span>
+
+<span class="nf">g</span> <span class="ow">::</span> <span class="kt">Int</span>
+<span class="nf">g</span> <span class="ow">=</span> <span class="n">f</span> <span class="n">instanceC_Int</span>
+</pre></div>
+</td></tr></table><p>これを利用すると，次のようなプログラムが書ける:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cm">{-# LANGUAGE ScopedTypeVariables #-}</span>
+
+<span class="kr">import</span> <span class="nn">Unsafe.Coerce</span>
+
+<span class="kr">newtype</span> <span class="kt">WrapCtx</span> <span class="n">c</span> <span class="n">r</span> <span class="ow">=</span> <span class="kt">WrapCtx</span> <span class="p">(</span><span class="n">c</span> <span class="ow">=&gt;</span> <span class="n">r</span><span class="p">)</span>
+
+<span class="nf">reify</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">a</span> <span class="n">r</span><span class="o">.</span> <span class="p">(</span><span class="kt">C</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+<span class="nf">reify</span> <span class="n">f</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">unsafeCoerce</span> <span class="p">(</span><span class="kt">WrapCtx</span> <span class="n">f</span> <span class="ow">::</span> <span class="kt">WrapCtx</span> <span class="p">(</span><span class="kt">C</span> <span class="n">a</span><span class="p">)</span> <span class="n">r</span><span class="p">)</span> <span class="n">x</span>
+</pre></div>
+</td></tr></table><p>実装時表現において <tt class="docutils literal">C a =&gt; r</tt> は <tt class="docutils literal">newtype C a</tt> においての <tt class="docutils literal">C a <span class="pre">-&gt;</span> r</tt> と同じであり，さらにこれは <tt class="docutils literal">a <span class="pre">-&gt;</span> r</tt> と同じであるという推論から，上のコードは正常に動くであろうということになる．なお、<tt class="docutils literal">WrapCtx</tt> で包むことにより制約の評価を遅延させている。この仕組みにより，引数を省略しても自動的にコンパイラが引数を埋めてくれるシステムが出来上がる．例えば，次のように使える:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">f1</span> <span class="ow">::</span> <span class="kt">C</span> <span class="kt">Int</span> <span class="ow">=&gt;</span> <span class="kt">Bool</span>
+<span class="nf">f1</span> <span class="ow">=</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="nf">f2</span> <span class="ow">::</span> <span class="kt">Bool</span>
+<span class="nf">f2</span> <span class="ow">=</span> <span class="n">reify</span> <span class="n">f1</span> <span class="mi">10</span>
+</pre></div>
+</td></tr></table><p>このプログラムは，推論通りに動作するなら，次のように elaboration される:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">f1</span> <span class="ow">::</span> <span class="kt">C</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+<span class="nf">f1</span> <span class="n">d</span> <span class="ow">=</span> <span class="n">m</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="nf">f2</span> <span class="ow">::</span> <span class="kt">Bool</span>
+<span class="nf">f2</span> <span class="ow">=</span> <span class="n">f1</span> <span class="p">(</span><span class="n">coerce</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</td></tr></table><p>実際には，もちろんこの動作はコンパイラに保証されてるわけでなく，推論通りにいかない可能性もある <a class="footnote-reference" href="#spj-offer" id="auto-id-2">[1]</a> ．このハックを使ったライブラリとして <a class="reference external" href="https://hackage.haskell.org/package/reflection">reflection パッケージ</a> が知られている．その詳細については，<a class="reference external" href="https://www.schoolofhaskell.com/user/thoughtpolice/using-reflection">分かりやすいチュートリアル</a> があるのでそちらを参照するといいと思う．</p>
+<p>ところで，この仕組み，次のようなコードではどう言う動きになるだろうか？:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">f3</span> <span class="ow">::</span> <span class="kt">C</span> <span class="kt">Int</span> <span class="ow">=&gt;</span> <span class="kt">C</span> <span class="kt">Int</span> <span class="ow">=&gt;</span> <span class="kt">Int</span>
+<span class="nf">f3</span> <span class="ow">=</span> <span class="n">m</span>
+
+<span class="nf">f4</span> <span class="ow">::</span> <span class="kt">C</span> <span class="kt">Int</span> <span class="ow">=&gt;</span> <span class="kt">Int</span>
+<span class="nf">f4</span> <span class="ow">=</span> <span class="n">reify</span> <span class="n">f3</span> <span class="mi">10</span>
+</pre></div>
+</td></tr></table><p>このプログラムが想定していることは，2つの暗黙的引数があり，その内の1つに適用するというようなものだ．ただ、どちらの引数を適用するかは指定されていない。これは、未定義動作であり、どちらが適用されるかはコンパイラがどう制約を解決するかに依存している。<a class="reference external" href="https://hackage.haskell.org/package/reflection">reflection パッケージ</a> でもこのようなものは未定義動作を引き起こすとして注意喚起がしてある。ただ、暗黙的引数として見るなら、どの引数を使うかはちゃんとプログラマが制御できて欲しい。</p>
+</div>
+<div class="section" id="auto-id-5">
+<h2>暗黙的引数再考<a class="headerlink" href="#auto-id-5" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ところで、暗黙的引数としてのフルの機能を望まないで、とりあえずそれぞれの型に1つだけ暗黙的引数が指定できるシステムを考えてみる。この場合、上記のように複数の暗黙的引数を使っても、引数の型が同じなら同じ実体を持つため、どちらの引数を使っても結果は変わらない <a class="footnote-reference" href="#conjecture-soundness" id="auto-id-6">[2]</a> 。例えば、</p>
+<ul class="simple">
+<li><tt class="docutils literal">Given a</tt> を暗黙的引数で <tt class="docutils literal">a</tt> 型の値が渡ってくる制約</li>
+<li><tt class="docutils literal">given :: Given a =&gt; a</tt> を暗黙的引数として渡ってきた内容を取り出せる関数</li>
+<li><tt class="docutils literal">Given</tt> 制約はユーザによってグローバルに定義できない</li>
+</ul>
+<p>とした時、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="ow">::</span> <span class="kt">Given</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Given</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Bool</span>
+<span class="nf">f</span> <span class="ow">=</span> <span class="n">given</span>
+</pre></div>
+</td></tr></table><p>は、<tt class="docutils literal">Given</tt> 制約が2箇所あり、辞書渡しと同じ elaboration を考えるなら、実体が2つ渡ってくることになるのでどっちの辞書を採用するかが重要になるように見える。しかし、型が同じなら同じ実体を持つという制約によって、実際はどちらを採用しても <tt class="docutils literal">f</tt> の結果は変わらない。ただ、この保証を守るため、暗黙的引数を最初に適用する部分は少し工夫が必要になる。つまり、<tt class="docutils literal">give</tt> を受け取った引数を暗黙的な引数として受け取った関数に渡すものとした時、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">g</span> <span class="ow">::</span> <span class="kt">Given</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Bool</span>
+<span class="nf">g</span> <span class="ow">=</span> <span class="n">give</span> <span class="kt">True</span> <span class="n">f</span>
+</pre></div>
+</td></tr></table><p>において、<tt class="docutils literal">give</tt> は <tt class="docutils literal">f</tt> の全ての暗黙的引数に関する制約を解決しないといけない。なぜなら、もし解決せずに制約を残してしまうと、上位から渡ってきた <tt class="docutils literal">g</tt> の <tt class="docutils literal">Given Int</tt> 制約が使われてしまう可能性があり、すなわち <tt class="docutils literal">f</tt> において <tt class="docutils literal">give</tt> で渡されたものと上位から渡ってきたものが混在してしまい、型が同じなら同じ実体を持つという制約を守れないからだ。よって、<tt class="docutils literal">give</tt> は制約解決において特別な仕組みを持つ何かにしなければならない。</p>
+<p>ところで今までは、型によって実体は1つに決まると制約が重要ということから、それを保証するよう既存の枠組みを修正しようと流れで話してきた。ところで、発想を転換して、そもそも実体が作られる毎に型を新規に発行するということは考えられないだろうかというのが、今回紹介するアイデアの基盤になる。新規に型を発行すれば、当然型に対して実体は一つになる。具体的には、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">given</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">k</span> <span class="n">a</span><span class="o">.</span> <span class="kt">Given</span> <span class="n">k</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">give</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">a</span> <span class="n">r</span><span class="o">.</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Gift</span> <span class="n">a</span> <span class="n">r</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+
+<span class="kr">newtype</span> <span class="kt">Gift</span> <span class="n">a</span> <span class="n">r</span> <span class="ow">=</span> <span class="kt">Gift</span> <span class="p">(</span><span class="n">forall</span> <span class="n">k</span><span class="o">.</span> <span class="kt">Given</span> <span class="n">k</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">k1</span> <span class="n">k2</span><span class="o">.</span> <span class="kt">Given</span> <span class="n">k1</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Given</span> <span class="n">k2</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k1</span> <span class="ow">-&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k2</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+<span class="nf">f</span> <span class="n">p1</span><span class="o">#</span> <span class="n">p2</span><span class="o">#</span> <span class="ow">=</span> <span class="n">given</span> <span class="n">p1</span><span class="o">#</span> <span class="o">&amp;&amp;</span> <span class="n">given</span> <span class="n">p2</span><span class="o">#</span>
+
+<span class="nf">g</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">k</span><span class="o">.</span> <span class="kt">Given</span> <span class="n">k</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+<span class="nf">g</span> <span class="n">p2</span><span class="o">#</span> <span class="ow">=</span> <span class="n">give</span> <span class="kt">True</span> <span class="o">$</span> <span class="kt">Gift</span> <span class="nf">\</span><span class="n">p1</span><span class="o">#</span> <span class="ow">-&gt;</span> <span class="n">f</span> <span class="n">p1</span><span class="o">#</span> <span class="n">p2</span><span class="o">#</span>
+</pre></div>
+</td></tr></table><p>みたいな感じでエミュレートができる。基本的には、<tt class="docutils literal">Proxy# k</tt> と rank 2 type がポイントになっていて、どんな鍵 <tt class="docutils literal">k</tt> に紐づく暗黙的引数でも大丈夫な関数の場合、鍵を新規発行して引数に紐付け関数に渡す関数が <tt class="docutils literal">give</tt> になっている。なお、<tt class="docutils literal">give</tt> / <tt class="docutils literal">given</tt> は、<a class="reference external" href="https://hackage.haskell.org/package/reflection">reflection パッケージ</a> の流儀に則って実装すれば実際に作れて、以下の感じになる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">class</span> <span class="kt">Given</span> <span class="n">k</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">given</span> <span class="ow">::</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+
+<span class="nf">give</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">a</span> <span class="n">r</span><span class="o">.</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Gift</span> <span class="n">a</span> <span class="n">r</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+<span class="nf">give</span> <span class="n">x</span> <span class="n">f</span> <span class="ow">=</span> <span class="p">(</span><span class="n">unsafeCoerce</span> <span class="n">f</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Proxy</span><span class="o">#</span> <span class="nb">()</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="nb">()</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="p">(</span><span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">x</span><span class="p">)</span> <span class="n">proxy</span><span class="o">#</span>
+</pre></div>
+</td></tr></table><p>もちろん、<tt class="docutils literal">Given</tt> のインスタンスが作れちゃうとまずいので、そこは隠蔽する必要があるけど。なお、型の新規発行の部分は、実際には <tt class="docutils literal">()</tt> をいつでも発行している。つまり、外部から見てどういう型を発行しているかが分からないことが大事って感じ。同じ感じのエミュレートは、存在型でも可能で、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">newtype</span> <span class="kt">GivenInst</span> <span class="n">k</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">GivenInst</span> <span class="n">a</span>
+
+<span class="kr">data</span> <span class="kt">GivenInstE</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="kt">GivenInstE</span> <span class="ow">::</span> <span class="kt">GivenInst</span> <span class="n">k</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">GivenInstE</span> <span class="n">a</span>
+
+<span class="nf">givenInstE</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">a</span><span class="o">.</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">GivenInstE</span> <span class="n">a</span>
+<span class="nf">givenInstE</span> <span class="n">x</span> <span class="ow">=</span> <span class="kt">GivenInstE</span> <span class="p">(</span><span class="kt">GivenInst</span> <span class="n">x</span> <span class="ow">::</span> <span class="kt">GivenInst</span> <span class="nb">()</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="kr">class</span> <span class="kt">Given</span> <span class="n">k</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">given</span> <span class="ow">::</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+
+<span class="nf">give</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">k</span> <span class="n">a</span> <span class="n">r</span><span class="o">.</span> <span class="kt">GivenInst</span> <span class="n">k</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Gift</span> <span class="n">k</span> <span class="n">a</span> <span class="n">r</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+<span class="nf">give</span> <span class="n">x</span> <span class="n">f</span> <span class="ow">=</span> <span class="p">(</span><span class="n">unsafeCoerce</span> <span class="n">f</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Proxy</span><span class="o">#</span> <span class="nb">()</span> <span class="ow">-&gt;</span> <span class="kt">GivenInst</span> <span class="n">k</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="nb">()</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="p">(</span><span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">x</span><span class="p">)</span> <span class="n">proxy</span><span class="o">#</span>
+
+<span class="kr">newtype</span> <span class="kt">Gift</span> <span class="n">k</span> <span class="n">a</span> <span class="n">r</span> <span class="ow">=</span> <span class="kt">Gift</span> <span class="p">(</span><span class="kt">Given</span> <span class="n">k</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">k1</span> <span class="n">k2</span><span class="o">.</span> <span class="kt">Given</span> <span class="n">k1</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Given</span> <span class="n">k2</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k1</span> <span class="ow">-&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k2</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+<span class="nf">f</span> <span class="n">p1</span><span class="o">#</span> <span class="n">p2</span><span class="o">#</span> <span class="ow">=</span> <span class="n">given</span> <span class="n">p1</span><span class="o">#</span> <span class="o">&amp;&amp;</span> <span class="n">given</span> <span class="n">p2</span><span class="o">#</span>
+
+<span class="nf">g</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">k</span><span class="o">.</span> <span class="kt">Given</span> <span class="n">k</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+<span class="nf">g</span> <span class="n">p2</span><span class="o">#</span> <span class="ow">=</span> <span class="kr">case</span> <span class="n">givenInstE</span> <span class="kt">True</span> <span class="kr">of</span>
+  <span class="kt">GivenInstE</span> <span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">give</span> <span class="n">x</span> <span class="o">$</span> <span class="kt">Gift</span> <span class="nf">\</span><span class="n">p1</span><span class="o">#</span> <span class="ow">-&gt;</span> <span class="n">f</span> <span class="n">p1</span><span class="o">#</span> <span class="n">p2</span><span class="o">#</span>
+</pre></div>
+</td></tr></table><p>ぱっと見こっちの方が複雑に見えるかもしれないけど、本質的にはこっちの方がさっきのより直感的で、新規発行されたものがどういう型か言及できないように、何かよく分からん鍵付きのインスタンスが渡ってきた時に、それを暗黙的引数として型が合ってるやつに渡せる。ところで、鍵について何も言及できないということは、暗黙的引数を受け取る関数が鍵に対して多相化されてるはずで、その直感からさっきの rank 2 type による例ができる。ところで、rank 2 type の例は多相化された関数しか相手にしていないが、こっちの例は暗黙的引数の新規発行だけは特別な仕組みになっているけど、それ以外は別に鍵を多相化しなくても利用できる。なので、例えばグローバルに1つ代表的な値が作りたいとなった時、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">Global</span>
+<span class="kr">instance</span> <span class="kt">Given</span> <span class="kt">Global</span> <span class="kt">Bool</span> <span class="kr">where</span>
+  <span class="n">given</span> <span class="kr">_</span> <span class="ow">=</span> <span class="kt">True</span>
+</pre></div>
+</td></tr></table><p>みたいなんを書いといて、これを使うみたい何ができる。また、鍵自体を、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="ow">::</span> <span class="n">forall</span> <span class="n">k</span><span class="o">.</span> <span class="kt">Given</span> <span class="kt">Global</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Given</span> <span class="n">k</span> <span class="kt">Bool</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span>
+<span class="nf">f</span> <span class="n">p</span><span class="o">#</span> <span class="ow">=</span> <span class="n">given</span> <span class="o">@</span><span class="kt">Global</span> <span class="n">proxy</span><span class="o">#</span> <span class="o">&amp;&amp;</span> <span class="n">given</span> <span class="n">p</span><span class="o">#</span>
+</pre></div>
+</td></tr></table><p>のように指定することも可能だ。鍵が単相である分には、プロテクトは外れないので、グローバルなインスタンスがコヒーレンスを守るならそれはそれで大丈夫だ。なお、ちゃんと単相であることを保証するハックとして、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">Undefined</span>
+<span class="kr">instance</span> <span class="kt">Given</span> <span class="kt">Undefined</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">given</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">undefined</span>
+</pre></div>
+</td></tr></table><p>と機先を制しておけば、型クラスの一意性判定により多相な鍵の登録はブロックされるはず。後は、<tt class="docutils literal">GivenInst</tt> コンストラクタを隠蔽しておけば、暗黙的引数でもグローバルにもコヒーレンスが保証される仕組みが出来上がる。</p>
+</div>
+<div class="section" id="auto-id-7">
+<h2>プリミティブなサポートへ<a class="headerlink" href="#auto-id-7" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>ここまでのハックを言語機能としてサポートするための構文とかも色々と考えた。基本的には、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">class</span> <span class="kt">C</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">m</span> <span class="ow">::</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="n">keyName</span> <span class="ow">::</span> <span class="kt">C</span> <span class="nb">()</span> <span class="kr">where</span> <span class="o">...</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="kt">C</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">C</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="o">%</span><span class="n">d1</span> <span class="o">%</span><span class="n">d2</span> <span class="ow">=</span> <span class="n">m</span> <span class="n">d1</span> <span class="o">&lt;&gt;</span> <span class="n">m</span> <span class="n">d2</span>
+</pre></div>
+</td></tr></table><p>ってやると、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kr">class</span> <span class="kt">C</span> <span class="n">k</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">m</span> <span class="ow">::</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+
+<span class="kr">instance</span> <span class="kt">C</span> <span class="n">keyName</span> <span class="kt">Bool</span> <span class="kr">where</span> <span class="o">...</span>
+
+<span class="nf">f</span> <span class="ow">::</span> <span class="kt">C</span> <span class="n">d1</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">C</span> <span class="n">d2</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Semigroup</span> <span class="n">k</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">d1</span> <span class="ow">-&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">d2</span> <span class="ow">-&gt;</span> <span class="kt">Proxy</span><span class="o">#</span> <span class="n">k</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">f</span> <span class="n">d1</span> <span class="n">d2</span> <span class="ow">=</span> <span class="n">m</span> <span class="n">d1</span> <span class="o">&lt;&gt;</span> <span class="n">m</span> <span class="n">d2</span>
+</pre></div>
+</td></tr></table><p>みたいなん相当になる。また、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">g</span> <span class="ow">::</span> <span class="nb">()</span>
+<span class="nf">g</span> <span class="ow">=</span> <span class="n">f</span> <span class="o">%</span><span class="p">(</span><span class="kt">C</span><span class="p">{</span> <span class="n">m</span> <span class="ow">=</span> <span class="nb">()</span> <span class="p">})</span> <span class="o">%</span><span class="p">(</span><span class="kt">C</span><span class="p">{</span> <span class="n">m</span> <span class="ow">=</span> <span class="nb">()</span> <span class="p">})</span>
+</pre></div>
+</td></tr></table><p>みたいなんをすると、こっちは直接 Haskell では書けないけど、<tt class="docutils literal">%(C{ m = <span class="pre">()})</span> :: exists k. C k ()</tt> みたいなんが出来上がって、いい感じに elaboration される的な。コヒーレンスチェックは完全に今まで通りグローバルなものさえチェックすれば良いはず。ただ、型制約の解決と型推論はちょっと変わるかもしれない。特に、上の例は <tt class="docutils literal">C d1 a</tt> / <tt class="docutils literal">C d2 a</tt> のインスタンスは束縛して使ってるわけだけど、<tt class="docutils literal">Semigroup</tt> のインスタンスは束縛して使ってない。これは、<tt class="docutils literal">Semigroup</tt> のどの鍵のインスタンス使うねんって話になる場合があると思うので、そこをうまいこと定義しないといけなさそう。これは型の defaulting の仕組みと大体同じことできないかなと考えてる。多相化されたままでなるべく解決できるようにして、曖昧な鍵が残っちゃったらデフォルトの鍵を使う的な。まあ、その辺ももうちょっと話詰めないとなと考えながら、特に何も考えていないのであった。</p>
+</div>
+<div class="section" id="auto-id-8">
+<h2>まとめ<a class="headerlink" href="#auto-id-8" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>というわけで、ちょっと拡張するとコヒーレンス満たす暗黙的引数と型クラス共通の仕組み作れそうだなみたいな話でした。</p>
+<p>直感的には、コヒーレンスの正当性示せそうな気がするけど、あまり真剣には考えてない。もしかしたら壊れがあるかも。今はあまり、新機能をちゃんとまとめて実装してみることに興味がないので、多分このアイデア自体は放置されることになるんだけど、ちゃんと覚えているうちにまとめておくのは大事な気がするので、アイデアの大筋をまとめてみた。Haskell は型で一意にしかインスタンスを作らないことを前提としていて、その拡張は大体その方針と妥協しながら何とかするみたいな方向性が多く、逆に Scala はコヒーレンスチェックをある程度捨てていて、その代わり各々で管理してくださいみたいな感じなんだけど、それぞれ両極端な感じがあるけど、その中間としてこういう方針もあるよなあと考えた感じ。</p>
+<p>ちゃんとアイデアまとめたんだし、どうせなら近い内に実装してみて使い勝手実験できたらなあと思っている。後、ちゃんと形式的に型システムまとめて、健全性も証明しておきたいなあ。ま、そういう感じです。なお、特に自分でやりたい欲は特に無くて (他にやりたいことたくさんあるし)、使ってみたい欲しかないので、誰か実装してくれるなら実装してくれ。</p>
+<table class="docutils footnote" frame="void" id="spj-offer" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-2">[1]</a></td><td><a class="reference external" href="https://www.reddit.com/r/haskell/comments/5xqozf/implicit_parameters_vs_reflection/dek9eqg/">https://www.reddit.com/r/haskell/comments/5xqozf/implicit_parameters_vs_reflection/dek9eqg/</a> で，GHC 側は一定のサポートをするつもりだという言説が述べられている．実際のところどうなのかは分からない．</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="conjecture-soundness" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-6">[2]</a></td><td>と考えているが正しい。厳密に健全性が示せてるわけではない。</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/03/coherent-implicit-parameter.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/03/coherent-implicit-parameter.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/xing-kurasu.html">型クラス</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/xing-shisutemu.html">型システム</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/">型クラスの Coherence と Orphan Instance</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/">Local Do と型クラス</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/deriving-strategies-by-deriving-via/">DerivingVia で deriving 戦略を模倣する</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/">遅延評価でデバッグが困難になる状況</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/02/haskell-atcoder-template/">AtCoder の新環境テストの問題を解いてみる</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>
