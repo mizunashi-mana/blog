@@ -23,6 +23,9 @@
 `Scala <https://mizunashi-mana.github.io/blog/tag/scala.html>`_
   あんまり書けない．読めはする．
 
+`Kotlin <https://mizunashi-mana.github.io/blog/tag/kotlin.html>`_
+  あんまり書けない．読めはする．
+
 `Python <https://mizunashi-mana.github.io/blog/tag/python.html>`_
   あんまり書けない．読めはする．
 
