@@ -1,5 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - ツール</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/tsuru.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-03-29T08:23:18+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>LaTeX の数式フォントに STIX を使う</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/latex-with-stix-font/" rel="alternate"></link><published>2020-03-07T05:59:35+09:00</published><updated>2020-03-29T08:23:18+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-07:/blog/posts/2020/03/latex-with-stix-font/</id><summary type="html">&lt;p&gt;LaTeX では Computer Modern フォントが使われている．ただ，Computer Modern フォントはかなり古く対応してる文字もあまり多くない．特に日本語環境だと IPA フォントなどと併用して使われることが多い．僕自身は Computer Modern に代わる目的で作られた Latin Modern フォントと IPA フォントを使ってきたんだけど，最近数式環境だけ STIX フォントに切り替えた．そのメモ …&lt;/p&gt;</summary><content type="html">&lt;p&gt;LaTeX では Computer Modern フォントが使われている．ただ，Computer Modern フォントはかなり古く対応してる文字もあまり多くない．特に日本語環境だと IPA フォントなどと併用して使われることが多い．僕自身は Computer Modern に代わる目的で作られた Latin Modern フォントと IPA フォントを使ってきたんだけど，最近数式環境だけ STIX フォントに切り替えた．そのメモ．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - ツール</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/tsuru.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-06-18T12:58:47+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>XCode でビルドするときに引っかかったところ</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/06/xcode-trouble-shooting/" rel="alternate"></link><published>2020-06-18T12:58:47+09:00</published><updated>2020-06-18T12:58:47+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-06-18:/blog/posts/2020/06/xcode-trouble-shooting/</id><summary type="html">&lt;p&gt;XCode を使ってる時，ちょっと検索しにくい問題に2件当たったので，備忘録として残しておく．&lt;/p&gt;
+&lt;div class="section" id="undefined-symbols-for-architecture-i386"&gt;
+&lt;h2&gt;Undefined symbols for architecture i386&lt;a class="headerlink" href="#undefined-symbols-for-architecture-i386" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;iOS 用の Objective-C のプロジェクトをビルドしてる際，なぜかリンクに失敗し，ある特定の framework について，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+Undefined symbols for architecture i386:
+  "_OBJC_CLASS_$_XXX", referenced …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;XCode を使ってる時，ちょっと検索しにくい問題に2件当たったので，備忘録として残しておく．&lt;/p&gt;
+&lt;div class="section" id="undefined-symbols-for-architecture-i386"&gt;
+&lt;h2&gt;Undefined symbols for architecture i386&lt;a class="headerlink" href="#undefined-symbols-for-architecture-i386" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;iOS 用の Objective-C のプロジェクトをビルドしてる際，なぜかリンクに失敗し，ある特定の framework について，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+Undefined symbols for architecture i386:
+  "_OBJC_CLASS_$_XXX", referenced from:
+  objc-class-ref in XXX.o
+&lt;/pre&gt;
+&lt;p&gt;というエラーが全てのシンボルについて出ていた．で，このリンカエラーが起こる前に，次のようなメッセージが出ていた:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+Ignoring file XXX.framework/XXX, missing required architecture i386 in file XXX.framework/XXX
+&lt;/pre&gt;
+&lt;p&gt;僕は，iOS プログラミングはほぼ初体験だったので，そもそも framework というのがどういうものなのか知らなかったんだけど，こいつはライブラリアーカイブやヘッダ情報などが詰め込まれているものらしい．ライブラリはアーキテクチャごとに用意されていて，どうやら今回の場合，この framework に i386 アーキテクチャが入っていないということらしい．&lt;/p&gt;
+&lt;p&gt;ところで，件の framework は他のプロジェクトを自分でビルドして持ってきたものだった．自分でビルドしたものに必要なアーキテクチャ用のライブラリアーカイブが入っていないのは不思議だ．で，いろいろ調べてみると，どうやら今回は次のような原因によるものだった (と思われる):&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Debug ビルドでは，XCode はデフォルトで必要なアーキテクチャ用のライブラリしか作らない&lt;/li&gt;
+&lt;li&gt;対象としてる iOS のバージョンが違った&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;一つ目は，どうやらいろんな人が詰まる問題みたいで，"Build Settings" の "Build Active Architecture Only" という設定が問題になる．この設定は，幾つかの標準アーキテクチャ用のライブラリしかビルドしないという設定で，デフォルトで Debug ビルド時は YES，Release ビルド時は NO になっている．今回はもう一つのプロジェクトの方を Debug ビルドしていて，そのプロジェクトの設定はデフォルトのままだったので，標準アーキテクチャしか framework に入っていなかった．なお，framework がどのアーキテクチャ向けのものなのかは，&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ xcrun lipo -info XXX.framework/XXX
+Architectures in the fat file: XXX are: armv7 armv7s i386 arm64
+&lt;/pre&gt;
+&lt;p&gt;で確認できる．世の中で配布されている framework は結構アーキテクチャに抜けがあったりするっぽいので，&lt;tt class="docutils literal"&gt;missing required architecture&lt;/tt&gt; と言われた場合は，まずは上のコマンドで対応してるアーキテクチャを確認してみると良いと思う．&lt;/p&gt;
+&lt;p&gt;さて，今回は両方 Debug ビルドしていたので，両方標準アーキテクチャが同じなら実は Release ビルドしない限り問題は起きなかったはずだ．では，なんで怒られたかなんだけど，実はいまいち原因が分かっていない．おそらく対象の iOS バージョンが違ったのが原因で，標準アーキテクチャが変わったんじゃないかと思うんだけど，実は詳しく調べてないので細かい原因は判明してない．&lt;/p&gt;
+&lt;p&gt;とりあえずめんどかったので，今回は framework を作るプロジェクトの方の，Debug ビルド時の設定で，"Build Active Architecture Only" を YES から NO に変更し，一通りのアーキテクチャに対応させることにした．基本的な対応は Release ビルドを行うことだと思う．ただ今回は Debug ビルド時のロジックなども欲しかったのでそういった対応をした感じ．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="extra-info-about-plist-acl-not-found"&gt;
+&lt;h2&gt;Extra info about plist: ACL=&amp;lt;not found&amp;gt;&lt;a class="headerlink" href="#extra-info-about-plist-acl-not-found" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;さて，上の設定でビルドをしてアプリをシミュレータで起動させてみると，今度は次のようなエラーが表示された:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This app could not be installed at this time.&lt;/p&gt;
+&lt;p&gt;Could not install at this time.
+Failed to load Info.plist from bundle at path ~/Library/Developer/CoreSimulator/Devices/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/data/Library/Caches/com.apple.mobile.installd.staging/temp.A3gmX5/extracted/Test.app/Frameworks/XXX.framework; Extra info about plist: ACL=&amp;lt;not found&amp;gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;このエラーは Run 時に，アラートダイアログで通知されて，&lt;tt class="docutils literal"&gt;Details&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;OK&lt;/tt&gt; というボタンが表示される．とりあえず，&lt;tt class="docutils literal"&gt;Details&lt;/tt&gt; の方を押してみると，次のようなことを言われる:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+Domain: MIInstallerErrorDomain
+Code: 35
+User Info: {
+    FunctionName = "-[MIBundle _validateWithError:]";
+    LegacyErrorString = PackageInspectionFailed;
+    SourceFileLine = 128;
+}
+&lt;/pre&gt;
+&lt;p&gt;これでは何も分からないが，どうやら先ほどのもう一つのプロジェクトでビルドした framework の &lt;tt class="docutils literal"&gt;Info.plist&lt;/tt&gt; がおかしそうな印象を受ける．ただ，実はこの framework は他のアプリに組み込んで動かしてみたことがあって，その時はこういうことは無かった．&lt;/p&gt;
+&lt;p&gt;で，何が悪かったのかだけど，この framework を追加する際の設定が悪かった．framework をプロジェクトに追加する際，その埋め込み方が設定できる．今回は，これが &lt;tt class="docutils literal"&gt;Embed &amp;amp; Sign&lt;/tt&gt; になっていた．これも詳しい原因はちょっと調べてないんだけど，Debug ビルドで作った signing とか何もされてないやつを，embed しようとすると上のようなエラーになるんかな？&lt;/p&gt;
+&lt;p&gt;今回は特に embed とかする必要ないし，単にシミュレータで動作確認したかっただけなんで，&lt;tt class="docutils literal"&gt;Do Not Embed&lt;/tt&gt; にすると無事起動するようになった．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;単にビルドして動かしたかっただけなのに，この2つの問題解決するだけで結構時間かかっちゃった．後，Objective-C 何も分からん．今回は以上です．&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/06/xcode-trouble-shooting.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/06/xcode-trouble-shooting.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="ツール"></category><category term="XCode"></category><category term="Objective-C"></category><category term="iOS"></category><category term="ビルド"></category></entry><entry><title>LaTeX の数式フォントに STIX を使う</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/latex-with-stix-font/" rel="alternate"></link><published>2020-03-07T05:59:35+09:00</published><updated>2020-03-29T08:23:18+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-07:/blog/posts/2020/03/latex-with-stix-font/</id><summary type="html">&lt;p&gt;LaTeX では Computer Modern フォントが使われている．ただ，Computer Modern フォントはかなり古く対応してる文字もあまり多くない．特に日本語環境だと IPA フォントなどと併用して使われることが多い．僕自身は Computer Modern に代わる目的で作られた Latin Modern フォントと IPA フォントを使ってきたんだけど，最近数式環境だけ STIX フォントに切り替えた．そのメモ …&lt;/p&gt;</summary><content type="html">&lt;p&gt;LaTeX では Computer Modern フォントが使われている．ただ，Computer Modern フォントはかなり古く対応してる文字もあまり多くない．特に日本語環境だと IPA フォントなどと併用して使われることが多い．僕自身は Computer Modern に代わる目的で作られた Latin Modern フォントと IPA フォントを使ってきたんだけど，最近数式環境だけ STIX フォントに切り替えた．そのメモ．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
 &lt;h2&gt;きっかけ&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;クラス &lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;A&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;A&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68333em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault"&gt;A&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;，&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;B&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;B&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68333em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault" style="margin-right:0.05017em;"&gt;B&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; について，&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;A&lt;/mi&gt;&lt;mo&gt;⊊&lt;/mo&gt;&lt;mi&gt;B&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;A \subsetneq B&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.8193em;vertical-align:-0.13597em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault"&gt;A&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel amsrm"&gt;⊊&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68333em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault" style="margin-right:0.05017em;"&gt;B&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; またはその逆か，&lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;A&lt;/mi&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mi&gt;B&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;A = B&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68333em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault"&gt;A&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel"&gt;=&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68333em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault" style="margin-right:0.05017em;"&gt;B&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; か，互いに比較不能，つまり &lt;span class="math inline"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;A&lt;/mi&gt;&lt;mo&gt;⊈&lt;/mo&gt;&lt;mi&gt;B&lt;/mi&gt;&lt;mo&gt;∧&lt;/mo&gt;&lt;mi&gt;B&lt;/mi&gt;&lt;mo&gt;⊈&lt;/mo&gt;&lt;mi&gt;A&lt;/mi&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;A \nsubseteq B \land B \nsubseteq A&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span aria-hidden="true" class="katex-html"&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:1.09657em;vertical-align:-0.30274em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault"&gt;A&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel amsrm"&gt;⊈&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68333em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault" style="margin-right:0.05017em;"&gt;B&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2222222222222222em;"&gt;&lt;/span&gt;&lt;span class="mbin"&gt;∧&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2222222222222222em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:1.09657em;vertical-align:-0.30274em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault" style="margin-right:0.05017em;"&gt;B&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;span class="mrel amsrm"&gt;⊈&lt;/span&gt;&lt;span class="mspace" style="margin-right:0.2777777777777778em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="strut" style="height:0.68333em;vertical-align:0em;"&gt;&lt;/span&gt;&lt;span class="mord mathdefault"&gt;A&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; かの何の関係であるかは重要になることが多い．ところで，比較不能に関してだけ2項演算ではないわけだけど，これを他と合わせて書く表記はないのだろうかというと，一応あって「⫓」を否定する記号が使われる．「⫓」の意味としては部分集合であり上位集合であるという意味になっていて，それを否定するのでそのどちらでもない，つまり片方だけに含まれる要素がそれぞれ存在するということになる．ただこの記号，LaTeX の標準パッケージ中ではサポートされていない．ところで，この記号は Unicode では U+2AD3 の文字としてサポートされていて，この文章でも Unicode 文字をそのまま使っている．&lt;/p&gt;
