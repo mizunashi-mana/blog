@@ -17,17 +17,15 @@ jobs:
       - run: |
           [[ ! -d /usr/local/bin ]] || \
             sudo chown -R circleci:circleci /usr/local/bin
-          [[ ! -d /usr/local/lib/python3.6/site-packages ]] || \
-            sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v3
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-{{ checksum "package-lock.json" }}-v4
       - run: |
           sudo pip install --upgrade pip
           sudo pip install pipenv
           pipenv install
           npm install
       - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v3
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-{{ checksum "package-lock.json" }}-v4
           paths:
             - ".venv"
             - "/usr/local/bin"
@@ -53,10 +51,8 @@ jobs:
       - run: |
           [[ ! -d /usr/local/bin ]] || \
             sudo chown -R circleci:circleci /usr/local/bin
-          [[ ! -d /usr/local/lib/python3.6/site-packages ]] || \
-            sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-v3
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-{{ checksum "package-lock.json" }}-v4
       - run: |
           sudo pip install --upgrade pip
           sudo pip install pipenv
