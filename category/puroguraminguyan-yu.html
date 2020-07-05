@@ -131,6 +131,31 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/07/no-parenthesis-with-blockarguments/#no-parenthesis-with-blockarguments">BlockArguments で括弧を書かない生活を送る</a></h2>
+    <p>
+          Posted on 日 05 7月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghckuo-zhang.html">GHC拡張</a>
+    </p>
+  </header>
+  <div>
+      <p>GHC 8.6 から <tt class="docutils literal">BlockArguments</tt> という拡張が入った．これは構文拡張で，Haskell 2010 で必要だった幾つかの括弧を省略できるようにするものだ．この拡張を使うことで，Haskell プログラミングにおいて極限まで括弧を省略できるようになった．今回は，<tt class="docutils literal">BlockArguments</tt> の簡単な紹介と，どういう風に括弧の省略ができるかを見ていきたいと思う．</p>
+<div class="section" id="auto-id-1">
+<h2><tt class="docutils literal">BlockArguments</tt> 拡張<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>Haskell 2010 では，構文要素として幾つかのブロック式が入っている．</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2 …</pre></div></td></tr></table></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2020/07/no-parenthesis-with-blockarguments/#no-parenthesis-with-blockarguments">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-implicit-parameter/#coherent-implicit-parameter">Coherent Implicit Parameter</a></h2>
     <p>
           Posted on 火 31 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
@@ -334,31 +359,6 @@
 <li>rustc: <tt class="docutils literal"><span class="pre">1 …</span></tt></li></ul>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/06/rust-generics-inside/#rust-generics-inside">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">GHC IO モナドの中身</a></h2>
-    <p>
-          Posted on 金 17 5月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/io.html">IO</a>
-    </p>
-  </header>
-  <div>
-      <p>Haskell の IO モナドって，中身どうなってたんだろと気になってて，ちょっと調べてみた．そのメモ．</p>
-<div class="section" id="io-realworld">
-<h2>IO モナドと RealWorld<a class="headerlink" href="#io-realworld" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>まずは基本から． IO モナドは， Haskell の根幹となるモナドで， <tt class="docutils literal">main</tt> も IO で書く． GHC では中身は次のように定義されている <a class="footnote-reference" href="#io-monad-definition" id="auto-id-1">[1]</a>:</p>
-<pre class="literal-block">
--- In GHC.Types …</pre></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/05/ghc-io-inside/#ghc-io-inside">    Continue reading
 </a>
   </div>
 </article>

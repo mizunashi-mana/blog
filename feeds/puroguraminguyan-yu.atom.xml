@@ -1,5 +1,289 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-03-31T07:30:54+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>Coherent Implicit Parameter</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-implicit-parameter/" rel="alternate"></link><published>2020-03-31T07:30:54+09:00</published><updated>2020-03-31T07:30:54+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-31:/blog/posts/2020/03/coherent-implicit-parameter/</id><summary type="html">&lt;p&gt;アドホック多相を実現する方法として，型クラスがある．型クラスは，辞書渡しと呼ばれる方法により，かなり自然に elaboration ができる．ところで，この elaboration は暗黙的引数にも転用できることが知られている。特に、型クラスを搭載した Haskell では，その処理系 GHC の内部実装を利用して暗黙的引数を実現する &lt;a class="reference external" href="https://hackage.haskell.org/package/reflection"&gt;reflection パッケージ&lt;/a&gt; が知られている．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - プログラミング言語</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/puroguraminguyan-yu.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-07-05T12:12:00+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>BlockArguments で括弧を書かない生活を送る</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/07/no-parenthesis-with-blockarguments/" rel="alternate"></link><published>2020-07-05T12:12:00+09:00</published><updated>2020-07-05T12:12:00+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-07-05:/blog/posts/2020/07/no-parenthesis-with-blockarguments/</id><summary type="html">&lt;p&gt;GHC 8.6 から &lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; という拡張が入った．これは構文拡張で，Haskell 2010 で必要だった幾つかの括弧を省略できるようにするものだ．この拡張を使うことで，Haskell プログラミングにおいて極限まで括弧を省略できるようになった．今回は，&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; の簡単な紹介と，どういう風に括弧の省略ができるかを見ていきたいと思う．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; 拡張&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Haskell 2010 では，構文要素として幾つかのブロック式が入っている．&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2 …&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;GHC 8.6 から &lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; という拡張が入った．これは構文拡張で，Haskell 2010 で必要だった幾つかの括弧を省略できるようにするものだ．この拡張を使うことで，Haskell プログラミングにおいて極限まで括弧を省略できるようになった．今回は，&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; の簡単な紹介と，どういう風に括弧の省略ができるかを見ていきたいと思う．&lt;/p&gt;
+&lt;div class="section" id="auto-id-1"&gt;
+&lt;h2&gt;&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; 拡張&lt;a class="headerlink" href="#auto-id-1" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Haskell 2010 では，構文要素として幾つかのブロック式が入っている．&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lexp  →  \ apat1 … apatn -&amp;gt; exp
+      |  let decls in exp
+      |  if exp [;] then exp [;] else exp
+      |  case exp of { alts }
+      |  do { stmts }
+      |  fexp
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;における，&lt;/p&gt;
+&lt;dl class="docutils"&gt;
+&lt;dt&gt;ラムダ式&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;\ apat1 … apatn &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; exp&lt;/tt&gt;&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;let&lt;/tt&gt; 式&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;let decls in exp&lt;/tt&gt;&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;if&lt;/tt&gt; 式&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;if exp [;] then exp [;] else exp&lt;/tt&gt;&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;case-of&lt;/span&gt;&lt;/tt&gt; 式&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;case exp of { alts }&lt;/tt&gt;&lt;/dd&gt;
+&lt;dt&gt;&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; 式&lt;/dt&gt;
+&lt;dd&gt;&lt;tt class="docutils literal"&gt;do { stmts }&lt;/tt&gt;&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;の5種類の式だ．他に，GHC 拡張で &lt;tt class="docutils literal"&gt;mdo&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;\case&lt;/tt&gt;，&lt;tt class="docutils literal"&gt;proc&lt;/tt&gt; などもある．ところで，これらの式は &lt;tt class="docutils literal"&gt;lexp&lt;/tt&gt; に紐づいている．これは，中置記法構文において&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;infixexp  →  lexp qop infixexp
+          |  - infixexp
+          |  lexp
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように，左の式の構文要素として使用される．具体的には，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;atomically&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt;
+  &lt;span class="n"&gt;writeTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように書ける．なお，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のような式の場合，&lt;tt class="docutils literal"&gt;(\f &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; f) $ 0&lt;/tt&gt; か &lt;tt class="docutils literal"&gt;\f &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (f $ 0)&lt;/tt&gt; の解釈の2通りが存在し，曖昧性が生じるが，これを解決するためのメタ規則が設定されており &lt;a class="footnote-reference" href="#haskell2010-metarule" id="auto-id-2"&gt;[1]&lt;/a&gt;，ブロック式は可能な限り，右に広くとることになっているため，この式は &lt;tt class="docutils literal"&gt;\f &lt;span class="pre"&gt;-&amp;gt;&lt;/span&gt; (f $ 0)&lt;/tt&gt; に一意に解釈が決まる．よって，左にブロック式を書きたい場合は，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように括弧で囲む必要がある．ところで，先ほどの&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;atomically&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt;
+  &lt;span class="n"&gt;writeTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;の式は，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;atomically&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt;
+  &lt;span class="n"&gt;writeTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように，&lt;tt class="docutils literal"&gt;$&lt;/tt&gt; 無しで書くことはできない．関数適用の構文は，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;fexp  →  [fexp] aexp
+
+aexp  →  qvar
+      |  gcon
+      |  literal
+      |  ( exp )
+      |  …
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のようになっている．&lt;tt class="docutils literal"&gt;aexp&lt;/tt&gt; の中で &lt;tt class="docutils literal"&gt;lexp&lt;/tt&gt; の構文を使用するには，括弧で囲む必要があるため，関数適用を &lt;tt class="docutils literal"&gt;$&lt;/tt&gt; 無しで書くには，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;atomically&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt;
+  &lt;span class="n"&gt;writeTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように括弧で囲む必要がある．&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; の概要は，ブロック式を &lt;tt class="docutils literal"&gt;lexp&lt;/tt&gt; から &lt;tt class="docutils literal"&gt;aexp&lt;/tt&gt; に移すことで，関数適用時にも括弧無しで書けるようにするというものだ．結果，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;atomically&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;readTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt;
+  &lt;span class="n"&gt;writeTVar&lt;/span&gt; &lt;span class="n"&gt;tv&lt;/span&gt; &lt;span class="o"&gt;$!&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;という式が，有効になる．これが，&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; 拡張になる．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="do"&gt;
+&lt;h2&gt;&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; によるレイアウトハッキング&lt;a class="headerlink" href="#do" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;さて，&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; はここまで見ると単純な拡張に見える．ところが，これを &lt;tt class="docutils literal"&gt;do&lt;/tt&gt; 構文と組み合わせると，今までの &lt;tt class="docutils literal"&gt;$&lt;/tt&gt; による書き方を書きやすくするのに加え，それより遥かに豊かな表記法を提供してくれる．例えば，以下のような書き方が可能になる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;foldl'&lt;/span&gt;
+  &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;shows&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+  &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+  &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="n"&gt;replicate&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+  &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="s"&gt;""&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;この式は，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;foldl'&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;shows&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;replicate&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="s"&gt;""&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;と同等になる．そのカラクリは，&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; 式の脱糖方法にある．&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; 式は，構成要素が1つの式しか無い場合，何も行わずその式を展開する．&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; 式の脱糖が意味を持つのは2つ以上式が並んだ場合のみだ．それを利用すれば，モナドと何の関係性もない式を，&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; で使うことにより，ある式の範囲を明示することができる．&lt;/p&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;$&lt;/tt&gt; は演算子の優先順位により，両側の式範囲を示すマーカーとなるが，&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; は代わりにレイアウトルールによりその範囲を明示するのに使用できる．ただ，この違いは注意が必要でもある．例えば，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;という式は，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;と同等の式になる．ところが，&lt;tt class="docutils literal"&gt;$&lt;/tt&gt; を何も考えずに&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;というように，&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; に置き換えるだけでは，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;というように，元の式とは異なる式になってしまう．このような場合は，&lt;tt class="docutils literal"&gt;$&lt;/tt&gt; を置き換えることはできない．また，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;id&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="kt"&gt;Identity&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;runIdentity&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;というような式を &lt;tt class="docutils literal"&gt;do&lt;/tt&gt; で書く場合，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;id&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="kt"&gt;Identity&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;runIdentity&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;と書いてしまうと，パースエラーになる．&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; 式は &lt;tt class="docutils literal"&gt;{&lt;/tt&gt; を省略した場合はレイアウトルールにより解釈が行われる．上の式は，&lt;tt class="docutils literal"&gt;runIdentity&lt;/tt&gt; の前の &lt;tt class="docutils literal"&gt;{&lt;/tt&gt; が &lt;tt class="docutils literal"&gt;do&lt;/tt&gt; の現在の位置より前にあるため，その位置でレイアウトが閉じてしまい，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;id&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="kt"&gt;Identity&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;runIdentity&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように解釈されることになってしまう．よって，この場合は，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;id&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+  &lt;span class="kt"&gt;Identity&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;runIdentity&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように，一続きになる式をインデントを意識して書く必要がある．&lt;tt class="docutils literal"&gt;runIdentity&lt;/tt&gt; の前の &lt;tt class="docutils literal"&gt;{&lt;/tt&gt; は，&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; の位置より深くする，つまり &lt;tt class="docutils literal"&gt;Identity&lt;/tt&gt; を書いた位置より深いところで書く必要がある．ただ，これは使いようによっては，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;foldl'&lt;/span&gt;
+  &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;shows&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+  &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="nf"&gt;\&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+  &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="n"&gt;replicate&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+  &lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="s"&gt;""&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように複数行のブロックの範囲を明示することもできる．&lt;/p&gt;
+&lt;p&gt;これを使えば，例えば &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;optparse-applicative&lt;/span&gt;&lt;/tt&gt; などの applicative style を多用するライブラリで，以下のように括弧をなくすことができる:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;sample&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Sample&lt;/span&gt;
+  &lt;span class="o"&gt;&amp;lt;$&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;strOption&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;long&lt;/span&gt; &lt;span class="s"&gt;"hello"&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt; &lt;span class="s"&gt;"TARGET"&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt; &lt;span class="s"&gt;"Target for the greeting"&lt;/span&gt;
+  &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;switch&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;long&lt;/span&gt; &lt;span class="s"&gt;"quiet"&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;short&lt;/span&gt; &lt;span class="sc"&gt;'q'&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt; &lt;span class="s"&gt;"Whether to be quiet"&lt;/span&gt;
+  &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;option&lt;/span&gt; &lt;span class="n"&gt;auto&lt;/span&gt; &lt;span class="kr"&gt;do&lt;/span&gt;
+      &lt;span class="n"&gt;long&lt;/span&gt; &lt;span class="s"&gt;"enthusiasm"&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt; &lt;span class="s"&gt;"How enthusiastically to greet"&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;showDefault&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt; &lt;span class="s"&gt;"INT"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;これは，演算子の優先順位の関係で &lt;tt class="docutils literal"&gt;$&lt;/tt&gt; を使っての括弧の省略はできないため，通常は，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;sample&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;Sample&lt;/span&gt;
+  &lt;span class="o"&gt;&amp;lt;$&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;strOption&lt;/span&gt;
+      &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;long&lt;/span&gt; &lt;span class="s"&gt;"hello"&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt; &lt;span class="s"&gt;"TARGET"&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt; &lt;span class="s"&gt;"Target for the greeting"&lt;/span&gt;
+      &lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;switch&lt;/span&gt;
+      &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;long&lt;/span&gt; &lt;span class="s"&gt;"quiet"&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;short&lt;/span&gt; &lt;span class="sc"&gt;'q'&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt; &lt;span class="s"&gt;"Whether to be quiet"&lt;/span&gt;
+      &lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="o"&gt;&amp;lt;*&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;option&lt;/span&gt; &lt;span class="n"&gt;auto&lt;/span&gt;
+      &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;long&lt;/span&gt; &lt;span class="s"&gt;"enthusiasm"&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt; &lt;span class="s"&gt;"How enthusiastically to greet"&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;showDefault&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+      &lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt; &lt;span class="s"&gt;"INT"&lt;/span&gt;
+      &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;のように括弧をつける必要があった．それを，&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; による &lt;tt class="docutils literal"&gt;do&lt;/tt&gt; 構文を使用することで，&lt;tt class="docutils literal"&gt;$&lt;/tt&gt; より多彩な表現ができるようになる．また，前に紹介した&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;も実は，&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;do&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;
+&lt;span class="nf"&gt;x&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;というように書き方を工夫すれば，括弧や &lt;tt class="docutils literal"&gt;$&lt;/tt&gt; を省略できる．ただ，やりすぎは可読性を著しく落とすので，用量用法を守って使用すると良いと思う．&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="auto-id-3"&gt;
+&lt;h2&gt;まとめ&lt;a class="headerlink" href="#auto-id-3" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;今回は，&lt;tt class="docutils literal"&gt;BlockArguments&lt;/tt&gt; の紹介と，その拡張下での &lt;tt class="docutils literal"&gt;do&lt;/tt&gt; 構文とレイアウトルールによる，括弧や &lt;tt class="docutils literal"&gt;$&lt;/tt&gt; の省略法を紹介した．実は最近この方法を使っていて，完全に &lt;tt class="docutils literal"&gt;$&lt;/tt&gt; を使わなくても大体書けるなあって感じになった．&lt;/p&gt;
+&lt;p&gt;基本的には，ある式の範囲を明示したい時は，&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;tt class="docutils literal"&gt;do&lt;/tt&gt; から始めて，複数行に渡る場合は最初のインデントより以降の行のインデントを深くする&lt;/li&gt;
+&lt;li&gt;その式の範囲が終わったら，改行して今までのインデントより浅いところから始める&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ということをすれば，括弧無しでレイアウトルールに任せた式表記ができる．用量用法を守って使っていきたい．こちらからは以上です．&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="haskell2010-metarule" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label"/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#auto-id-2"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#x8-220003"&gt;https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#x8-220003&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/07/no-parenthesis-with-blockarguments.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/07/no-parenthesis-with-blockarguments.rst'
+}
+&lt;/script&gt;&lt;script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"&gt;&lt;/script&gt;</content><category term="プログラミング言語"></category><category term="Haskell"></category><category term="GHC"></category><category term="GHC拡張"></category></entry><entry><title>Coherent Implicit Parameter</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-implicit-parameter/" rel="alternate"></link><published>2020-03-31T07:30:54+09:00</published><updated>2020-03-31T07:30:54+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-03-31:/blog/posts/2020/03/coherent-implicit-parameter/</id><summary type="html">&lt;p&gt;アドホック多相を実現する方法として，型クラスがある．型クラスは，辞書渡しと呼ばれる方法により，かなり自然に elaboration ができる．ところで，この elaboration は暗黙的引数にも転用できることが知られている。特に、型クラスを搭載した Haskell では，その処理系 GHC の内部実装を利用して暗黙的引数を実現する &lt;a class="reference external" href="https://hackage.haskell.org/package/reflection"&gt;reflection パッケージ&lt;/a&gt; が知られている．&lt;/p&gt;
 &lt;p&gt;ところで，暗黙的引数の仕組みは，単純に型クラスの型システムを転用するだけでは，coherence …&lt;/p&gt;</summary><content type="html">&lt;p&gt;アドホック多相を実現する方法として，型クラスがある．型クラスは，辞書渡しと呼ばれる方法により，かなり自然に elaboration ができる．ところで，この elaboration は暗黙的引数にも転用できることが知られている。特に、型クラスを搭載した Haskell では，その処理系 GHC の内部実装を利用して暗黙的引数を実現する &lt;a class="reference external" href="https://hackage.haskell.org/package/reflection"&gt;reflection パッケージ&lt;/a&gt; が知られている．&lt;/p&gt;
 &lt;p&gt;ところで，暗黙的引数の仕組みは，単純に型クラスの型システムを転用するだけでは，coherence を壊してしまう．そのため，coherence を保証しながら暗黙的引数を実現する方法がいくつか研究されている．今回は，暗黙的引数と型クラスの関係，それから少し最近考えている， coherence を保って，型クラスの仕組みを少し拡張するだけで暗黙的引数を実現するアイデアを紹介したいと思う．&lt;/p&gt;
 &lt;div class="section" id="auto-id-1"&gt;
