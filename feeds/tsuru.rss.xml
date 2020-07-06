@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>続くといいな日記 - ツール</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Thu, 18 Jun 2020 12:58:47 +0900</lastBuildDate><item><title>XCode でビルドするときに引っかかったところ</title><link>https://mizunashi-mana.github.io/blog/posts/2020/06/xcode-trouble-shooting/</link><description>&lt;p&gt;XCode を使ってる時，ちょっと検索しにくい問題に2件当たったので，備忘録として残しておく．&lt;/p&gt;
+<rss version="2.0"><channel><title>続くといいな日記 - ツール</title><link>https://mizunashi-mana.github.io/blog/</link><description>続くといいな日記</description><lastBuildDate>Mon, 06 Jul 2020 13:29:16 +0900</lastBuildDate><item><title>XCode でビルドするときに引っかかったところ</title><link>https://mizunashi-mana.github.io/blog/posts/2020/06/xcode-trouble-shooting/</link><description>&lt;p&gt;XCode を使ってる時，ちょっと検索しにくい問題に2件当たったので，備忘録として残しておく．&lt;/p&gt;
 &lt;div class="section" id="undefined-symbols-for-architecture-i386"&gt;
 &lt;h2&gt;Undefined symbols for architecture i386&lt;a class="headerlink" href="#undefined-symbols-for-architecture-i386" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;iOS 用の Objective-C のプロジェクトをビルドしてる際，なぜかリンクに失敗し，ある特定の framework について，&lt;/p&gt;

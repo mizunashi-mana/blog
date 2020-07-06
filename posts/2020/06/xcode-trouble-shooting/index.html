@@ -58,7 +58,7 @@
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2020/06/xcode-trouble-shooting/"/>
 <meta property="og:type" content="article"/>
 <meta property="article:published_time" content="2020-06-18 12:58:47+09:00"/>
-<meta property="article:modified_time" content="2020-06-18 12:58:47+09:00"/>
+<meta property="article:modified_time" content="2020-07-06 13:29:16+09:00"/>
 <meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
 <meta property="article:section" content="ツール"/>
 <meta property="article:tag" content="XCode"/>
@@ -180,11 +180,12 @@ Architectures in the fat file: XXX are: armv7 armv7s i386 arm64
 <div class="section" id="extra-info-about-plist-acl-not-found">
 <h2>Extra info about plist: ACL=&lt;not found&gt;<a class="headerlink" href="#extra-info-about-plist-acl-not-found" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
 <p>さて，上の設定でビルドをしてアプリをシミュレータで起動させてみると，今度は次のようなエラーが表示された:</p>
-<blockquote>
-<p>This app could not be installed at this time.</p>
-<p>Could not install at this time.
-Failed to load Info.plist from bundle at path ~/Library/Developer/CoreSimulator/Devices/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/data/Library/Caches/com.apple.mobile.installd.staging/temp.A3gmX5/extracted/Test.app/Frameworks/XXX.framework; Extra info about plist: ACL=&lt;not found&gt;</p>
-</blockquote>
+<pre class="literal-block">
+This app could not be installed at this time.
+
+Could not install at this time.
+Failed to load Info.plist from bundle at path ~/Library/Developer/CoreSimulator/Devices/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/data/Library/Caches/com.apple.mobile.installd.staging/temp.A3gmX5/extracted/Test.app/Frameworks/XXX.framework; Extra info about plist: ACL=&lt;not found&gt;
+</pre>
 <p>このエラーは Run 時に，アラートダイアログで通知されて，<tt class="docutils literal">Details</tt> / <tt class="docutils literal">OK</tt> というボタンが表示される．とりあえず，<tt class="docutils literal">Details</tt> の方を押してみると，次のようなことを言われる:</p>
 <pre class="literal-block">
 Domain: MIInstallerErrorDomain

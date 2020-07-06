@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - ツール</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/tsuru.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-06-18T12:58:47+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>XCode でビルドするときに引っかかったところ</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/06/xcode-trouble-shooting/" rel="alternate"></link><published>2020-06-18T12:58:47+09:00</published><updated>2020-06-18T12:58:47+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-06-18:/blog/posts/2020/06/xcode-trouble-shooting/</id><summary type="html">&lt;p&gt;XCode を使ってる時，ちょっと検索しにくい問題に2件当たったので，備忘録として残しておく．&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>続くといいな日記 - ツール</title><link href="https://mizunashi-mana.github.io/blog/" rel="alternate"></link><link href="https://mizunashi-mana.github.io/blog/feeds/tsuru.atom.xml" rel="self"></link><id>https://mizunashi-mana.github.io/blog/</id><updated>2020-07-06T13:29:16+09:00</updated><subtitle>続くといいな日記</subtitle><entry><title>XCode でビルドするときに引っかかったところ</title><link href="https://mizunashi-mana.github.io/blog/posts/2020/06/xcode-trouble-shooting/" rel="alternate"></link><published>2020-06-18T12:58:47+09:00</published><updated>2020-07-06T13:29:16+09:00</updated><author><name>Mizunashi Mana</name></author><id>tag:mizunashi-mana.github.io,2020-06-18:/blog/posts/2020/06/xcode-trouble-shooting/</id><summary type="html">&lt;p&gt;XCode を使ってる時，ちょっと検索しにくい問題に2件当たったので，備忘録として残しておく．&lt;/p&gt;
 &lt;div class="section" id="undefined-symbols-for-architecture-i386"&gt;
 &lt;h2&gt;Undefined symbols for architecture i386&lt;a class="headerlink" href="#undefined-symbols-for-architecture-i386" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;iOS 用の Objective-C のプロジェクトをビルドしてる際，なぜかリンクに失敗し，ある特定の framework について，&lt;/p&gt;
@@ -36,11 +36,12 @@ Architectures in the fat file: XXX are: armv7 armv7s i386 arm64
 &lt;div class="section" id="extra-info-about-plist-acl-not-found"&gt;
 &lt;h2&gt;Extra info about plist: ACL=&amp;lt;not found&amp;gt;&lt;a class="headerlink" href="#extra-info-about-plist-acl-not-found" title="Permalink to this headline"&gt;&lt;i class="fas fa-link anchor-link"&gt;&lt;/i&gt;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;さて，上の設定でビルドをしてアプリをシミュレータで起動させてみると，今度は次のようなエラーが表示された:&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;This app could not be installed at this time.&lt;/p&gt;
-&lt;p&gt;Could not install at this time.
-Failed to load Info.plist from bundle at path ~/Library/Developer/CoreSimulator/Devices/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/data/Library/Caches/com.apple.mobile.installd.staging/temp.A3gmX5/extracted/Test.app/Frameworks/XXX.framework; Extra info about plist: ACL=&amp;lt;not found&amp;gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;pre class="literal-block"&gt;
+This app could not be installed at this time.
+
+Could not install at this time.
+Failed to load Info.plist from bundle at path ~/Library/Developer/CoreSimulator/Devices/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/data/Library/Caches/com.apple.mobile.installd.staging/temp.A3gmX5/extracted/Test.app/Frameworks/XXX.framework; Extra info about plist: ACL=&amp;lt;not found&amp;gt;
+&lt;/pre&gt;
 &lt;p&gt;このエラーは Run 時に，アラートダイアログで通知されて，&lt;tt class="docutils literal"&gt;Details&lt;/tt&gt; / &lt;tt class="docutils literal"&gt;OK&lt;/tt&gt; というボタンが表示される．とりあえず，&lt;tt class="docutils literal"&gt;Details&lt;/tt&gt; の方を押してみると，次のようなことを言われる:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
 Domain: MIInstallerErrorDomain

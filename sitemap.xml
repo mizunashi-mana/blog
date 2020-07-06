@@ -5,28 +5,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/</loc>
-<lastmod>2020-07-05T12:16:53-00:00</lastmod>
+<lastmod>2020-07-06T13:42:39-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/archives.html</loc>
-<lastmod>2020-07-05T12:16:53-00:00</lastmod>
+<lastmod>2020-07-06T13:42:39-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tags.html</loc>
-<lastmod>2020-07-05T12:16:53-00:00</lastmod>
+<lastmod>2020-07-06T13:42:39-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/categories.html</loc>
-<lastmod>2020-07-05T12:16:53-00:00</lastmod>
+<lastmod>2020-07-06T13:42:39-00:00</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -61,7 +61,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/posts/2020/06/xcode-trouble-shooting/</loc>
-<lastmod>2020-06-18T12:58:47+09:00</lastmod>
+<lastmod>2020-07-06T13:29:16+09:00</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
 </url>
@@ -460,7 +460,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/category/tsuru.html</loc>
-<lastmod>2020-06-18T12:58:47+09:19</lastmod>
+<lastmod>2020-07-06T13:29:16+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -509,28 +509,28 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/xcode.html</loc>
-<lastmod>2020-06-18T12:58:47+09:19</lastmod>
+<lastmod>2020-07-06T13:29:16+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/objective-c.html</loc>
-<lastmod>2020-06-18T12:58:47+09:19</lastmod>
+<lastmod>2020-07-06T13:29:16+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/ios.html</loc>
-<lastmod>2020-06-18T12:58:47+09:19</lastmod>
+<lastmod>2020-07-06T13:29:16+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/tag/birudo.html</loc>
-<lastmod>2020-06-18T12:58:47+09:19</lastmod>
+<lastmod>2020-07-06T13:29:16+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
@@ -1153,7 +1153,7 @@ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
 <loc>https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html</loc>
-<lastmod>2020-07-05T12:12:00+09:19</lastmod>
+<lastmod>2020-07-06T13:29:16+09:19</lastmod>
 <changefreq>daily</changefreq>
 <priority>0.5</priority>
 </url>
