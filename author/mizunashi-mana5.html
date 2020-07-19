@@ -131,6 +131,35 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/#add-tooltip-for-footnote">脚注のためのツールチップ追加</a></h2>
+    <p>
+          Posted on 月 15 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/javascript.html">JavaScript</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/css.html">CSS</a>
+    </p>
+  </header>
+  <div>
+      <p>脚注をツールチップで見れるようにしたので，それについて．</p>
+<div class="section" id="restructuredtext">
+<h2>reStructuredText の脚注<a class="headerlink" href="#restructuredtext" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>reStructuredText では脚注が使える．これは，以下のように書けばいい:</p>
+<pre class="literal-block">
+some text[#footnote-ref]_ .
+
+.. [#footnote-ref] some footnote content.
+</pre>
+<p>こうすると，自動でナンバリングが行われ，それぞれ脚注へのリンクと元の文書へのバックリンクが生成される．分かりづらいがバックリンクは，数字の部分に当てがわれ，それをクリックすることで戻れる．ただ，これをクリックするのがめんどかったので，ツールチップで表示してみることにした …</p></div>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/add-tooltip-for-footnote/#add-tooltip-for-footnote">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-overflow-settings/#fix-overflow-settings">ブログの overflow 時のスタイル設定を見直す</a></h2>
     <p>
           Posted on 月 15 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
@@ -361,31 +390,6 @@ SITEMAP = {
 <p>そもそもドキュメントをちゃんと読めという話なんだけど， <a class="reference external" href="https://docs.python.org/ja/3/library/datetime.html">https …</a></p></div>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/python-datetime/#python-datetime">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/#fix-blog-config">ブログのデザイン調整</a></h2>
-    <p>
-          Posted on 月 01 4月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/python.html">Python</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pelican.html">Pelican</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/burogu.html">ブログ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/circleci.html">CircleCI</a>
-    </p>
-  </header>
-  <div>
-      <p>ブログの改良をちょっと色々やってたので，そのご報告．</p>
-<div class="section" id="circle-ci">
-<h2>Circle CI での謎の警告解消<a class="headerlink" href="#circle-ci" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>今まで Circle CI 上だと以下の警告が出てた:</p>
-<pre class="literal-block">
-WARNING: Locale could not be set. Check the LOCALE setting, ensuring it is valid and available …</pre></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/04/fix-blog-config/#fix-blog-config">    Continue reading
 </a>
   </div>
 </article>

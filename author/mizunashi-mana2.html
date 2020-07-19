@@ -131,6 +131,30 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/#use-reader-instead-of-state">State モナドの代わりに Reader モナドを使う</a></h2>
+    <p>
+          Posted on 木 30 1月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguramingu.html">プログラミング</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/monado.html">モナド</a>
+    </p>
+  </header>
+  <div>
+      <dl class="docutils">
+<dt><strong>注意</strong></dt>
+<dd>この記事は公開当時主張に誤りを含んでいたため，大幅に書き直しています．また，公開当時の主張の誤りについても，付録として載せておきました．</dd>
+</dl>
+<p>Haskell で State モナドはモナドの代表格だ．Haskell 入門者は，多くの場合，状態を伴った計算を State モナドで書くことを習うだろう．しかし，実用上の多くの場面では，State モナドではなく他の選択肢を選んだ方がいい場合がある．一つの選択肢が，Reader モナドと可変参照を使う方法だ．今回は，この手法を使う利点と利用場面について考えていこうと思う …</p>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2020/01/use-reader-instead-of-state/#use-reader-instead-of-state">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/12/algebraic-compact-functor/#algebraic-compact-functor">始代数と終余代数が一致する条件</a></h2>
     <p>
           Posted on 月 16 12月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/shu-xue.html">数学</a>
@@ -349,30 +373,6 @@ sudo …</pre></div>
       <p><span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo separator="true">;</mo><mi>i</mi><mo>↦</mo><mo stretchy="false">{</mo><mi>n</mi><mo>∣</mo><mi>n</mi><mo>≤</mo><mi>i</mi><mo stretchy="false">}</mo><mo>:</mo><mi mathvariant="double-struck">N</mi><mo>→</mo><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi></mrow></mrow><annotation encoding="application/x-tex">F; i \mapsto \{n \mid n \leq i\}: \mathbb{N} \to \mathrm{Poset}</annotation></semantics></math></span><span aria-hidden="true" class="katex-html"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">F …</span></span></span></span></span></p>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/08/set-of-natural-numbers-is-colimit/#set-of-natural-numbers-is-colimit">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/#local-do-and-first-type-class">Local Do と型クラス</a></h2>
-    <p>
-          Posted on 土 27 7月 2019 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghc.html">GHC</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/ghckuo-zhang.html">GHC拡張</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/dogou-wen.html">do構文</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/xing-kurasu.html">型クラス</a>
-    </p>
-  </header>
-  <div>
-      <p>現在， GHC に <a class="reference external" href="https://github.com/ghc-proposals/ghc-proposals/pull/111">線形型の提案</a> がされていて活発に議論されている．プロトタイプも <a class="reference external" href="https://github.com/tweag/ghc/tree/linear-types">ここ</a> から利用可能だ． Docker イメージも利用可能なので，気軽に試せると思うので，ぜひ試してみてくれ．</p>
-<p>さて，そんな線形型の提案の裏で，副産物として Local Do という拡張が提案されている．今回は，その拡張の紹介と最近思ってることのお話．</p>
-<div class="section" id="auto-id-3">
-<h2>Local Do 拡張<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
-<p>Haskell の …</p></div>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2019/07/local-do-and-first-type-class/#local-do-and-first-type-class">    Continue reading
 </a>
   </div>
 </article>
