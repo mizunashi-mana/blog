@@ -47,5 +47,8 @@
 `Debian <https://mizunashi-mana.ginthub.io/blog/tag/debian.html>`_
   日頃サーバ用に使ってる OS ．一からの環境構築の仕方や基本的なコマンドは分かる．
 
-`Docker <htttps://mizunashi-mana.github.io/blog/tag/docker.html>`_
+`Docker <https://mizunashi-mana.github.io/blog/tag/docker.html>`_
   サービスの運用には使用していないが，開発目的での使用経験はある．基本的な利用方法は分かる．
+
+`Kubernetes <https://mizunashi-mana.github.io/blog/tag/kubernetes.html>`_
+  サービスの運用には使用していないが、基本的な利用方法は分かる．
