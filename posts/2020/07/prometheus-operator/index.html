@@ -1,0 +1,552 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="Prometheus は、メトリクスの監視を行うためのモニタリングツールだ。各種メトリクスを出す exporter とそれを集計する Prometheus サーバ、及びその集計結果を監視しアラートを出すアラートマネージャで主に構成されている。Prometheus それ自体は便利なんだが、Kubernetes クラスタを監視したい場合色々追加で設定が必要で、結構めんどくさい。そこで、Kubernetes 用に Prometheus をカスタマイズして提供してくれるパッケージがいくつか出ている。今回はそのうちの Prometheus Operator を触る機会があって、せっかくなので使い方を備忘録として残しておく。 Prometheus …" />
+<meta name="keywords" content="Prometheus, Grafana, Kubernetes, Docker">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="Prometheus Operator で k8s を監視する"/>
+<meta property="og:description" content="Prometheus は、メトリクスの監視を行うためのモニタリングツールだ。各種メトリクスを出す exporter とそれを集計する Prometheus サーバ、及びその集計結果を監視しアラートを出すアラートマネージャで主に構成されている。Prometheus それ自体は便利なんだが、Kubernetes クラスタを監視したい場合色々追加で設定が必要で、結構めんどくさい。そこで、Kubernetes 用に Prometheus をカスタマイズして提供してくれるパッケージがいくつか出ている。今回はそのうちの Prometheus Operator を触る機会があって、せっかくなので使い方を備忘録として残しておく。 Prometheus …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2020/07/prometheus-operator/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-07-26 08:38:44+09:00"/>
+<meta property="article:modified_time" content="2020-07-26 08:38:44+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="運用"/>
+<meta property="article:tag" content="Prometheus"/>
+<meta property="article:tag" content="Grafana"/>
+<meta property="article:tag" content="Kubernetes"/>
+<meta property="article:tag" content="Docker"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; Prometheus Operator で k8s を監視する</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="prometheus-operator">Prometheus Operator で k8s を監視する</h1>
+    <p>
+          Posted on 日 26 7月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/yun-yong.html">運用</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>Prometheus は、メトリクスの監視を行うためのモニタリングツールだ。各種メトリクスを出す exporter とそれを集計する Prometheus サーバ、及びその集計結果を監視しアラートを出すアラートマネージャで主に構成されている。Prometheus それ自体は便利なんだが、Kubernetes クラスタを監視したい場合色々追加で設定が必要で、結構めんどくさい。そこで、Kubernetes 用に Prometheus をカスタマイズして提供してくれるパッケージがいくつか出ている。今回はそのうちの Prometheus Operator を触る機会があって、せっかくなので使い方を備忘録として残しておく。</p>
+<div class="section" id="prometheus-operator">
+<h2>Prometheus Operator のインストール<a class="headerlink" href="#prometheus-operator" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まずは、Kubernetes / helm が入った環境用意する。一応、Kubernetes のバックエンドは今回は Docker を想定する。Kubernetes 自体は Windows / macOS なら Docker Desktop で付属としてついてくるのでそれを使うといいだろう。WSL2 の環境なら、</p>
+<ol class="arabic simple">
+<li>Docker Desktop をインストール</li>
+<li>設定から「Kubernetes」-&gt;「Enable Kubernetes」</li>
+<li>「Resources」-&gt;「WSL Integration」-&gt; 普段使ってる WSL コンテナを有効化</li>
+</ol>
+<p>すれば、WSL コンテナ内で <tt class="docutils literal">docker</tt> / <tt class="docutils literal">kubectl</tt> などの CLI が使えるようになる。Helm は、大体各種パッケージマネージャでインストールできる。Linuxbrew とか使って、</p>
+<pre class="literal-block">
+brew install helm
+</pre>
+<p>とかすれば入る。後は、</p>
+<pre class="literal-block">
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+</pre>
+<p>とかで標準のチャートリポジトリを追加しておく。後、Kubernetes Dashboard もデプロイしておくとよい。こっちも helm で入れられる:</p>
+<pre class="literal-block">
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+kubectl create namespace kubernetes-dashboard
+helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+    --namespace kubernetes-dashboard \
+    --set protocolHttp=true,service.externalPort=80
+</pre>
+<p>Prometheus Operator はかなり色々入るので名前空間を分けておいた方がいい。今回は <tt class="docutils literal">prometheus</tt> という名前空間を作って、そこにインストールしていく。<tt class="docutils literal">helm</tt> で簡単に入るので、それでインストールする:</p>
+<pre class="literal-block">
+kubectl create namespace prometheus
+helm install prometheus stable/prometheus-operator --namespace prometheus
+</pre>
+<p>ポッドの様子を見てみる:</p>
+<pre class="literal-block">
+$ kubectl -n prometheus get pods
+NAME                                                     READY   STATUS              RESTARTS   AGE
+alertmanager-prometheus-prometheus-oper-alertmanager-0   2/2     Running   0          77s
+prometheus-grafana-8c6966f8f-m45xx                       2/2     Running   0          99s
+prometheus-kube-state-metrics-6df5d44568-p464c           1/1     Running   0          99s
+prometheus-prometheus-node-exporter-2r7vq                1/1     Running   0          99s
+prometheus-prometheus-oper-operator-749cd475f6-j7ftd     2/2     Running   0          99s
+prometheus-prometheus-prometheus-oper-prometheus-0       3/3     Running   1          68s
+</pre>
+<p>サービスも見てみると、</p>
+<pre class="literal-block">
+$ kubectl -n prometheus get svc
+NAME                                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+alertmanager-operated                     ClusterIP   None            &lt;none&gt;        9093/TCP,9094/TCP,9094/UDP   2m33s
+prometheus-grafana                        ClusterIP   10.111.67.1     &lt;none&gt;        80/TCP                       2m55s
+prometheus-kube-state-metrics             ClusterIP   10.97.237.255   &lt;none&gt;        8080/TCP                     2m55s
+prometheus-operated                       ClusterIP   None            &lt;none&gt;        9090/TCP                     2m24s
+prometheus-prometheus-node-exporter       ClusterIP   10.100.44.54    &lt;none&gt;        9100/TCP                     2m55s
+prometheus-prometheus-oper-alertmanager   ClusterIP   10.98.127.253   &lt;none&gt;        9093/TCP                     2m55s
+prometheus-prometheus-oper-operator       ClusterIP   10.97.208.129   &lt;none&gt;        8080/TCP,443/TCP             2m55s
+prometheus-prometheus-oper-prometheus     ClusterIP   10.98.54.131    &lt;none&gt;        9090/TCP                     2m55s
+</pre>
+<p>みたいな感じになる。おおむねそれぞれのサービスは</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">prometheus-oper-prometheus</span></tt></dt>
+<dd>Prometheus 本体</dd>
+<dt><tt class="docutils literal"><span class="pre">prometheus-oper-alermanager</span></tt></dt>
+<dd>Alert Manager 本体</dd>
+<dt><tt class="docutils literal"><span class="pre">prometheus-node-exporter</span></tt></dt>
+<dd>ノードごとのメトリクス出力用 node exporter</dd>
+<dt><tt class="docutils literal"><span class="pre">kube-state-metrics</span></tt></dt>
+<dd>Kubernetes のオブジェクトごとのメトリクス出力用 exporter</dd>
+<dt><tt class="docutils literal">grafana</tt></dt>
+<dd>Prometheus のメトリクス可視化用の Grafana 本体</dd>
+<dt><tt class="docutils literal"><span class="pre">prometheus-oper-operator</span></tt></dt>
+<dd>Prometheus Operator 本体</dd>
+</dl>
+<p>みたいになっている。Prometheus Operator の主な役割は、カスタムリソースによる Prometheus / AlertManager の設定管理及び監視対象との接続になる。具体的にどのように設定を管理していくは、後で見ていくとして、とりあえずデプロイされたものを触ってみる。まず、Prometheus 本体を見てみる。<tt class="docutils literal">localhost</tt> で見たい場合は、プロキシ立てると良い:</p>
+<pre class="literal-block">
+kubectl proxy
+</pre>
+<p>で、</p>
+<pre class="literal-block">
+http://localhost:8001/api/v1/namespaces/prometheus/services/http:prometheus-prometheus-oper-prometheus:web/proxy/
+</pre>
+<p>にアクセスするといいだろう。Prometheus の画面が表示されて、色々ターゲットが追加されてるのが分かると思う。お試し環境だと etcd とかデプロイしてないと思うので、etcd が立ち上がってないとかアラートが出てると思うが、それらのアラートの調整の仕方は後で紹介する。<tt class="docutils literal">Grafana</tt> の画面も見てみるといいだろう。<tt class="docutils literal">Grafana</tt> の方は proxy から見るのはちょっときついので、ポートフォワードして見るといい:</p>
+<pre class="literal-block">
+kubectl port-forward service/prometheus-grafana 3000:80 --address 0.0.0.0 -n prometheus
+</pre>
+<p>Grafana の方はログインが必要で、ユーザ <tt class="docutils literal">admin</tt> / パスワード <tt class="docutils literal"><span class="pre">prom-operator</span></tt> で入れる。このパラメータは、<a class="reference external" href="https://github.com/helm/charts/tree/master/stable/prometheus-operator#grafana">チャートのパラメータ</a> として弄れるようになっている。Grafana も初期段階で色々テンプレートが追加されていて便利という感じ。</p>
+</div>
+<div class="section" id="auto-id-2">
+<h2>カスタムリソース<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>これだけ見ると、まあ単に初期設定モリモリの Prometheus 周辺ツールがパッとデプロイできるだけとなるんだけど、Prometheus Operator の神髄はここから。Prometheus Operator は、Prometheus の設定をカスタムリソースとしてデプロイできる。まずは、どういうリソースがデプロイされているかを見てみる。以下の URL から Dashboard にアクセスする:</p>
+<pre class="literal-block">
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:http/proxy/
+</pre>
+<p>そして、上のメニューから <tt class="docutils literal">prometheus</tt> ネームスペースを選択し、左のメニューの「カスタムリソース定義」欄を選択する。すると、幾つかの項目が表示されると思う。それぞれ、</p>
+<dl class="docutils">
+<dt>Prometheus</dt>
+<dd>Prometheus ポッドのテンプレート。このテンプレートを基に operator が Prometheus ポッドをデプロイする。</dd>
+<dt>Alertmanager</dt>
+<dd>Alertmanager ポッドのテンプレート。このテンプレートを基に operator が Alertmanager ポッドをデプロイする。</dd>
+<dt>PrometheusRule</dt>
+<dd>Prometheus のルールを表すカスタムリソース</dd>
+<dt>ThanosRuler</dt>
+<dd>Thanos のルールを表すカスタムリソース (Thanos 触ったことないので、今回は割愛)</dd>
+</dl>
+<p>みたいなもの。後、<tt class="docutils literal">PodMonitor</tt> / <tt class="docutils literal">ServiceMonitor</tt> があるが、これは後述するので今は割愛する。Prometheus のルールを弄りたかったら PrometheusRule カスタムリソースをいじることになる。新規にルールを追加したかったら新しく PrometheusRule を作ってデプロイすればいいし、既存のものをいじりたかったら既存のカスタムリソースを弄ればいい。</p>
+<p>試しに、etcd のアラートを消してみる。PrometheusRule カスタムリソースの欄に <tt class="docutils literal"><span class="pre">prometheus-prometheus-oper-etcd</span></tt> というカスタムリソースがある。定義を見てみると、<tt class="docutils literal">etcdMembersDown</tt> などのアラートルールが記載されてるのが分かると思う。このカスタムリソースでは etcd ターゲットに関するルールが規定されている。これを削除してみる:</p>
+<pre class="literal-block">
+kubectl -n prometheus delete prometheusrules prometheus-prometheus-oper-etcd
+</pre>
+<p>で、しばらく待ってから <a class="footnote-reference" href="#watch-completed-on-log" id="auto-id-3">[1]</a> Prometheus のダッシュボードをのぞいてみると、アラートから etcd 関連のルールが消えてることが確認できると思う。次は新しくルールを追加してみる。以下のカスタムリソースを作成する:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">monitoring.coreos.com/v1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">PrometheusRule</span>
+<span class="nt">metadata</span><span class="p">:</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mysample-alert.rules</span>
+    <span class="nt">namespace</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+    <span class="nt">labels</span><span class="p">:</span>
+        <span class="nt">app</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus-operator</span>
+        <span class="nt">release</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+<span class="nt">spec</span><span class="p">:</span>
+    <span class="nt">groups</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mysample-alert.rules</span>
+        <span class="nt">rules</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span>
+            <span class="nt">alert</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MyTargetDown</span>
+            <span class="nt">expr</span><span class="p">:</span> <span class="p p-Indicator">&gt;-</span>
+                <span class="no">100 * (count(up == 0) BY (job, namespace, service) / count(up) BY</span>
+                <span class="no">(job, namespace, service)) &gt; 10</span>
+            <span class="nt">for</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10m</span>
+            <span class="nt">labels</span><span class="p">:</span>
+                <span class="nt">severity</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">warning</span>
+            <span class="nt">annotations</span><span class="p">:</span>
+                <span class="nt">message</span><span class="p">:</span> <span class="p p-Indicator">&gt;-</span>
+                    <span class="no">{{ $labels.job }}/{{ $labels.service }} targets in</span>
+                    <span class="no">{{ $labels.namespace }} namespace are down.</span>
+</pre></div>
+</td></tr></table><p>これを、例えば <tt class="docutils literal"><span class="pre">mysample-alert.rules.yaml</span></tt> として、</p>
+<pre class="literal-block">
+kubectl apply -f mysample-alert.rules.yaml
+</pre>
+<p>とやると、デプロイできる。後はしばらく待てば、Prometheus Dashboard のアラート一覧に、<tt class="docutils literal">MyTargetDown</tt> というアラートが追加されてることが分かる。このようにして新しいルールを追加したり、既存のルールを編集・削除したりできる。</p>
+<p>ところで、上でデプロイしたルールの <tt class="docutils literal">labels</tt> で設定されてる <tt class="docutils literal">app</tt> / <tt class="docutils literal">release</tt> の値は、デフォルトでデプロイされている prometheus でセレクタとして設定されてる値で、これを設定しないとルールが認識されないようになっている。実際にその部分を見てみる。Prometheus カスタムリソースとして、1つだけデプロイされている <tt class="docutils literal"><span class="pre">prometheus-prometheus-oper-prometheus</span></tt> の設定をのぞいてみる。ここでは、</p>
+<ul class="simple">
+<li>接続する Alertmanager</li>
+<li>ServiceMonitor / PodMonitor のセレクタ</li>
+<li>PrometheusRule のセレクタ</li>
+</ul>
+<p>や、Prometheus ポッドの設定ができる。PrometheusRule のセレクタは、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">ruleNamespaceSelector</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
+<span class="nt">ruleSelector</span><span class="p">:</span>
+    <span class="nt">matchLabels</span><span class="p">:</span>
+        <span class="nt">app</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus-operator</span>
+        <span class="nt">release</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+</pre></div>
+</td></tr></table><p>の部分がそうで、デフォルトの Prometheus ポッドでは <tt class="docutils literal">app</tt> が <tt class="docutils literal"><span class="pre">prometheus-operator</span></tt> で、<tt class="docutils literal">release</tt> が <tt class="docutils literal">prometheus</tt> のラベルを持っている PrometheusRule のみ認識され、Prometheus にルールとして取り込まれる。メトリクスによって監視サーバを分けたい場合などは、対応するルールにラベルを設定しておき、そのラベルに対するセレクタを設定した Prometheus カスタムリソースをデプロイすればいい。</p>
+<p>Prometheus カスタムリソースから作られたポッドは、Prometheus のログがそのままログとして出ている。カスタムリソースで書いたルールが間違っていたら、ログにその旨が出力されるので、カスタムリソースがちゃんと設定されてるのにルールが反映されていない場合は確認してみるといい。カスタムリソースから作られた設定及びルールは、</p>
+<ul class="simple">
+<li><tt class="docutils literal">/etc/prometheus/config_out/prometheus.env.yaml</tt></li>
+<li><tt class="docutils literal"><span class="pre">/etc/prometheus/rules/&lt;pod名&gt;/&lt;rule名&gt;.yaml</span></tt></li>
+</ul>
+<p>に入っている。ログでは正常に動いてそうなのに、ルールが反映されない場合次に確認するのが、カスタムリソースに対応するルールファイルがあるかとそのファイルの中身がちゃんと入っているかだ。大体それを確認すればトラブルシューティングができるはず。</p>
+<p>Alertmanager カスタムリソースはちょっとめんどいので今回は省略する。<a class="reference external" href="https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/alerting.md">ドキュメント</a> を参照のこと。基本的には、Alertmanager カスタムリソースを作成し、対応する alertmanager の設定を secret で作成する。で、Prometheus カスタムリソースにその Alertmanager カスタムリソースと secret を指定するとアラートが設定できる。</p>
+</div>
+<div class="section" id="podmonitor-servicemonitor">
+<h2><tt class="docutils literal">PodMonitor</tt> / <tt class="docutils literal">ServiceMonitor</tt><a class="headerlink" href="#podmonitor-servicemonitor" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>さて、ルールの変更とポッドの設定はできたが、Prometheus の監視対象、つまりターゲットの変更はどうすればいいのだろう？ そのターゲットの管理を担うのが <tt class="docutils literal">PodMonitor</tt> / <tt class="docutils literal">ServiceMonitor</tt> になる。それぞれ名前の通り、pod / service ごとのターゲットの設定ができる。</p>
+<p>初期で追加されているターゲットは、それぞれ ServiceMonitor で設定されている。例えば、grafana の設定は、<tt class="docutils literal"><span class="pre">prometheus-prometheus-oper-grafana</span></tt> という名前のカスタムリソースがそれに当たる。中身は、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">spec</span><span class="p">:</span>
+    <span class="nt">endpoints</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span>
+        <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/metrics</span>
+        <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">service</span>
+    <span class="nt">namespaceSelector</span><span class="p">:</span>
+        <span class="nt">matchNames</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+    <span class="nt">selector</span><span class="p">:</span>
+        <span class="nt">matchLabels</span><span class="p">:</span>
+            <span class="nt">app.kubernetes.io/instance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+            <span class="nt">app.kubernetes.io/name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">grafana</span>
+</pre></div>
+</td></tr></table><p>のような内容になっている。<tt class="docutils literal">namespaceSelector</tt> で <tt class="docutils literal">prometheus</tt> 名前空間、<tt class="docutils literal">selector</tt> でその名前空間のラベルでマッチするサービスを探すことになる。このセレクタに引っかかる service が、<tt class="docutils literal"><span class="pre">prometheus-grafana</span></tt> になる。その内容は、</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">spec</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
+    <span class="nt">ports</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">service</span>
+        <span class="nt">protocol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">TCP</span>
+        <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">80</span>
+        <span class="nt">targetPort</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3000</span>
+    <span class="nt">selector</span><span class="p">:</span>
+        <span class="nt">app.kubernetes.io/instance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+        <span class="nt">app.kubernetes.io/name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">grafana</span>
+</pre></div>
+</td></tr></table><p>となっている。ServiceMonitor は、このサービスの <tt class="docutils literal">service</tt> という名前のポート、つまり 3000 番の <tt class="docutils literal">/metrics</tt> パスをターゲットとして設定する。このように <tt class="docutils literal">ServiceMonitor</tt> をデプロイしたり、編集することで、サービスに対してのターゲットを設定できる。試しに、etcd / proxy のターゲットがお試し環境だと機能していないので消してみる。それぞれ <tt class="docutils literal"><span class="pre">prometheus-prometheus-oper-kube-etcd</span></tt> / <tt class="docutils literal"><span class="pre">prometheus-prometheus-oper-kube-proxy</span></tt> という ServiceMonitor が対応している。これら2つを削除し、しばらく待つと、ターゲットからその2つが消えてることが確認できる。もちろん、自分でデプロイした exporter を持つサービスに対して自由にターゲットを設定できる。試しにやってみる。Kotlin で Spring Actuator を使ったメトリクス出力機能付き Web アプリを service としてデプロイし、その service に対して ServiceMonitor でメトリクスをターゲットとして追加してみる。</p>
+<p>デプロイするサンプルアプリは、<a class="reference external" href="https://github.com/mizunashi-mana/kotlin-spring-actuator-sample">https://github.com/mizunashi-mana/kotlin-spring-actuator-sample</a> 。k8s のリソースも書いてあるので、それでまずデプロイをする:</p>
+<pre class="literal-block">
+git clone https://github.com/mizunashi-mana/kotlin-spring-actuator-sample
+cd kotlin-spring-actuator-sample
+./gradlew docker
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+</pre>
+<p>これで、actuator のメトリクスが出されるようになる。そのメトリクスの内容は、</p>
+<pre class="literal-block">
+http://localhost:8001/api/v1/namespaces/default/services/http:spring-actuator-demo:web/proxy/actuator/prometheus
+</pre>
+<p>とかで見れる。これを ServiceMonitor で監視してみる。以下のようなリソースを書く:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">monitoring.coreos.com/v1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ServiceMonitor</span>
+
+<span class="nt">metadata</span><span class="p">:</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">spring-actuator-demo-monitor</span>
+    <span class="nt">namespace</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+    <span class="nt">labels</span><span class="p">:</span>
+        <span class="nt">release</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+
+<span class="nt">spec</span><span class="p">:</span>
+    <span class="nt">namespaceSelector</span><span class="p">:</span>
+        <span class="nt">any</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+
+    <span class="nt">selector</span><span class="p">:</span>
+        <span class="nt">matchLabels</span><span class="p">:</span>
+            <span class="nt">app</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">spring-actuator-demo</span>
+
+    <span class="nt">endpoints</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span>
+        <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">web</span>
+        <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/actuator/prometheus</span>
+</pre></div>
+</td></tr></table><p>で、例えば <tt class="docutils literal"><span class="pre">demo-service-monitor.yaml</span></tt> として、デプロイする:</p>
+<pre class="literal-block">
+kubectl apply -f demo-service-monitor.yaml
+</pre>
+<p>で、しばらく待ってから Prometheus のターゲットを確認すると、<tt class="docutils literal"><span class="pre">spring-actuator-demo</span></tt> のためのターゲットが確認できると思う。実際にメトリクスが取れてるかは、Grafana にポートフォワードして、</p>
+<pre class="literal-block">
+http://localhost:3000/explore?orgId=1&amp;left=%5B%22now-1h%22,%22now%22,%22Prometheus%22,%7B%22expr%22:%22jvm_buffer_memory_used_bytes%22%7D,%7B%22mode%22:%22Metrics%22%7D,%7B%22ui%22:%5Btrue,true,true,%22none%22%5D%7D%5D
+</pre>
+<p>とかで確認してみるといいだろう。デフォルトでデプロイされてる Prometheus カスタムリソースは、<tt class="docutils literal">release: prometheus</tt> ラベルで PodMonitor / ServiceMonitor を探すので、そのラベルは設定する必要がある。それから、ターゲットのジョブラベルは明示的に設定することもできるが、指定しない場合は <tt class="docutils literal">name</tt> が設定される。Prometheus では同じジョブを持つメトリクスを複数登録できないので、monitor の <tt class="docutils literal">name</tt> は注意して設定しておくといいだろう。</p>
+<p>今回のは service ごとにセレクトしてターゲットに設定をするが、pod ごとにセレクトできるのが PodMonitor になる。こちらは使い方は ServiceMonitor と同じで、pod のセレクトか service のセレクトかだけが異なるので、今回は省略する。</p>
+</div>
+<div class="section" id="auto-id-5">
+<h2>まとめ<a class="headerlink" href="#auto-id-5" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>というわけで、Prometheus Operator の使い方を紹介した。Prometheus Operator は Kubernetes 上での監視体制を整えるためのパッケージで、カスタムリソースで監視対象を追加したりルールを追加したりできる。監視対象の追加は Kubernetes のエコシステムに合わせた形で定義できるため、結構便利。ただ、現状は beta 版なのでこの先大きく使い方が変わる可能性がある。そこは注意した方がいいだろう。今回はそういう感じで。</p>
+<table class="docutils footnote" frame="void" id="watch-completed-on-log" rules="none">
+<colgroup><col class="label"/><col/></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#auto-id-3">[1]</a></td><td>反映の完了は各 prometheus ポッドのログから確認できる。<tt class="docutils literal">Completed loading of configuration file</tt> というログが出たら反映が行われている。</td></tr>
+</tbody>
+</table>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2020/07/prometheus-operator.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2020/07/prometheus-operator.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/prometheus.html">Prometheus</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/grafana.html">Grafana</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/kubernetes.html">Kubernetes</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/docker.html">Docker</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/06/linear-types-in-docker/">GHC の線形型プロトタイプのお試し環境を作る</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2019/05/spark-installation-for-try/">Apache Spark のお試し環境を作る</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>
