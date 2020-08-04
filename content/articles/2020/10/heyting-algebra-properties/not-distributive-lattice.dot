@@ -1,0 +1,27 @@
+digraph graph_name {
+  graph [
+    charset = "UTF-8";
+    rankdir = BT;
+  ];
+
+  node [
+  ];
+
+  edge [
+  ];
+
+  // node define
+  ⊤;
+  ⊥;
+  x;
+  y;
+  z;
+
+  // edge define
+  x -> ⊤;
+  y -> ⊤;
+  z -> ⊤;
+  ⊥ -> x;
+  ⊥ -> y;
+  ⊥ -> z;
+}
