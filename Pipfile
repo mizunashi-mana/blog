@@ -17,4 +17,6 @@ Pygments = "*"
 gitpython = "*"
 
 [requires]
-python_version = "3"
+# for pelican 4.2.0
+# See the https://github.com/getpelican/pelican/issues/2674
+python_version = "3.7"
