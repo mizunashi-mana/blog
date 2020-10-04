@@ -1,0 +1,33 @@
+\documentclass[12pt]{article}
+
+\setlength{\paperwidth}{10cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+\input{package.tex}
+
+\newcommand*{\BNFassign}{\mathrel{::=}}
+\newcommand*{\BNFor}{\hspace{1.4em}\mid}
+\newcommand*{\tokenc}[1]{\text{\texttt{#1}}}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+  \vcenter{\xymatrix{
+    X
+    \ar@{-->}[d]_{\bar{f}}
+    &
+    X \times Y
+    \ar@{->}[d]_{\bar{f} \times \mathrm{id}}
+    \ar@{->}[rd]^{f}
+    \\
+    Z^Y
+    &
+    Z^Y \times Y
+    \ar@{->}[r]_-{\epsilon}
+    &
+    Z
+  }}
+\end{align*}
+\end{document}
