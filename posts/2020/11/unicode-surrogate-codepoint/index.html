@@ -58,7 +58,7 @@
 <meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2020/11/unicode-surrogate-codepoint/"/>
 <meta property="og:type" content="article"/>
 <meta property="article:published_time" content="2020-11-14 10:48:12+09:00"/>
-<meta property="article:modified_time" content="2020-11-14 10:48:12+09:00"/>
+<meta property="article:modified_time" content="2020-11-14 11:12:49+09:00"/>
 <meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
 <meta property="article:section" content="規格"/>
 <meta property="article:tag" content="Unicode"/>
@@ -203,8 +203,8 @@
 <li>Unicode コードポイントの列を内部表現として使っている言語</li>
 </ul>
 <p>に分かれている．個人的に観測している範囲では，古い言語は UTF-16 の採用率が高く，最近は UTF-8 の採用率が高い気がする．古い言語で UTF-16 採用率が高いのは，やはり Unicode の歴史的事情が大きく影響を与えているんじゃないだろうか？ まあ，その辺の話は置いておいて，今回注目したいのが「Unicode コードポイントの列を内部表現として使っている言語」だ．例としては，Python，Haskell <a class="footnote-reference" href="#ghc-haskell" id="auto-id-6">[5]</a> が相当する．</p>
-<p>Unicode コードポイントの列というのは，つまりは <tt class="docutils literal">0</tt> から <tt class="docutils literal">0x10FFFF</tt> の間の整数の列ということだ．ところが，コードポイントにはサロゲートコードポイントが含まれているため，文字表現として実質必要なのは <tt class="docutils literal">0</tt> から <tt class="docutils literal"><span class="pre">0xD7FF`，``0xE000</span></tt> から <tt class="docutils literal">0x10FFFF</tt> の数値だけだ．なので，<tt class="docutils literal">0xD800</tt> から <tt class="docutils literal">0xDFFF</tt> の間は使われない領域ということになる．こういう領域を見ると有効活用したいと思うのが，エンジニアの性らしく，Python / Haskell ではそれぞれが，実は微妙に Unicode コードポイントから拡張を施している．これらの言語では，コードポイントのうち，<tt class="docutils literal">0xDC80</tt> から <tt class="docutils literal">0xDCFF</tt> の数値は Unicode コードポイントして扱われない場合がある．</p>
-<p>では，何に使われているかというと，ASCII 互換の文字コードでエンコードされたバイト列に対し，デコードに失敗した文字を表現するために使われる．正直こんな機能あまり出番はないと思うというか，正直使いたくなるユースケースはあまり思い浮かばないが，例えばこの機能によって文字列型でバイト列を扱うことができる．何を言ってるか分からないと思うので，とりあえず Python3 で例を見てみよう:</p>
+<p>Unicode コードポイントの列というのは，つまりは <tt class="docutils literal">0</tt> から <tt class="docutils literal">0x10FFFF</tt> の間の整数の列ということだ．ところが，コードポイントにはサロゲートコードポイントが含まれているため，文字表現として実質必要なのは <tt class="docutils literal">0</tt> から <tt class="docutils literal">0xD7FF</tt>，<tt class="docutils literal">0xE000</tt> から <tt class="docutils literal">0x10FFFF</tt> の数値だけだ．なので，<tt class="docutils literal">0xD800</tt> から <tt class="docutils literal">0xDFFF</tt> の間は使われない領域ということになる．こういう領域を見ると有効活用したいと思うのがエンジニアの性らしく，Python / Haskell ではそれぞれが，実は微妙に Unicode コードポイントから拡張を施している．これらの言語では，コードポイントのうち，<tt class="docutils literal">0xDC80</tt> から <tt class="docutils literal">0xDCFF</tt> の数値は Unicode コードポイントして扱われない場合がある．</p>
+<p>では，何に使われているかというと，ASCII 互換の文字コードでエンコードされたバイト列に対し，デコードに失敗した文字を表現するために使われる．正直こんな機能あまり出番はないと思うというか，使いたくなるユースケースはあまり思い浮かばないが，例えばこの機能によって文字列型でバイト列を扱うことができる．何を言ってるか分からないと思うので，とりあえず Python3 で例を見てみよう:</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
