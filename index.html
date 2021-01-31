@@ -130,6 +130,27 @@
 
 <article>
   <header>
+    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2021/01/how-to-use-happy/#how-to-use-happy">Happy のコンフリクトレポートと向き合う</a></h2>
+    <p>
+          Posted on 日 31 1月 2021 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
+
+
+          &#8226;     Tagged with
+
+              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/pasa.html">パーサ</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/happy.html">Happy</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/lalr.html">LALR</a>
+    </p>
+  </header>
+  <div>
+      <p>Haskell には，Happy と言う名前のパーサジェネレータがある．基本的には，yacc と同じような使い勝手のジェネレータで，GHC で使用されているため Haskell のパーサジェネレータとしてはそこそこ実績がある．</p>
+<p>Happy は意味アクション付き BNF から LALR(1) パーサを生成する．このパーサは基本的に，構文解析表を見ながら shift / reduce と呼ばれる操作を行っていく，shift-reduce パーサの一種になる …</p>
+        <br>
+        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2021/01/how-to-use-happy/#how-to-use-happy">    Continue reading
+</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/11/unicode-surrogate-codepoint/#unicode-surrogate-codepoint">Unicode とサロゲートコードポイント</a></h2>
     <p>
           Posted on 土 14 11月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/gui-ge.html">規格</a>
@@ -335,35 +356,6 @@ Undefined symbols for architecture i386:
 <p>ところで、実は <tt class="docutils literal">DerivingVia …</tt></p>
         <br>
         <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2020/03/deriving-strategies-by-deriving-via/#deriving-strategies-by-deriving-via">    Continue reading
-</a>
-  </div>
-  <hr />
-</article>
-<article>
-  <header>
-    <h2><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/#haskell-lazy-debug-problem">遅延評価でデバッグが困難になる状況</a></h2>
-    <p>
-          Posted on 日 29 3月 2020 in <a href="https://mizunashi-mana.github.io/blog/category/puroguraminguyan-yu.html">プログラミング言語</a>
-
-
-          &#8226;     Tagged with
-
-              <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/chi-yan-ping-jia.html">遅延評価</a>,              <a href="https://mizunashi-mana.github.io/blog/tag/debatsugu.html">デバッグ</a>
-    </p>
-  </header>
-  <div>
-      <p>先日、Haskell 界隈で遅延評価によってデバッグがし辛いのはどんな時かと言う話があった。見た感じ、遅延評価によってデバッグのしにくさはそんなに変わらないと言う意見が結構あり、個人的には衝撃だった。僕自身は遅延評価にだいぶヘイトを溜めてる人なので、どういう状況でデフォルト遅延評価が嫌かを実感できる問題を作った。この問題を解けば、きっとヘイトを共有できるはずってわけ。一緒に地獄に落ちような。</p>
-<p>なお、かなり主観に寄っていて、結構書き殴ってる部分が多いので、厳密な議論をするにはあまり良い例ではないかもしれない。個人的には、備忘録的な意味合いも強くて、今まで詰まったやつをまとめておくかみたいな感じでもある。</p>
-<p>先に結論を書いておくと、</p>
-<ul class="simple">
-<li>プログラム自体が大きくて <a class="footnote-reference" href="#simple-example" id="auto-id-2">[1]</a></li>
-<li>複雑な制御構造をしていて</li>
-<li><dl class="first docutils">
-<dt>(optional) 以下のいずれかの条件を満たす</dt>
-<dd><ul class="first last">
-<li>遅延評価を機能として使っている …</li></ul></dd></dl></li></ul>
-        <br>
-        <a class="btn" href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/#haskell-lazy-debug-problem">    Continue reading
 </a>
   </div>
 </article>

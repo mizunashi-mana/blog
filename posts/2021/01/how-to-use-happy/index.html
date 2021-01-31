@@ -1,0 +1,743 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://mizunashi-mana.github.io/blog/theme/font-awesome/css/solid.css">
+
+    <link href="https://mizunashi-mana.github.io/blog/dist-asset/bundle.css" rel="stylesheet">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="続くといいな日記 Atom">
+
+    <link href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" type="application/rss+xml" rel="alternate" title="続くといいな日記 RSS">
+
+    <link rel="shortcut icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://mizunashi-mana.github.io/blog/asset/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-110810716-2', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#555">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#555">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#555">
+
+<meta name="author" content="Mizunashi Mana" />
+<meta name="description" content="Haskell には，Happy と言う名前のパーサジェネレータがある．基本的には，yacc と同じような使い勝手のジェネレータで，GHC で使用されているため Haskell のパーサジェネレータとしてはそこそこ実績がある． Happy は意味アクション付き BNF から LALR(1) パーサを生成する．このパーサは基本的に，構文解析表を見ながら shift / reduce と呼ばれる操作を行っていく，shift-reduce パーサの一種になる …" />
+<meta name="keywords" content="Haskell, パーサ, Happy, LALR">
+
+<meta property="og:site_name" content="続くといいな日記"/>
+<meta property="og:title" content="Happy のコンフリクトレポートと向き合う"/>
+<meta property="og:description" content="Haskell には，Happy と言う名前のパーサジェネレータがある．基本的には，yacc と同じような使い勝手のジェネレータで，GHC で使用されているため Haskell のパーサジェネレータとしてはそこそこ実績がある． Happy は意味アクション付き BNF から LALR(1) パーサを生成する．このパーサは基本的に，構文解析表を見ながら shift / reduce と呼ばれる操作を行っていく，shift-reduce パーサの一種になる …"/>
+<meta property="og:locale" content="ja"/>
+<meta property="og:url" content="https://mizunashi-mana.github.io/blog/posts/2021/01/how-to-use-happy/"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2021-01-31 14:37:38+09:00"/>
+<meta property="article:modified_time" content="2021-01-31 14:37:38+09:00"/>
+<meta property="article:author" content="https://mizunashi-mana.github.io/blog/author/mizunashi-mana.html">
+<meta property="article:section" content="フレームワーク"/>
+<meta property="article:tag" content="Haskell"/>
+<meta property="article:tag" content="パーサ"/>
+<meta property="article:tag" content="Happy"/>
+<meta property="article:tag" content="LALR"/>
+<meta property="og:image" content="https://mizunashi-mana.github.io/blog/asset/profile.png">
+
+  <title>続くといいな日記 &ndash; Happy のコンフリクトレポートと向き合う</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://mizunashi-mana.github.io/blog">
+        <img src="https://mizunashi-mana.github.io/blog/asset/profile.png" alt="" title="">
+      </a>
+      <h1><a href="https://mizunashi-mana.github.io/blog"></a></h1>
+
+<p>続くといいな日記</p>
+      <nav>
+        <ul class="list">
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/0-profile.html#0-profile">著者について</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/1-about.html#1-about">このサイトについて</a></li>
+          <li><a href="https://mizunashi-mana.github.io/blog/pages/3-privacy-policy.html#3-privacy-policy">プライバシーポリシー</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-envelope" href="mailto:axnnoindexr11@gmail.com" target="_blank">
+            <i class="fas fa-envelope">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-github" href="https://github.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-github">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-gitlab" href="https://gitlab.com/mizunashi-mana" target="_blank">
+            <i class="fab fa-gitlab">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-twitter" href="https://twitter.com/Mizunashi_Mana" target="_blank">
+            <i class="fab fa-twitter">
+            </i>
+          </a></li>
+          <li>
+            <a  class="sc-rss" href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml" target="_blank">
+            <i class="fas fa-rss">
+            </i>
+          </a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://mizunashi-mana.github.io/blog">    Home
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/archives.html">Archives</a>
+      <a href="https://mizunashi-mana.github.io/blog/categories.html">Categories</a>
+      <a href="https://mizunashi-mana.github.io/blog/tags.html">Tags</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.atom.xml">    Atom
+</a>
+
+      <a href="https://mizunashi-mana.github.io/blog/feeds/all.rss.xml">    RSS
+</a>
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="how-to-use-happy">Happy のコンフリクトレポートと向き合う</h1>
+    <p>
+          Posted on 日 31 1月 2021 in <a href="https://mizunashi-mana.github.io/blog/category/huremuwaku.html">フレームワーク</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>Haskell には，Happy と言う名前のパーサジェネレータがある．基本的には，yacc と同じような使い勝手のジェネレータで，GHC で使用されているため Haskell のパーサジェネレータとしてはそこそこ実績がある．</p>
+<p>Happy は意味アクション付き BNF から LALR(1) パーサを生成する．このパーサは基本的に，構文解析表を見ながら shift / reduce と呼ばれる操作を行っていく，shift-reduce パーサの一種になる．しかし，shift-reduce パーサの生成は，一般に BNF から一意に決まらないことがある．そのような BNF が与えられた場合，一般にジェネレータは警告をユーザに伝えつつ，標準的なパーサを出力するようになっていることが多く，Happy もそのようになっている．ただ，その標準的パーサが意図していない動きをする場合も多い．</p>
+<p>今回は，Happy が出す警告の見方とその自分なりの解決方法を紹介する．以下の文献を主に参考にしている．</p>
+<ul class="simple">
+<li><a class="reference external" href="https://www.haskell.org/happy/doc/html/">https://www.haskell.org/happy/doc/html/</a></li>
+<li><a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/blob/eb90d23911ee10868dc2c7cc27a8397f0ae9b41d/compiler/GHC/Parser.y">GHC の Parser.y</a></li>
+</ul>
+<p>なお、Happy 1.20 を前提に話す。</p>
+<div class="section" id="shift-reduce">
+<h2>shift-reduce パーサ<a class="headerlink" href="#shift-reduce" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>まずは shift-reduce パーサの簡単な動きを押さえておく．shift-reduce パーサと言っても，その解析方法や実装によって結構生成方法が違うが，今回は LALR(1) に焦点を当てる．今回はそこまで細かい話には立ち入らないので，大まかなイメージをつかんでもらえれば良い．</p>
+<p>shift-reduce パーサは，その名の通り，</p>
+<dl class="docutils">
+<dt>shift</dt>
+<dd>入力から1つ文字を持ってきて，葉を作ってスタックに入れる</dd>
+<dt>reduce</dt>
+<dd>スタックから幾つか木を持ってきて，それを組み合わせた木を作りスタックに入れる</dd>
+</dl>
+<p>の2つの操作を繰り返しながら，パースを行うボトムアップ構文解析法を指す．動きのイメージは <a class="reference external" href="https://en.wikipedia.org/wiki/Shift-reduce_parser">https://en.wikipedia.org/wiki/Shift-reduce_parser</a> に割とわかりやすい表があるので，ちょっと拝借する．</p>
+<pre class="literal-block">
+R1: assign ← ID '=' sums
+R2: sums ← sums '+' prods
+R3: sums ← prods
+R4: prods ← prods '*' value
+R5: prods ← value
+R6: value ← INT
+R7: value ← ID
+</pre>
+<p>という文法があるとする．大文字や <tt class="docutils literal"><span class="pre">'..'</span></tt> が終端記号，小文字で書かれたものが非終端記号だ．この文法から生成されるパーサは，だいたい以下のような動きをする:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="40%"/>
+<col width="14%"/>
+<col width="24%"/>
+<col width="22%"/>
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">パーススタック</th>
+<th class="head">先読み</th>
+<th class="head">残りの入力</th>
+<th class="head">操作</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">ID</tt></td>
+<td><tt class="docutils literal">=</tt></td>
+<td><tt class="docutils literal">ID + ID * INT</tt></td>
+<td>shift</td>
+</tr>
+<tr><td><tt class="docutils literal">ID =</tt></td>
+<td><tt class="docutils literal">ID</tt></td>
+<td><tt class="docutils literal">+ ID * INT</tt></td>
+<td>shift</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = ID</tt></td>
+<td><tt class="docutils literal">+</tt></td>
+<td><tt class="docutils literal">ID * INT</tt></td>
+<td>reduce by (R7)</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = value</tt></td>
+<td><tt class="docutils literal">+</tt></td>
+<td><tt class="docutils literal">ID * INT</tt></td>
+<td>reduce by (R5)</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = prods</tt></td>
+<td><tt class="docutils literal">+</tt></td>
+<td><tt class="docutils literal">ID * INT</tt></td>
+<td>reduce by (R3)</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums</tt></td>
+<td><tt class="docutils literal">+</tt></td>
+<td><tt class="docutils literal">ID * INT</tt></td>
+<td>shift</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums +</tt></td>
+<td><tt class="docutils literal">ID</tt></td>
+<td><tt class="docutils literal">* INT</tt></td>
+<td>shift</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums + ID</tt></td>
+<td><tt class="docutils literal">*</tt></td>
+<td><tt class="docutils literal">INT</tt></td>
+<td>reduce by (R7)</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums + value</tt></td>
+<td><tt class="docutils literal">*</tt></td>
+<td><tt class="docutils literal">INT</tt></td>
+<td>reduce by (R5)</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums + prods</tt></td>
+<td><tt class="docutils literal">*</tt></td>
+<td><tt class="docutils literal">INT</tt></td>
+<td>shift</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums + prods *</tt></td>
+<td><tt class="docutils literal">INT</tt></td>
+<td> </td>
+<td>shift</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums + prods * INT</tt></td>
+<td> </td>
+<td> </td>
+<td>reduce by (R7)</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums + prods * value</tt></td>
+<td> </td>
+<td> </td>
+<td>reduce by (R5)</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums + prods</tt></td>
+<td> </td>
+<td> </td>
+<td>reduce by (R2)</td>
+</tr>
+<tr><td><tt class="docutils literal">ID = sums</tt></td>
+<td> </td>
+<td> </td>
+<td>reduce by (R1)</td>
+</tr>
+<tr><td><tt class="docutils literal">assign</tt></td>
+<td> </td>
+<td> </td>
+<td>accept</td>
+</tr>
+</tbody>
+</table>
+<p>パーサは状態スタックを持っており、次にどういう操作を行うかは、先読み一文字とパーススタックの先頭要素、現在の状態から決まる。</p>
+</div>
+<div class="section" id="auto-id-1">
+<h2>Happy でパーサを記述する<a class="headerlink" href="#auto-id-1" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>実際に Happy で shift-reduce パーサを生成し、どういう状態と操作が行われるかを見てみる。</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">-- Parser.y</span>
+<span class="p">{</span>
+<span class="kr">module</span> <span class="nn">Parser</span> <span class="kr">where</span>
+<span class="p">}</span>
+
+<span class="o">%</span><span class="n">token</span>
+    <span class="kt">ID</span>  <span class="p">{</span> <span class="kt">TokId</span> <span class="kr">_</span> <span class="p">}</span>
+    <span class="kt">INT</span> <span class="p">{</span> <span class="kt">TokInt</span> <span class="kr">_</span> <span class="p">}</span>
+    <span class="sc">'='</span> <span class="p">{</span> <span class="kt">TokSym</span> <span class="s">"="</span> <span class="p">}</span>
+    <span class="sc">'+'</span> <span class="p">{</span> <span class="kt">TokSym</span> <span class="s">"+"</span> <span class="p">}</span>
+    <span class="sc">'*'</span> <span class="p">{</span> <span class="kt">TokSym</span> <span class="s">"*"</span> <span class="p">}</span>
+
+<span class="o">%</span><span class="n">tokentype</span> <span class="p">{</span> <span class="kt">Token</span> <span class="p">}</span>
+
+<span class="o">%</span><span class="n">name</span> <span class="n">assign</span>
+<span class="o">%%</span>
+
+<span class="nf">assign</span> <span class="ow">::</span> <span class="p">{</span> <span class="p">(</span><span class="kt">Token</span><span class="p">,</span> <span class="kt">Expr</span><span class="p">)</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="kt">ID</span> <span class="sc">'='</span> <span class="n">sums</span>   <span class="p">{</span> <span class="p">(</span><span class="o">$</span><span class="mi">1</span><span class="p">,</span> <span class="o">$</span><span class="mi">3</span><span class="p">)</span> <span class="p">}</span>
+
+<span class="nf">sums</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="n">sums</span> <span class="sc">'+'</span> <span class="n">prods</span>    <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="n">prods</span>             <span class="p">{</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+
+<span class="nf">prods</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="n">prods</span> <span class="sc">'*'</span> <span class="n">value</span>   <span class="p">{</span> <span class="kt">Prod</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="n">value</span>             <span class="p">{</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+
+<span class="nf">value</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="kt">ID</span>                <span class="p">{</span> <span class="kt">Val</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="kt">INT</span>               <span class="p">{</span> <span class="kt">Val</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+
+<span class="p">{</span>
+<span class="nf">happyError</span> <span class="ow">::</span> <span class="p">[</span><span class="kt">Token</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">happyError</span> <span class="kr">_</span> <span class="ow">=</span> <span class="ne">error</span> <span class="s">"happyError"</span>
+
+<span class="kr">data</span> <span class="kt">Token</span>
+    <span class="ow">=</span> <span class="kt">TokId</span> <span class="kt">String</span>
+    <span class="o">|</span> <span class="kt">TokInt</span> <span class="kt">Integer</span>
+    <span class="o">|</span> <span class="kt">TokSym</span> <span class="kt">String</span>
+    <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Eq</span><span class="p">,</span> <span class="kt">Show</span><span class="p">)</span>
+
+<span class="kr">data</span> <span class="kt">Expr</span>
+    <span class="ow">=</span> <span class="kt">Sum</span> <span class="kt">Expr</span> <span class="kt">Expr</span>
+    <span class="o">|</span> <span class="kt">Prod</span> <span class="kt">Expr</span> <span class="kt">Expr</span>
+    <span class="o">|</span> <span class="kt">Val</span> <span class="kt">Token</span>
+    <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Eq</span><span class="p">,</span> <span class="kt">Show</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table><p>このプログラムに対して、</p>
+<pre class="literal-block">
+happy -i Parser.y
+</pre>
+<p>を実行すると、パーサプログラム <tt class="docutils literal">Parser.hs</tt> とパーサ生成時の情報 <tt class="docutils literal">Parser.info</tt> が生成される。<tt class="docutils literal">Parser.info</tt> には文法解析時の情報と、状態遷移に関するものが書かれる。状態遷移に関するものは <tt class="docutils literal">States</tt> 節に書かれている。今回は、</p>
+<pre class="literal-block">
+-----------------------------------------------------------------------------
+States
+-----------------------------------------------------------------------------
+State 0
+
+
+        ID             shift, and enter state 2
+
+        assign         goto state 3
+
+State 1
+
+
+        ID             shift, and enter state 2
+
+
+State 2
+
+        assign -&gt; ID . '=' sums                             (rule 1)
+
+        '='            shift, and enter state 4
+
+
+State 3
+
+        %start_parseAssign -&gt; assign .                      (rule 0)
+
+        %eof           accept
+
+
+State 4
+
+        assign -&gt; ID '=' . sums                             (rule 1)
+
+        ID             shift, and enter state 8
+        INT            shift, and enter state 9
+
+        sums           goto state 5
+        prods          goto state 6
+        value          goto state 7
+
+State 5
+
+        assign -&gt; ID '=' sums .                             (rule 1)
+        sums -&gt; sums . '+' prods                            (rule 2)
+
+        '+'            shift, and enter state 11
+        %eof           reduce using rule 1
+
+
+State 6
+
+        sums -&gt; prods .                                     (rule 3)
+        prods -&gt; prods . '*' value                          (rule 4)
+
+        '+'            reduce using rule 3
+        '*'            shift, and enter state 10
+        %eof           reduce using rule 3
+
+...
+</pre>
+<p>みたいな情報が出力される．それぞれの状態について，</p>
+<ul class="simple">
+<li>State の値</li>
+<li>reduce 途中の規則</li>
+<li>先読み値での操作</li>
+<li>パーススタックの状態による操作</li>
+</ul>
+<p>が表示されている．reduce 途中の規則表示は，<tt class="docutils literal">.</tt> の位置までは reduce 済みということを表している．この辺は LALR 法に馴染みのある人なら分かると思うが，状態の作り方に由来する情報で，解析するプログラムが大きくなるとあまり役に立つ情報ではなかったりするが，覚えておいて損はないだろう．</p>
+</div>
+<div class="section" id="auto-id-2">
+<h2>コンフリクトとその解決<a class="headerlink" href="#auto-id-2" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>さて，ここからが本題．shift-reduce パーサ生成では，パーサが上記の通りの動きをすることから，先読みしている文字から shift か reduce のどちらを行うか一意に決めなければならない．しかし，書かれた文法によっては，うまく一意に決められないことがある．大方問題になるのは以下のケースだ:</p>
+<ul class="simple">
+<li>文法が曖昧性を含んでいる</li>
+<li>先をパースして見なければ，操作が決定できない</li>
+</ul>
+<p>一般的に，shift-reduce パーサ生成器はこのような問題を直接検出はしてくれない場合が多い．特に，Happy の場合は，直接検出の機能はない．ただ代わりに，これらの問題は間接的に shift/reduce 衝突，reduce/reduce 衝突という2つの警告によって報告される．</p>
+<p>それぞれの警告は，名前の通り</p>
+<dl class="docutils">
+<dt>shift/reduce 衝突</dt>
+<dd>shift 操作と reduce 操作，どちらも可能．この場合，自動的に shift 操作が選択される．</dd>
+<dt>reduce/reduce 衝突</dt>
+<dd>可能な reduce 操作が複数ある．この場合，自動的に一番早く現れる規則に関する reduce 操作が選択される．</dd>
+</dl>
+<p>という問題を表している．実際に，衝突が報告されるようなプログラムを書いてみる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">-- Parser.y</span>
+<span class="p">{</span>
+<span class="kr">module</span> <span class="nn">Parser</span> <span class="kr">where</span>
+<span class="p">}</span>
+
+<span class="o">%</span><span class="n">token</span>
+    <span class="kt">ID</span>  <span class="p">{</span> <span class="kt">TokId</span> <span class="kr">_</span> <span class="p">}</span>
+    <span class="sc">'+'</span> <span class="p">{</span> <span class="kt">TokSym</span> <span class="s">"+"</span> <span class="p">}</span>
+
+<span class="o">%</span><span class="n">tokentype</span> <span class="p">{</span> <span class="kt">Token</span> <span class="p">}</span>
+
+<span class="o">%</span><span class="n">name</span> <span class="n">expr</span>
+<span class="o">%%</span>
+
+<span class="nf">expr</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="n">expr</span> <span class="sc">'+'</span> <span class="n">expr</span>     <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="kt">ID</span>                <span class="p">{</span> <span class="kt">Val</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+
+<span class="p">{</span>
+<span class="nf">happyError</span> <span class="ow">::</span> <span class="p">[</span><span class="kt">Token</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">happyError</span> <span class="kr">_</span> <span class="ow">=</span> <span class="ne">error</span> <span class="s">"happyError"</span>
+
+<span class="kr">data</span> <span class="kt">Token</span>
+    <span class="ow">=</span> <span class="kt">TokId</span> <span class="kt">String</span>
+    <span class="o">|</span> <span class="kt">TokSym</span> <span class="kt">String</span>
+    <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Eq</span><span class="p">,</span> <span class="kt">Show</span><span class="p">)</span>
+
+<span class="kr">data</span> <span class="kt">Expr</span>
+    <span class="ow">=</span> <span class="kt">Sum</span> <span class="kt">Expr</span> <span class="kt">Expr</span>
+    <span class="o">|</span> <span class="kt">Val</span> <span class="kt">Token</span>
+    <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Eq</span><span class="p">,</span> <span class="kt">Show</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table><p>これの <tt class="docutils literal">Parser.info</tt> を見ると，最初に</p>
+<pre class="literal-block">
+state 6 contains 1 shift/reduce conflicts.
+</pre>
+<p>というように shift/reduce 衝突が報告される．State 6 の情報を見に行ってみると，</p>
+<pre class="literal-block">
+State 6
+
+    expr -&gt; expr . '+' expr                             (rule 1)
+    expr -&gt; expr '+' expr .                             (rule 1)
+
+    '+'            shift, and enter state 5
+                    (reduce using rule 1)
+
+    %eof           reduce using rule 1
+</pre>
+<p>という表示がある．<tt class="docutils literal">'+'</tt> の操作で <tt class="docutils literal">(reduce using rule 1)</tt> と言う表記があるのが分かるだろう．衝突している操作で，選ばれなかったものは <tt class="docutils literal"><span class="pre">(...)</span></tt> と言う形で表記される．今回の場合は，</p>
+<ul class="simple">
+<li><tt class="docutils literal">shift, and enter state 5</tt></li>
+<li><tt class="docutils literal">reduce using rule 1</tt></li>
+</ul>
+<p>が衝突し，shift/reduce 衝突なので shift が優先されている．このケースは文法自体に曖昧性がある．つまり，<tt class="docutils literal">a + b + c</tt> のような式が，<tt class="docutils literal">Sum (Sum a b) c</tt> とパースされて欲しいのか，<tt class="docutils literal">Sum a (Sum b c)</tt> とパースされて欲しいのか分からないのだ．<tt class="docutils literal">'+'</tt> が出てきた時に shift を優先させると，shift を貪欲的に行い最終的にまとめて reduce されるため <tt class="docutils literal">Sum a (Sum b c)</tt> が結果になる．実際，今回のパース結果を見てみると，</p>
+<pre class="literal-block">
+&gt;&gt;&gt; expr [TokId "a", TokSym "+", TokId "b", TokSym "+", TokId "c"]
+Sum (Val (TokId "a")) (Sum (Val (TokId "b")) (Val (TokId "c")))
+</pre>
+<p>となっている．reduce が優先された場合，まず出来上がったところから reduce していくため，<tt class="docutils literal">Sum (Sum a b) c</tt> が結果になる．もし，shift 優先で問題ないなら，それを Happy に <tt class="docutils literal">%shift</tt> ディレクティブで以下のように教えることができる:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">expr</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="n">expr</span> <span class="sc">'+'</span> <span class="n">expr</span> <span class="o">%</span><span class="n">shift</span>  <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="kt">ID</span>                    <span class="p">{</span> <span class="kt">Val</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+</pre></div>
+</td></tr></table><p>または，文法から曖昧性を排除することで，解決できる．こちらの方が一般的な解決方法だろう．左結合でのパース結果，つまり reduce 優先した場合の結果が得たかったら次のように書けば良い:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">expr</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="n">expr</span> <span class="sc">'+'</span> <span class="kt">ID</span>   <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="p">(</span><span class="kt">Val</span> <span class="o">$</span><span class="mi">3</span><span class="p">)</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="kt">ID</span>            <span class="p">{</span> <span class="kt">Val</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+</pre></div>
+</td></tr></table><p>shift/reduce 衝突は基本避けられるなら避けた方がいいが，そこまで無理をして避ける必要はないだろう．shift/reduce を無理に避けるため文法が複雑になるより，<tt class="docutils literal">%shift</tt> ディレクティブを指定した方がプログラムが保守しやすい場合も多い．特に，演算子・ブロックの優先順位の問題においては，<tt class="docutils literal">%shift</tt> ディレクティブや <tt class="docutils literal">%left</tt>，<tt class="docutils literal">%right</tt> を使用した方が意味アクションが書きやすい場合が多い．</p>
+<p>しかしながら，reduce/reduce 衝突の方は，プログラマが意図しないパーサが生成されるケースが多いため，注意が必要だ．例えば問題になるのは，以下のような文法だ:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">expr</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="n">value</span> <span class="sc">'+'</span> <span class="n">expr</span>            <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="n">value</span> <span class="sc">'+'</span> <span class="n">value</span>           <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="n">value</span>                     <span class="p">{</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+
+<span class="nf">value</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="kt">ID</span>                        <span class="p">{</span> <span class="kt">Val</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+</pre></div>
+</td></tr></table><p>この文法では，</p>
+<pre class="literal-block">
+state 10 contains 1 reduce/reduce conflicts.
+</pre>
+<p>という警告が生成される．State 10 は次のような情報表示がされる:</p>
+<pre class="literal-block">
+State 10
+
+    expr -&gt; value . '+' value                           (rule 1)
+    expr -&gt; value '+' value .                           (rule 1)
+    expr -&gt; value . '+' expr                            (rule 2)
+    expr -&gt; value .                                     (rule 3)
+
+    '+'            shift, and enter state 6
+    %eof           reduce using rule 3
+            (reduce using rule 1)
+</pre>
+<p>この場合，<tt class="docutils literal">a + b</tt> という式を，</p>
+<ul class="simple">
+<li><tt class="docutils literal">expr <span class="pre">-&gt;</span> value '+' expr</tt> の規則で reduce するか</li>
+<li><tt class="docutils literal">expr <span class="pre">-&gt;</span> value '+' value</tt> の規則で reduce するか</li>
+</ul>
+<p>が分からない点で，文法が曖昧になっている．ただ，警告自体は，</p>
+<ul class="simple">
+<li><tt class="docutils literal">expr <span class="pre">-&gt;</span> value '+' value</tt></li>
+<li><tt class="docutils literal">expr <span class="pre">-&gt;</span> value</tt></li>
+</ul>
+<p>の2つが衝突していると言っている事には注意が必要だ．実際には，後者のルールは reduce が起きた後 <tt class="docutils literal">expr <span class="pre">-&gt;</span> value '+' expr</tt> で reduce が走ることを前提にしているわけだが，警告をそのまま素直に受け取ると，問題の特定が難しい場合があるのには注意だ．さて，今回のケースでは2つの reduce が被らないように文法を修正するのが良いだろう．具体的には，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">expr</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="n">value</span> <span class="sc">'+'</span> <span class="n">value</span> <span class="sc">'+'</span> <span class="n">expr2</span>     <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="n">value</span> <span class="sc">'+'</span> <span class="n">value</span>               <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="n">value</span>                         <span class="p">{</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+
+<span class="nf">expr2</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="n">value</span> <span class="sc">'+'</span> <span class="n">expr2</span>               <span class="p">{</span> <span class="kt">Sum</span> <span class="o">$</span><span class="mi">1</span> <span class="o">$</span><span class="mi">3</span> <span class="p">}</span>
+    <span class="o">|</span> <span class="n">value</span>                         <span class="p">{</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+
+<span class="nf">value</span> <span class="ow">::</span> <span class="p">{</span> <span class="kt">Expr</span> <span class="p">}</span>
+    <span class="kt">:</span> <span class="kt">ID</span>                            <span class="p">{</span> <span class="kt">Val</span> <span class="o">$</span><span class="mi">1</span> <span class="p">}</span>
+</pre></div>
+</td></tr></table><p>というように修正するのが良いだろう．</p>
+<p>基本的に，自身が管理できていない衝突は，その原因を特定して解決しておいた方がいい．特に，reduce/reduce 衝突は解決しておく必要があるだろう．Happy はデフォルトでは衝突を検知してもパーサをそのまま生成するが，このようなマナーを考慮して，<tt class="docutils literal">%expect</tt> ディレクティブというものを用意してくれている．これを使って，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">expect</span> <span class="mi">10</span>
+</pre></div>
+</td></tr></table><p>というように書くと，reduce/shift 衝突が 10 箇所，reduce/reduce 衝突がない場合のみパーサを生成するようになる．基本的に，reduce/shift 衝突は，その起こっている箇所に <tt class="docutils literal">%shift</tt> ディレクティブを指定するのがいいだろう．なので，基本的に，</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">expect</span> <span class="mi">0</span>
+</pre></div>
+</td></tr></table><p>を指定し，<tt class="docutils literal">%shift</tt> ディレクティブを適宜入れながら，reduce/reduce 衝突は回避していくのが良いだろう．</p>
+</div>
+<div class="section" id="auto-id-3">
+<h2>まとめ<a class="headerlink" href="#auto-id-3" title="Permalink to this headline"><i class="fas fa-link anchor-link"></i></a></h2>
+<p>今回は shift-reduce 生成器 Happy で起こる shift/reduce 衝突，reduce/reduce 衝突の回避方法を軽く紹介した．基本的に，衝突は回避していくのが良いが，shift/reduce 衝突については無理に回避せず <tt class="docutils literal">%shift</tt> を使うという手がある．また，<tt class="docutils literal">%expect 0</tt> はつけておいた方が良いだろう．</p>
+<p>文法が大きくなってくると，State の情報で提示された reduce の対象ルールと実際問題がある曖昧性のあるルールは割とかけ離れていたりするので注意が必要だ．基本的には，先読み対象のトークンが使われている場所を探索し，地道に曖昧性がある部分を探していくしかないと思う．また，実際には先読みを十分に行えば判別可能な曖昧性についても，衝突を起こしてしまう場合がある．その場合は，効率的なパースのためにも早期に判別可能な文法に修正していくのが良いだろう．この辺は，PEG とかと比べると少々使い勝手悪いっすね．というわけで，今日はこの辺で．</p>
+</div>
+<script>
+var contentMetadataForCustomJS = {
+  'type': 'articles',
+  'title': document.title,
+  'url': location.protocol + '//' + location.host + location.pathname,
+  'source_path': 'articles/2021/01/how-to-use-happy.rst',
+  'github_url': 'https://github.com/mizunashi-mana/blog/blob/master/content/articles/2021/01/how-to-use-happy.rst'
+}
+</script><script async src="https://mizunashi-mana.github.io/blog/dist-asset/bundle.js"></script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://mizunashi-mana.github.io/blog/tag/haskell.html">Haskell</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/pasa.html">パーサ</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/happy.html">Happy</a>
+      <a href="https://mizunashi-mana.github.io/blog/tag/lalr.html">LALR</a>
+    </p>
+  </div>
+
+
+
+  <div class="related-posts">
+    <h4>    You might enjoy
+</h4>
+    <ul class="related-posts">
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/07/no-parenthesis-with-blockarguments/">BlockArguments で括弧を書かない生活を送る</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-implicit-parameter/">Coherent Implicit Parameter</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/deriving-strategies-by-deriving-via/">DerivingVia で deriving 戦略を模倣する</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/haskell-lazy-debug-problem/">遅延評価でデバッグが困難になる状況</a></li>
+      <li><a href="https://mizunashi-mana.github.io/blog/posts/2020/03/coherent-typeclass-and-orphan-instance/">型クラスの Coherence と Orphan Instance</a></li>
+    </ul>
+  </div>
+
+
+</article>
+
+    <footer>
+<p>
+  &copy;  2019 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " 続くといいな日記 ",
+  "url" : "https://mizunashi-mana.github.io/blog",
+  "image": "https://mizunashi-mana.github.io/blog/asset/profile.png",
+  "description": "Mizunashi Mana's Blog"
+}
+</script>
+
+<a href="https://github.com/mizunashi-mana/blog" class="github-corner" aria-label="View source on Github">
+    <svg width="80"
+         height="80"
+         viewBox="0 0 250 250"
+         style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+         aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor"
+              style="transform-origin: 130px 106px;"
+              class="octo-arm">
+        </path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor"
+              class="octo-body">
+        </path>
+    </svg>
+</a>
+<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></body>
+</html>
