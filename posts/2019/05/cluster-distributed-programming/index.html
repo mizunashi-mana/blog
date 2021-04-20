@@ -383,24 +383,24 @@ Armbrust, M., Das, T., Torres, J., Yavuz, B., Zhu, S., Xin, R., … Zaharia, M. 
 
 <span class="k">object</span> <span class="nc">SparkSample</span> <span class="o">{</span>
   <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">numMappers</span> <span class="k">=</span> <span class="mi">100</span>
-    <span class="k">val</span> <span class="n">numReducers</span> <span class="k">=</span> <span class="mi">50</span>
-    <span class="k">val</span> <span class="n">numPairs</span> <span class="k">=</span> <span class="mi">1000</span>
-    <span class="k">val</span> <span class="n">numSize</span> <span class="k">=</span> <span class="mi">1000</span>
+    <span class="k">val</span> <span class="n">numMappers</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="k">val</span> <span class="n">numReducers</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="k">val</span> <span class="n">numPairs</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="k">val</span> <span class="n">numSize</span> <span class="o">=</span> <span class="mi">1000</span>
 
-    <span class="k">val</span> <span class="n">sparkConf</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SparkConf</span><span class="o">().</span><span class="n">setAppName</span><span class="o">(</span><span class="s">"Spark Example"</span><span class="o">)</span>
-    <span class="k">val</span> <span class="n">sc</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SparkContext</span><span class="o">(</span><span class="n">sparkConf</span><span class="o">)</span>
+    <span class="k">val</span> <span class="n">sparkConf</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SparkConf</span><span class="o">().</span><span class="n">setAppName</span><span class="o">(</span><span class="s">"Spark Example"</span><span class="o">)</span>
+    <span class="k">val</span> <span class="n">sc</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SparkContext</span><span class="o">(</span><span class="n">sparkConf</span><span class="o">)</span>
 
-    <span class="k">val</span> <span class="n">pairs</span> <span class="k">=</span> <span class="n">sc</span>
+    <span class="k">val</span> <span class="n">pairs</span> <span class="o">=</span> <span class="n">sc</span>
       <span class="o">.</span><span class="n">parallelize</span><span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">numMappers</span><span class="o">,</span> <span class="n">numMappers</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">p</span> <span class="k">=&gt;</span>
-        <span class="k">val</span> <span class="n">ranGen</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Random</span>
-        <span class="k">val</span> <span class="n">arr</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">])](</span><span class="n">numPairs</span><span class="o">)</span>
+      <span class="o">.</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">p</span> <span class="o">=&gt;</span>
+        <span class="k">val</span> <span class="n">ranGen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Random</span>
+        <span class="k">val</span> <span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">])](</span><span class="n">numPairs</span><span class="o">)</span>
 
-        <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="mi">0</span> <span class="n">until</span> <span class="n">numPairs</span><span class="o">)</span> <span class="o">{</span>
-          <span class="k">val</span> <span class="n">byteArr</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">](</span><span class="n">numSize</span><span class="o">)</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="o">&lt;-</span> <span class="mi">0</span> <span class="n">until</span> <span class="n">numPairs</span><span class="o">)</span> <span class="o">{</span>
+          <span class="k">val</span> <span class="n">byteArr</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">](</span><span class="n">numSize</span><span class="o">)</span>
           <span class="n">ranGen</span><span class="o">.</span><span class="n">nextBytes</span><span class="o">(</span><span class="n">byteArr</span><span class="o">)</span>
-          <span class="n">arr</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=</span> <span class="o">(</span><span class="n">ranGen</span><span class="o">.</span><span class="n">nextInt</span><span class="o">(</span><span class="nc">Int</span><span class="o">.</span><span class="nc">MaxValue</span><span class="o">),</span> <span class="n">byteArr</span><span class="o">)</span>
+          <span class="n">arr</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="n">ranGen</span><span class="o">.</span><span class="n">nextInt</span><span class="o">(</span><span class="nc">Int</span><span class="o">.</span><span class="nc">MaxValue</span><span class="o">),</span> <span class="n">byteArr</span><span class="o">)</span>
         <span class="o">}</span>
 
         <span class="n">arr</span>

@@ -192,18 +192,18 @@ $ node --eval 'const KaTeX = require("katex"); console.log(KaTeX.renderToString(
 30
 31</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env node</span>
 
-<span class="kr">const</span> <span class="nx">KaTeX</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"katex"</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">KaTeX</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"katex"</span><span class="p">);</span>
 
 <span class="kd">function</span> <span class="nx">katexRenderingPipe</span><span class="p">(</span><span class="nx">instream</span><span class="p">,</span> <span class="nx">outstream</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">let</span> <span class="nx">chunkrest</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
 
   <span class="kd">function</span> <span class="nx">onData</span><span class="p">(</span><span class="nx">chunk</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kr">const</span> <span class="nx">chunks</span> <span class="o">=</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s2">"utf8"</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">"\t\n"</span><span class="p">);</span>
-    <span class="nx">chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nx">chunkrest</span> <span class="o">+</span> <span class="nx">chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">const</span> <span class="nx">chunks</span> <span class="o">=</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s2">"utf8"</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">"\t\n"</span><span class="p">);</span>
+    <span class="nx">chunks</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">=</span> <span class="nx">chunkrest</span> <span class="o">+</span> <span class="nx">chunks</span><span class="p">[</span><span class="mf">0</span><span class="p">];</span>
 
-    <span class="kd">let</span> <span class="nx">l</span> <span class="o">=</span> <span class="nx">chunks</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-      <span class="kr">const</span> <span class="nx">str</span> <span class="o">=</span> <span class="nx">chunks</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\t /g</span><span class="p">,</span> <span class="s2">"\t"</span><span class="p">);</span>
+    <span class="kd">let</span> <span class="nx">l</span> <span class="o">=</span> <span class="nx">chunks</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mf">1</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mf">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">str</span> <span class="o">=</span> <span class="nx">chunks</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\t /g</span><span class="p">,</span> <span class="s2">"\t"</span><span class="p">);</span>
       <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">str</span> <span class="o">!==</span> <span class="s2">"string"</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">"not string stream"</span><span class="p">);</span>
       <span class="p">}</span>
