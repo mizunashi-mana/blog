@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "blog"
+version = "0.1.0"
+description = ""
+authors = ["Mizunashi Mana <mizunashi-mana@noreply.git>"]
+
+[tool.poetry.dependencies]
+python = "^3"
+pelican = "*"
+ghp-import = "*"
+pillow = "*"
+gitpython = "*"
+beautifulsoup4 = "*"
+pygments = "*"
+
+[tool.poetry.dev-dependencies]
+doc8 = "*"
+docutils = "*"
+rstcheck = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

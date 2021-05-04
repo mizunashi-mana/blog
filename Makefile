@@ -1,6 +1,6 @@
 PY?=python3
-PELICAN?=pipenv run pelican
-GHP_IMPORT?=pipenv run ghp-import
+PELICAN?=poetry run pelican
+GHP_IMPORT?=poetry run ghp-import
 WEBPACK?=npx webpack
 PELICANOPTS=
 

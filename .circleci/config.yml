@@ -9,7 +9,6 @@ jobs:
       - run: git submodule update --init
 
       - run: |
-          sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
           sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
           DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
 
@@ -17,18 +16,19 @@ jobs:
           [[ ! -d /usr/local/bin ]] || \
             sudo chown -R circleci:circleci /usr/local/bin
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-{{ checksum "package-lock.json" }}-v4
+          key: deps9-{{ .Branch }}-{{ checksum "poetry.lock" }}-{{ checksum "package-lock.json" }}-v5
       - run: |
           sudo pip install --upgrade pip
-          sudo pip install pipenv
-          pipenv install
+          sudo pip install poetry
+          poetry install
           npm install
       - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-{{ checksum "package-lock.json" }}-v4
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-{{ checksum "package-lock.json" }}-v5
           paths:
+            - ".poetry"
             - ".venv"
             - "/usr/local/bin"
-            - "/usr/local/lib/python3.6/site-packages"
+            - "/usr/local/lib/python3.7/site-packages"
             - "./node_modules"
 
       - run: make html
@@ -42,8 +42,6 @@ jobs:
       - run: git submodule update --init
 
       - run: |
-          sudo sed -i 's/ja_JP\s.*$/ja_JP ja_JP.utf8/g' /usr/share/locale/locale.alias
-          sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
           sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
           DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
 
@@ -51,11 +49,11 @@ jobs:
           [[ ! -d /usr/local/bin ]] || \
             sudo chown -R circleci:circleci /usr/local/bin
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-{{ checksum "package-lock.json" }}-v4
+          key: deps9-{{ .Branch }}-{{ checksum "poetry.lock" }}-{{ checksum "package-lock.json" }}-v4
       - run: |
           sudo pip install --upgrade pip
-          sudo pip install pipenv
-          pipenv install
+          sudo pip install poetry
+          poetry install
           npm install
 
       - run: |
