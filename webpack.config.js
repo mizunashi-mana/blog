@@ -42,21 +42,6 @@ module.exports = {
                     },
                     {
                         loader: 'postcss-loader',
-                        options: {
-                            postcssOptions: {
-                                plugins: function () {
-                                    return [
-                                        require('cssnano')({
-                                            preset: ['default', {
-                                                mergeRules: false,
-                                            }]
-                                        }),
-                                        require('precss'),
-                                        require('autoprefixer')
-                                    ];
-                                }
-                            }
-                        }
                     },
                 ]
             },
