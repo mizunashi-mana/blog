@@ -24,6 +24,7 @@
     "file-loader": "^6.2.0",
     "mini-css-extract-plugin": "^1.6.0",
     "postcss-loader": "^5.2.0",
+    "postcss-nested": "^5.0.5",
     "postcss-preset-env": "^6.7.0",
     "webpack": "^5.36.2",
     "webpack-cli": "^4.6.0"
