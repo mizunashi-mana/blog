@@ -52,7 +52,7 @@ MAIN_MENU = True
 TIMEZONE = 'Asia/Tokyo'
 
 DEFAULT_LANG = 'ja'
-LOCALE = ('ja_JP.UTF-8', 'ja_JP')
+LOCALE = ['ja_JP.UTF-8', 'ja_JP']
 OG_LOCALE = DEFAULT_LANG
 
 # Feed generation is usually not desired when developing
