@@ -23,7 +23,7 @@ jobs:
           poetry install
           npm install
       - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}-{{ checksum "package-lock.json" }}-v5
+          key: deps9-{{ .Branch }}-{{ checksum "poetry.lock" }}-{{ checksum "package-lock.json" }}-v5
           paths:
             - ".poetry"
             - ".venv"
@@ -49,7 +49,7 @@ jobs:
           [[ ! -d /usr/local/bin ]] || \
             sudo chown -R circleci:circleci /usr/local/bin
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "poetry.lock" }}-{{ checksum "package-lock.json" }}-v4
+          key: deps9-{{ .Branch }}-{{ checksum "poetry.lock" }}-{{ checksum "package-lock.json" }}-v5
       - run: |
           sudo pip install --upgrade pip
           sudo pip install poetry
