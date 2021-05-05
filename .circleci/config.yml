@@ -9,6 +9,7 @@ jobs:
       - run: git submodule update --init
 
       - run: |
+          sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
           sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
           DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
 
@@ -42,6 +43,7 @@ jobs:
       - run: git submodule update --init
 
       - run: |
+          sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
           sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
           DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
 
