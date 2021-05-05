@@ -8,7 +8,7 @@ https://mizunashi-mana.github.io/blog/
 
 ## Requirements
 
-* pipenv: https://pipenv.readthedocs.io/en/latest/
+* poetry: https://python-poetry.org/docs/
 * npm: https://www.npmjs.com/get-npm
 
 ## Installation
@@ -16,7 +16,7 @@ https://mizunashi-mana.github.io/blog/
 ```bash
 git clone --recurse-submodules https://github.com/mizunashi-mana/blog.git
 cd blog
-pipenv install
+poetry install
 npm install
 make publish
 ```
