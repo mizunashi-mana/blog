@@ -752,7 +752,7 @@ Server started, listening on 5000
         <span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="k">companion</span> <span class="k">object</span> <span class="p">{</span>
+    <span class="k">companion</span> <span class="k">object</span> <span class="err">{</span>
         <span class="k">private</span> <span class="k">fun</span> <span class="nf">startgRPCClient</span><span class="p">(</span>
             <span class="n">mainHandler</span><span class="p">:</span> <span class="n">Handler</span><span class="p">,</span>
             <span class="n">binding</span><span class="p">:</span> <span class="n">ActivityMainBinding</span>
@@ -763,7 +763,7 @@ Server started, listening on 5000
                 <span class="p">.</span><span class="n">build</span><span class="p">()</span>
             <span class="k">val</span> <span class="py">stub</span> <span class="p">=</span> <span class="n">ServiceGrpc</span><span class="p">.</span><span class="n">newStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">stub</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="k">object</span> <span class="p">:</span> <span class="nc">StreamObserver</span><span class="p">&lt;</span><span class="n">Hello</span><span class="p">.</span><span class="n">Post</span><span class="p">&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">stub</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="k">object</span> <span class="err">: </span><span class="nc">StreamObserver</span><span class="p">&lt;</span><span class="n">Hello</span><span class="p">.</span><span class="n">Post</span><span class="p">&gt;</span> <span class="p">{</span>
                 <span class="k">override</span> <span class="k">fun</span> <span class="nf">onNext</span><span class="p">(</span><span class="n">post</span><span class="p">:</span> <span class="n">Hello</span><span class="p">.</span><span class="n">Post</span><span class="p">)</span> <span class="p">{</span>
                     <span class="n">mainHandler</span><span class="p">.</span><span class="n">post</span> <span class="p">{</span>
                         <span class="n">binding</span><span class="p">.</span><span class="n">textView</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">post</span><span class="p">.</span><span class="n">message</span>

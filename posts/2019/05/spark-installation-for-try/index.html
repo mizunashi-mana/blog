@@ -255,7 +255,7 @@ WARN NativeCodeLoader: Unable to load native-hadoop library for your platform...
 <span class="o">[[</span> <span class="s2">"</span><span class="nv">$STRICT</span><span class="s2">"</span> <span class="o">==</span> <span class="s2">"true"</span> <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">set</span> -u
 <span class="nb">set</span> -eo pipefail
 
-<span class="k">case</span> <span class="si">${</span><span class="nv">1</span><span class="si">}</span> <span class="k">in</span>
+<span class="k">case</span> <span class="si">${</span><span class="nv">1</span><span class="si">}</span> in
   master<span class="o">)</span>
     <span class="nb">shift</span> <span class="m">1</span>
     <span class="nb">exec</span> <span class="s2">"</span><span class="si">${</span><span class="nv">SPARK_INSTALL_DIR</span><span class="si">}</span><span class="s2">/bin/spark-class"</span> <span class="s2">"org.apache.spark.deploy.master.Master"</span> <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>

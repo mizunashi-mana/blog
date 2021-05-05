@@ -173,7 +173,7 @@ WARN NativeCodeLoader: Unable to load native-hadoop library for your platform...
 &lt;span class="o"&gt;[[&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="nv"&gt;$STRICT&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;"true"&lt;/span&gt; &lt;span class="o"&gt;]]&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt; -u
 &lt;span class="nb"&gt;set&lt;/span&gt; -eo pipefail
 
-&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; in
   master&lt;span class="o"&gt;)&lt;/span&gt;
     &lt;span class="nb"&gt;shift&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;
     &lt;span class="nb"&gt;exec&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;SPARK_INSTALL_DIR&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;/bin/spark-class"&lt;/span&gt; &lt;span class="s2"&gt;"org.apache.spark.deploy.master.Master"&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="nv"&gt;$@&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
