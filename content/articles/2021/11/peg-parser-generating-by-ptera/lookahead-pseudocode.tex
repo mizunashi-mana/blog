@@ -1,0 +1,64 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage[all]{xy}
+\usepackage{ebproof}
+\usepackage{algpseudocode}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{40cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{algorithmic}
+    \Procedure{LookAHead}{$G = (N, \Sigma, R, A_0)$}
+        \State $L$ := $\emptyset$
+        \For{$A \in N$}
+            \Call{LookAHeadVar}{$G, L, A$}
+        \EndFor
+        \State $\mathbf{return}$ $L$
+    \EndProcedure
+
+    \Procedure{LookAHeadVar}{$G = (N, \Sigma, R, A_0), L, A$}
+        \If{$L[A] = \mathrm{updating}$}
+            \State $\mathbf{fail}$
+        \ElsIf{$L[A] = S$}
+            \State $\mathbf{return}$ $S$
+        \EndIf
+        \State $L[A]$ := $\mathrm{updating}$
+        \If{$R(A) = \mathit{alt}_1 / \cdots / \mathit{alt}_n$}
+            \For{$i \in \{1, \ldots, n\}$}
+                \State $S_i$ := \Call{LookAHeadAlt}{$G, \mathit{alt}_i$}
+            \EndFor
+            \State $L[A]$ := $\bigcup_{i \in \{1, \ldots, n\}} S_i$
+            \State $\mathbf{return}$ $L[A]$
+        \EndIf
+    \EndProcedure
+
+    \Procedure{LookAHeadAlt}{$G = (N, \Sigma, R, A_0), L, \mathit{alt}$}
+        \If{$\mathit{alt} = \epsilon$}
+            \State $\mathbf{return}$ $\Sigma$
+        \ElsIf{$\mathit{alt} = u_1 \cdots u_n$}
+            \State $\mathbf{return}$ \Call{LookAHeadUnit}{$G, L, u_1$}
+        \ElsIf{$\mathit{alt} = \& u_1 \cdots u_n$}
+            \State $\mathbf{return}$ \Call{LookAHeadUnit}{$G, L, u_1$}
+        \ElsIf{$\mathit{alt} = ! u_1 \cdots u_n$}
+            \State $\mathbf{return}$ $\Sigma$
+        \EndIf
+    \EndProcedure
+
+    \Procedure{LookAHeadUnit}{$G, L, u$}
+        \If{$u = \sigma$}
+            \State $\mathbf{return}$ $\{\sigma\}$
+        \ElsIf{$u = A$}
+            \State $\mathbf{return}$ \Call{LookAHeadVar}{$G, L, A$}
+        \EndIf
+    \EndProcedure
+\end{algorithmic}
+
+\end{document}

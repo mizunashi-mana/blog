@@ -1,0 +1,163 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage[all]{xy}
+\usepackage{ebproof}
+\usepackage{algpseudocode}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{80cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{algorithmic}
+    \Procedure{ConstructSRB}{$G = (N, \Sigma, R, A_0), L, \bot$}
+        \State $S$ := $\emptyset$
+        \State $T$ := $\emptyset$
+        \For{$A \mapsto e \in R$}
+            \State $T[A]$ := \Call{ConstructEnterMap}{$A, e, L, \Sigma_\bot$}
+            \State $S$ := $S \cup \mathrm{image}(T[A])$
+        \EndFor
+        \State $R'$ := $\emptyset$
+        \State $S'$ := $\emptyset$
+        \While{$S \backslash S' = \emptyset$}
+            \State $\mathbf{pick}$ $s \in S \backslash S'$
+            \State $S'$ := $S' \cup \{s\}$
+            \If{$s = \langle i, e\rangle$}
+                \State $R'_s$ := \Call{ConstructTransition}{$s, L, T, S, \Sigma_\bot$}
+                \State $R'$ := $R' \cup R'_s$
+            \EndIf
+        \EndWhile
+        \State $s_0$ := \Call{NewState}{$\mathrm{s}, S$}
+        \State $s_1$ := \Call{NewState}{$\mathrm{a}, S$}
+        \State $R'$ := $R' \cup \{\langle s_0, \sigma\rangle \mapsto \langle\mathrm{enter}(s_1, A_0), s_2\rangle \mid (\sigma \to s_2) \in T(A_0) \}$
+        \State $\mathbf{return}$ $(S, \Sigma_\bot, R', s_0)$
+    \EndProcedure
+
+    \Procedure{ConstructEnterMap}{$A, \mathit{alt}_1 / \cdots / \mathit{alt}_n, L, \Sigma_\bot$}
+        \State $T_A$ := $\emptyset$
+        \State $i$ := $n$
+        \While{$i \geq 1$}
+            \State $s$ := $\langle 1, \mathit{alt}_{i} / \mathit{alt}_{i + 1} / \cdots / \mathit{alt}_n\rangle$
+            \If{$\mathit{alt}_i = \epsilon \lor \mathit{alt}_i = ! u_1 \cdots u_m$}
+                \State $T_A$ := $\{\sigma \mapsto s \mid \sigma \in \Sigma_\bot\}$
+            \ElsIf{$\mathit{alt}_i = u_1 \ldots u_m \lor \mathit{alt}_i = \& u_1 \cdots u_m$}
+                \If{$u_1 \in \Sigma$}
+                    \State $T_A$ := $T_A[u_1 \mapsto s]$
+                \Else
+                    \State $T_A$ := $\left\{\sigma \to s' \mid \sigma \in \mathrm{dom}(T_A) \cup L(u_1), s' = \left\{\begin{array}{ll}
+                        s &(\sigma \in L(u_1)) \\
+                        T_A(\sigma) &(\sigma \not\in L(u_1))
+                    \end{array}\right.\right\}$
+                \EndIf
+            \EndIf
+            \State $i$ := $i - 1$
+        \EndWhile
+        \State $\mathbf{return}$ $T_A$
+    \EndProcedure
+
+    \Procedure{ConstructTransition}{$s_1 = \langle i, \mathit{alt}_1 / \cdots / \mathit{alt}_n\rangle, L, T, S, \Sigma_\bot$}
+        \If{$\mathit{alt}_1 = ! u_1 \cdots u_m$}
+            \State $R'$ := $\emptyset$
+
+            \If{$1 < n$}
+                \State $s'$ := \Call{NewState}{$\langle i, \mathit{alt}_2 / \cdots / \mathit{alt}_n\rangle, S$}
+                \State $s_2$ := \Call{AddBackRule}{$s_1, s', \Sigma_\bot, S, R'$}
+            \Else
+                \State $s_2$ := $s_1$
+            \EndIf
+
+            \If{$i = 1$}
+                \State $s_3$ := \Call{AddNotRule}{$s_2, \mathit{alt}_1, \Sigma_\bot, S, R'$}
+            \Else
+                \State $s_3$ := $s_2$
+            \EndIf
+
+            \If{$i > m$}
+                \State $\mathbf{return}$ \Call{AddReduceRule}{$s_3, \mathit{alt}, \Sigma_\bot, R'$}
+            \Else
+                \State $s_4$ = \Call{NewState}{$\langle i + 1, \mathit{alt}_1\rangle, S$}
+                \State $\mathbf{return}$ \Call{AddUnitRule}{$s_3, s_4, u_i, S, T, R'$}
+            \EndIf
+        \ElsIf{$\mathit{alt}_1 = u_1 \cdots u_m \lor \mathit{alt}_1 = \& u_1 \cdots u_m$}
+            \If{$i > m$}
+                \State $\mathbf{return}$ \Call{AddReduceRule}{$s_1, \mathit{alt}, \Sigma_\bot, \emptyset$}
+            \Else
+                \State $L_{u_i}$ := \Call{LookAHead}{$u_i, L$}
+                \State $\langle e_1, e_2\rangle$ := \Call{AggregateAlts}{$s_1, u_i, L_{u_i}, L$}
+                \State $R'$ := $\emptyset$
+                \If{$e_2 \neq \epsilon$}
+                    \State $s'$ := \Call{NewState}{$\langle i, e_2\rangle, S$}
+                    \State $s_2$ := \Call{AddBackRule}{$s_1, s', L_{u_i}, R'$}
+                \Else
+                    \State $s_2$ := $s_1$
+                \EndIf
+                \State $s_3$ := \Call{NewState}{$\langle i + 1, e_1\rangle, S$}
+                \State $\mathbf{return}$ \Call{AddUnitRule}{$s_2, s_3, u_i, T, S, R'$}
+            \EndIf
+        \EndIf
+    \EndProcedure
+
+    \Procedure{AggregateAlts}{$\langle i, \mathit{alt}_1 / \cdots / \mathit{alt}_n\rangle, u_i, L_{u_i}, L$}
+        \State $e$ := $\mathit{alt}_1$
+        \State $j$ := $2$
+        \While{$j \leq n$}
+            \If{$(\mathit{alt}_j = u'_1 \cdots u'_{m'} \lor \mathit{alt}_j = \& u'_1 \cdots u'_{m'}) \land i \leq m'$}
+                \State $L_{u'_i}$ := \Call{LookAHead}{$u'_i, L$}
+                \If{$u_i = u'_i$}
+                    \State $e$ := $e / \mathit{alt}_j$
+                \ElsIf{$L_{u_i} \cap L_{u'_i} \neq \emptyset$}
+                    \State $\mathbf{break}$
+                \EndIf
+            \Else
+                \State $\mathbf{break}$
+            \EndIf
+            \State $j$ := $j + 1$
+        \EndWhile
+        \State $\mathbf{return}$ $\langle e, \mathit{alt}_j / \mathit{alt}_{j + 1} / \cdots / \mathit{alt}_n\rangle$
+    \EndProcedure
+
+    \Procedure{LookAHead}{$u, L$}
+        \If{$u \in \mathrm{dom}(L)$}
+            \State $\mathbf{return}$ $L(u)$
+        \Else
+            \State $\mathbf{return}$ $\{u\}$
+        \EndIf
+    \EndProcedure
+
+    \Procedure{NewState}{$s, S$}
+        \State $S$ := $S \cup \{s\}$
+        \State $\mathbf{return}$ $s$
+    \EndProcedure
+
+    \Procedure{AddReduceRule}{$s, \mathit{alt}, \Sigma, R'$}
+        \State $\mathbf{return}$ $R' \cup \{\langle s, \sigma\rangle \mapsto \langle \mathrm{reduce}(\mathit{alt}), s\rangle \mid \sigma \in \Sigma\}$
+    \EndProcedure
+
+    \Procedure{AddBackRule}{$s_1, s', \Sigma, S, R'$}
+        \State $s_2$ := \Call{NewState}{$\mathrm{b}(s_1), S$}
+        \State $R'$ := $R' \cup \{\langle s_1, \sigma\rangle \mapsto \langle\mathrm{pushback}(s'), s_2\rangle \mid \sigma \in \Sigma\}$
+        \State $\mathbf{return}$ $s_2$
+    \EndProcedure
+
+    \Procedure{AddBackRule}{$s_1, \mathit{alt}, \Sigma, S, R'$}
+        \State $s_2$ :=  \Call{NewState}{$\mathrm{n}(s_1), S$}
+        \State $R'$ := $R' \cup \{\langle s_1, \sigma\rangle \mapsto \langle\mathrm{pushnot}(\mathit{alt}), s_2\rangle \mid \sigma \in \Sigma\}$
+        \State $\mathbf{return}$ $s_2$
+    \EndProcedure
+
+    \Procedure{AddUnitRule}{$s_1, s_2, u, T, S, R'$}
+        \If{$u \in \mathrm{dom}(T)$}
+            \State $\mathbf{return}$ $R' \cup \{\langle s_1, \sigma\rangle \mapsto \langle\mathrm{enter}(s_2, u), s_3\rangle \mid (\sigma \to s_3) \in T(u) \}$
+        \Else
+            \State $\mathbf{return}$ $R' \cup \{\langle s_1, u\rangle \mapsto \langle\mathrm{shift}, s_2\rangle\}$
+        \EndIf
+    \EndProcedure
+\end{algorithmic}
+
+\end{document}

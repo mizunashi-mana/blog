@@ -1,0 +1,116 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage[all]{xy}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{20cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+  \begin{prooftree}
+    \infer0{\langle \epsilon, x\rangle \to \mathbf{s}(\epsilon)}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\langle \sigma,\sigma x\rangle \to \mathbf{s}(\sigma)}
+  \end{prooftree}
+  \quad
+  \begin{prooftree}
+    \hypo{\sigma \neq \sigma'}
+    \infer1{\langle \sigma,\sigma' x\rangle \to \mathbf{f}}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{A \leftarrow e \in R}
+    \hypo{\langle e, x\rangle \to o}
+    \infer2{\langle A, x\rangle \to o}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\langle e_1,x_1x_2y\rangle\to \mathbf{s}(x_1)}
+    \hypo{\langle e_2, x_2y\rangle \to \mathbf{s}(x_2)}
+    \infer2{\langle e_1e_2, x_1x_2y\rangle \to \mathbf{s}(x_1x_2)}
+  \end{prooftree}
+  \quad
+  \begin{prooftree}
+    \hypo{\langle e_1,x\rangle \to \mathbf{f}}
+    \infer1{\langle e_1e_2, x\rangle \to \mathbf{f}}
+  \end{prooftree}
+  \quad
+  \begin{prooftree}
+    \hypo{\langle e_1,x_1y\rangle\to \mathbf{s}(x_1)}
+    \hypo{\langle e_2, y\rangle \to \mathbf{f}}
+    \infer2{\langle e_1e_2, x_1y\rangle \to \mathbf{f}}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\langle e_1,xy\rangle \to \mathbf{s}(x)}
+    \infer1{\langle e_1 / e_2,xy\rangle \to \mathbf{s}(x)}
+  \end{prooftree}
+  \quad
+  \begin{prooftree}
+    \hypo{\langle e_1,x\rangle \to \mathbf{f}}
+    \hypo{\langle e_2,x\rangle \to o}
+    \infer2{\langle e_1 / e_2,x\rangle \to o}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\langle e,x_1x_2y\rangle \to \mathbf{s}(x_1)}
+    \hypo{\langle e^*,x_2y\rangle \to \mathbf{s}(x_2)}
+    \infer2{\langle e^*,x_1x_2y\rangle \to \mathbf{s}(x_1x_2)}
+  \end{prooftree}
+  \quad
+  \begin{prooftree}
+    \hypo{\langle e,x\rangle \to \mathbf{f}}
+    \infer1{\langle e^*,x\rangle \to \mathbf{s}(\epsilon)}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\langle e,x\rangle \to \mathbf{f}}
+    \infer1{\langle !e, x\rangle \to \mathbf{s}(\epsilon)}
+  \end{prooftree}
+  \quad
+  \begin{prooftree}
+    \hypo{\langle e,xy\rangle \to \mathbf{s}(x)}
+    \infer1{\langle !e,xy\rangle \to \mathbf{f}}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\langle e\; e^*,x\rangle \to o}
+    \infer1{\langle e+,x\rangle \to o}
+  \end{prooftree}
+  \quad
+  \begin{prooftree}
+    \hypo{\langle e / \epsilon,x\rangle \to o}
+    \infer1{\langle e?,x\rangle \to o}
+  \end{prooftree}
+  \quad
+  \begin{prooftree}
+    \hypo{\langle !!e,x\rangle \to o}
+    \infer1{\langle \& e,x\rangle \to o}
+  \end{prooftree}
+\]
+
+\end{document}
