@@ -65,5 +65,9 @@ jobs:
         make html
         make publish
 
-    - name: List files
-      run: ls -R output/
+    - name: Archive output
+      uses: actions/upload-artifact@v2
+      with:
+        name: blog-artifact
+        path: output/
+        retention-days: 1
