@@ -45,7 +45,7 @@ MENUITEMS = add_site_url_to_items(MENUITEMS)
 PLUGINS.extend([
   'filetime_from_git',
   'sitemap',
-  'tipue_search',
+  'search',
   'related_posts',
 ])
 

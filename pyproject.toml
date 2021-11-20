@@ -5,13 +5,14 @@ description = ""
 authors = ["Mizunashi Mana <mizunashi-mana@noreply.git>"]
 
 [tool.poetry.dependencies]
-python = "^3"
+python = ">= 3.7,<4"
 pelican = "*"
 ghp-import = "*"
 pillow = "*"
 gitpython = "*"
 beautifulsoup4 = "*"
 pygments = "*"
+pelican-search = "*"
 
 [tool.poetry.dev-dependencies]
 doc8 = "*"
