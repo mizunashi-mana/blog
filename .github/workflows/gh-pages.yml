@@ -12,6 +12,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Enable ja_JP.UTF-8 locale
+      run: |
+        sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
+        sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
+        DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
+
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -22,6 +28,11 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
+
+    - name: Install stork
+      run: |
+        sudo wget -O /usr/local/bin/stork https://files.stork-search.net/releases/v1.2.1/stork-ubuntu-latest
+        sudo chmod +x /usr/local/bin/stork
 
     - name: Cache poetry
       uses: actions/cache@v2
