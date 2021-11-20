@@ -31,6 +31,22 @@ jobs:
         sudo wget -O /usr/local/bin/stork https://files.stork-search.net/releases/v1.2.1/stork-ubuntu-latest
         sudo chmod +x /usr/local/bin/stork
 
+    - name: Cache poetry
+      uses: actions/cache@v2
+      with:
+        key: ${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-v1
+        path: |
+          ~/.poetry
+          .venv
+
+    - name: Cache npm
+      uses: actions/cache@v2
+      with:
+        key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}-v1
+        path: |
+          ~/.npm
+          node_modules
+
     - name: Install poetry
       run: |
         pip install poetry
@@ -49,6 +65,11 @@ jobs:
       run: |
         git config user.name 'release-bot'
         git config user.email 'release-bot@users.noreply.github.com'
+
+    - name: Checkout gh-pages
+      run: |
+        git fetch origin gh-pages
+        git branch -u origin gh-pages
 
     - name: Deploy to GitHub Pages
       run: make github
