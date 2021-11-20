@@ -57,16 +57,12 @@ jobs:
     - name: Install npm dependencies
       run: npm ci
 
-    - name: Build
-      run: |
-        make publish
-
     - name: Set git config
       run: |
         git config user.name 'release-bot'
         git config user.email 'release-bot@users.noreply.github.com'
 
-    - name: Checkout gh-pages
+    - name: Create gh-pages branch
       run: |
         git fetch origin gh-pages
         git branch --track gh-pages origin/gh-pages
