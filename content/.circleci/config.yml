@@ -1,6 +1,0 @@
-# Disable CI on gh-pages branch
-
-version: 2
-jobs: {}
-workflows:
-  version: 2
