@@ -47,11 +47,7 @@ module.exports = {
             },
             {
                 test: /\.(ttf|woff2?)$/,
-                use: [
-                    {
-                        loader: 'file-loader'
-                    },
-                ]
+                type: 'asset/resource',
             }
         ],
     },
