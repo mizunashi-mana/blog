@@ -22,7 +22,6 @@ PAGES_SORT_ATTRIBUTE = 'source_path'
 THEME = './themes/Flex'
 PATH = 'content'
 STATIC_PATHS = [
-  '.circleci',
   'asset',
   'dist-asset',
   'articles', # mixed content

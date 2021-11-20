@@ -1,6 +1,7 @@
 import * as DeviceUtil from '../util/device';
 
-import Tooltip from 'tooltip.js';
+import Tippy from 'tippy.js';
+import 'tippy.js/themes/light-border.css';
 
 export function addFootnoteTooltip() {
   // disable tooltips on touch-enabled device
@@ -18,14 +19,13 @@ export function addFootnoteTooltip() {
     const eid = e.getAttribute("id");
     const reference = e.getAttribute("href").substr(1);
 
-    const tooltipContent = document.createElement('div');
-    tooltipContent.setAttribute('class', 'footnote-tooltip-content');
-    tooltipContent.innerHTML = footnoteTitles[reference];
-
-    new Tooltip(document.getElementById(eid), {
-      placement: "bottom",
-      title: tooltipContent,
-      html: true,
+    Tippy(document.getElementById(eid), {
+      placement: 'bottom',
+      content: footnoteTitles[reference],
+      allowHTML: true,
+      maxWidth: '80vw',
+      theme: 'light-border',
+      arrow: false,
     });
   }
 }

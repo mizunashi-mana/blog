@@ -132,52 +132,6 @@ ul.social {
   }
 }
 
-
-.tooltip {
-  background-color: #ffffff;
-  border-radius: 6px;
-  box-shadow: rgba(0,0,0,0.2) 0px 0px 12px 0px;
-  z-index: 100;
-
-  .tooltip-arrow {
-    width: 0;
-    height: 0;
-    margin: 5px;
-    position: absolute;
-    border: 5px solid #ffffff;
-    overflow: hidden;
-
-    &::after {
-      content: "";
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      transform: rotate(45deg);
-      left: calc(50% - 5px);
-      box-shadow: rgba(0,0,0,0.2) 0px -3px 12px 0px;
-      background-color: transparent;
-    }
-  }
-
-  &[x-placement^="bottom"] {
-    margin-top: 5px;
-
-    .tooltip-arrow {
-      border-left-color: transparent;
-      border-top-color: transparent;
-      border-right-color: transparent;
-      top: -10px;
-      left: calc(50% - 5px);
-      margin-top: 0;
-      margin-bottom: 0;
-    }
-  }
-
-  .footnote-tooltip-content {
-    padding: 4px 10px;
-  }
-}
-
 h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
 }
