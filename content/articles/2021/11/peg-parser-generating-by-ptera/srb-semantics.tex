@@ -1,0 +1,134 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage[all]{xy}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{enter}(s, A), s_2\rangle}
+    \hypo{m(A, \sigma x) = \mathrm{c}\langle t, y\rangle}
+    \infer2{\mathrm{c}\langle m, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \mathrm{arg}(t) \rho, s, y\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{enter}(s, A), s_2\rangle}
+    \hypo{m(A, \sigma x) = \mathrm{f}}
+    \infer2{\mathrm{c}\langle m, \rho, s_1, \sigma x\rangle \to \mathrm{f}\langle m, \rho\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{enter}(s, A), s_2\rangle}
+    \hypo{\langle A, \sigma x\rangle \not\in \mathrm{dom}(m)}
+    \infer2{\mathrm{c}\langle m, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \mathrm{enter}(s, A, \sigma x) \rho, s_2, \sigma x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{shift}, s_2\rangle}
+    \infer1{\mathrm{c}\langle m, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \mathrm{arg}(\sigma) \rho, s_2, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{pushback}(s), s_2\rangle}
+    \infer1{\mathrm{c}\langle m, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \mathrm{back}(s, \sigma x) \rho, s_2, \sigma x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{pushnot}(\mathit{alt}), s_2\rangle}
+    \infer1{\mathrm{c}\langle m, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \mathrm{not}(\mathit{alt}) \rho, s_2, \sigma x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{reduce}(\mathit{alt}), s_2\rangle}
+    \infer1{\mathrm{c}\langle m, \rho, s_1, \sigma x\rangle \to \mathrm{r}\langle m, \rho, \epsilon, \mathit{alt}, \sigma x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\langle s, \sigma\rangle \not\in \mathrm{dom}(R)}
+    \infer1{\mathrm{c}\langle m, \rho, s, \sigma x\rangle \to \mathrm{f}\langle m, \rho\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\mathit{alt} = u_1 \cdots u_n}
+    \hypo{m_2 = m_1[\langle A, y\rangle \mapsto \mathrm{c}\langle \alpha, x\rangle]}
+    \infer2{\mathrm{r}\langle m_1, \mathrm{enter}(s, A, y) \rho, \alpha, \mathit{alt}, x\rangle \to \mathrm{c}\langle m_2, \mathrm{arg}(\mathrm{n}(\alpha)) \rho, s, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\mathit{alt} \neq u_1 \cdots u_n}
+    \hypo{m_2 = m_1[\langle A, y\rangle \mapsto \mathrm{c}\langle \alpha, y\rangle]}
+    \infer2{\mathrm{r}\langle m_1, \mathrm{enter}(s, A, y) \rho, \alpha, \mathit{alt}, x\rangle \to \mathrm{c}\langle m_2, \mathrm{arg}(\mathrm{n}(\alpha)) \rho, s, y\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{r}\langle m, \mathrm{arg}(t) \rho, \alpha, \mathit{alt}, x\rangle \to \mathrm{r}\langle m, \rho, t \alpha, \mathit{alt}, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{r}\langle m, \mathrm{not}(\mathit{alt}_1) \rho, \alpha, \mathit{alt}_2, x\rangle \to \mathrm{f}\langle m, \rho\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{r}\langle m, \mathrm{back}(s, y) \rho, \alpha, \mathit{alt}, x\rangle \to \mathrm{r}\langle m, \rho, \alpha, \mathit{alt}, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{f}\langle m, \mathrm{back}(s, x) \rho\rangle \to \mathrm{c}\langle m, \rho, s, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{f}\langle m, \mathrm{not}(\mathit{alt}) \rho\rangle \to \mathrm{r}\langle m, \rho, \epsilon, \mathit{alt}, \epsilon\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{f}\langle m, \mathrm{enter}(s, A, x) \rho\rangle \to \mathrm{f}\langle m, \rho\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{f}\langle m, \mathrm{arg}(t) \rho\rangle \to \mathrm{f}\langle m, \rho\rangle}
+  \end{prooftree}
+\]
+
+\end{document}
