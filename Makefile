@@ -2,7 +2,7 @@ PY?=python3
 PELICAN?=poetry run pelican
 GHP_IMPORT?=poetry run ghp-import
 WEBPACK?=npx webpack
-PELICANOPTS=-vD
+PELICANOPTS=
 
 BASEDIR=$(CURDIR)
 INPUTDIR=$(BASEDIR)/content
