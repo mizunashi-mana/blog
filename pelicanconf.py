@@ -111,7 +111,7 @@ PLUGINS = [
   'headerid',
   'embed_customjs',
   'katex_math_render',
-  'autocorrect_filetime',
+  'filetime_from_git',
   'sitemap',
   'search',
   'related_posts',
