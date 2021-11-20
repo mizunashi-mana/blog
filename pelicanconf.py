@@ -37,14 +37,14 @@ JS_FILE = '/dist-asset/bundle.js'
 
 BROWSER_COLOR = '#555'
 ROBOTS = 'index, follow'
-SUMMARY_MAX_LENGTH = 25
+SUMMARY_MAX_LENGTH = 50
 
 CC_LICENSE = {
   'name': 'Creative Commons Attribution-ShareAlike',
   'version': '4.0',
   'slug': 'by-sa',
 }
-COPYRIGHT_YEAR = 2019
+COPYRIGHT_YEAR = 2021
 
 MAIN_MENU = True
 
