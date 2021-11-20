@@ -112,6 +112,9 @@ PLUGINS = [
   'embed_customjs',
   'katex_math_render',
   'autocorrect_filetime',
+  'sitemap',
+  'search',
+  'related_posts',
 ]
 
 RELATIVE_URLS = True
