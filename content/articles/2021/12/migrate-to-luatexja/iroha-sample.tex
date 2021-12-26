@@ -1,0 +1,40 @@
+\documentclass[
+    luatex,
+    japanese,
+    unicode,
+    titlepage,
+    pdfusetitle
+]{ltjsarticle}
+
+\usepackage{luatexja}
+\usepackage{hyperref}
+\usepackage{babel}
+\usepackage{bookmark}
+\usepackage[no-math,haranoaji,deluxe]{luatexja-preset}
+\usepackage{unicode-math}
+
+\setmainfont{STIX Two Text}
+\setmathfont{STIX Two Math}
+
+% some math fonts not support bold
+\DeclareFontShape{TU}{STIXTwoMath(1)}{b}{n}{<->ssub*STIXTwoMath(1)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(2)}{b}{n}{<->ssub*STIXTwoMath(2)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(3)}{b}{n}{<->ssub*STIXTwoMath(3)/m/n}{}
+
+\begin{document}
+    \pagestyle{empty}
+
+    \begin{tabular}{ll}
+        \textbackslash textup & \textup{いろはにほへとちりぬるを} \\
+        \textbackslash textit & \textit{いろはにほへとちりぬるを} \\
+        \textbackslash textsl & \textsl{いろはにほへとちりぬるを} \\
+        \textbackslash textsc & \textsc{いろはにほへとちりぬるを} \\
+        \textbackslash textmd & \textmd{いろはにほへとちりぬるを} \\
+        \textbackslash textbf & \textbf{いろはにほへとちりぬるを} \\
+        \textbackslash textrm & \textrm{いろはにほへとちりぬるを} \\
+        \textbackslash textmc & \textmc{いろはにほへとちりぬるを} \\
+        \textbackslash textsf & \textsf{いろはにほへとちりぬるを} \\
+        \textbackslash textgt & \textgt{いろはにほへとちりぬるを} \\
+        \textbackslash texttt & \texttt{いろはにほへとちりぬるを}
+    \end{tabular}
+\end{document}

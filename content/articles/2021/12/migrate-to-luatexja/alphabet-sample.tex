@@ -1,0 +1,40 @@
+\documentclass[
+    luatex,
+    japanese,
+    unicode,
+    titlepage,
+    pdfusetitle
+]{ltjsarticle}
+
+\usepackage{luatexja}
+\usepackage{hyperref}
+\usepackage{babel}
+\usepackage{bookmark}
+\usepackage[no-math,haranoaji,deluxe]{luatexja-preset}
+\usepackage{unicode-math}
+
+\setmainfont{STIX Two Text}
+\setmathfont{STIX Two Math}
+
+% some math fonts not support bold
+\DeclareFontShape{TU}{STIXTwoMath(1)}{b}{n}{<->ssub*STIXTwoMath(1)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(2)}{b}{n}{<->ssub*STIXTwoMath(2)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(3)}{b}{n}{<->ssub*STIXTwoMath(3)/m/n}{}
+
+\begin{document}
+    \pagestyle{empty}
+
+    \begin{tabular}{ll}
+        \textbackslash textup & \textup{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textit & \textit{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textsl & \textsl{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textsc & \textsc{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textmd & \textmd{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textbf & \textbf{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textrm & \textrm{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textmc & \textmc{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textsf & \textsf{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash textgt & \textgt{abcdefghijklmnopqrstuvwxyz123456890} \\
+        \textbackslash texttt & \texttt{abcdefghijklmnopqrstuvwxyz123456890}
+    \end{tabular}
+\end{document}
