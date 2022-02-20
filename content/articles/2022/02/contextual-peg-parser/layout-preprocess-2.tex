@@ -1,0 +1,45 @@
+\documentclass[12pt]{article}
+
+\usepackage{unicode-math}
+\setmainfont{STIX Two Text}
+\setmathfont{STIX Two Math}
+
+% some math fonts not support bold
+\DeclareFontShape{TU}{STIXTwoMath(1)}{b}{n}{<->ssub*STIXTwoMath(1)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(2)}{b}{n}{<->ssub*STIXTwoMath(2)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(3)}{b}{n}{<->ssub*STIXTwoMath(3)/m/n}{}
+
+\usepackage{ebproof}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{cd}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{40cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    L(\mathit{ts}) &= L_1(\mathit{ts}, \epsilon) \\
+    L_1(t:\mathit{ts}, \mathit{ms}) &= \left\{\begin{array}{ll}
+        \texttt{\textquotedbl;\textquotedbl}:L_1(\mathit{ts}, \mathit{ms}) &(t = \langle n\rangle, \mathit{ms} = n:\mathit{ms}') \\
+        \texttt{\textquotedbl\}\textquotedbl}:L_1(t:\mathit{ts}, \mathit{ms}') &(t = \langle n\rangle, \mathit{ms} = m:\mathit{ms}', n < m) \\
+        L_1(\mathit{ts}, \mathit{ms}) &(t = \langle n\rangle, \text{otherwise}) \\
+        \texttt{\textquotedbl\{\textquotedbl}:L_1(\mathit{ts}, n:\mathit{ms}) &(t = \{ n\}, (\mathit{ms} = m:\mathit{ms}' \land n > m) \lor (\mathit{ms} = \epsilon \land n > 0)) \\
+        \texttt{\textquotedbl\{\textquotedbl}:\texttt{\textquotedbl\}\textquotedbl}:L_1(\langle n\rangle:\mathit{ts}, \mathit{ms}) &(t = \{ n\}, \text{otherwise}) \\
+        t:L_1(\mathit{ts}, \mathit{ms}') &(t = \texttt{\textquotedbl\}\textquotedbl}, \mathit{ms} = 0:\mathit{ms}') \\
+        \mathrm{fail} &(t = \texttt{\textquotedbl\}\textquotedbl}, \text{otherwise}) \\
+        t:L_1(\mathit{ts}, 0:\mathit{ms}) &(t = \texttt{\textquotedbl\{\textquotedbl}) \\
+        \texttt{\textquotedbl\}\textquotedbl}:L_1(t:\mathit{ts}, \mathit{ms}') &(\text{otherwise}, \mathit{ms} = m:\mathit{ms}', m > 0, \mathrm{parseError}(t)) \\
+        t:L_1(\mathit{ts}, \mathit{ms}) &(\text{otherwise}) \\
+    \end{array}\right. \\
+    L_1(\epsilon, \mathit{ms}) &= \left\{\begin{array}{ll}
+        \epsilon &(\mathit{ms} = \epsilon) \\
+        \texttt{\textquotedbl\{\textquotedbl}:L_1(\epsilon, \mathit{ms}') &(\mathit{ms} = m:\mathit{ms}', m > 0) \\
+        \mathrm{fail} &(\mathit{ms} = 0:\mathit{ms}')
+    \end{array}\right.
+\end{align*}
+\end{document}

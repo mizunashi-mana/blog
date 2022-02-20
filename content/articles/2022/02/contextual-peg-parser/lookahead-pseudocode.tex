@@ -1,0 +1,116 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{algpseudocode}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{120cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{algorithmic}
+    \Procedure{LookAHead}{$G = (N, \Sigma, R, A_0)$}
+        \State $L$ := $\emptyset$
+        \For{$A \in N$}
+            \Call{LookAHeadVar}{$G, L, A$}
+        \EndFor
+        \For{$A \in N$}
+            \If{$R(A) = \mathit{alt}_1 / \cdots / \mathit{alt}_n$}
+                \For{$i \in \{1, \ldots, n\}$}
+                    \Call{LookAHeadAlt}{$G, L, A, \mathit{alt}_i$}
+                \EndFor
+            \EndIf
+        \EndFor
+        \State $\mathbf{return}$ $L$
+    \EndProcedure
+
+    \Procedure{LookAHeadVar}{$G = (N, \Sigma, R, A_0), L, A$}
+        \If{$L[A] = \mathrm{updating}$}
+            \State $\mathbf{fail}$
+        \ElsIf{$L[A] = \langle S, e\rangle$}
+            \State $\mathbf{return}$ $\langle S, e\rangle$
+        \EndIf
+        \State $L[A]$ := $\mathrm{updating}$
+        \If{$R(A) = \mathit{alt}_1 / \cdots / \mathit{alt}_n$}
+            \For{$i \in \{1, \ldots, n\}$}
+                \State $\langle S_i, e_i\rangle$ := \Call{LookAHeadAltHead}{$G, L, \mathit{alt}_i$}
+            \EndFor
+            \State $L[A]$ := $\langle\bigcup_{i \in \{1, \ldots, n\}} S_i, \bigvee_{i \in \{1, \ldots, n\}} e_i\rangle$
+            \State $\mathbf{return}$ $L[A]$
+        \EndIf
+    \EndProcedure
+
+    \Procedure{LookAHeadAltHead}{$G = (N, \Sigma, R, A_0), L, \mathit{alt}$}
+        \If{$\mathit{alt} = u_1 \cdots u_n \lor \mathit{alt} = \& u_1 \cdots u_n$}
+            \State $S$ := $\emptyset$
+            \State $i$ := $1$
+            \While{$i \leq n$}
+                \State $\langle S_i, e_i\rangle$ := \Call{LookAHeadUnit}{$G, L, u_i$}
+                \State $S$ := $S \cup S_i$
+                \If{$\neg e_i$}
+                    \State $\mathbf{return}$ $\langle S, \bot\rangle$
+                \EndIf
+            \EndWhile
+            \State $\mathbf{return}$ $\langle S, \top\rangle$
+        \ElsIf{$\mathit{alt} = ! u_1 \cdots u_n$}
+            \State $i$ := $1$
+            \While{$i \leq n$}
+                \State $\langle S_i, e_i\rangle$ := \Call{LookAHeadUnit}{$G, L, u_i$}
+                \If{$\neg e_i$}
+                    \State $\mathbf{return}$ $\langle \Sigma, \top\rangle$
+                \EndIf
+            \EndWhile
+            \State $\mathbf{return}$ $\langle \emptyset, \bot\rangle$
+        \EndIf
+    \EndProcedure
+
+    \Procedure{LookAHeadUnit}{$G, L, u$}
+        \If{$u = \sigma$}
+            \State $\mathbf{return}$ $\langle\{\sigma\}, \bot\rangle$
+        \ElsIf{$u = A$}
+            \State $\mathbf{return}$ \Call{LookAHeadVar}{$G, L, A$}
+        \EndIf
+    \EndProcedure
+
+    \Procedure{LookAHeadAlt}{$G = (N, \Sigma, R, A_0), L, A, \mathit{alt}$}
+        \If{$\mathit{alt} = u_1 \cdots u_n$}
+            \Call{LookAHeadUnits}{$G, L, A \to \mathit{alt}, u_1 \cdots u_n, 0$}
+        \ElsIf{$\mathit{alt} = \& u_1 \cdots u_n$}
+            \State $\langle S, e\rangle$ := \Call{LookAHeadUnits}{$G, L, A \to \mathit{alt}, u_1 \cdots u_n, 1$}
+            \State $L[A \to \mathit{alt}, 1]$ := $\langle S, e\rangle$
+        \ElsIf{$\mathit{alt} = ! u_1 \cdots u_n$}
+            \State $\langle S, e\rangle$ := \Call{LookAHeadUnits}{$G, L, A \to \mathit{alt}, u_1 \cdots u_n, 1$}
+            \If{$e$}
+                \State $L[A \to \mathit{alt}, 1]$ := $\langle \emptyset, \bot\rangle$
+            \Else
+                \State $L[A \to \mathit{alt}, 1]$ := $\langle \Sigma, \top\rangle$
+            \EndIf
+        \EndIf
+    \EndProcedure
+
+    \Procedure{LookAHeadUnits}{$G = (N, \Sigma, R, A_0), L, A \to \mathit{alt}, u_1 \cdots u_n, i_0$}
+        \State $i$ := $n$
+        \State $\langle S, e\rangle$ := $\langle \emptyset, \top\rangle$
+        \While{$i \geq 1$}
+            \If{$u_i = \sigma$}
+                \State $\langle S_i, e_i\rangle$ := $\langle\{\sigma\}, \bot\rangle$
+            \ElsIf{$u_i = A$}
+                \State $\langle S_i, e_i\rangle$ := $L[A]$
+            \EndIf
+            \If{$e_i$}
+                \State $\langle S, e\rangle$ := $\langle S \cup S_i, e_i\rangle$
+            \Else
+                \State $\langle S, e\rangle$ := $\langle S_i, e_i\rangle$
+            \EndIf
+            \State $L[A \to \mathit{alt}, i + i_0]$ := $\langle S, e\rangle$
+        \EndWhile
+        \State $\mathbf{return}$ $\langle S, e\rangle$
+    \EndProcedure
+\end{algorithmic}
+
+\end{document}
