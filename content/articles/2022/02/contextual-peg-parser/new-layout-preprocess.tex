@@ -1,0 +1,49 @@
+\documentclass[12pt]{article}
+
+\usepackage{unicode-math}
+\setmainfont{STIX Two Text}
+\setmathfont{STIX Two Math}
+
+% some math fonts not support bold
+\DeclareFontShape{TU}{STIXTwoMath(1)}{b}{n}{<->ssub*STIXTwoMath(1)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(2)}{b}{n}{<->ssub*STIXTwoMath(2)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(3)}{b}{n}{<->ssub*STIXTwoMath(3)/m/n}{}
+
+\usepackage{ebproof}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{cd}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{40cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    L(t:\mathit{ts}) &= \left\{\begin{array}{ll}
+        L_1(r_t, \mathit{ts}) &(\mathrm{pos}(t) = (r_t, c_t), \mathrm{islft}(t)) \\
+        \{c_t\}:\langle c_t\rangle:L_1(r_t, \mathit{ts}) &(\text{otherwise}, \mathrm{pos}(t) = (r_t, c_t))
+    \end{array}\right. \\
+    L(\epsilon) &= \{1\}:\epsilon \\
+    L_1(r_0, t:\mathit{ts}) &= \left\{\begin{array}{ll}
+        \langle c_t\rangle:L_2(r_t, t, \mathit{ts}) &(\mathrm{pos}(t) = (r_t, c_t), r_0 < r_t) \\
+        L_2(r_t, t, \mathit{ts}) &(\text{otherwise}, \mathrm{pos}(t) = (r_t, c_t))
+    \end{array}\right. \\
+    L_1(r_0, \epsilon) &= \epsilon \\
+    L_2(r_1, t_1, \mathit{ts}) &= \left\{\begin{array}{ll}
+        t_1:t_2:L_1(r_2, \mathit{ts}') &(\mathrm{islt}(t_1), \mathit{ts} = t_2:\mathit{ts}',\mathrm{pos}(t_2) = (r_2, c_2), t_2 = \texttt{\textquotedbl\{\textquotedbl}) \\
+        t_1:\{c_2\}:\langle c_2\rangle:t_2:L_1(r_2, \mathit{ts}') &(\mathrm{islt}(t_1), \mathit{ts} = t_2:\mathit{ts}',\mathrm{pos}(t_2) = (r_2, c_2), t_2 \neq \texttt{\textquotedbl\{\textquotedbl}) \\
+        t_1:\{1\}:\epsilon &(\mathrm{islt}(t_1), \mathit{ts} = \epsilon) \\
+        t_1:L_1(r_1, \mathit{ts}) &(\not\mathrm{islt}(t_1))
+    \end{array}\right. \\
+    \mathrm{islft}(t) &\iff t = \texttt{\textquotedbl module\textquotedbl} \\
+    \mathrm{islt}(t) &\iff
+        t = \texttt{\textquotedbl let\textquotedbl}
+        \lor t = \texttt{\textquotedbl where\textquotedbl}
+        \lor t = \texttt{\textquotedbl do\textquotedbl}
+        \lor t = \texttt{\textquotedbl of\textquotedbl}
+\end{align*}
+\end{document}

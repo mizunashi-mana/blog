@@ -1,0 +1,59 @@
+\documentclass[12pt]{article}
+
+\usepackage{unicode-math}
+\setmainfont{STIX Two Text}
+\setmathfont{STIX Two Math}
+
+% some math fonts not support bold
+\DeclareFontShape{TU}{STIXTwoMath(1)}{b}{n}{<->ssub*STIXTwoMath(1)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(2)}{b}{n}{<->ssub*STIXTwoMath(2)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(3)}{b}{n}{<->ssub*STIXTwoMath(3)/m/n}{}
+
+\usepackage{ebproof}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{cd}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{40cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \begin{array}{rl}
+        \mathit{decls}
+        \Coloneq & \mathit{expbo}\; \mathit{declsinl}\; \mathit{expbc} \\
+        \mid &\mathit{impbo}\; \mathit{declsinl}\; \mathit{impbc} \\
+        \mathit{declsinl}
+        \Coloneq &(\mathit{decl}\; \mathit{semi})^*\; \mathit{decl} \\
+        \mid
+    \end{array}
+\end{align*}
+
+\begin{align*}
+    \begin{array}{rll}
+        \mathit{expbo}
+        \Coloneq &\texttt{\textquotedbl\{\textquotedbl} &\{l \mapsto \mathrm{push}(0, l)\} \\
+        \mathit{expbc}
+        \Coloneq &\texttt{\textquotedbl\}\textquotedbl} &\{l \mapsto \mathrm{pop}(l) \mid \mathrm{front}(l) = 0\} \\
+        \mathit{impbo}
+        \Coloneq &\{n\} &\{l \mapsto n:l \mid n > \mathrm{front}(l)\} \\
+        \mid &\{n\} &\{l \mapsto n:l \mid l = \epsilon\} \\
+        \mid &\{n\} &\{l \mapsto (n + 1):l \mid n \leq \mathrm{front}(l)\} \\
+        \mathit{impbc}
+        \Coloneq &\epsilon &\{l \mapsto \mathrm{pop}(l) \mid \mathrm{front}(l) > 0\} \\
+        \mathit{semi}
+        \Coloneq &\texttt{\textquotedbl;\textquotedbl} \\
+        \mid &\langle n\rangle &\{l \mapsto l \mid \mathrm{front}(l) = n\}
+    \end{array}
+\end{align*}
+
+\begin{align*}
+    \begin{array}{rll}
+        \mathbf{skip} \Coloneq &\langle n\rangle &\{l \mapsto l \mid \mathrm{front}(l) < n\}
+    \end{array}
+\end{align*}
+\end{document}

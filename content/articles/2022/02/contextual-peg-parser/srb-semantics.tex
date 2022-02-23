@@ -1,0 +1,185 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{enter}(s, A), s_2\rangle}
+    \hypo{m(A, \sigma x) = \mathrm{c}\langle t, y\rangle}
+    \infer2{\mathrm{c}\langle m, \gamma, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \gamma, \mathrm{arg}(t) \rho, s, y\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{enter}(s, A), s_2\rangle}
+    \hypo{m(A, \sigma x) = \mathrm{f}}
+    \infer2{\mathrm{c}\langle m, \gamma, \rho, s_1, \sigma x\rangle \to \mathrm{f}\langle m, \gamma, \rho\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{enter}(s, A), s_2\rangle}
+    \hypo{\langle A, \sigma x\rangle \not\in \mathrm{dom}(m)}
+    \infer2{\mathrm{c}\langle m, \gamma, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \gamma, \mathrm{enter}(s, A, \sigma x) \rho, s_2, \sigma x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{shift}, s_2\rangle}
+    \infer1{\mathrm{c}\langle m, \gamma, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \gamma, \mathrm{arg}(\sigma) \rho, s_2, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{pushback}(s), s_2\rangle}
+    \infer1{\mathrm{c}\langle m, \gamma, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \gamma, \mathrm{back}(s, \sigma x) \rho, s_2, \sigma x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{pushnot}(\mathit{alt}, f), s_2\rangle}
+    \infer1{\mathrm{c}\langle m, \gamma, \rho, s_1, \sigma x\rangle \to \mathrm{c}\langle m, \gamma, \mathrm{not}(\mathit{alt}, f) \rho, s_2, \sigma x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{R(s_1, \sigma) = \langle\mathrm{reduce}(\mathit{alt}, f), s_2\rangle}
+    \infer1{\mathrm{c}\langle m, \gamma, \rho, s_1, \sigma x\rangle \to \mathrm{r}\langle m, \gamma, \rho, \rho, \epsilon, \epsilon, \mathit{alt}, f, \sigma x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\langle s, \sigma\rangle \not\in \mathrm{dom}(R)}
+    \infer1{\mathrm{c}\langle m, \gamma, \rho, s, \sigma x\rangle \to \mathrm{f}\langle m, \gamma, \rho\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\mathit{alt} = u_1 \cdots u_n}
+    \hypo{m_2 = m_1[\langle A, y\rangle \mapsto \mathrm{c}\langle \alpha, x\rangle]}
+    \hypo{f(\gamma) = \mathrm{nothing}}
+    \infer3{\mathrm{r}\langle m_1, \gamma, \mathrm{enter}(s, A, y) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{c}\langle m_2, \gamma, \mathrm{arg}(\mathrm{n}(\alpha)) \rho_\gamma \rho, s, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\mathit{alt} = u_1 \cdots u_n}
+    \hypo{m_2 = \emptyset}
+    \hypo{f(\gamma_1) = \mathrm{update}(\gamma_2)}
+    \infer3{\mathrm{r}\langle m_1, \gamma_1, \mathrm{enter}(s, A, y) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{c}\langle m_2, \gamma_2, \mathrm{arg}(\mathrm{n}(\alpha)) \mathrm{modctx}(\gamma_1) \rho_\gamma \rho, s, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\mathit{alt} = u_1 \cdots u_n}
+    \hypo{m_2 = m_1[\langle A, y\rangle \mapsto \mathrm{f}]}
+    \hypo{f(\gamma) = \mathrm{fail}}
+    \infer3{\mathrm{r}\langle m_1, \gamma, \mathrm{enter}(s, A, y) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{f}\langle m_2, \gamma, \rho_0\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\mathit{alt} \neq u_1 \cdots u_n}
+    \hypo{m_2 = m_1[\langle A, y\rangle \mapsto \mathrm{c}\langle \alpha, y\rangle]}
+    \hypo{f(\gamma) = \mathrm{nothing}}
+    \infer3{\mathrm{r}\langle m_1, \gamma, \mathrm{enter}(s, A, y) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{c}\langle m_2, \gamma, \mathrm{arg}(\mathrm{n}(\alpha)) \rho_\gamma \rho, s, y\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\mathit{alt} \neq u_1 \cdots u_n}
+    \hypo{m_2 = \emptyset}
+    \hypo{f(\gamma_1) = \mathrm{update}(\gamma_2)}
+    \infer3{\mathrm{r}\langle m_1, \gamma_1, \mathrm{enter}(s, A, y) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{c}\langle m_2, \gamma_2, \mathrm{arg}(\mathrm{n}(\alpha)) \mathrm{modctx}(\gamma_1) \rho_\gamma \rho, s, y\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{\mathit{alt} \neq u_1 \cdots u_n}
+    \hypo{m_2 = m_1[\langle A, y\rangle \mapsto \mathrm{f}]}
+    \hypo{f(\gamma) = \mathrm{fail}}
+    \infer3{\mathrm{r}\langle m_1, \gamma, \mathrm{enter}(s, A, y) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{f}\langle m_2, \gamma, \rho_0\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{r}\langle m, \gamma, \mathrm{arg}(t) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{r}\langle m, \gamma, \rho, \rho_0, t \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{r}\langle m, \gamma, \mathrm{not}(\mathit{alt}_1, f_1) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}_2, f_2, x\rangle \to \mathrm{f}\langle m, \gamma, \rho_0\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{r}\langle m, \gamma, \mathrm{back}(s, y) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{r}\langle m, \gamma, \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{r}\langle m, \gamma, \mathrm{modctx}(\gamma_0) \rho, \rho_0, \alpha, \rho_\gamma, \mathit{alt}, f, x\rangle \to \mathrm{r}\langle m, \gamma, \rho, \rho_0, \alpha, \mathrm{modctx}(\gamma_0) \rho_\gamma, \mathit{alt}, f, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{f}\langle m, \gamma, \mathrm{back}(s, x) \rho\rangle \to \mathrm{c}\langle m, \gamma, \rho, s, x\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{f}\langle m, \gamma, \mathrm{not}(\mathit{alt}, f) \rho\rangle \to \mathrm{r}\langle m, \gamma, \rho, \rho, \epsilon, \epsilon, \mathit{alt}, f, \epsilon\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{m_2 = m_1[\langle A, x\rangle \mapsto \mathrm{f}]}
+    \infer1{\mathrm{f}\langle m_1, \gamma, \mathrm{enter}(s, A, x) \rho\rangle \to \mathrm{f}\langle m_2, \gamma, \rho\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \infer0{\mathrm{f}\langle m, \gamma, \mathrm{arg}(t) \rho\rangle \to \mathrm{f}\langle m, \gamma, \rho\rangle}
+  \end{prooftree}
+\]
+
+\[
+  \begin{prooftree}
+    \hypo{m_2 = \emptyset}
+    \infer1{\mathrm{f}\langle m_1, \gamma_1, \mathrm{modctx}(\gamma_2) \rho\rangle \to \mathrm{f}\langle m_2, \gamma_2, \rho\rangle}
+  \end{prooftree}
+\]
+
+\end{document}

@@ -1,0 +1,46 @@
+\documentclass[12pt]{article}
+
+\usepackage{unicode-math}
+\setmainfont{STIX Two Text}
+\setmathfont{STIX Two Math}
+
+% some math fonts not support bold
+\DeclareFontShape{TU}{STIXTwoMath(1)}{b}{n}{<->ssub*STIXTwoMath(1)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(2)}{b}{n}{<->ssub*STIXTwoMath(2)/m/n}{}
+\DeclareFontShape{TU}{STIXTwoMath(3)}{b}{n}{<->ssub*STIXTwoMath(3)/m/n}{}
+
+\usepackage{ebproof}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{cd}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{40cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    P(\mathit{ts}) &= \left\{\begin{array}{ll}
+        P_1(1, \bot, \mathit{ts}) &(\mathit{ts} = t:\mathit{ts}', \mathrm{islft}(t)) \\
+        P_1(1, \top, \mathit{ts}) &(\text{otherwise}) \\
+    \end{array}\right. \\
+    P_1(r_0, \mathit{nl}, t:\mathit{ts}) &= \left\{\begin{array}{ll}
+        \{c_t\}:t:P_1(r_t, \mathrm{islt}(t), \mathit{ts}) &(\mathrm{pos}(t) = (r_t, c_t), \mathit{nl}, t \neq \texttt{\textquotedbl\{\textquotedbl}) \\
+        \langle c_t\rangle:t:P_1(r_t, \mathrm{islt}(t), \mathit{ts}) &(\text{otherwise}, \mathrm{pos}(t) = (r_t, c_t), r_0 < r_t) \\
+        t:P_1(r_t, \mathrm{islt}(t), \mathit{ts}) &(\text{otherwise})
+    \end{array}\right. \\
+    P_1(r_0, \mathit{nl}, \epsilon) &= \left\{\begin{array}{ll}
+        \{0\}:\epsilon &(\mathit{nl}) \\
+        \epsilon &(\text{otherwise})
+    \end{array}\right. \\
+    \mathrm{islft}(t) &\iff t = \texttt{\textquotedbl module\textquotedbl} \\
+    \mathrm{islt}(t) &\iff
+        t = \texttt{\textquotedbl let\textquotedbl}
+        \lor t = \texttt{\textquotedbl where\textquotedbl}
+        \lor t = \texttt{\textquotedbl do\textquotedbl}
+        \lor t = \texttt{\textquotedbl of\textquotedbl}
+\end{align*}
+\end{document}
