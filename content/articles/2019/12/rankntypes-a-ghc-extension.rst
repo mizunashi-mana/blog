@@ -94,7 +94,7 @@
 
   type PolyShow = Show a => a -> String
 
-  showA :: PolyShow -> String
+  showA :: PolyShow -> A -> String
   showA pshow = go
     where
       go x = case x of
@@ -134,7 +134,7 @@ RankNTypes
 
   type PolyShow = forall a. Show a => a -> String
 
-  showA :: PolyShow -> String
+  showA :: PolyShow -> A -> String
   showA pshow = go
     where
       go x = case x of
