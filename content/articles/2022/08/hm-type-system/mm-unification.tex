@@ -1,0 +1,53 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \infer0{\mathcal{U}(x, x) = \emptyset}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{x \neq y}
+        \infer1{\mathcal{U}(x, y) = \{y \mapsto x\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathcal{U}(a_1, b_1) = S_1}
+        \hypo{\mathcal{U}(S_1a_2, S_1b_2) = S_2}
+        \hypo{\cdots}
+        \hypo{\mathcal{U}(S_1 \cdots S_{n - 1}a_n, S_1 \cdots S_{n - 1}b_n) = S_n}
+        \infer4{\mathcal{U}(f(a_1, \ldots, a_n), f(b_1, \ldots, b_n)) = S_1 \cdots S_n}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{x \not\in \mathit{fv}(f(a_1, \ldots, a_n))}
+        \infer1{\mathcal{U}(x, f(a_1, \ldots, a_n)) = \{x \mapsto f(a_1, \ldots, a_n)\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{x \not\in \mathit{fv}(f(a_1, \ldots, a_n))}
+        \infer1{\mathcal{U}(f(a_1, \ldots, a_n), x) = \{x \mapsto f(a_1, \ldots, a_n)\}}
+    \end{prooftree}
+\]
+\end{document}
