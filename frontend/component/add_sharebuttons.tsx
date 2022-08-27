@@ -57,12 +57,6 @@ export function addShareButtons(metadata: {
                 faClassName: "fab fa-facebook"
             },
             {
-                name: 'facebook',
-                title: 'Like share to Facebook',
-                href: `https://www.facebook.com/sharer/sharer.php?src=share_button&u=${metadata.url}`,
-                faClassName: "fab fa-facebook"
-            },
-            {
                 name: 'get-pocket',
                 title: 'Save to Pocket',
                 href: `https://getpocket.com/edit?url=${metadata.url}`,
