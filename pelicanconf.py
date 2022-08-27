@@ -113,12 +113,13 @@ PLUGINS = [
   'katex_math_render',
   'filetime_from_git',
   'sitemap',
-  'search',
   'related_posts',
+  # 'search', # It's too heavy and make bad performance.
 ]
 
 # For search plugin
-STORK_VERSION = '1.2.1'
+STORK_VERSION = '1.5.0'
+SEARCH_HTML_SELECTOR = "main article"
 
 RELATIVE_URLS = True
 
