@@ -42,4 +42,4 @@ LINKS = add_site_url_to_items(LINKS)
 SOCIAL = add_site_url_to_items(SOCIAL)
 MENUITEMS = add_site_url_to_items(MENUITEMS)
 
-GOOGLE_ANALYTICS = "UA-110810716-2"
+GOOGLE_GLOBAL_SITE_TAG = "G-YZTJG0VBE4"

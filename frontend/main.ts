@@ -5,8 +5,8 @@ import * as addShareButtons from './component/add_sharebuttons';
 import * as addFootnoteTooltip from './component/add_footnote_tooltip';
 
 
-function onLoad() {
-  const contentMetadata = global.contentMetadataForCustomJS;
+function onLoad(): void {
+  const contentMetadata = (global as any).contentMetadataForCustomJS;
 
   if (['articles'].includes(contentMetadata.type)) {
     addShareButtons.addShareButtons(contentMetadata);
@@ -26,7 +26,7 @@ function completed() {
 
 if (
   document.readyState === "complete"
-  || document.readyState !== "loading" && !document.documentElement.doScroll
+  || document.readyState !== "loading" && !("doScroll" in document.documentElement)
 ) {
   window.setTimeout(onLoad);
 } else {
