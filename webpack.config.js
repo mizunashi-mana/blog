@@ -5,7 +5,7 @@ module.exports = {
     mode: 'production',
 
     entry: {
-        bundle: './frontend/index.js',
+        bundle: './frontend/index.ts',
     },
     output: {
         filename: '[name].js',
@@ -14,7 +14,6 @@ module.exports = {
 
     resolve: {
         alias: {
-            vue$: 'vue/dist/vue.esm.js',
             katex$: 'katex/dist/katex.mjs',
             katex: 'katex',
         }
@@ -23,15 +22,9 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.m?js$/,
-                exclude: /(node_modules|bower_components)/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env'],
-                        plugins: ['@babel/plugin-transform-runtime']
-                    }
-                }
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
             },
             {
                 test: /\.(scss|css)$/,
@@ -50,6 +43,10 @@ module.exports = {
                 type: 'asset/resource',
             }
         ],
+    },
+
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
     },
 
     plugins: [

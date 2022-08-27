@@ -44,7 +44,7 @@ CC_LICENSE = {
   'version': '4.0',
   'slug': 'by-sa',
 }
-COPYRIGHT_YEAR = 2021
+COPYRIGHT_YEAR = 2022
 
 MAIN_MENU = True
 
@@ -116,6 +116,9 @@ PLUGINS = [
   'search',
   'related_posts',
 ]
+
+# For search plugin
+STORK_VERSION = '1.2.1'
 
 RELATIVE_URLS = True
 
