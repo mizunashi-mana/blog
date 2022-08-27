@@ -1,0 +1,63 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \mathrm{ftv}(\tau) &= \left\{\begin{array}{ll}
+        \{\alpha\} &(\tau = \alpha) \\
+        \emptyset &(\tau = \mathbf{unit}) \\
+        \mathrm{ftv}(\tau_1) \cup \mathrm{ftv}(\tau_2) &(\tau = \tau_1 \to \tau_2)
+    \end{array}\right. \\
+    \mathrm{ftv}(\Gamma) &= \bigcup_{x:\forall \vec{\alpha}\ldotp \tau \in \Gamma} \mathrm{ftv}(\tau) \backslash \vec{\alpha} \\
+    \forall \vec{\alpha}\ldotp \tau_1 \succ \tau_2 &\iff \exists S\ldotp S\tau_1 = \tau_2 \land \mathrm{dom}(S) \subseteq \vec{\alpha} \\
+    \mathrm{Gen}(\Gamma, \tau) &= \forall \vec{\alpha}\ldotp \tau &(\vec{\alpha} = \mathrm{ftv}(\tau) \backslash \mathrm{ftv}(\Gamma))
+\end{align*}
+
+\[
+    \begin{prooftree}
+        \infer0{\Gamma \vdash \text{\texttt{()}}: \mathbf{unit}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma(x) \succ \tau}
+        \infer1{\Gamma \vdash x: \tau}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma + x: \tau_1 \vdash e: \tau_2}
+        \infer1{\Gamma \vdash \lambda x\ldotp e: \tau_1 \to \tau_2}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e_1: \tau_2 \to \tau}
+        \hypo{\Gamma \vdash e_2: \tau_2}
+        \infer2{\Gamma \vdash e_1\; e_2: \tau}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e_1: \tau_1}
+        \hypo{\Gamma + x: \mathrm{Gen}(\Gamma, \tau_1) \vdash e_2: \tau}
+        \infer2{\Gamma \vdash \mathbf{let}\;x = e_1\;\mathbf{in}\;e_2: \tau}
+    \end{prooftree}
+\]
+\end{document}

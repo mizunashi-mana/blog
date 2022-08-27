@@ -1,0 +1,54 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \tau &\Coloneqq \alpha \mid \mathbf{unit} \mid \tau \to \tau \\
+    \mathbf{default}(\tau) &= \left\{\begin{array}{ll}
+        \mathbf{unit} &(\tau = \alpha \lor \tau = \mathbf{unit}) \\
+        \mathbf{default}(\tau_1) \to \mathbf{default}(\tau_2) &(\tau = \tau_1 \to \tau_2)
+    \end{array}\right.
+\end{align*}
+
+\[
+    \begin{prooftree}
+        \infer0{\mathcal{W}_{\text{simply}}(\Gamma, \text{\texttt{()}}) = (\emptyset, \mathbf{unit})}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \infer0{\mathcal{W}_{\text{simply}}(\Gamma, x) = (\emptyset, \Gamma(x))}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathbf{fresh} \beta}
+        \hypo{\mathcal{W}_{\text{simply}}(\Gamma + x:\beta, e) = (S_1, \tau_1)}
+        \infer2{\mathcal{W}_{\text{simply}}(\Gamma, \lambda x\ldotp e) = (S_1, S_1\beta \to \tau_1)}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathcal{W}_{\text{simply}}(\Gamma, e_1) = (S_1, \tau_1)}
+        \hypo{\mathcal{W}_{\text{simply}}(S_1\Gamma, e_2) = (S_2, \tau_2)}
+        \hypo{\mathbf{fresh} \beta}
+        \hypo{\mathcal{U}(S_2\tau_1, \tau_2 \to \beta) = S_3}
+        \infer4{\mathcal{W}_{\text{simply}}(\Gamma, e_1\; e_2) = (S_3S_2S_1, S_3\beta)}
+    \end{prooftree}
+\]
+\end{document}

@@ -1,0 +1,27 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \begin{array}{rcl}
+        e
+        &\Coloneqq & \text{\texttt{()}} \\
+        &\mid & x \\
+        &\mid & \lambda x\ldotp e \\
+        &\mid & \mathbf{let}\;x = e\;\mathbf{in}\;e \\
+        &\mid & e\; e
+    \end{array}
+\end{align*}
+\end{document}

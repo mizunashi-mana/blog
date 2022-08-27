@@ -1,0 +1,46 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{120cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \infer0{\mathbf{fresh} \beta_2}
+        \infer0{\mathbf{fresh} \beta_3, \beta_4}
+        \infer0{\mathcal{U}(\beta_2, \beta_3 \to \beta_4) = S_1}
+        \infer0{\mathcal{M}(x: \beta_3, x, \beta_4) = S_2}
+        \infer3{\mathcal{M}(\emptyset, \lambda x\ldotp x, \beta_2) = S_2S_1 = \{\beta_2 \mapsto \beta_4 \to \beta_4, \beta_3 \mapsto \beta_4\}}
+        \infer0{\mathbf{fresh} \beta_5}
+        \infer0{\mathbf{fresh} \beta_6}
+        \infer0{\mathbf{fresh} \beta_7}
+        \infer0{\mathcal{U}(\beta_6 \to \beta_5 \to \beta_1, \beta_7 \to \beta_7) = S_3}
+        \infer2{\mathcal{M}(\mathit{id}: \forall \alpha\ldotp \alpha \to \alpha, \mathit{id}, \beta_6 \to \beta_5 \to \beta_1) = S_3 = \{\beta_6 \mapsto \beta_5 \to \beta_1, \beta_7 \mapsto \beta_5 \to \beta_1\}}
+        \infer0{\mathbf{fresh} \beta_8, \beta_9}
+        \infer0{\mathcal{U}(\beta_5 \to \beta_1, \beta_8 \to \beta_9) = S_4}
+        \infer0{\mathcal{U}(\beta_1, \beta_5) = S_5}
+        \infer1{\mathcal{M}(\mathit{id}: \forall \alpha\ldotp \alpha \to \alpha, x: \beta_5, x, \beta_1) = S_5 = \{\beta_5 \mapsto \beta_1\}}
+        \infer3{\mathcal{M}(\mathit{id}: \forall \alpha\ldotp \alpha \to \alpha, \lambda x\ldotp x, \beta_5 \to \beta_1) = S_5S_4 = \{\beta_5 \mapsto \beta_1, \beta_8 \mapsto \beta_1, \beta_9 \mapsto \beta_1\}}
+        \infer3{\mathcal{M}(\mathit{id}: \forall \alpha\ldotp \alpha \to \alpha, \mathit{id}\;(\lambda x\ldotp x), \beta_5 \to \beta_1) = S_5S_4S_3 = \{\beta_5 \mapsto \beta_1, \beta_6 \mapsto \beta_1 \to \beta_1, \beta_7 \mapsto \beta_1 \to \beta_1, \beta_8 \mapsto \beta_1, \beta_9 \mapsto \beta_1\}}
+        \infer0{\mathbf{fresh} \beta_{10}}
+        \infer0{\mathbf{fresh} \beta_{11}}
+        \infer0{\mathcal{U}(\beta_{10} \to \beta_1, \beta_{11} \to \beta_{11}) = S_6}
+        \infer2{\mathcal{M}(\mathit{id}: \forall \alpha\ldotp \alpha \to \alpha, \mathit{id}, \beta_{10} \to \beta_1) = S_6 = \{\beta_{10} \mapsto \beta_1, \beta_{11} \mapsto \beta_1\}}
+        \infer0{\mathcal{U}(\beta_1, \mathbf{unit}) = S_7}
+        \infer1{\mathcal{M}(\mathit{id}: \forall \alpha\ldotp \alpha \to \alpha, \text{\texttt{()}}, \beta_1) = S_7 = \{\beta_1 \mapsto \mathbf{unit}\}}
+        \infer3{\mathcal{M}(\mathit{id}: \forall \alpha\ldotp \alpha \to \alpha, \mathit{id}\;\text{\texttt{()}}, \beta_1) = S_7S_6 = \{\beta_1 \mapsto \mathbf{unit}, \beta_{10} \mapsto \mathbf{unit}, \beta_{11} \mapsto \mathbf{unit}\}}
+        \infer3{\mathcal{M}(\mathit{id}: \forall \alpha\ldotp \alpha \to \alpha, (\mathit{id}\;(\lambda x\ldotp x))\;(\mathit{id}\;\text{\texttt{()}}), \beta_1) = S_7S_6S_5S_4S_3 = \{\beta_1 \mapsto \mathbf{unit}, \beta_5 \mapsto \mathbf{unit}, \beta_6 \mapsto \mathbf{unit} \to \mathbf{unit}, \beta_7 \mapsto \mathbf{unit} \to \mathbf{unit}, \beta_8 \mapsto \mathbf{unit}, \beta_9 \mapsto \mathbf{unit}, \beta_{10} \mapsto \mathbf{unit}, \beta_{11} \mapsto \mathbf{unit}\}}
+        \infer3{\mathcal{M}(\emptyset, \mathbf{let}\;\mathit{id} = \lambda x\ldotp x\; \mathbf{in}\; (\mathit{id}\;(\lambda x\ldotp x))\;(\mathit{id}\;\text{\texttt{()}}), \beta_1) = S_7S_6S_5S_4S_3S_2S_1 = \{\beta_1 \mapsto \mathbf{unit}, \beta_2 \mapsto \beta_4 \to \beta_4, \beta_3 \mapsto \beta_4, \beta_5 \mapsto \mathbf{unit}, \beta_6 \mapsto \mathbf{unit} \to \mathbf{unit}, \beta_7 \mapsto \mathbf{unit} \to \mathbf{unit}, \beta_8 \mapsto \mathbf{unit}, \beta_9 \mapsto \mathbf{unit}, \beta_{10} \mapsto \mathbf{unit}, \beta_{11} \mapsto \mathbf{unit}\}}
+    \end{prooftree}
+\]
+\end{document}

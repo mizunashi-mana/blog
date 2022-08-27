@@ -1,0 +1,60 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\mathcal{U}(\rho, \mathbf{unit}) = S}
+        \infer1{\mathcal{M}(\Gamma, \text{\texttt{()}}, \rho) = S}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma(x) = \forall \vec{\alpha}\ldotp \tau}
+        \hypo{\mathbf{fresh} \vec{\beta}}
+        \hypo{\mathcal{U}(\rho, \tau[\vec{\alpha} \leftarrow \vec{\beta}]) = S}
+        \infer3{\mathcal{M}(\Gamma, x, \rho) = S}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathbf{fresh} \beta_1, \beta_2}
+        \hypo{\mathcal{U}(\rho, \beta_1 \to \beta_2) = S_1}
+        \hypo{\mathcal{M}(S_1\Gamma + x:S_1\beta_1, e, S_1\beta_2) = S_2}
+        \infer3{\mathcal{W}(\Gamma, \lambda x\ldotp e, \rho) = S_2S_1}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathbf{fresh} \beta}
+        \hypo{\mathcal{M}(\Gamma, e_1, \beta \to \rho) = S_1}
+        \hypo{\mathcal{M}(S_1\Gamma, e_2, S_1\beta) = S_2}
+        \infer3{\mathcal{M}(\Gamma, e_1\; e_2, \rho) = S_2S_1}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathbf{fresh} \beta}
+        \hypo{\mathcal{M}(\Gamma, e_1, \beta) = S_1}
+        \hypo{\Gamma_1 = S_1(\Gamma)}
+        \hypo{\mathcal{M}(\Gamma_1 + x:\mathrm{Gen}(\Gamma_1, S_1\beta), e_2, S_1\rho) = S_2}
+        \infer4{\mathcal{M}(\Gamma, \mathbf{let}\;x = e_1\;\mathbf{in}\; e_2, \rho) = S_2S_1}
+    \end{prooftree}
+\]
+\end{document}

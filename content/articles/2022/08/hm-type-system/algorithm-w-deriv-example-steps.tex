@@ -1,0 +1,54 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{100cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \underline{\mathbf{let}\;\mathit{id} = \lambda x\ldotp x\; \mathbf{in}\; (\mathit{id}\;(\lambda x\ldotp x))\;(\mathit{id}\;\text{\texttt{()}})}
+\]
+
+\[
+    \mathbf{let}\;\mathit{id} = \underline{\lambda \underset{\color{red} \beta_1}{x}\ldotp x}\; \mathbf{in}\; (\mathit{id}\;(\lambda x\ldotp x))\;(\mathit{id}\;\text{\texttt{()}})
+\]
+
+\[
+    \mathbf{let}\;\underline{\underset{\color{red} \forall \alpha\ldotp \alpha \to \alpha}{\mathit{id}} = \lambda \underset{\beta_1}{x}\ldotp x}\; \mathbf{in}\; (\mathit{id}\;(\lambda x\ldotp x))\;(\mathit{id}\;\text{\texttt{()}})
+\]
+
+\[
+    \mathbf{let}\;\underset{\forall \alpha\ldotp \alpha \to \alpha}{\mathit{id}} = \lambda \underset{\beta_1}{x}\ldotp x\; \mathbf{in}\; \underline{(\mathit{id}\;(\lambda x\ldotp x))\;(\mathit{id}\;\text{\texttt{()}})}
+\]
+
+\[
+    \mathbf{let}\;\underset{\forall \alpha\ldotp \alpha \to \alpha}{\mathit{id}} = \lambda \underset{\beta_1}{x}\ldotp x\; \mathbf{in}\; \underline{(\underset{\color{red} \beta_2 \to \beta_2}{\mathit{id}}\;(\lambda \underset{\color{red} \beta_3}{x}\ldotp x))}\;(\mathit{id}\;\text{\texttt{()}})
+\]
+
+\[
+    \mathbf{let}\;\underset{\forall \alpha\ldotp \alpha \to \alpha}{\mathit{id}} = \lambda \underset{\beta_1}{x}\ldotp x\; \mathbf{in}\; \underline{(\underset{\color{red} (\beta_3 \to \beta_3) \to (\beta_3 \to \beta_3)}{\mathit{id}}\;(\lambda \underset{\beta_3}{x}\ldotp x))}\;(\mathit{id}\;\text{\texttt{()}})
+\]
+
+\[
+    \mathbf{let}\;\underset{\forall \alpha\ldotp \alpha \to \alpha}{\mathit{id}} = \lambda \underset{\beta_1}{x}\ldotp x\; \mathbf{in}\; (\underset{(\beta_3 \to \beta_3) \to (\beta_3 \to \beta_3)}{\mathit{id}}\;(\lambda \underset{\beta_3}{x}\ldotp x))\;\underline{(\underset{\color{red} \beta_2 \to \beta_2}{\mathit{id}}\;\text{\texttt{()}})}
+\]
+
+\[
+    \mathbf{let}\;\underset{\forall \alpha\ldotp \alpha \to \alpha}{\mathit{id}} = \lambda \underset{\beta_1}{x}\ldotp x\; \mathbf{in}\; (\underset{(\beta_3 \to \beta_3) \to (\beta_3 \to \beta_3)}{\mathit{id}}\;(\lambda \underset{\beta_3}{x}\ldotp x))\;\underline{(\underset{\color{red} \mathbf{unit} \to \mathbf{unit}}{\mathit{id}}\;\text{\texttt{()}})}
+\]
+
+\[
+    \mathbf{let}\;\underset{\forall \alpha\ldotp \alpha \to \alpha}{\mathit{id}} = \lambda \underset{\beta_1}{x}\ldotp x\; \mathbf{in}\; \underline{(\underset{\color{red} (\mathbf{unit} \to \mathbf{unit}) \to (\mathbf{unit} \to \mathbf{unit})}{\mathit{id}}\;(\lambda \underset{\color{red} \mathbf{unit}}{x}\ldotp x))\;(\underset{\mathbf{unit} \to \mathbf{unit}}{\mathit{id}}\;\text{\texttt{()}})}
+\]
+
+\end{document}

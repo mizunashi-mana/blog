@@ -1,0 +1,57 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \infer0{\mathcal{W}(\Gamma, \text{\texttt{()}}) = (\emptyset, \mathbf{unit})}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma(x) = \forall \vec{\alpha}\ldotp \tau}
+        \hypo{\mathbf{fresh} \vec{\beta}}
+        \infer2{\mathcal{W}(\Gamma, x) = (\emptyset, \tau[\vec{\alpha}\leftarrow\vec{\beta}])}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathbf{fresh} \beta}
+        \hypo{\mathcal{W}(\Gamma + x:\beta, e) = (S_1, \tau_1)}
+        \infer2{\mathcal{W}(\Gamma, \lambda x\ldotp e) = (S_1, S_1\beta \to \tau_1)}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathcal{W}(\Gamma, e_1) = (S_1, \tau_1)}
+        \hypo{\mathcal{W}(S_1\Gamma, e_2) = (S_2, \tau_2)}
+        \hypo{\mathbf{fresh} \beta}
+        \hypo{\mathcal{U}(S_2\tau_1, \tau_2 \to \beta) = S_3}
+        \infer4{\mathcal{W}(\Gamma, e_1\; e_2) = (S_3S_2S_1, S_3\beta)}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathcal{W}(\Gamma, e_1) = (S_1, \tau_1)}
+        \hypo{\Gamma_1 = S_1(\Gamma)}
+        \hypo{\mathcal{W}(\Gamma_1 + x:\mathrm{Gen}(\Gamma_1, \tau_1), e_2) = (S_2, \tau_2)}
+        \infer3{\mathcal{W}(\Gamma, \mathbf{let}\;x = e_1\;\mathbf{in}\; e_2) = (S_2S_1, \tau_2)}
+    \end{prooftree}
+\]
+\end{document}

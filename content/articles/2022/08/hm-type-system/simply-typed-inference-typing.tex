@@ -1,0 +1,44 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \infer0{\Gamma \vdash \text{\texttt{()}}: \mathbf{unit}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma(x) = \tau}
+        \infer1{\Gamma \vdash x: \tau}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma + x:\tau_1 \vdash e: \tau_2}
+        \infer1{\Gamma \vdash \lambda x\ldotp e: \tau_1 \to \tau_2}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e_1: \tau_2 \to \tau}
+        \hypo{\Gamma \vdash e_2: \tau_2}
+        \infer2{\Gamma \vdash e_1\; e_2: \tau}
+    \end{prooftree}
+\]
+\end{document}

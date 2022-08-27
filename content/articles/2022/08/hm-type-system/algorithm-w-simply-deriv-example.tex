@@ -1,0 +1,42 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{100cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \infer0{\mathbf{fresh} \beta_1}
+        \infer0{\mathbf{fresh} \beta_2}
+        \infer0{\mathbf{fresh} \beta_3}
+        \infer0{\mathcal{W}_{\text{simply}}(f: \beta_1, x: \beta_2, y: \beta_3, f) = (\emptyset, \beta_1)}
+        \infer0{\mathcal{W}_{\text{simply}}(f: \beta_1, x: \beta_2, y: \beta_3, y) = (\emptyset, \beta_3)}
+        \infer0{\mathbf{fresh} \beta_4}
+        \infer0{\mathcal{U}(\beta_1, \beta_3 \to \beta_4) = S_1}
+        \infer4{\mathcal{W}_{\text{simply}}(f: \beta_1, x: \beta_2, y: \beta_3, f\; y) = (S_1 = \{\beta_1 \mapsto \beta_3 \to \beta_4\}, \beta_4)}
+        \infer2{\mathcal{W}_{\text{simply}}(f: \beta_1, x: \beta_2, \lambda y\ldotp f\; y) = (S_1, \beta_3 \to \beta_4)}
+        \infer2{\mathcal{W}_{\text{simply}}(f: \beta_1, \lambda x\ldotp \lambda y\ldotp f\; y) = (S_1, \beta_2 \to \beta_3 \to \beta_4)}
+        \infer2{\mathcal{W}_{\text{simply}}(\emptyset, \lambda f\ldotp \lambda x\ldotp \lambda y\ldotp f\; y) = (S_1, (\beta_3 \to \beta_4) \to \beta_2 \to \beta_3 \to \beta_4)}
+        \infer0{\mathbf{fresh} \beta_5}
+        \infer0{\mathcal{W}_{\text{simply}}(x: \beta_5, x) = (\emptyset, \beta_5)}
+        \infer2{\mathcal{W}_{\text{simply}}(\emptyset, \lambda x\ldotp x) = (\emptyset, \beta_5 \to \beta_5)}
+        \infer0{\mathbf{fresh} \beta_6}
+        \infer0{\mathcal{U}((\beta_3 \to \beta_4) \to \beta_2 \to \beta_3 \to \beta_4, (\beta_5 \to \beta_5) \to \beta_6) = S_2}
+        \infer4{\mathcal{W}_{\text{simply}}(\emptyset, (\lambda f\ldotp \lambda x\ldotp \lambda y\ldotp f\; y)\; (\lambda x\ldotp x)) = (S_2S_1 = \{\beta_1 \mapsto \beta_5 \to \beta_5, \beta_3 \mapsto \beta_5, \beta_4 \mapsto \beta_5, \beta_6 \mapsto \beta_2 \to \beta_5 \to \beta_5\}, \beta_2 \to \beta_5 \to \beta_5)}
+        \infer0{\mathcal{W}_{\text{simply}}(\emptyset, \text{\texttt{()}}) = (\emptyset, \mathbf{unit})}
+        \infer0{\mathbf{fresh} \beta_7}
+        \infer0{\mathcal{U}(\beta_2 \to \beta_5 \to \beta_5, \mathbf{unit} \to \beta_7) = S_3}
+        \infer4{\mathcal{W}_{\text{simply}}(\emptyset, (\lambda f\ldotp \lambda x\ldotp \lambda y\ldotp f\; y)\; (\lambda x\ldotp x)\;\text{\texttt{()}}) = (S_3S_2S_1 = \{\beta_1 \mapsto \beta_5 \to \beta_5, \beta_2 \mapsto \mathbf{unit}, \beta_3 \mapsto \beta_5, \beta_4 \mapsto \beta_5, \beta_6 \mapsto \mathbf{unit} \to \beta_5 \to \beta_5, \beta_7 \mapsto \beta_5 \to \beta_5\}, \beta_5 \to \beta_5)}
+    \end{prooftree}
+\]
+\end{document}
