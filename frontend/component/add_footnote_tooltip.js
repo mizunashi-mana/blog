@@ -17,7 +17,7 @@ export function addFootnoteTooltip() {
 
   for (const e of document.querySelectorAll("a.footnote-reference")) {
     const eid = e.getAttribute("id");
-    const reference = e.getAttribute("href").substr(1);
+    const reference = e.getAttribute("href").substring(1);
 
     Tippy(document.getElementById(eid), {
       placement: 'bottom',
