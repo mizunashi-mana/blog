@@ -1,0 +1,31 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{100cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \infer0{f: \mathbf{Int} \to \mathbf{Int} \in \Gamma}
+        \infer1{C; \Gamma \vdash f: \mathbf{Int} \to \mathbf{Int}}
+        \infer0{1: \mathbf{Int64} \in \Gamma}
+        \infer1{C; \Gamma \vdash 1: \mathbf{Int64}}
+        \infer0{\mathbf{Int} \simeq \mathbf{Int64} \in C}
+        \infer1{C \Vdash \mathbf{Int} \simeq \mathbf{Int64}}
+        \infer1{C \Vdash \mathbf{Int64} \simeq \mathbf{Int}}
+        \infer2{C; \Gamma \vdash 1: \mathbf{Int}}
+        \infer2{C; \Gamma \vdash f\; 1: \mathbf{Int}}
+    \end{prooftree}
+\]
+
+\end{document}

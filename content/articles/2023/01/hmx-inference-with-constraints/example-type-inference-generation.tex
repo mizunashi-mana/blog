@@ -1,0 +1,40 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{100cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \infer0{\mathbf{fresh}\; \beta_1}
+        \infer0{\mathbf{fresh}\; \beta_2}
+        \infer1{\mathcal{W}(\Gamma + x: \beta_1, \mathit{plus}) = (\mathbf{Num}\; \beta_2, \beta_2 \to \beta_2 \to \beta_2)}
+        \infer0{\mathcal{W}(\Gamma + x: \beta_1, x) = (\epsilon, \beta_1)}
+        \infer0{\mathbf{fresh}\; \beta_3}
+        \infer3{\mathcal{W}(\Gamma + x: \beta_1, \mathit{plus}\; x) = (\mathbf{Num}\; \beta_2 \land (\beta_2 \to \beta_2 \to \beta_2 \simeq \beta_1 \to \beta_3), \beta_3)}
+        \infer0{\mathcal{W}(\Gamma + x: \beta_1, x) = (\epsilon, \beta_1)}
+        \infer0{\mathbf{fresh}\; \beta_4}
+        \infer3{\mathcal{W}(\Gamma + x: \beta_1, \mathit{plus}\; x\; x) = (\mathbf{Num}\; \beta_2 \land (\beta_2 \to \beta_2 \to \beta_2 \simeq \beta_1 \to \beta_3) \land (\beta_3 \simeq \beta_1 \to \beta_4), \beta_4)}
+        \infer2{\mathcal{W}(\Gamma, \lambda x\ldotp \mathit{plus}\; x\; x) = (\mathbf{Num}\; \beta_2 \land (\beta_2 \to \beta_2 \to \beta_2 \simeq \beta_1 \to \beta_3) \land (\beta_3 \simeq \beta_1 \to \beta_4), \beta_1 \to \beta_4) = (Q_1, \tau_1)}
+        \infer0{\mathit{gen}(\Gamma, Q_1, \tau_1) = \forall \beta_1, \beta_2, \beta_3, \beta_4\ldotp Q_1 \Rightarrow \tau_1 = \sigma_1}
+        \infer0{\mathbf{fresh}\; \beta_5, \beta_6, \beta_7, \beta_8}
+        \infer0{Q_2 = Q_1[\beta_n \leftarrow \beta_{n + 4}]}
+        \infer2{\mathcal{W}(\Gamma + \mathit{double}: \sigma_1, \mathit{double}) = (Q_2, \beta_5 \to \beta_8)}
+        \infer0{\mathcal{W}(\Gamma + \mathit{double}: \sigma_1, 1.0) = (\epsilon, \mathbf{float})}
+        \infer0{\mathbf{fresh}\; \beta_9}
+        \infer3{\mathcal{W}(\Gamma + \mathit{double}: \sigma_1, \mathit{double}\; 1.0) = (Q_2 \land (\beta_5 \to \beta_8 \simeq \mathbf{float} \to \beta_9), \beta_9)}
+        \infer3{\mathcal{W}(\Gamma, \mathbf{let}\;\mathit{double} = \lambda x\ldotp \mathit{plus}\; x\; x\; \mathbf{in}\; \mathit{double}\; 1.0) = (\mathbf{Num}\; \beta_6 \land (\beta_6 \to \beta_6 \to \beta_6 \simeq \beta_5 \to \beta_7) \land (\beta_7 \simeq \beta_5 \to \beta_8) \land (\beta_5 \to \beta_8 \simeq \mathbf{float} \to \beta_9), \beta_9)}
+    \end{prooftree}
+\]
+
+\end{document}
