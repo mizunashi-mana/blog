@@ -65,6 +65,7 @@ GITHUB_CORNER_URL = GITHUB_URL
 
 # Blogroll
 LINKS = (
+  ('著者について', 'https://mizunashi-mana.github.io/profile'),
 )
 
 # Social widget
