@@ -1,0 +1,25 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\mathcal{W}(\Gamma, e) = (Q, \tau)}
+        \hypo{\mathrm{solv}(C, Q) = \theta}
+        \infer2{C; \Gamma \vdash^\mathcal{W} e \rightsquigarrow \theta\tau}
+    \end{prooftree}
+\]
+
+\end{document}

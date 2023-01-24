@@ -1,0 +1,51 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{x:\forall \vec{\alpha}\ldotp Q \Rightarrow \tau \in \Gamma}
+        \hypo{\mathbf{fresh} \vec{\beta}}
+        \infer2{\mathcal{W}(\Gamma, x) = (Q[\overrightarrow{\alpha \leftarrow \beta}], \tau[\overrightarrow{\alpha \leftarrow \beta}])}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathbf{fresh} \beta}
+        \hypo{\mathcal{W}(\Gamma + x: \beta, e) = (Q, \tau)}
+        \infer2{\mathcal{W}(\Gamma, \lambda x\ldotp e) = (Q, \beta \to \tau)}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathcal{W}(\Gamma, e_1) = (Q_1, \tau_1)}
+        \hypo{\mathcal{W}(\Gamma, e_2) = (Q_2, \tau_2)}
+        \hypo{\mathbf{fresh} \beta}
+        \infer3{\mathcal{W}(\Gamma, e_1\; e_2) = (Q_1 \land Q_2 \land (\tau_1 \simeq (\tau_2 \to \beta)), \beta)}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\mathcal{W}(\Gamma, e_1) = (Q_1, \tau_1)}
+        \hypo{\mathit{gen}(\Gamma, Q_1, \tau_1) = \sigma_1}
+        \hypo{\mathcal{W}(\Gamma + x:\sigma_1, e_2) = (Q_2, \tau_2)}
+        \infer3{\mathcal{W}(\Gamma, \mathbf{let}\; x = e_1\; \mathbf{in}\; e_2) = (Q_2, \tau_2)}
+    \end{prooftree}
+\]
+\end{document}
