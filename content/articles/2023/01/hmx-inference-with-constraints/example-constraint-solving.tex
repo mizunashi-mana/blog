@@ -1,0 +1,42 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{100cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    &\{\mathbf{Num}\; \beta_6, {\color{red} \beta_6 \to \beta_6 \to \beta_6 \simeq \beta_5 \to \beta_7}, \beta_7 \simeq \beta_5 \to \beta_8, \beta_5 \to \beta_8 \simeq \mathbf{float} \to \beta_9\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, {\color{red} \beta_5 \to \beta_8 \simeq \mathbf{float} \to \beta_9}, \beta_6 \simeq \beta_5, \beta_6 \to \beta_6 \simeq \beta_7\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, {\color{red} \beta_6 \simeq \beta_5}, \beta_6 \to \beta_6 \simeq \beta_7, \beta_5 \simeq \mathbf{float}, \beta_8 \simeq \beta_9\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, {\color{red} \beta_6 \to \beta_6 \simeq \beta_7}, \beta_5 \simeq \mathbf{float}, \beta_8 \simeq \beta_9, \beta_5 \simeq \beta_6\} \\
+    &\to \{\mathbf{Num}\; \beta_6, {\color{red} \beta_7 \simeq \beta_5 \to \beta_8}, \beta_5 \simeq \mathbf{float}, \beta_8 \simeq \beta_9, \beta_5 \simeq \beta_6, {\color{red} \beta_7 \simeq \beta_6 \to \beta_6}\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, \beta_5 \simeq \mathbf{float}, \beta_8 \simeq \beta_9, \beta_5 \simeq \beta_6, {\color{red} \beta_5 \to \beta_8 \simeq \beta_6 \to \beta_6}\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, \beta_5 \simeq \mathbf{float}, \beta_8 \simeq \beta_9, \beta_5 \simeq \beta_6, {\color{red} \beta_8 \simeq \beta_6}\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, {\color{red} \beta_5 \simeq \mathbf{float}}, \beta_8 \simeq \beta_9, {\color{red} \beta_5 \simeq \beta_6}, \beta_6 \simeq \beta_8\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, \beta_5 \simeq \mathbf{float}, \beta_8 \simeq \beta_9, \beta_6 \simeq \beta_8, {\color{red} \mathbf{float} \simeq \beta_6}\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, \beta_5 \simeq \mathbf{float}, \beta_8 \simeq \beta_9, {\color{red} \beta_6 \simeq \beta_8, \beta_6 \simeq \mathbf{float}}\} \\
+    &\to \{\mathbf{Num}\; \beta_6, \beta_7 \simeq \beta_5 \to \beta_8, \beta_5 \simeq \mathbf{float}, {\color{red} \beta_8 \simeq \beta_9}, \beta_6 \simeq \beta_8, {\color{red} \beta_8 \simeq \mathbf{float}}\} \\
+    &\to \{{\color{red} \mathbf{Num}\; \beta_6}, \beta_7 \simeq \beta_5 \to \beta_8, \beta_5 \simeq \mathbf{float}, \beta_8 \simeq \beta_9, {\color{red} \beta_6 \simeq \beta_8}, \beta_9 \simeq \mathbf{float}\} \\
+    &\to \{{\color{red} \beta_7 \simeq \beta_5 \to \beta_8, \beta_5 \simeq \mathbf{float}}, \beta_8 \simeq \beta_9, \beta_6 \simeq \beta_8, \beta_9 \simeq \mathbf{float}, \mathbf{Num}\; \beta_8\} \\
+    &\to \{\beta_5 \simeq \mathbf{float}, {\color{red} \beta_8 \simeq \beta_9, \beta_6 \simeq \beta_8}, \beta_9 \simeq \mathbf{float}, \mathbf{Num}\; \beta_8, \beta_7 \simeq \mathbf{float} \to \beta_8\} \\
+    &\to \{\beta_5 \simeq \mathbf{float}, {\color{red} \beta_8 \simeq \beta_9, \beta_9 \simeq \mathbf{float}}, \mathbf{Num}\; \beta_8, \beta_7 \simeq \mathbf{float} \to \beta_8, \beta_6 \simeq \beta_9\} \\
+    &\to \{\beta_5 \simeq \mathbf{float}, \beta_9 \simeq \mathbf{float}, {\color{red} \mathbf{Num}\; \beta_8}, \beta_7 \simeq \mathbf{float} \to \beta_8, \beta_6 \simeq \beta_9, {\color{red} \beta_8 \simeq \mathbf{float}}\} \\
+    &\to \{\beta_5 \simeq \mathbf{float}, \beta_9 \simeq \mathbf{float}, {\color{red} \beta_7 \simeq \mathbf{float} \to \beta_8}, \beta_6 \simeq \beta_9, {\color{red} \beta_8 \simeq \mathbf{float}}, \mathbf{Num}\; \mathbf{float}\} \\
+    &\to \{\beta_5 \simeq \mathbf{float}, {\color{red} \beta_9 \simeq \mathbf{float}, \beta_6 \simeq \beta_9}, \beta_8 \simeq \mathbf{float}, \mathbf{Num}\; \mathbf{float}, \beta_7 \simeq \mathbf{float} \to \mathbf{float}\} \\
+    &\to \{\beta_5 \simeq \mathbf{float}, \beta_9 \simeq \mathbf{float}, \beta_8 \simeq \mathbf{float}, {\color{red} \mathbf{Num}\; \mathbf{float}}, \beta_7 \simeq \mathbf{float} \to \mathbf{float}, \beta_6 \simeq \mathbf{float}\} \\
+    &\to \{\beta_5 \simeq \mathbf{float}, \beta_9 \simeq \mathbf{float}, \beta_8 \simeq \mathbf{float}, \beta_7 \simeq \mathbf{float} \to \mathbf{float}, \beta_6 \simeq \mathbf{float}\} \\
+    &\not\to
+\end{align*}
+
+\end{document}

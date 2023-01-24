@@ -1,0 +1,108 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\alpha_1 \leq \alpha_2}
+        \infer1{\alpha_1 \prec \alpha_2}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \infer0{\alpha_1 \prec T \vec{\tau_2}}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\alpha \prec \tau}
+        \hypo{\alpha \not\in \mathrm{ftv}(\tau)}
+        \infer2{\alpha \lll \tau}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{Q = (\tau \simeq \tau) \in W}
+        \infer1{C \vdash W \to W \backslash \{Q\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{Q = (T \vec{\tau_1} \simeq T \vec{\tau_2}) \in W}
+        \infer1{C \vdash W \to (W \backslash \{Q\}) \cup \overrightarrow{\tau_1 \simeq \tau_2}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{(T_1 \vec{\tau_1} \simeq T_2 \vec{\tau_2}) \in W}
+        \hypo{T_1 \neq T_2}
+        \infer2{C \vdash W \to \bot}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{Q = (\tau_1 \simeq \tau_2) \in W}
+        \hypo{\tau_2 \prec \tau_1}
+        \infer2{C \vdash W \to (W \backslash \{Q\}) \cup \{\tau_2 \simeq \tau_1\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{(\alpha \simeq \tau) \in W}
+        \hypo{\alpha \in \mathit{ftv}(\tau)}
+        \infer2{C \vdash W \to \bot}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\{\alpha \simeq \tau_1, \alpha \simeq \tau_2\} \subseteq W}
+        \hypo{\tau_1 \neq \tau_2}
+        \hypo{\alpha \lll \tau_1}
+        \hypo{\alpha \lll \tau_2}
+        \infer4{C \vdash W \to (W \backslash \{\alpha \simeq \tau_2\}) \cup \{\tau_1 \simeq \tau_2\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\{\alpha_1 \simeq \tau_1, \alpha_2 \simeq \tau_2\} \subseteq W}
+        \hypo{\alpha_1 \in \mathit{ftv}(\tau_2)}
+        \hypo{\alpha_1 \lll \tau_1}
+        \hypo{\alpha_2 \lll \tau_2}
+        \infer4{C \vdash W \to (W \backslash \{\alpha_2 \simeq \tau_2\}) \cup \{\alpha_2 \simeq \tau_2[\alpha_1 \leftarrow \tau_1]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\{\alpha_1 \simeq \tau_1, D \vec{\tau_2}\} \subseteq W}
+        \hypo{\alpha_1 \in \mathit{ftv}(\vec{\tau_2})}
+        \hypo{\alpha_1 \lll \tau_1}
+        \infer3{C \vdash W \to (W \backslash \{D \vec{\tau_2}\}) \cup \{(D \vec{\tau_2})[\alpha_1 \leftarrow \tau_1]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{Q = D \vec{\tau} \in W}
+        \hypo{D \vec{\tau} \in C}
+        \infer2{C \vdash W \to (W \backslash \{Q\})}
+    \end{prooftree}
+\]
+\end{document}

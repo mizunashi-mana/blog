@@ -1,0 +1,26 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{C \vdash \mathrm{flat}(Q_1) \to^* W_2 \not\to {}}
+        \hypo{\forall (\alpha_2 \simeq \tau_2) \in W_2\ldotp \theta_2\alpha_2 = \theta_2\tau_2}
+        \hypo{C \Vdash \theta_2 (\bigwedge \{D \vec{\tau} \mid D \vec{\tau} \in W_2\})}
+        \infer3{\mathrm{solv}(C, Q_1) = \theta_2}
+    \end{prooftree}
+\]
+
+\end{document}
