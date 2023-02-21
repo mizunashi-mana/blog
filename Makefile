@@ -3,10 +3,12 @@ PELICAN?=poetry run pelican
 GHP_IMPORT?=poetry run ghp-import
 WEBPACK?=npx webpack
 PELICANOPTS=
+CP=cp
 
 BASEDIR=$(CURDIR)
 INPUTDIR=$(BASEDIR)/content
 OUTPUTDIR=$(BASEDIR)/output
+PUBLICDIR=$(BASEDIR)/public
 CONFFILE=$(BASEDIR)/pelicanconf.py
 PUBLISHCONF=$(BASEDIR)/publishconf.py
 CONTNET_DIST_ASSET_DIR=$(BASEDIR)/content/dist-asset
@@ -24,6 +26,7 @@ ifeq ($(RELATIVE), 1)
 	PELICANOPTS += --relative-urls
 endif
 
+.PHONY: help
 help:
 	@echo 'Makefile for a pelican Web site                                           '
 	@echo '                                                                          '
@@ -41,19 +44,28 @@ help:
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
 	@echo '                                                                          '
 
+.PHONY: js-build
 js-build:
 	$(WEBPACK)
 
-html: js-build
+.PHONY: html-pelican
+html-pelican: js-build
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 
+.PHONY: html
+html: html-pelican
+	$(CP) $(PUBLICDIR)/privacy-policy-redirect.html $(OUTPUTDIR)/pages/3-privacy-policy.html
+
+.PHONY: clean
 clean:
 	[ ! -d $(CONTENT_DIST_ASSET_DIR) ] || rm -rf $(CONTENT_DIST_ASSET_DIR)
 	[ ! -d $(OUTPUTDIR) ] || rm -rf $(OUTPUTDIR)
 
+.PHONY: regenerate
 regenerate: js-build
 	$(PELICAN) -r $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 
+.PHONY: serve
 serve:
 ifdef PORT
 	$(PELICAN) -l $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS) -p $(PORT)
@@ -61,6 +73,7 @@ else
 	$(PELICAN) -l $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 endif
 
+.PHONY: serve-global
 serve-global:
 ifdef SERVER
 	$(PELICAN) -l $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS) -p $(PORT) -b $(SERVER)
@@ -68,7 +81,7 @@ else
 	$(PELICAN) -l $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS) -p $(PORT) -b 0.0.0.0
 endif
 
-
+.PHONY: devserver
 devserver: js-build
 ifdef PORT
 	$(PELICAN) -lr $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS) -p $(PORT)
@@ -76,12 +89,15 @@ else
 	$(PELICAN) -lr $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 endif
 
-publish: js-build
+.PHONY: publish-pelican
+publish-pelican: js-build
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(PUBLISHCONF) --fatal errors $(PELICANOPTS)
 
+.PHONY: publish
+publish: publish-pelican
+	$(CP) $(PUBLICDIR)/privacy-policy-redirect.html $(OUTPUTDIR)/pages/3-privacy-policy.html
+
+.PHONY: github
 github: publish
 	$(GHP_IMPORT) -m "Generate Pelican site" -b $(GITHUB_PAGES_BRANCH) $(OUTPUTDIR)
 	git push origin $(GITHUB_PAGES_BRANCH)
-
-
-.PHONY: html help clean regenerate serve serve-global devserver stopserver publish github
