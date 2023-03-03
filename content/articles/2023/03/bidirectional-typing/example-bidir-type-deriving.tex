@@ -1,0 +1,68 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{120cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\vdots}
+        \infer1{\mathbf{B}, \mathbf{t}: \mathbf{B}\vdash (\forall \alpha\ldotp \alpha \to \alpha) \to \mathbf{B}}
+        \infer0{f: \forall \alpha\ldotp \alpha \to \alpha \in \ldots, f: \forall \alpha\ldotp \alpha \to \alpha}
+        \infer1[Var]{\ldots, f: \forall \alpha\ldotp \alpha \to \alpha\vdash f \Rightarrow \forall \alpha\ldotp \alpha \to \alpha}
+        \hypo{\vdots}
+        \infer1{\ldots\vdash \mathbf{B}}
+        \infer0{\ldots \vdash \mathbf{B} \to \mathbf{B} \preceq \mathbf{B} \to \mathbf{B}}
+        \infer2{\ldots\vdash \forall \alpha\ldotp \alpha \to \alpha \preceq \mathbf{B} \to \mathbf{B}}
+        \infer0{\mathbf{t}: \mathbf{B} \in \mathbf{B}, \mathbf{t}: \mathbf{B}, \ldots}
+        \infer1[Var]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \ldots\vdash \mathbf{t} \Rightarrow \mathbf{B}}
+        \infer0{\mathbf{B} \in \mathbf{B}, \ldots}
+        \infer1{\mathbf{B}, \ldots\vdash \mathbf{B} \leq \mathbf{B}}
+        \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \ldots\vdash \mathbf{t} \Leftarrow \mathbf{B}}
+        \infer3[App]{\mathbf{B}, \mathbf{t}: \mathbf{B}, f: \forall \alpha\ldotp \alpha \to \alpha\vdash f\; \mathbf{t} \Rightarrow \mathbf{B}}
+        \infer0{\mathbf{B} \in \mathbf{B}, \ldots}
+        \infer1{\mathbf{B}, \ldots\vdash \mathbf{B} \leq \mathbf{B}}
+        \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, f: \forall \alpha\ldotp \alpha \to \alpha\vdash f\; \mathbf{t} \Leftarrow \mathbf{B}}
+        \infer2[AnnAbsSyn]{\mathbf{B}, \mathbf{t}: \mathbf{B}\vdash \lambda (f: \forall \alpha\ldotp \alpha \to \alpha)\ldotp f\; \mathbf{t} \Rightarrow (\forall \alpha\ldotp \alpha \to \alpha) \to \mathbf{B}}
+        \infer0{\ldots\vdash (\forall \alpha\ldotp \alpha \to \alpha) \to \mathbf{B} \preceq (\forall \alpha\ldotp \alpha \to \alpha) \to \mathbf{B}}
+        \infer0{x_2: \beta \in \ldots, x_2: \beta}
+        \infer1[Var]{\ldots, x_2: \beta\vdash x_2 \Rightarrow \beta}
+        \infer0{\beta \in \ldots, \beta, x_1: \mathbf{B}}
+        \infer1{\ldots, \beta, x_1: \mathbf{B}\vdash \beta \leq \beta}
+        \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha, \beta, x_1: \mathbf{B}\vdash x_2 \Leftarrow \beta}
+        \infer1[Abs]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha, \beta, x_1: \mathbf{B}\vdash \lambda x_2\ldotp x_2 \Leftarrow \beta \to \beta}
+        \infer1[AnnAbs]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha, \beta\vdash \lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2 \Leftarrow \mathbf{B} \to \beta \to \beta}
+        \infer1[TyAbs]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash \lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2 \Leftarrow \forall \beta\ldotp \mathbf{B} \to \beta \to \beta}
+        \infer1[Ann]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta) \Rightarrow \forall \beta\ldotp \mathbf{B} \to \beta \to \beta}
+        \hypo{\vdots}
+        \infer1{\ldots \vdash \alpha}
+        \infer0{\ldots \vdash \mathbf{B} \to \alpha \to \alpha \preceq \mathbf{B} \to \alpha \to \alpha}
+        \infer2{\ldots \vdash \forall \beta\ldotp \mathbf{B} \to \beta \to \beta \preceq \mathbf{B} \to \alpha \to \alpha}
+        \infer0{\mathbf{t}: \mathbf{B} \in \mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha}
+        \infer1[Var]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash \mathbf{t} \Rightarrow \mathbf{B}}
+        \infer0{\mathbf{B} \in \mathbf{B}, \ldots}
+        \infer1{\mathbf{B}, \ldots\vdash \mathbf{B} \leq \mathbf{B}}
+        \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash \mathbf{t} \Leftarrow \mathbf{B}}
+        \infer3[App]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Rightarrow \alpha \to \alpha}
+        \infer0{\alpha \in \ldots, \alpha}
+        \infer1{\ldots, \alpha\vdash \alpha \leq \alpha}
+        \infer0{\alpha \in \ldots, \alpha}
+        \infer1{\ldots, \alpha\vdash \alpha \leq \alpha}
+        \infer2{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash \alpha \to \alpha \leq \alpha \to \alpha}
+        \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Leftarrow \alpha \to \alpha}
+        \infer1[TyAbs]{\mathbf{B}, \mathbf{t}: \mathbf{B}\vdash ((\lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Leftarrow \forall \alpha\ldotp \alpha \to \alpha}
+        \infer3[App]{\mathbf{B}, \mathbf{t}: \mathbf{B}\vdash (\lambda (f: \forall \alpha\ldotp \alpha \to \alpha)\ldotp f\; \mathbf{t})\; (((\lambda x_1\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t}) \Rightarrow \mathbf{B}}
+    \end{prooftree}
+\]
+\end{document}

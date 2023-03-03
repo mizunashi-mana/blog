@@ -1,0 +1,66 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \def\arraystretch{5}
+    \begin{array}{cc}
+        \begin{prooftree}
+            \hypo{\alpha \in \Gamma}
+            \infer1[Var]{\Gamma \vdash \alpha \leq \alpha}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \infer0{\Gamma \vdash \lambda x\ldotp x: \alpha \to \alpha}
+        \end{prooftree}
+        \\
+        \begin{prooftree}
+            \hypo{\Gamma \vdash \sigma'_1 \leq \sigma_1}
+            \hypo{\Gamma \vdash \sigma_2 \leq \sigma'_2}
+            \infer2[Arrow]{\Gamma \vdash \sigma_1 \to \sigma_2 \leq \sigma'_1 \to \sigma'_2}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\Gamma \vdash f_1: \sigma'_1 \to \sigma_1}
+            \hypo{\Gamma \vdash f_2: \sigma_2 \to \sigma'_2}
+            \infer2{\Gamma \vdash \lambda f\ldotp \lambda x\ldotp f_2\; (f\; (f_1\; x)): (\sigma_1 \to \sigma_2) \to (\sigma'_1 \to \sigma'_2)}
+        \end{prooftree}
+        \\
+        \begin{prooftree}
+            \hypo{\Gamma \vdash \tau_1}
+            \hypo{\Gamma \vdash \sigma_1[\alpha_1 \leftarrow \tau_1] \leq \sigma_2}
+            \infer2[Spec]{\Gamma \vdash \forall \alpha_1\ldotp \sigma_1 \leq \sigma_2}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\Gamma \vdash \tau_1}
+            \hypo{\Gamma \vdash f: \sigma_1[\alpha_1 \leftarrow \tau_1] \to \sigma_2}
+            \infer2{\Gamma \vdash \lambda x\ldotp f\; (x: \sigma_1[\alpha_1 \leftarrow \tau_1]): (\forall \alpha_1\ldotp \sigma_1) \to \sigma_2}
+        \end{prooftree}
+        \\
+        \begin{prooftree}
+            \hypo{\Gamma, \alpha_2 \vdash \sigma_1 \leq \sigma_2}
+            \infer1[Skol]{\Gamma \vdash \sigma_1 \leq \forall \alpha_2\ldotp \sigma_2}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\Gamma, \alpha_2 \vdash f: \sigma_1 \to \sigma_2}
+            \infer1{\Gamma \vdash \lambda x\ldotp (f\; x: \forall \alpha_2\ldotp \sigma_2): \sigma_1 \to \forall \alpha_2\ldotp \sigma_2}
+        \end{prooftree}
+    \end{array}
+\end{align*}
+
+\end{document}

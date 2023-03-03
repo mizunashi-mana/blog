@@ -1,0 +1,100 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \def\arraystretch{5}
+    \begin{array}{cc}
+        \begin{prooftree}
+            \hypo{x: \sigma \in \Gamma}
+            \infer1{\Gamma \vdash x: \sigma}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{x:\sigma \in \Gamma}
+            \infer1[Var]{\Gamma \vdash x \Rightarrow \sigma}
+        \end{prooftree}
+        \\
+        \begin{prooftree}
+            \hypo{\Gamma, x: \sigma_1 \vdash e: \sigma_2}
+            \infer1{\Gamma \vdash \lambda x\ldotp e: \sigma_1 \to \sigma_2}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\Gamma, x: \sigma_1 \vdash e \Rightarrow \sigma_2}
+            \hypo{\Gamma, x: \sigma_1 \vdash \sigma_2 \leq \sigma_2}
+            \infer2[Sub]{\Gamma, x: \sigma_1 \vdash e \Leftarrow \sigma_2}
+            \infer1[Abs]{\Gamma \vdash \lambda x\ldotp e \Leftarrow \sigma_1 \to \sigma_2}
+            \infer1[Ann]{\Gamma \vdash (\lambda x\ldotp e: \sigma_1 \to \sigma_2) \Rightarrow \sigma_1 \to \sigma_2}
+        \end{prooftree}
+        \\
+        \begin{prooftree}
+            \hypo{\Gamma, x: \sigma_1 \vdash e: \sigma_2}
+            \infer1{\Gamma \vdash \lambda (x: \sigma_1)\ldotp e: \sigma_1 \to \sigma_2}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\Gamma, x: \sigma_1 \vdash e \Rightarrow \sigma_2}
+            \hypo{\Gamma, x: \sigma_1 \vdash \sigma_2 \leq \sigma_2}
+            \infer2[Sub]{\Gamma, x: \sigma_1 \vdash e \Leftarrow \sigma_2}
+            \infer1[AnnAbs]{\Gamma \vdash \lambda x: \sigma_1\ldotp e \Leftarrow \sigma_1 \to \sigma_2}
+            \infer1[Ann]{\Gamma \vdash (\lambda (x: \sigma_1)\ldotp e: \sigma_1 \to \sigma_2) \Rightarrow \sigma_1 \to \sigma_2}
+        \end{prooftree}
+        \\
+        \begin{prooftree}
+            \hypo{\Gamma \vdash e_1: \sigma_2 \to \sigma}
+            \hypo{\Gamma \vdash e_2: \sigma_2}
+            \infer2{\Gamma \vdash e_1\; e_2: \sigma}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\Gamma \vdash e_1 \Rightarrow \sigma_2 \to \sigma}
+            \hypo{\Gamma \vdash \sigma_2 \to \sigma \preceq \sigma_2 \to \sigma}
+            \hypo{\Gamma \vdash e_2 \Rightarrow \sigma_2}
+            \infer0{\Gamma \vdash \sigma_2 \leq \sigma_2}
+            \infer2[Sub]{\Gamma \vdash e_2 \Leftarrow \sigma_2}
+            \infer3[App]{\Gamma \vdash e_1\; e_2 \Rightarrow \sigma}
+        \end{prooftree}
+        \\
+        \begin{prooftree}
+            \hypo{\Gamma, \alpha \vdash e: \sigma}
+            \infer1{\Gamma \vdash e: \forall \alpha\ldotp \sigma}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\Gamma, \alpha \vdash e \Rightarrow \sigma}
+            \hypo{\Gamma, \alpha \vdash \sigma \leq \sigma}
+            \infer2[Sub]{\Gamma, \alpha \vdash e \Leftarrow \sigma}
+            \infer1[TyAbs]{\Gamma \vdash e \Leftarrow \forall \alpha\ldotp \sigma}
+            \infer1[Ann]{\Gamma \vdash (e: \forall \alpha\ldotp \sigma) \Rightarrow \forall \alpha\ldotp \sigma}
+        \end{prooftree}
+        \\
+        \begin{prooftree}
+            \hypo{\Gamma \vdash e: \forall \alpha\ldotp \sigma}
+            \hypo{\Gamma \vdash \tau}
+            \infer2{\Gamma \vdash e: \sigma[\alpha \leftarrow \tau]}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\Gamma \vdash e \Rightarrow \forall \alpha\ldotp \sigma}
+            \hypo{\Gamma \vdash \sigma[\alpha \leftarrow \tau] \leq \sigma[\alpha \leftarrow \tau]}
+            \infer1{\Gamma \vdash \forall \alpha\ldotp \sigma \leq \sigma[\alpha \leftarrow \tau]}
+            \infer2[Sub]{\Gamma \vdash e \Leftarrow \sigma[\alpha \leftarrow \tau]}
+            \infer1[Ann]{\Gamma \vdash (e: \sigma[\alpha \leftarrow \tau]) \Rightarrow \sigma[\alpha \leftarrow \tau]}
+        \end{prooftree}
+    \end{array}
+\end{align*}
+\end{document}

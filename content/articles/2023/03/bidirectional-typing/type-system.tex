@@ -1,0 +1,86 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\alpha \in \Gamma}
+        \infer1{\Gamma \vdash \alpha}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \sigma_1}
+        \hypo{\Gamma \vdash \sigma_2}
+        \infer2{\Gamma \vdash \sigma_1 \to \sigma_2}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma, \alpha \vdash \sigma}
+        \infer1{\Gamma \vdash \forall \alpha\ldotp \sigma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{x:\sigma \in \Gamma}
+        \infer1{\Gamma \vdash x:\sigma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, x: \sigma_1 \vdash e: \sigma_2}
+        \infer1{\Gamma \vdash \lambda x\ldotp e: \sigma_1 \to \sigma_2}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, x: \sigma_1 \vdash e: \sigma_2}
+        \infer1{\Gamma \vdash \lambda (x: \sigma_1)\ldotp e: \sigma_1 \to \sigma_2}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e_1: \sigma_2 \to \sigma}
+        \hypo{\Gamma \vdash e_2: \sigma_2}
+        \infer2{\Gamma \vdash e_1\; e_2: \sigma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e: \sigma}
+        \infer1{\Gamma \vdash (e: \sigma): \sigma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, \alpha \vdash e: \sigma}
+        \infer1{\Gamma \vdash e: \forall \alpha\ldotp \sigma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e: \forall \alpha\ldotp \sigma}
+        \hypo{\Gamma \vdash \tau}
+        \infer2{\Gamma \vdash e: \sigma[\alpha \leftarrow \tau]}
+    \end{prooftree}
+\]
+\end{document}
