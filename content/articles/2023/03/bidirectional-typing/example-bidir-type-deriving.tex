@@ -42,9 +42,9 @@
         \infer1{\ldots, \beta, x_1: \mathbf{B}\vdash \beta \leq \beta}
         \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha, \beta, x_1: \mathbf{B}\vdash x_2 \Leftarrow \beta}
         \infer1[Abs]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha, \beta, x_1: \mathbf{B}\vdash \lambda x_2\ldotp x_2 \Leftarrow \beta \to \beta}
-        \infer1[AnnAbs]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha, \beta\vdash \lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2 \Leftarrow \mathbf{B} \to \beta \to \beta}
-        \infer1[TyAbs]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash \lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2 \Leftarrow \forall \beta\ldotp \mathbf{B} \to \beta \to \beta}
-        \infer1[Ann]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta) \Rightarrow \forall \beta\ldotp \mathbf{B} \to \beta \to \beta}
+        \infer1[Abs]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha, \beta\vdash \lambda x_1\ldotp \lambda x_2\ldotp x_2 \Leftarrow \mathbf{B} \to \beta \to \beta}
+        \infer1[TyAbs]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash \lambda x_1\ldotp \lambda x_2\ldotp x_2 \Leftarrow \forall \beta\ldotp \mathbf{B} \to \beta \to \beta}
+        \infer1[Ann]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda x_1\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta) \Rightarrow \forall \beta\ldotp \mathbf{B} \to \beta \to \beta}
         \hypo{\vdots}
         \infer1{\ldots \vdash \alpha}
         \infer0{\ldots \vdash \mathbf{B} \to \alpha \to \alpha \preceq \mathbf{B} \to \alpha \to \alpha}
@@ -54,14 +54,14 @@
         \infer0{\mathbf{B} \in \mathbf{B}, \ldots}
         \infer1{\mathbf{B}, \ldots\vdash \mathbf{B} \leq \mathbf{B}}
         \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash \mathbf{t} \Leftarrow \mathbf{B}}
-        \infer3[App]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Rightarrow \alpha \to \alpha}
+        \infer3[App]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda x_1\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Rightarrow \alpha \to \alpha}
         \infer0{\alpha \in \ldots, \alpha}
         \infer1{\ldots, \alpha\vdash \alpha \leq \alpha}
         \infer0{\alpha \in \ldots, \alpha}
         \infer1{\ldots, \alpha\vdash \alpha \leq \alpha}
         \infer2{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash \alpha \to \alpha \leq \alpha \to \alpha}
-        \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Leftarrow \alpha \to \alpha}
-        \infer1[TyAbs]{\mathbf{B}, \mathbf{t}: \mathbf{B}\vdash ((\lambda (x_1: \mathbf{B})\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Leftarrow \forall \alpha\ldotp \alpha \to \alpha}
+        \infer2[Sub]{\mathbf{B}, \mathbf{t}: \mathbf{B}, \alpha\vdash ((\lambda x_1\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Leftarrow \alpha \to \alpha}
+        \infer1[TyAbs]{\mathbf{B}, \mathbf{t}: \mathbf{B}\vdash ((\lambda x_1\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t} \Leftarrow \forall \alpha\ldotp \alpha \to \alpha}
         \infer3[App]{\mathbf{B}, \mathbf{t}: \mathbf{B}\vdash (\lambda (f: \forall \alpha\ldotp \alpha \to \alpha)\ldotp f\; \mathbf{t})\; (((\lambda x_1\ldotp \lambda x_2\ldotp x_2): \forall \beta\ldotp \mathbf{B} \to \beta \to \beta)\; \mathbf{t}) \Rightarrow \mathbf{B}}
     \end{prooftree}
 \]
