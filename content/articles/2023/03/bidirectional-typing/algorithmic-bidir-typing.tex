@@ -1,0 +1,83 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e \Rightarrow \sigma_1 \mid \Theta}
+        \hypo{\Theta \vdash [\Theta]\sigma_1 \leq [\Theta]\sigma_2 \mid \Delta}
+        \infer2[Sub]{\Gamma \vdash e \Leftarrow \sigma_2 \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{x: \sigma \in \Gamma}
+        \infer1[Var]{\Gamma \vdash x \Rightarrow \sigma \mid \Gamma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e \Leftarrow \sigma \mid \Delta}
+        \infer1[Ann]{\Gamma \vdash (e: \sigma) \Rightarrow \sigma \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, \alpha \vdash e \Leftarrow \sigma \mid \Delta, \alpha, \Theta}
+        \infer1[TyAbs]{\Gamma \vdash e \Leftarrow \forall \alpha\ldotp \sigma \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, x: \sigma_1 \vdash e \Leftarrow \sigma_2 \mid \Delta, x:\sigma_1, \Theta}
+        \infer1[Abs]{\Gamma \vdash \lambda x\ldotp e \Leftarrow \sigma_1 \to \sigma_2 \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, \hat{\alpha_1}, \hat{\alpha_2}, x: \hat{\alpha_1} \vdash e \Leftarrow \hat{\alpha_2} \mid \Delta, x: \hat{\alpha_1}, \Theta}
+        \infer1[AbsSyn]{\Gamma \vdash \lambda x\ldotp e \Rightarrow \hat{\alpha_1} \to \hat{\alpha_2} \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, x: \sigma_1 \vdash e \Leftarrow \sigma_2 \mid \Delta, x: \sigma_1, \Theta}
+        \infer1[AnnAbs]{\Gamma \vdash \lambda (x: \sigma_1)\ldotp e \Leftarrow \sigma_1 \to \sigma_2 \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, \hat{\alpha_2}, x: \sigma_1 \vdash e \Leftarrow \hat{\alpha_2} \mid \Delta, x: \sigma_1, \Theta}
+        \infer1[AnnAbsSyn]{\Gamma \vdash \lambda x: \sigma_1\ldotp e \Rightarrow \sigma_1 \to \hat{\alpha_2} \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e_1 \Rightarrow \sigma_1 \mid \Theta_1}
+        \hypo{\Theta_1 \vdash [\Theta_1]\sigma_1 \preceq \sigma_2 \to \sigma \mid \Theta_2}
+        \hypo{\Theta_2 \vdash e_2 \Leftarrow [\Theta_2]\sigma_2 \mid \Delta}
+        \infer3[App]{\Gamma \vdash e_1\; e_2 \Rightarrow \sigma \mid \Delta}
+    \end{prooftree}
+\]
+\end{document}

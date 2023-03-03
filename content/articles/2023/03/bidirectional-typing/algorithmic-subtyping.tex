@@ -1,0 +1,136 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\alpha \in \Gamma}
+        \infer1[Var]{\Gamma \vdash \alpha \leq \alpha \mid \Gamma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\hat{\alpha} \in \Gamma}
+        \infer1[HatVar]{\Gamma \vdash \hat{\alpha} \leq \hat{\alpha} \mid \Gamma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \sigma_1 \leq \sigma_1' \mid \Theta}
+        \hypo{\Theta \vdash [\Theta]\sigma_2 \leq [\Theta]\sigma_2' \mid \Delta}
+        \infer2[Arrow]{\Gamma \vdash \sigma_1 \to \sigma_2 \leq \sigma_1' \to \sigma_2' \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, \alpha_1 \mapsto \hat{\alpha_1} \vdash \sigma_1[\alpha_1 \leftarrow \hat{\alpha_1}] \leq \sigma_2 \mid \Delta, \alpha_1 \mapsto \hat{\alpha_1}, \Theta}
+        \infer1[Spec]{\Gamma \vdash \forall \alpha_1\ldotp \sigma_1 \leq \sigma_2 \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, \alpha_2 \vdash \sigma_1 \leq \sigma_2 \mid \Delta, \alpha_2, \Theta}
+        \infer1[Skol]{\Gamma \vdash \sigma_1 \leq \forall \alpha_2\ldotp \sigma_2 \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\hat{\alpha_1} \not\in \mathit{ftv}(\sigma_2)}
+        \hypo{\hat{\alpha_1} \in \Gamma}
+        \hypo{\Gamma \vdash \hat{\alpha_1} \simeq \sigma_2 \mid \Delta}
+        \infer3[UnifyLeft]{\Gamma \vdash \hat{\alpha_1} \leq \sigma_2 \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\hat{\alpha_2} \not\in \mathit{ftv}(\sigma_1)}
+        \hypo{\hat{\alpha_2} \in \Gamma}
+        \hypo{\Gamma \vdash \sigma_1 \simeq \hat{\alpha_2} \mid \Delta}
+        \infer3[UnifyRight]{\Gamma \vdash \sigma_1 \leq \hat{\alpha_2} \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma_1 \vdash \tau_2}
+        \infer1{\Gamma_1, \hat{\alpha_1}, \Gamma_2 \vdash \hat{\alpha_1} \simeq \tau_2 \mid \Gamma_1, \hat{\alpha_1} = \tau_2, \Gamma_2}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma_1 \vdash \tau_2}
+        \infer1{\Gamma_1, \hat{\alpha_1}, \Gamma_2 \vdash \tau_2 \simeq \hat{\alpha_1} \mid \Gamma_1, \hat{\alpha_1} = \tau_2, \Gamma_2}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma_1 \vdash \tau_2}
+        \infer1{\Gamma_1, \hat{\alpha_1}, \Gamma_2 \vdash \hat{\alpha_1} \simeq \tau_2 \mid \Gamma_1, \hat{\alpha_1} = \tau_2, \Gamma_2}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \infer0{\Gamma_1, \hat{\alpha_1}, \Gamma_2, \hat{\alpha_2}, \Gamma_3 \vdash \hat{\alpha_1} \simeq \hat{\alpha_2} \mid \Gamma_1, \hat{\alpha_1}, \Gamma_2, \hat{\alpha_2} = \hat{\alpha_1}, \Gamma_3}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \infer0{\Gamma_1, \hat{\alpha_1}, \Gamma_2, \hat{\alpha_2}, \Gamma_3 \vdash \hat{\alpha_2} \simeq \hat{\alpha_1} \mid \Gamma_1, \hat{\alpha_1}, \Gamma_2, \hat{\alpha_2} = \hat{\alpha_1}, \Gamma_3}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma_1, \hat{\alpha_3}, \hat{\alpha_2}, \hat{\alpha_1} = \hat{\alpha_2} \to \hat{\alpha_3}, \Gamma_2 \vdash \hat{\alpha_2} \simeq \sigma_2 \mid \Theta}
+        \hypo{\Theta \vdash [\Theta]\sigma_3 \simeq \hat{\alpha_3} \mid \Delta}
+        \infer2{\Gamma_1, \hat{\alpha_1}, \Gamma_2 \vdash \hat{\alpha_1} \simeq \sigma_2 \to \sigma_3 \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma_1, \hat{\alpha_3}, \hat{\alpha_2}, \hat{\alpha_1} = \hat{\alpha_2} \to \hat{\alpha_3}, \Gamma_2 \vdash \sigma_2 \simeq \hat{\alpha_2} \mid \Theta}
+        \hypo{\Theta \vdash \hat{\alpha_3} \simeq [\Theta]\sigma_3 \mid \Delta}
+        \infer2{\Gamma_1, \hat{\alpha_1}, \Gamma_2 \vdash \sigma_2 \to \sigma_3 \simeq \hat{\alpha_1} \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\hat{\alpha_1} \in \Gamma}
+        \hypo{\Gamma, \alpha_2 \vdash \hat{\alpha_1} \simeq \sigma_2 \mid \Delta, \alpha_2, \Theta}
+        \infer2{\Gamma \vdash \hat{\alpha_1} \simeq \forall \alpha_2\ldotp \sigma_2 \mid \Delta}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\hat{\alpha_1} \in \Gamma}
+        \hypo{\Gamma, \alpha_2 \mapsto \hat{\alpha_2}, \hat{\alpha_2} \vdash \sigma_2[\alpha_2 \leftarrow \hat{\alpha_2}] \simeq \hat{\alpha_1} \mid \Delta, \alpha_2 \mapsto \hat{\alpha_2}, \Theta}
+        \infer2{\Gamma \vdash \forall \alpha_2\ldotp \sigma_2 \simeq \hat{\alpha_1} \mid \Delta}
+    \end{prooftree}
+\]
+\end{document}

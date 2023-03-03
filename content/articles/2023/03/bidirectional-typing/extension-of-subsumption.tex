@@ -1,0 +1,33 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+\usepackage{color}
+
+\setlength{\paperwidth}{40cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \def\arraystretch{5}
+    \begin{array}{cc}
+        \begin{prooftree}
+            \hypo{\alpha \not\in \mathit{ftv}(\sigma_1)}
+            \infer1[Shift]{\Gamma \vdash \forall \alpha\ldotp \sigma_1 \to \sigma_2 \preceq \sigma_1 \to \forall \alpha\ldotp \sigma_2}
+        \end{prooftree}
+        &
+        \begin{prooftree}
+            \hypo{\alpha \not\in \mathit{ftv}(\sigma_1)}
+            \infer1{\Gamma \vdash \lambda (f: \forall \alpha\ldotp \sigma_1 \to \sigma_2)\ldotp \lambda x\ldotp (f\; x: \forall \alpha\ldotp \sigma_2): (\forall \alpha\ldotp \sigma_1 \to \sigma_2) \to \sigma_1 \to \forall \alpha\ldotp \sigma_2}
+        \end{prooftree}
+    \end{array}
+\end{align*}
+
+\end{document}
