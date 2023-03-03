@@ -98,6 +98,12 @@
 
 \[
     \begin{prooftree}
+        \infer0{\Gamma_1, \hat{\alpha_1}, \Gamma_2, \hat{\alpha_2}, \Gamma_3 \vdash \hat{\alpha_2} \simeq \hat{\alpha_1} \mid \Gamma_1, \hat{\alpha_1}, \Gamma_2, \hat{\alpha_2} = \hat{\alpha_1}, \Gamma_3}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
         \hypo{\Gamma_1, \hat{\alpha_3}, \hat{\alpha_2}, \hat{\alpha_1} = \hat{\alpha_2} \to \hat{\alpha_3}, \Gamma_2 \vdash \hat{\alpha_2} \simeq \sigma_2 \mid \Theta}
         \hypo{\Theta \vdash [\Theta]\sigma_3 \simeq \hat{\alpha_3} \mid \Delta}
         \infer2{\Gamma_1, \hat{\alpha_1}, \Gamma_2 \vdash \hat{\alpha_1} \simeq \sigma_2 \to \sigma_3 \mid \Delta}
