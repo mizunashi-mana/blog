@@ -45,6 +45,12 @@ export function addShareButtons(metadata: {
                 faClassName: "fas fa-code",
             },
             {
+                name: 'mastodon',
+                title: 'Share to Mastodon',
+                href: `https://mizunashi-mana.github.io/mastodon-front-gateway/share/?text=${metadata.title}&url=${metadata.url}`,
+                faClassName: "fab fa-mastodon",
+            },
+            {
                 name: 'twitter',
                 title: 'Tweet share to Twitter',
                 href: `https://twitter.com/intent/tweet?text=${metadata.title}&tw_p=tweetbutton&url=${metadata.url}`,
