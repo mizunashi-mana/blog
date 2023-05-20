@@ -75,7 +75,7 @@ SOCIAL = (
   ('github', 'https://github.com/mizunashi-mana'),
   ('gitlab', 'https://gitlab.com/mizunashi-mana'),
   ('twitter', 'https://twitter.com/Mizunashi_Mana'),
-  ('mastodon', 'https://social.vivaldi.net/@mizunashi'),
+  ('mastodon', 'https://mstdn.mizunashi.work/@mizunashi_mana'),
   ('rss', '/' + FEED_ALL_RSS),
 )
 
