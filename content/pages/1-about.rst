@@ -9,9 +9,8 @@
 当サイトについての誤りの指摘や意見などがありましたら、以下の方法で気軽に連絡ください。
 
 * GitHub の `Issue <https://github.com/mizunashi-mana/blog/issues>`_ で報告
-* Mastodon の `リプライ <https://social.vivaldi.net/@mizunashi>`_ で報告
-
-なお、メール (axnnoindexr11@gmail.com) でも受け付けています。
+* `contact@mizunashi.work <mailto:contact@mizunashi.work>`_ からメールで報告
+* `@mizunashi_mana@mstdn.mizunashi.work <https://mstdn.mizunashi.work/@mizunashi_mana>`_ 宛に Mastodon / Misskey などからリプライで報告
 
 免責事項
 ----------
