@@ -71,11 +71,11 @@ LINKS = (
 
 # Social widget
 SOCIAL = (
-  ('envelope', 'mailto:axnnoindexr11@gmail.com'),
+  ('envelope', 'mailto:contact@mizunashi.work'),
   ('github', 'https://github.com/mizunashi-mana'),
   ('gitlab', 'https://gitlab.com/mizunashi-mana'),
-  ('twitter', 'https://twitter.com/Mizunashi_Mana'),
   ('mastodon', 'https://mstdn.mizunashi.work/@mizunashi_mana'),
+  ('twitter', 'https://twitter.com/Mizunashi_Mana'),
   ('rss', '/' + FEED_ALL_RSS),
 )
 
