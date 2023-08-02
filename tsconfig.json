@@ -9,6 +9,8 @@
         "moduleResolution": "node",
     },
     "exclude": [
+        "output",
+        "content/dist-asset",
         "plugins/official"
     ]
 }

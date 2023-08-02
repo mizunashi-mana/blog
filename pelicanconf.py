@@ -116,12 +116,15 @@ PLUGINS = [
   'filetime_from_git',
   'sitemap',
   'related_posts',
-  # 'search', # It's too heavy and make bad performance.
+  'pelican.plugins.search',
 ]
 
 # For search plugin
-STORK_VERSION = '1.5.0'
-SEARCH_HTML_SELECTOR = "main article"
+STORK_VERSION = '1.6.0'
+SEARCH_INPUT_OPTIONS = {
+    "url_prefix": SITEURL,
+    "html_selector": "main article"
+}
 
 RELATIVE_URLS = True
 
