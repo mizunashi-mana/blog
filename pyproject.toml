@@ -1,13 +1,12 @@
 [tool.poetry]
 name = "blog"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
-authors = ["Mizunashi Mana <mizunashi-mana@noreply.git>"]
+authors = ["Mizunashi Mana <contact@mizunashi.work>"]
 
 [tool.poetry.dependencies]
 python = ">= 3.7,<4"
 pelican = "*"
-ghp-import = "*"
 pillow = "*"
 gitpython = "*"
 beautifulsoup4 = "*"

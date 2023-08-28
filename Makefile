@@ -1,6 +1,5 @@
 PY?=python3
 PELICAN?=poetry run pelican
-GHP_IMPORT?=poetry run ghp-import
 WEBPACK?=npx webpack
 PELICANOPTS=
 CP=cp
@@ -12,8 +11,6 @@ PUBLICDIR=$(BASEDIR)/public
 CONFFILE=$(BASEDIR)/pelicanconf.py
 PUBLISHCONF=$(BASEDIR)/publishconf.py
 CONTNET_DIST_ASSET_DIR=$(BASEDIR)/content/dist-asset
-
-GITHUB_PAGES_BRANCH=gh-pages
 
 
 DEBUG ?= 0
@@ -95,9 +92,3 @@ publish-pelican: js-build
 
 .PHONY: publish
 publish: publish-pelican
-	$(CP) $(PUBLICDIR)/privacy-policy-redirect.html $(OUTPUTDIR)/pages/3-privacy-policy.html
-
-.PHONY: github
-github: publish
-	$(GHP_IMPORT) -m "Generate Pelican site" -b $(GITHUB_PAGES_BRANCH) $(OUTPUTDIR)
-	git push origin $(GITHUB_PAGES_BRANCH)
