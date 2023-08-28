@@ -8,6 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
+
+    permissions:
+      pages: write
+      id-token: write
+
     steps:
     - name: Enable ja_JP.UTF-8 locale
       run: |
@@ -58,15 +63,14 @@ jobs:
     - name: Install npm dependencies
       run: npm ci
 
-    - name: Set git config
-      run: |
-        git config user.name 'release-bot'
-        git config user.email 'release-bot@users.noreply.github.com'
+    - name: Build
+      run: make publish
 
-    - name: Create gh-pages branch
-      run: |
-        git fetch origin gh-pages
-        git branch --track gh-pages origin/gh-pages
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: |
+          output/
 
     - name: Deploy to GitHub Pages
-      run: make github
+      uses: actions/deploy-pages@v2
