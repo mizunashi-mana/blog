@@ -5,7 +5,7 @@ description = ""
 authors = ["Mizunashi Mana <contact@mizunashi.work>"]
 
 [tool.poetry.dependencies]
-python = ">= 3.7,<4"
+python = ">= 3.8,<4"
 pelican = "*"
 pillow = "*"
 gitpython = "*"
