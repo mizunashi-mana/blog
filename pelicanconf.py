@@ -74,8 +74,7 @@ SOCIAL = (
   ('envelope', 'mailto:contact@mizunashi.work'),
   ('github', 'https://github.com/mizunashi-mana'),
   ('gitlab', 'https://gitlab.com/mizunashi-mana'),
-  ('mastodon', 'https://mstdn.mizunashi.work/@mizunashi_mana'),
-  ('twitter', 'https://twitter.com/Mizunashi_Mana'),
+  ('mastodon', 'https://ff.mizunashi.work/@me'),
   ('rss', '/' + FEED_ALL_RSS),
 )
 
