@@ -89,6 +89,7 @@ endif
 .PHONY: publish-pelican
 publish-pelican: js-build
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(PUBLISHCONF) --fatal errors $(PELICANOPTS)
+	rm $(OUTPUTDIR)/search.toml
 
 .PHONY: publish
 publish: publish-pelican

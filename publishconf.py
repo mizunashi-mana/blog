@@ -43,3 +43,5 @@ SOCIAL = add_site_url_to_items(SOCIAL)
 MENUITEMS = add_site_url_to_items(MENUITEMS)
 
 GOOGLE_GLOBAL_SITE_TAG = "G-YZTJG0VBE4"
+
+STORK_INPUT_OPTIONS['url_prefix'] = SITEURL
