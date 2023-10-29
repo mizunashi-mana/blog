@@ -7,7 +7,7 @@ SITENAME = '続くといいな日記'
 SITEDESCRIPTION = '{AUTHOR}\'s Blog'.format(AUTHOR=AUTHOR)
 SITESUBTITLE = SITENAME
 
-SITEURL = 'localhost:8000'
+SITEURL = 'http://localhost:8000'
 ARTICLE_URL = 'posts/{date:%Y}/{date:%m}/{slug}/'
 ARTICLE_SAVE_AS = 'posts/{date:%Y}/{date:%m}/{slug}/index.html'
 MONTH_ARCHIVE_URL = 'posts/{date:%Y}/{date:%m}/'
