@@ -22,13 +22,13 @@ PAGES_SORT_ATTRIBUTE = 'source_path'
 THEME = './themes/Flex'
 PATH = 'content'
 STATIC_PATHS = [
-  'asset',
-  'dist-asset',
-  'articles', # mixed content
+    'asset',
+    'dist-asset',
+    'articles', # mixed content
 ]
 ARTICLE_PATHS = ['articles']
 READERS = {
-  'html': None
+    'html': None
 }
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
@@ -40,9 +40,9 @@ ROBOTS = 'index, follow'
 SUMMARY_MAX_LENGTH = 50
 
 CC_LICENSE = {
-  'name': 'Creative Commons Attribution-ShareAlike',
-  'version': '4.0',
-  'slug': 'by-sa',
+    'name': 'Creative Commons Attribution-ShareAlike',
+    'version': '4.0',
+    'slug': 'by-sa',
 }
 COPYRIGHT_YEAR = 2022
 
@@ -65,71 +65,71 @@ GITHUB_CORNER_URL = GITHUB_URL
 
 # Blogroll
 LINKS = (
-  ('著者について', 'https://mizunashi-mana.github.io/profile'),
-  ('プライバシーポリシー', 'https://mizunashi-mana.github.io/profile/privacy-policy.html'),
+    ('著者について', 'https://mizunashi-mana.github.io/profile'),
+    ('プライバシーポリシー', 'https://mizunashi-mana.github.io/profile/privacy-policy.html'),
 )
 
 # Social widget
 SOCIAL = (
-  ('envelope', 'mailto:contact@mizunashi.work'),
-  ('github', 'https://github.com/mizunashi-mana'),
-  ('gitlab', 'https://gitlab.com/mizunashi-mana'),
-  ('mastodon', 'https://ff.mizunashi.work/@me'),
-  ('rss', '/' + FEED_ALL_RSS),
+    ('envelope', 'mailto:contact@mizunashi.work'),
+    ('github', 'https://github.com/mizunashi-mana'),
+    ('gitlab', 'https://gitlab.com/mizunashi-mana'),
+    ('mastodon', 'https://ff.mizunashi.work/@me'),
+    ('rss', '/' + FEED_ALL_RSS),
 )
 
 MENUITEMS = (
-  ('Archives', '/archives.html'),
-  ('Categories', '/categories.html'),
-  ('Tags', '/tags.html'),
+    ('Archives', '/archives.html'),
+    ('Categories', '/categories.html'),
+    ('Tags', '/tags.html'),
 )
 
 SITEMAP = {
-  'format': 'xml',
-  'priorities': {
-    'articles': 0.7,
-    'indexes': 0.5,
-    'pages': 0.6,
-  },
-  'changefreqs': {
-    'articles': 'monthly',
-    'indexes': 'daily',
-    'pages': 'monthly',
-  }
+    'format': 'xml',
+    'priorities': {
+        'articles': 0.7,
+        'indexes': 0.5,
+        'pages': 0.6,
+    },
+    'changefreqs': {
+        'articles': 'monthly',
+        'indexes': 'daily',
+        'pages': 'monthly',
+    }
 }
 
 DEFAULT_PAGINATION = 10
 
 PYGMENTS_RST_OPTIONS = {
-  'linenos': 'table',
+    'linenos': 'table',
 }
 
 PLUGIN_PATHS = [
-  'plugins/official',
-  'plugins/custom',
+    'plugins/official',
+    'plugins/custom',
 ]
 PLUGINS = [
-  'headerid',
-  'embed_customjs',
-  'katex_math_render',
-  'filetime_from_git',
-  'sitemap',
-  'related_posts',
-  'pelican.plugins.search',
+    'headerid',
+    'embed_customjs',
+    'katex_math_render',
+    'filetime_from_git',
+    'sitemap',
+    'related_posts',
+    'pelican.plugins.search',
 ]
 
 # For search plugin
 STORK_VERSION = '1.6.0'
-SEARCH_INPUT_OPTIONS = {
-    "url_prefix": SITEURL,
-    "html_selector": "main article"
+STORK_INPUT_OPTIONS = {
+    'url_prefix': SITEURL,
+    'html_selector': 'main article',
 }
 
 RELATIVE_URLS = True
 
 DOCUTILS_SETTINGS = {
-  'auto_id_prefix': 'auto-id-',
-  'math_output': 'LaTeX',
+    'auto_id_prefix': 'auto-id-',
+    'math_output': 'LaTeX',
 }
 
 HEADERID_LINK_CHAR = '<i class="fas fa-link anchor-link"></i>'
