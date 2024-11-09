@@ -147,7 +147,7 @@ Debian 12 を ISO インストーラを使ってインストールし、SSH で�
         }
     }
 
-を ``/etc/nftables.conf`` に書き込んで (SSH ポート番号 22 の部分は変更している場合は正しいポートに直す必要がある)、 ``systemctl restart nftables`` すればいいだろう。若干、icmpv6 パケット全許可だったりするのが気になるが、ひとまずはこれでいいんじゃないだろうか。Ubuntu の場合は ufw とか使うのが普通だと思うので、無理に
+を ``/etc/nftables.conf`` に書き込んで (SSH ポート番号 22 の部分は変更している場合は正しいポートに直す必要がある)、 ``systemctl restart nftables`` すればいいだろう。若干、icmpv6 パケット全許可だったりするのが気になるが、ひとまずはこれでいいんじゃないだろうか。Ubuntu の場合は ufw とか使うのが普通だと思うので、そっちを使うのが良さそう。
 
 またドメインの取得と設定も前提にする。僕は `Cloudflare Registrar <https://www.cloudflare.com/ja-jp/products/registrar/>`_ 経由でドメインを買い、そのサブドメインに A レコードと AAA レコードを生やしている。まこの辺はいい感じのサービス見つけるなり、上級者向けだが自分で DNS サーバ立てるなりしてくれ。
 
