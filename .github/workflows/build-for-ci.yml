@@ -18,17 +18,17 @@ jobs:
         sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
         DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
         fetch-depth: 0
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: 3.11
-    - uses: actions/setup-node@v3
+        python-version: 3.12
+    - uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
 
     - name: Install stork
       run: |
@@ -36,7 +36,7 @@ jobs:
         sudo chmod +x /usr/local/bin/stork
 
     - name: Cache poetry
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         key: ${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-v1
         path: |
@@ -44,7 +44,7 @@ jobs:
           .venv
 
     - name: Cache npm
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}-v1
         path: |
