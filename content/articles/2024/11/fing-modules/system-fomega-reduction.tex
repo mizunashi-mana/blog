@@ -1,0 +1,59 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \infer0{(\lambda x: \tau\ldotp e)\; v \Rightarrow e[x \leftarrow v]}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\forall i \ldotp {l_2}_i \neq l}
+        \infer1{\{\overrightarrow{l_1 = v_1}, l = v, \overrightarrow{l_2 = v_2}\}.l \Rightarrow v}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \infer0{(\Lambda t: \kappa\ldotp e)\; \tau \Rightarrow e[t \leftarrow \tau]}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \infer0{\mathrm{unpack}\langle t: \kappa, x: \tau\rangle = \mathrm{pack}\langle \tau_t, v\rangle_{\tau_\exists}\ldotp e \Rightarrow e[t \leftarrow \tau_t][x \leftarrow v]}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{e_1 \Rightarrow e_2}
+        \infer1{C[e_1] \Rightarrow C[e_2]}
+    \end{prooftree}
+\]
+
+
+\[
+    C
+    \Coloneqq []
+    \mid C\; e
+    \mid v\; C
+    \mid \{\overrightarrow{l_1 = v_1}, l = C, \overrightarrow{l_2 = e_2}\}
+    \mid C.l
+    \mid C\; \tau
+    \mid \mathrm{pack}\langle \tau_t, C\rangle_{\tau_\exists}
+    \mid \mathrm{unpack}\langle t: \kappa, x: \tau\rangle = C\ldotp e
+\]
+
+\end{document}

@@ -1,0 +1,77 @@
+\documentclass[12pt]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{25cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    &\mathit{pack}\langle \mathit{int}\; \mathit{int}, \{ \\
+    &\hspace{1em}\begin{array}{l}
+        l_\mathit{AbsSig} = [\exists t_1: \star\ldotp \{
+            l_\mathit{AbsT}: [= t_1: \star] \;
+            l_\mathit{SampleV}: [t_1] \;
+            l_\mathit{SampleF}: [t_1 \to t_1]
+        \}] \\
+        l_\mathit{SampleFun} = \lambda x_\mathit{ArgV}: \{\}\ldotp \mathrm{pack}\langle \mathit{int}, \\
+        \hspace{1em}\{
+            l_\mathit{AbsT} = [\mathit{int}: \star] \;
+            l_\mathit{SampleV} = [1] \;
+            l_\mathit{SampleF} = [\lambda x: \mathit{int}\ldotp x]
+            \} \\
+        \hspace{2em}\rangle_{\exists t_2: \star\ldotp \{
+            l_\mathit{AbsT}: [= t_1: \star] \;
+            l_\mathit{SampleV}: [t_1] \;
+            l_\mathit{SampleF}: [t_1 \to t_1]
+        \}} \\
+        l_\mathit{SampleArg} = \{\} \\
+        l_\mathit{SampleFunApp1} = \{
+            l_\mathit{AbsT} = [\mathit{int}: \star] \;
+            l_\mathit{SampleV} = [1] \;
+            l_\mathit{SampleF} = [\lambda x: \mathit{int}\ldotp x]
+        \} \\
+        l_\mathit{SampleFunApp2} = \{
+            l_\mathit{AbsT} = [\mathit{int}: \star] \;
+            l_\mathit{SampleV} = [1] \;
+            l_\mathit{SampleF} = [\lambda x: \mathit{int}\ldotp x]
+        \}
+    \end{array} \\
+    &\}\rangle_\tau \\
+    &\tau = \exists t_3\; t_4\ldotp \{ \\
+    &\hspace{1em}\begin{array}{l}
+        l_\mathit{AbsSig}: [= \exists t_1: \star\ldotp \{
+            l_\mathit{AbsT}: [= t_1: \star] \;
+            l_\mathit{SampleV}: [t_1] \;
+            l_\mathit{SampleF}: [t_1 \to t_1]
+        \}] \\
+        l_\mathit{SampleFun}: \{\} \to \exists t_2: \star\ldotp \{
+            l_\mathit{AbsT}: [= t_2: \star] \;
+            l_\mathit{SampleV}: [t_2] \;
+            l_\mathit{SampleF}: [t_2 \to t_2]
+        \} \\
+        l_\mathit{SampleArg}: \{\} \\
+        l_\mathit{SampleFunApp1}: \{
+            l_\mathit{AbsT}: [t_3: \star] \;
+            l_\mathit{SampleV}: [t_3] \;
+            l_\mathit{SampleF}: [t_3 \to t_3]
+        \} \\
+        l_\mathit{SampleFunApp2}: \{
+            l_\mathit{AbsT}: [t_4: \star] \;
+            l_\mathit{SampleV}: [t_4] \;
+            l_\mathit{SampleF}: [t_4 \to t_4]
+        \}
+    \end{array} \\
+    &\}
+\end{align*}
+
+\end{document}

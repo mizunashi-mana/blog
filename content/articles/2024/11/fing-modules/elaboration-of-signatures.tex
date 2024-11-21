@@ -1,0 +1,49 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash P \rightsquigarrow e: [= \Xi]}
+        \infer1{\Gamma \vdash P \rightsquigarrow \Xi}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash D \rightsquigarrow \Xi}
+        \infer1{\Gamma \vdash \{D\} \rightsquigarrow \Xi}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash S_1 \rightsquigarrow \exists \overrightarrow{t: \kappa}\ldotp \Sigma}
+        \hypo{\Gamma, \overrightarrow{t: \kappa}, x_X: \Sigma \vdash S_2 \rightsquigarrow \Xi}
+        \infer2{\Gamma \vdash (X: S_1) \to S_2 \rightsquigarrow \forall \overrightarrow{t: \kappa}\ldotp \Sigma \to \Xi}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash S \rightsquigarrow \exists \overrightarrow{t_1: \kappa_1} t: \kappa \overrightarrow{t_2: \kappa_2}\ldotp \Sigma}
+        \hypo{\Sigma.\overrightarrow{l_X} = [= t: \kappa]}
+        \hypo{\Sigma \vdash T: \kappa \rightsquigarrow \tau}
+        \infer3{\Gamma \vdash S\; \mathrm{where}\; \mathrm{type}\; \overrightarrow{X} = T \rightsquigarrow \exists \overrightarrow{t_1: \kappa_1} \overrightarrow{t_2: \kappa_2}\ldotp \Sigma[t \leftarrow \tau]}
+    \end{prooftree}
+\]
+
+\end{document}

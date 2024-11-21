@@ -1,0 +1,27 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \begin{array}{rcl}
+        v
+        &\Coloneqq &\lambda x: \tau\ldotp e \\
+        &\mid &\{\overrightarrow{l = v}\} \\
+        &\mid &\Lambda t: \kappa\ldotp e \\
+        &\mid &\mathrm{pack}\langle \tau_t, e\rangle_{\tau_\exists}
+    \end{array}
+\end{align*}
+\end{document}

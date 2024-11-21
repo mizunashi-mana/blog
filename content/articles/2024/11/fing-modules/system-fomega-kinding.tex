@@ -1,0 +1,63 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma(t) = \kappa}
+        \infer1{\Gamma \vdash t: \kappa}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_1: \star}
+        \hypo{\Gamma \vdash \tau_2: \star}
+        \infer2{\Gamma \vdash \tau_1 \to \tau_2: \star}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\overrightarrow{\Gamma \vdash \tau: \star}}
+        \infer1{\Gamma \vdash \{\overrightarrow{l: \tau}\}: \star}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa \vdash \tau: \star}
+        \infer1{\Gamma \vdash \forall t: \kappa\ldotp \tau: \star}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa \vdash \tau: \star}
+        \infer1{\Gamma \vdash \exists t: \kappa\ldotp \tau: \star}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa_1 \vdash \tau: \kappa_2}
+        \infer1{\Gamma \vdash \lambda t: \kappa_1\ldotp \tau: \kappa_1 \to \kappa_2}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_1: \kappa_2 \to \kappa}
+        \hypo{\Gamma \vdash \tau_2: \kappa_2}
+        \infer2{\Gamma \vdash \tau_1\; \tau_2: \kappa}
+    \end{prooftree}
+\]
+
+\end{document}
