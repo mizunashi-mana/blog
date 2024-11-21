@@ -1,0 +1,89 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\tau_1 \equiv_\alpha \tau_2}
+        \hypo{\Gamma \vdash \tau_1: \kappa}
+        \hypo{\Gamma \vdash \tau_2: \kappa}
+        \infer3{\Gamma \vdash \tau_1 \equiv \tau_2: \kappa}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_2 \equiv \tau_1: \kappa}
+        \infer1{\Gamma \vdash \tau_1 \equiv \tau_2: \kappa}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_1 \equiv \tau_2: \kappa}
+        \hypo{\Gamma \vdash \tau_2 \equiv \tau_3: \kappa}
+        \infer2{\Gamma \vdash \tau_1 \equiv \tau_3: \kappa}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_1 \equiv \tau_1': \star}
+        \hypo{\Gamma \vdash \tau_2 \equiv \tau_2': \star}
+        \infer2{\Gamma \vdash \tau_1 \to \tau_2 \equiv \tau_1' \to \tau_2': \star}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\forall i\ldotp {l_1}_i = {l_2}_i}
+        \hypo{\overrightarrow{\Gamma \vdash \tau_1 \equiv \tau_2: \star}}
+        \infer2{\Gamma \vdash \{\overrightarrow{l_1: \tau_1}\} \equiv \{\overrightarrow{l_2: \tau_2}\}: \star}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_1 \equiv \tau_1': \kappa_2 \to \kappa}
+        \hypo{\Gamma \vdash \tau_2 \equiv \tau_2': \kappa_2}
+        \infer2{\Gamma \vdash \tau_1\; \tau_2 \equiv \tau_1'\; \tau_2': \kappa}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa \vdash \tau_1 \equiv \tau_2: \star}
+        \infer1{\Gamma \vdash \forall t: \kappa\ldotp \tau_1 \equiv \forall t: \kappa\ldotp \tau_2: \star}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa \vdash \tau_1 \equiv \tau_2: \star}
+        \infer1{\Gamma \vdash \exists t: \kappa\ldotp \tau_1 \equiv \exists t: \kappa\ldotp \tau_2: \star}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa_t \vdash \tau_1 \equiv \tau_2: \kappa}
+        \infer1{\Gamma \vdash \lambda t: \kappa_t\ldotp \tau_1 \equiv \lambda t: \kappa_t\ldotp \tau_2: \kappa_t \to \kappa}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa_2 \vdash \tau_1: \kappa}
+        \hypo{\Gamma \vdash \tau_2: \kappa_2}
+        \infer2{\Gamma \vdash (\forall t: \kappa_2\ldotp \tau_1)\; \tau_2 \equiv \tau_1[t \leftarrow \tau_2]: \kappa}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{t \not\in \mathrm{tyfv}(\tau)}
+        \hypo{\Gamma \vdash \tau: \kappa_1 \to \kappa_2}
+        \infer2{\Gamma \vdash (\lambda t: \kappa_1\ldotp \tau t) \equiv \tau: \kappa_1 \to \kappa_2}
+    \end{prooftree}
+\]
+
+\end{document}

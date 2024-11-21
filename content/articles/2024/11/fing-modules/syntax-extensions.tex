@@ -1,0 +1,37 @@
+\documentclass[12pt]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \mathrm{let}\{B\}\ldotp T &\stackrel{\mathrm{def}}{=} \{B; \mathrm{type}\; X = T\}.X
+    \\
+    \mathrm{let}\{B\}\ldotp E &\stackrel{\mathrm{def}}{=} \{B; \mathrm{val}\; X = E\}.X
+    \\
+    \mathrm{let}\{B\}\ldotp S &\stackrel{\mathrm{def}}{=} \{B; \mathrm{sig}\; X = S\}.X
+    \\
+    \mathrm{let}\{B\}\ldotp M &\stackrel{\mathrm{def}}{=} \{B; \mathrm{module}\; X = M\}.X
+    \\
+    M_1\; M_2 &\stackrel{\mathrm{def}}{=} \mathrm{let}\{\mathrm{module}\; X_1 = M_1; \mathrm{module}\; X_2 = M_2\}\ldotp X_1\; X_2
+    \\
+    M \triangleright S &\stackrel{\mathrm{def}}{=} \mathrm{let}\{\mathrm{module}\; X = M\}\ldotp X \triangleright S
+    \\
+    M: S &\stackrel{\mathrm{def}}{=} (\mathrm{fun}\; X: S \Rightarrow X)\; M
+    \\
+    \mathrm{local}\{B\}\ldotp D &\stackrel{\mathrm{def}}{=} \mathrm{include}\;(\mathrm{let}\{B\}\ldotp \{D\})
+    \\
+    \mathrm{local}\{B\}\ldotp B_0 &\stackrel{\mathrm{def}}{=} \mathrm{include}\;(\mathrm{let}\{B\}\ldotp \{B_0\})
+\end{align*}
+\end{document}

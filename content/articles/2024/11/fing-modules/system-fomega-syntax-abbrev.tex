@@ -1,0 +1,71 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \Sigma.\overrightarrow{l} &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        (\Sigma.l_1).\overrightarrow{l_2} &(\overrightarrow{l} = l_1\; \overrightarrow{l_2}) \\
+        \Sigma &(\overrightarrow{l} = \epsilon)
+    \end{array}\right.
+    \\
+    \overrightarrow{\tau_1} \to \tau_2 &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        \tau_{1,1} \to (\overrightarrow{\tau_{1,2}} \to \tau_2) &(\overrightarrow{\tau_1} = \tau_{1,1}\; \overrightarrow{\tau_{1,2}}) \\
+        \tau_2 &(\overrightarrow{\tau_1} = \epsilon)
+    \end{array}\right.
+    \\
+    \lambda \overrightarrow{x: \tau}\ldotp e &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        \lambda x_1: \tau_1\ldotp \lambda \overrightarrow{x_2: \tau_2}\ldotp e &(\overrightarrow{x: \tau} = x_1: \tau_1\; \overrightarrow{x_2: \tau_2}) \\
+        e &(\overrightarrow{x: \tau} = \epsilon)
+    \end{array}\right.
+    \\
+    e_1\; \overrightarrow{e_2} &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        e_1\; e_{2,1}\; \overrightarrow{e_{2,2}} &(\overrightarrow{e_2} = e_{2,1}\; \overrightarrow{e_{2,2}}) \\
+        e_1 &(\overrightarrow{e_2} = \epsilon)
+    \end{array}\right.
+    \\
+    \forall \overrightarrow{t: \kappa}\ldotp e &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        \forall t_1: \kappa_1\ldotp \forall \overrightarrow{t_2: \kappa_2}\ldotp e &(\overrightarrow{t: \kappa} = t_1: \kappa_1\; \overrightarrow{t_2: \kappa_2}) \\
+        e &(\overrightarrow{t: \kappa} = \epsilon)
+    \end{array}\right.
+    \\
+    \Lambda \overrightarrow{t: \kappa}\ldotp e &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        \Lambda t_1: \kappa_1\ldotp \Lambda \overrightarrow{t_2: \kappa_2}\ldotp e &(\overrightarrow{t: \kappa} = t_1: \kappa_1\; \overrightarrow{t_2: \kappa_2}) \\
+        e &(\overrightarrow{t: \kappa} = \epsilon)
+    \end{array}\right.
+    \\
+    e\; \overrightarrow{\tau} &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        e\; \tau_1\; \overrightarrow{\tau_2} &(\overrightarrow{\tau} = \tau_1\; \overrightarrow{\tau_2}) \\
+        e &(\overrightarrow{\tau} = \epsilon)
+    \end{array}\right.
+    \\
+    \mathrm{let}\; \overrightarrow{t_1: \kappa_1 = \tau_1}\; \overrightarrow{x_2: \tau_2 = e_2}\ldotp e_2 &\stackrel{\mathrm{def}}{=} (\Lambda \overrightarrow{t_1: \kappa_1}\ldotp \lambda \overrightarrow{x_2: \tau_2}\ldotp e_2)\; \overrightarrow{\tau_1}\; \overrightarrow{e_2}
+    \\
+    \exists \overrightarrow{t: \kappa}\ldotp e &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        \exists t_1: \kappa_1\ldotp \exists \overrightarrow{t_2: \kappa_2}\ldotp e &(\overrightarrow{t: \kappa} = t_1: \kappa_1\; \overrightarrow{t_2: \kappa_2}) \\
+        e &(\overrightarrow{t: \kappa} = \epsilon)
+    \end{array}\right.
+    \\
+    \mathrm{pack}\langle \overrightarrow{\tau}, e\rangle_{\exists \overrightarrow{t: \kappa}\ldotp \tau_0} &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        \mathrm{pack}\langle \tau_1, \mathrm{pack}\langle \overrightarrow{\tau_2}, e\rangle_{\exists \overrightarrow{t_2: \kappa_2}\ldotp \tau_0[t_1 \leftarrow \tau_1]}\rangle_{\exists \overrightarrow{t: \kappa}\ldotp \tau_0} &(\overrightarrow{\tau} = \tau_1\; \overrightarrow{\tau_2}, \overrightarrow{t: \kappa} = t_1: \kappa_1\; \overrightarrow{t_2: \kappa_2}) \\
+        e &(\overrightarrow{\tau} = \epsilon, \overrightarrow{t: \kappa} = \epsilon)
+    \end{array}\right.
+    \\
+    \mathrm{unpack}\langle \overrightarrow{t: \kappa}, x: \tau\rangle = e_1\ldotp e_2 &\stackrel{\mathrm{def}}{=} \left\{\begin{array}{ll}
+        \exists t_1: \kappa_1\ldotp \exists \overrightarrow{t_2: \kappa_2}\ldotp e &(\overrightarrow{\tau} = \tau_1\; \overrightarrow{\tau_2}, \overrightarrow{t: \kappa} = t_1: \kappa_1\; \overrightarrow{t_2: \kappa_2}) \\
+        \mathrm{let}\; x: \tau = e_1\ldotp e_2 &(\overrightarrow{\tau} = \epsilon, \overrightarrow{t: \kappa} = \epsilon)
+    \end{array}\right.
+\end{align*}
+\end{document}

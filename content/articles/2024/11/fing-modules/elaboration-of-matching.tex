@@ -1,0 +1,74 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \Sigma_1 \leq \Sigma_2[\overrightarrow{t \leftarrow \tau}] \rightsquigarrow e}
+        \hypo{\overrightarrow{\Gamma \vdash \tau: \kappa}}
+        \infer2{\Gamma \vdash \Sigma_1 \leq \exists \overrightarrow{t: \kappa}\ldotp \Sigma_2 \uparrow \overrightarrow{\tau} \rightsquigarrow e}
+    \end{prooftree}
+\]
+
+$\underline{\Gamma \vdash \Xi_1 \leq \Xi_2 \rightarrow e}$
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_1 \equiv \tau_2: \kappa}
+        \infer1{\Gamma \vdash [\tau_1] \leq [\tau_2] \rightsquigarrow \lambda x: [\tau_1]\ldotp x}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_1 \equiv \tau_2: \kappa}
+        \infer1{\Gamma \vdash [= \tau_1: \kappa] \leq [= \tau_2: \kappa] \rightsquigarrow \lambda x: [= \tau_1: \kappa]\ldotp x}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \Xi_1 \leq \Xi_2 \rightsquigarrow e_1}
+        \hypo{\Gamma \vdash \Xi_2 \leq \Xi_1 \rightsquigarrow e_2}
+        \infer2{\Gamma \vdash [= \Xi_1] \leq [= \Xi_2] \rightsquigarrow \lambda x: [= \Xi_1]\ldotp [\Xi_2]}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\forall i\ldotp {l_1}_{f(i)} = {l_2}_i}
+        \hypo{\forall i\ldotp \forall j > f(i)\ldotp {l_1}_{j} \neq {l_2}_{i}}
+        \hypo{\forall i\ldotp \Gamma \vdash {\Sigma_1}_{f(i)} \leq {\Sigma_2}_i \rightsquigarrow e_i}
+        \infer3{\Gamma \vdash \{\overrightarrow{l_1: \Sigma_1}\} \leq \{\overrightarrow{l_2: \Sigma_2}\} \rightsquigarrow \lambda x: \{\overrightarrow{l_1: \Sigma_1}\}\ldotp \{\overrightarrow{l_2 = e\; (x.{l_2})}\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, \overrightarrow{t_2: \kappa_2} \vdash \Sigma_2 \leq \exists \overrightarrow{t_1: \kappa_1}\ldotp \Sigma_1 \uparrow \overrightarrow{\tau} \rightsquigarrow e_1}
+        \hypo{\Gamma, \overrightarrow{t_2: \kappa_2} \vdash \Xi_1[\overrightarrow{t_1 \leftarrow \tau}] \leq \Xi_2 \rightsquigarrow e_2}
+        \infer2{\Gamma \vdash (\forall \overrightarrow{t_1: \kappa_1}\ldotp \Sigma_1 \to \Xi_1) \leq (\forall \overrightarrow{t_2: \kappa_2}\ldotp \Sigma_2 \to \Xi_2) \rightsquigarrow \lambda x_1: (\forall \overrightarrow{t_1: \kappa_1}\ldotp \Sigma_1 \to \Xi_1)\ldotp \Lambda \overrightarrow{t_2: \kappa_2}\ldotp \lambda x_2: \Sigma_2\ldotp e_2\; (x_1\; \overrightarrow{\tau}\; (e_1\; x_2))}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, \overrightarrow{t_1: \kappa_1} \vdash \Sigma_1 \leq \exists \overrightarrow{t_2: \kappa_2}\ldotp \Sigma_2 \uparrow \overrightarrow{\tau} \rightsquigarrow e}
+        \infer1{\Gamma \vdash (\exists \overrightarrow{t_1: \kappa_1}\ldotp \Sigma_1) \leq (\exists \overrightarrow{t_2: \kappa_2}\ldotp \Sigma_2) \rightsquigarrow \lambda x_1: (\exists \overrightarrow{t_1: \kappa_1}\ldotp \Sigma_1)\ldotp \mathrm{unpack}\langle \overrightarrow{t_1: \kappa_1}, x_1': \Sigma_1\rangle = x_1\ldotp \mathrm{pack}\langle \overrightarrow{\tau}, e\; x_1'\rangle_{\exists \overrightarrow{t_2: \kappa_2}\ldotp \Sigma_2}}
+    \end{prooftree}
+\]
+
+\end{document}

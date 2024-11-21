@@ -1,0 +1,88 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau: \star}
+        \hypo{\Gamma(x) = \tau}
+        \infer2{\Gamma \vdash x: \tau}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e: \tau_1}
+        \hypo{\Gamma \vdash \tau_1 \equiv \tau: \star}
+        \infer2{\Gamma \vdash e: \tau}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash \tau_1: \star}
+        \hypo{\Gamma, x: \tau_1 \vdash e: \tau_2}
+        \infer2{\Gamma \vdash \lambda x: \tau_1\ldotp e: \tau_1 \to \tau_2}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e_1: \tau_2 \to \tau}
+        \hypo{\Gamma \vdash e_2: \tau_2}
+        \infer2{\Gamma \vdash e_1\; e_2: \tau}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\forall i\ldotp {l_1}_i = {l_2}_i}
+        \hypo{\overrightarrow{\Gamma \vdash e: \tau}}
+        \infer2{\Gamma \vdash \{\overrightarrow{l_1 = e}\}: \{\overrightarrow{l_2: \tau}\}}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e: \{\overrightarrow{l_1: \tau_1}, l: \tau, \overrightarrow{l_2: \tau_2}\}}
+        \hypo{\forall i\ldotp {l_2}_i \neq l}
+        \infer2{\Gamma \vdash e.l: \tau}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa \vdash e: \tau}
+        \infer1{\Gamma \vdash \Lambda t: \kappa\ldotp e: (\forall t: \kappa\ldotp \tau)}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e: (\forall t: \kappa\ldotp \tau_1)}
+        \hypo{\Gamma \vdash \tau: \kappa}
+        \infer2{\Gamma \vdash e\; \tau: \tau_1[t \leftarrow \tau]}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma, t: \kappa \vdash \tau: \star}
+        \hypo{\Gamma \vdash \tau_t: \kappa}
+        \hypo{\Gamma \vdash e: \tau[t \leftarrow \tau_t]}
+        \infer3{\Gamma \vdash \mathrm{pack}\langle \tau_t, e\rangle_{\exists t: \kappa\ldotp \tau}: (\exists t: \kappa\ldotp \tau)}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \hypo{\Gamma \vdash e_1: (\exists t: \kappa\ldotp \tau_1)}
+        \hypo{\Gamma, t: \kappa, x: \tau_1 \vdash e_2: \tau}
+        \infer2{\Gamma \vdash \mathrm{unpack}\langle t: \kappa, x: \tau_1\rangle = e_1\ldotp e_2: \tau}
+    \end{prooftree}
+\]
+
+\end{document}

@@ -1,0 +1,36 @@
+\documentclass[12pt]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \begin{array}{rcll}
+        \Xi
+        &\Coloneqq &\exists \overrightarrow{t: \kappa}\ldotp \Sigma &(\text{抽象シグネチャ}) \\
+        \Sigma
+        &\Coloneqq &[\tau] &(\text{無名値宣言}) \\
+        &\mid &[= \tau: \kappa] &(\text{無名型定義}) \\
+        &\mid &[= \Xi] &(\text{無名シグネチャ定義}) \\
+        &\mid &\{\overrightarrow{l: \Sigma}\} &(\text{構造化シグネチャ}) \\
+        &\mid &\forall \overrightarrow{t: \kappa}\ldotp \Sigma \to \Xi &(\text{ファンクタシグネチャ})
+    \end{array}
+\end{align*}
+
+\begin{align*}
+    [\tau] &\stackrel{\mathrm{def}}{=} \{\mathit{val}: \tau\} \\
+    [= \tau: \kappa] &\stackrel{\mathrm{def}}{=} \{\mathit{type}: \forall t: (\kappa \to \star)\ldotp t\; \tau \to t\; \tau\} \\
+    [= \Xi] &\stackrel{\mathrm{def}}{=} \{\mathit{sig}: \Xi \to \Xi\}
+\end{align*}
+\end{document}

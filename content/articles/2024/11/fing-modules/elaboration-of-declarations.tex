@@ -1,0 +1,74 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash T \rightsquigarrow \tau: \star}
+        \infer1{\Gamma \vdash \mathrm{val}\; X: T \rightsquigarrow \{l_X: [\tau]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash T \rightsquigarrow \tau: \kappa}
+        \infer1{\Gamma \vdash \mathrm{type}\; X = T \rightsquigarrow \{l_X: [= \tau: \kappa]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash K \rightsquigarrow \kappa}
+        \infer1{\Gamma \vdash \mathrm{type}\; X: K \rightsquigarrow \exists t: \kappa\ldotp \{l_X: [= t: \kappa]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash S \rightsquigarrow \exists \overrightarrow{t: \kappa}\ldotp \Sigma}
+        \infer1{\Gamma \vdash \mathrm{module}\; X: S \rightsquigarrow \exists \overrightarrow{t: \kappa}\ldotp \{l_X: \Sigma\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash S \rightsquigarrow \Xi}
+        \infer1{\Gamma \vdash \mathrm{sig}\; X = S \rightsquigarrow \{l_X: [= \Xi]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash S \rightsquigarrow \exists \overrightarrow{t: \kappa}\ldotp \{\overrightarrow{l_X: \Sigma}\}}
+        \infer1{\Gamma \vdash \mathrm{include}\; S \rightsquigarrow \exists \overrightarrow{t: \kappa}\ldotp \{\overrightarrow{l_X: \Sigma}\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \infer0{\Gamma \vdash \epsilon \rightsquigarrow \{\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash D_1 \rightsquigarrow \exists \overrightarrow{t_1: \kappa_1}\ldotp \{\overrightarrow{l_{X_1}: \Sigma_1}\}}
+        \hypo{\Gamma, \overrightarrow{t_1: \kappa_1}, \overrightarrow{x_{X_1}: \Sigma_1} \vdash D_2 \rightsquigarrow \exists \overrightarrow{t_2: \kappa_2}\ldotp \{\overrightarrow{l_{X_2}: \Sigma_2}\}}
+        \infer2{\Gamma \vdash D_1; D_2 \rightsquigarrow \exists \overrightarrow{t_1: \kappa_1} \overrightarrow{t_2: \kappa_2} \{\overrightarrow{l_{X_1}: \Sigma_1} \overrightarrow{l_{X_2}: \Sigma_2}\}}
+    \end{prooftree}
+\]
+
+\end{document}

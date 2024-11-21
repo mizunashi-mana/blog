@@ -1,0 +1,104 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{23cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash E \rightsquigarrow e: \tau}
+        \infer1{\Gamma \vdash \mathrm{val}\; X = E \rightsquigarrow \{l_X = [e]\}: \{l_X: [\tau]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash T \rightsquigarrow \tau: \kappa}
+        \infer1{\Gamma \vdash \mathrm{type}\; X = T \rightsquigarrow \{l_X = [\tau: \kappa]\}: \{l_X: [= \tau: \kappa]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash M \rightsquigarrow e: \exists \overrightarrow{t: \kappa}\ldotp \Sigma}
+        \hypo{\mathrm{NotAtomic}(\Sigma)}
+        \infer2{\Gamma \vdash \mathrm{module}\; X = M \rightsquigarrow (\mathrm{unpack}\langle \overrightarrow{t: \kappa}, x: \Sigma\rangle = e\ldotp \mathrm{pack}\langle \overrightarrow{t}, \{l_X = x\}\rangle_{\exists \overrightarrow{t: \kappa}\ldotp \Sigma}): \exists \overrightarrow{t: \kappa}\ldotp \{l_X: \Sigma\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash S \rightsquigarrow \Xi}
+        \infer1{\Gamma \vdash \mathrm{sig}\; X = S \rightsquigarrow \{l_X = [\Xi]\}: \{l_X: [= \Xi]\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash M \rightsquigarrow e: \exists \overrightarrow{t: \kappa}\ldotp \overrightarrow{l_X: \Sigma}}
+        \infer1{\Gamma \vdash \mathrm{include}\; M \rightsquigarrow e: \exists \overrightarrow{t: \kappa}\ldotp \overrightarrow{l_X: \Sigma}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \infer0{\Gamma \vdash \epsilon \rightsquigarrow \{\}: \{\}}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash B_1 \rightsquigarrow e_1: \exists \overrightarrow{t_1: \kappa_1}\ldotp \Sigma_1}
+        \hypo{\Gamma, \overrightarrow{t_1: \kappa_1}, \overrightarrow{x_{X_1}: \Sigma_1} \vdash B_2 \rightsquigarrow e_2: \exists \overrightarrow{t_2: \kappa_2}\ldotp \Sigma_2}
+        \hypo{\mathrm{Comb}(\overrightarrow{l_{X_1} = \Sigma_1}, \overrightarrow{l_{X_2} = \Sigma_2}) = \overrightarrow{l_{X_3}: \Sigma_3 \mid k_3}}
+        \infer3{
+            \Gamma \vdash B_1; B_2 \rightsquigarrow
+            \left(\begin{array}{l}
+                \mathrm{unpack}\langle \overrightarrow{t_1: \kappa_1}, x_1\rangle = e_1\ldotp \\
+                \hspace{1em}\mathrm{unpack}\langle \overrightarrow{t_2: \kappa_2}, x_2\rangle = (\mathrm{let}\; \overrightarrow{x_{X_1}: \Sigma_1 = x_1.l_{X_1}}\ldotp e_2)\ldotp \\
+                \hspace{2em}\mathrm{pack}\langle
+                    \overrightarrow{t_1} \overrightarrow{t_2},
+                    \{\overrightarrow{l_{X_3} = x_{k_3}.l_{X_3}}\}
+                \rangle_{\exists \overrightarrow{t_1: \kappa_1} \overrightarrow{t_2: \kappa_2}\ldotp \{\overrightarrow{l_{X_3}: \Sigma_3}\}}
+            \end{array}\right): \exists \overrightarrow{t_1: \kappa_1} \overrightarrow{t_2: \kappa_2}\ldotp \{\overrightarrow{l_{X_3}: \Sigma_3}\}
+        }
+    \end{prooftree}
+\]
+
+$\underline{\mathrm{Comb}(\Sigma_1, \Sigma_2) = \overrightarrow{l: \Sigma \mid p}}$
+
+\[
+    \begin{prooftree}
+        \hypo{\{\overrightarrow{l_{X_3}}\} = \{\overrightarrow{l_{X_1}}\} \cup \{\overrightarrow{l_{X_2}}\}}
+        \hypo{\overrightarrow{p_3 \in \{1,2\}}}
+        \hypo{\overrightarrow{l_{X_3} = {(l_{X_{p_3}})}_{q_3}}}
+        \hypo{\overrightarrow{\forall m > j\ldotp l_{X_3} \neq {(l_{X_{p_3}})}_m}}
+        \hypo{\overrightarrow{p_3 = 2 \lor \forall i\ldotp l_{X_3} \neq {(l_{X_2})}_i}}
+        \infer5{\mathrm{Comb}(\overrightarrow{l_{X_1} = \Sigma_1}, \overrightarrow{l_{X_2} = \Sigma_2}) =  \overrightarrow{l_{X_3}: {(\Sigma_{p_3})}_{q_3} \mid p_3}}
+    \end{prooftree}
+\]
+
+$\underline{\mathrm{NotAtomic}(\Sigma)}$
+
+\[
+    \begin{prooftree}
+        \infer0{\mathrm{NotAtomic}(\{\overrightarrow{l_X: \Sigma}\})}
+    \end{prooftree}
+    \hspace{1em}
+    \begin{prooftree}
+        \infer0{\mathrm{NotAtomic}(\forall \overrightarrow{t: \kappa}\ldotp \Sigma \to \Xi)}
+    \end{prooftree}
+\]
+
+\end{document}

@@ -1,0 +1,48 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \begin{array}{rcll}
+        \kappa
+        &\Coloneqq &\star &(\text{型の種}) \\
+        &\mid &\kappa_1 \to \kappa_2 &(\text{型構築子の種}) \\
+        \tau
+        &\Coloneqq &t &(\text{型変数}) \\
+        &\mid &\tau_1 \to \tau_2 &(\text{関数型}) \\
+        &\mid &\{\overrightarrow{l: \tau}\} &(\text{レコード型}) \\
+        &\mid &\forall t: \kappa\ldotp \tau &(\text{多相型}) \\
+        &\mid &\exists t: \kappa\ldotp \tau &(\text{存在型}) \\
+        &\mid &\lambda t: \kappa\ldotp \tau &(\text{型構築子}) \\
+        &\mid &\tau_1\; \tau_2 &(\text{型構築}) \\
+        e
+        &\Coloneqq &x &(\text{変数}) \\
+        &\mid &\lambda x: \tau\ldotp e &(\text{ラムダ式}) \\
+        &\mid &e_1\; e_2 &(\text{適用}) \\
+        &\mid &\{\overrightarrow{l = e}\} &(\text{レコード式}) \\
+        &\mid &e.l &(\text{レコードアクセス}) \\
+        &\mid &\Lambda t: \kappa\ldotp e &(\text{多相化}) \\
+        &\mid &e\; \tau &(\text{具象化}) \\
+        &\mid &{\mathrm{pack}\langle \tau_1, e\rangle}_{\tau_2} &(\text{存在量化}) \\
+        &\mid &\mathrm{unpack}\langle t: \kappa, x: \tau\rangle = e_1\ldotp e_2 &(\text{存在アクセス}) \\
+        \Gamma
+        &\Coloneqq &t: \kappa \\
+        &\mid &x: \tau \\
+        &\mid &\epsilon \\
+        &\mid &\Gamma_1, \Gamma_2
+    \end{array}
+\end{align*}
+\end{document}

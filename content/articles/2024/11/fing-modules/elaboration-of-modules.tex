@@ -1,0 +1,67 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma(x_X) = \Sigma}
+        \infer1{\Gamma \vdash X \rightsquigarrow x_X: \Sigma}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash B \rightsquigarrow e: \Xi}
+        \infer1{\Gamma \vdash \{B\} \rightsquigarrow e: \Xi}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash M \rightsquigarrow e: \exists \overrightarrow{t: \kappa}\ldotp \{\overrightarrow{l: \Sigma}\}}
+        \hypo{\overrightarrow{l: \Sigma} = \overrightarrow{l_1: \Sigma_1} l_X = \Sigma_2 \overrightarrow{l_3: \Sigma_3}}
+        \hypo{\forall i\ldotp {l_3}_i \neq l_X}
+        \infer3{\Gamma \vdash M.X \rightsquigarrow \mathrm{unpack}\langle \overrightarrow{t: \kappa}, x: \{\overrightarrow{l: \Sigma}\}\rangle = e\ldotp \mathrm{pack}\langle \overrightarrow{t}, x.l_X\rangle_{\exists \overrightarrow{t: \kappa}\ldotp \Sigma_2}: \exists \overrightarrow{t: \kappa}\ldotp \Sigma_2}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash S \rightsquigarrow \exists \overrightarrow{t: \kappa}\ldotp \Sigma}
+        \hypo{\Gamma, \overrightarrow{t: \kappa}, x_X: \Sigma \vdash M \rightsquigarrow e: \Xi}
+        \infer2{\Gamma \vdash (\mathrm{fun}\; X: S \Rightarrow M) \rightsquigarrow (\Lambda \overrightarrow{t: \kappa}\ldotp \lambda x_X: \Sigma\ldotp e): \forall \overrightarrow{t: \kappa}\ldotp \Sigma \to \Xi}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma(x_{X_1}) = \forall \overrightarrow{t: \kappa}\ldotp \Sigma_2' \to \Xi}
+        \hypo{\Gamma(x_{X_2}) = \Sigma_2}
+        \hypo{\Gamma \vdash \Sigma_2 \leq \exists \overrightarrow{t: \kappa}\ldotp \Sigma_2' \uparrow \overrightarrow{\tau} \rightsquigarrow e}
+        \infer3{\Gamma \vdash X_1\; X_2 \rightsquigarrow x_{X_1}\; \overrightarrow{\tau}\; (e\; x_{X_2}): \Xi[\overrightarrow{t \leftarrow \tau}]}
+    \end{prooftree}
+\]
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma(x_X) = \Sigma_1}
+        \hypo{\Gamma \vdash S \rightsquigarrow \exists \overrightarrow{t: \kappa}\ldotp \Sigma_2}
+        \hypo{\Gamma \vdash \Sigma_1 \leq \exists \overrightarrow{t: \kappa}\ldotp \Sigma_2 \uparrow \overrightarrow{\tau} \rightsquigarrow e}
+        \infer3{\Gamma \vdash X \triangleright S \rightsquigarrow \mathrm{pack}\langle \overrightarrow{\tau}, e\; x_X\rangle_{\exists \overrightarrow{t: \kappa}\ldotp \Sigma_2}: \exists \overrightarrow{t: \kappa}\ldotp \Sigma_2}
+    \end{prooftree}
+\]
+
+\end{document}

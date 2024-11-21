@@ -1,0 +1,61 @@
+\documentclass[12pt]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{20cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{align*}
+    \begin{array}{rcll}
+        X
+        &\Coloneqq &\cdots &(\text{変数}) \\
+        K
+        &\Coloneqq &\cdots &(\text{種}) \\
+        T
+        &\Coloneqq &\cdots \mid P &(\text{型}) \\
+        E
+        &\Coloneqq &\cdots \mid P &(\text{式}) \\
+        P
+        &\Coloneqq &M &(\text{パス}) \\
+        M
+        &\Coloneqq &X \\
+        &\mid &\{B\} &(\text{定義群}) \\
+        &\mid &M.X &(\text{射影}) \\
+        &\mid &\mathrm{fun}\;X: S \Rightarrow M &(\text{ファンクタ}) \\
+        &\mid &X_1\; X_2 &(\text{ファンクタへの適用}) \\
+        &\mid &X \triangleright S &(\text{シーリング}) \\
+        B
+        &\Coloneqq &\mathrm{val}\; X = E &(\text{値定義}) \\
+        &\mid &\mathrm{type}\; X = T &(\text{型定義}) \\
+        &\mid &\mathrm{module}\; X = M &(\text{モジュール定義}) \\
+        &\mid &\mathrm{sig}\; X = S &(\text{シグネチャ定義}) \\
+        &\mid &\mathrm{include}\; M &(\text{モジュール展開}) \\
+        &\mid &\epsilon &(\text{空}) \\
+        &\mid &B_1; B_2 &(\text{結合}) \\
+        S
+        &\Coloneqq &P &(\text{シグネチャパス}) \\
+        &\mid &\{D\} &(\text{宣言群}) \\
+        &\mid &(X: S) \rightarrow S &(ファンクタシグネチャ) \\
+        &\mid &S\;\mathrm{where}\;\mathrm{type}\;\overrightarrow{X} = T &(\text{制約付きシグネチャ}) \\
+        D
+        &\Coloneqq &\mathrm{val}\; X: T &(\text{値宣言}) \\
+        &\mid &\mathrm{type}\; X: K &(\text{型宣言}) \\
+        &\mid &\mathrm{type}\; X = T &(\text{型定義}) \\
+        &\mid &\mathrm{module}\; X: S &(\text{モジュール宣言}) \\
+        &\mid &\mathrm{sig}\; X = S &(\text{シグネチャ定義}) \\
+        &\mid &\mathrm{include}\; S &(\text{シグネチャ展開}) \\
+        &\mid &\epsilon &(\text{空}) \\
+        &\mid &D_1; D_2 &(\text{結合})
+    \end{array}
+\end{align*}
+\end{document}

@@ -1,0 +1,46 @@
+\documentclass[lualatex,12pt,unicode]{article}
+
+\usepackage{luatexja-preset}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ascmac}
+\usepackage{mathtools}
+\usepackage{ebproof}
+
+\setlength{\paperwidth}{10cm}
+\setlength{\paperheight}{30cm}
+
+\input{layout.tex}
+
+\begin{document}
+\pagestyle{empty}
+
+$\underline{\Gamma \vdash P \rightsquigarrow e: \Sigma}$
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash P \rightsquigarrow e: \exists \overrightarrow{t: \kappa}\ldotp \Sigma}
+        \hypo{\Gamma \vdash \Sigma: \star}
+        \infer2{\Gamma \vdash P \rightsquigarrow (\mathrm{unpack}\langle \overrightarrow{t: \kappa}, x\rangle = e\ldotp x): \Sigma}
+    \end{prooftree}
+\]
+
+$\underline{\Gamma \vdash T \rightsquigarrow \tau: \kappa}$
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash P \rightsquigarrow e: [= \tau: \kappa]}
+        \infer1{\Gamma \vdash P \rightsquigarrow \tau: \kappa}
+    \end{prooftree}
+\]
+
+$\underline{\Gamma \vdash E \rightsquigarrow e: \tau}$
+
+\[
+    \begin{prooftree}
+        \hypo{\Gamma \vdash P \rightsquigarrow e: [\tau]}
+        \infer1{\Gamma \vdash P \rightsquigarrow e.\mathit{val}: \tau}
+    \end{prooftree}
+\]
+
+\end{document}
