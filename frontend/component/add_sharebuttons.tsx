@@ -11,7 +11,7 @@ export type ShareButtonsProps = {
     }[];
 };
 
-export const shareButtons: React.FC<ShareButtonsProps> = (props: ShareButtonsProps) => {
+export const ShareButtons: React.FC<ShareButtonsProps> = (props: ShareButtonsProps) => {
     return (
         <ul className="social">
             {props.items.map(item => (
@@ -75,7 +75,7 @@ export function addShareButtons(metadata: {
     targetElem.className = "sharebuttons";
 
     const reactRoot = ReactDOM.createRoot(targetElem);
-    reactRoot.render(shareButtons(props));
+    reactRoot.render(<ShareButtons items={props.items} />);
 
     const content = document.querySelector("article.single div");
     if (content !== null) {
