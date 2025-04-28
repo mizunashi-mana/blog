@@ -9,7 +9,7 @@ export function addFootnoteTooltip(): void {
         return;
     }
 
-    let footnoteTitles: {[key: string]: string;} = {};
+    let footnoteTitles: {[key: string]: string | undefined;} = {};
     document.querySelectorAll("table.docutils.footnote").forEach(e => {
         const eid = e.getAttribute("id");
         if (eid !== null) {

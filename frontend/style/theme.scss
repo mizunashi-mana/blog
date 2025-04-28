@@ -1,0 +1,827 @@
+/*!
+ * @license MIT https://github.com/alexandrevicenzi/Flex
+ * Copyright (c) 2015 Alexandre Vicenzi
+ */
+@use "variables";
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+h1 {
+    font-size: 2.4em
+}
+
+h2 {
+    font-size: 2em
+}
+
+h3 {
+    font-size: 1.6em
+}
+
+h4 {
+    font-size: 1.36em
+}
+
+h5 {
+    font-size: 1.2em
+}
+
+h6 {
+    font-size: 1.1em
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: variables.$body-bg;
+    color: variables.$text-color;
+    font-family: variables.$sans;
+    font-size: 1.02em;
+    line-height: 1.2em;
+}
+
+a {
+    color: variables.$link-color;
+    text-decoration: none;
+}
+
+a:hover {
+    color: variables.$link-hover-color;
+}
+
+hr {
+    color: variables.$light-grey;
+    background-color: variables.$light-grey;
+    height: 1px;
+    border: none;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+img {
+    max-width: 100%;
+}
+
+aside {
+    background-color: variables.$sidebar-bg;
+    color: variables.$sidebar-text-color;
+    text-align: center;
+
+    a {
+        color: variables.$sidebar-link-color;
+    }
+
+    a:hover {
+        color: variables.$sidebar-link-hover-color;
+    }
+
+    div {
+        padding: 20px;
+        margin: 0;
+
+        img {
+            border-radius: 50%;
+            max-width: 140px;
+        }
+
+        h1 {
+            margin: 15px 0 5px 0;
+        }
+
+        p {
+            margin: 0 0 15px 0;
+            font-size: .92em;
+        }
+    }
+
+    nav {
+        ul {
+            li {
+                display: inline;
+                line-height: 1.6em;
+                font-size: 1.28em;
+                text-transform: lowercase;
+            }
+        }
+    }
+}
+
+main {
+    nav {
+        text-align: center;
+        text-transform: uppercase;
+        padding: 14px 0 14px 0;
+        border-bottom: variables.$nav-border-color 1px solid;
+
+        /**
+     * Need to use font-size of 0 so that whitespace between the <a> tags
+     * doesn't have an affect on alignment.
+     */
+        font-size: 0;
+    }
+
+    nav,
+    .translations {
+        a {
+            font-size: 12px;
+            padding: 0 4px;
+            border-right: variables.$nav-border-color 1px solid;
+        }
+
+        :last-child {
+            border-right: none;
+        }
+    }
+
+    .neighbors {
+        margin: 4% 0% 4% 0%;
+        height: 20px;
+    }
+
+    .pagination {
+        margin: 4% 8% 4% 8%;
+        height: 20px;
+    }
+
+    .social-share {
+        p {
+            font-size: .8em;
+        }
+    }
+
+    article {
+        margin: 0 8% 2% 8%;
+        line-height: 2.0;
+
+        header {
+
+            h1,
+            h2 {
+                margin-bottom: 0;
+            }
+
+            p {
+                color: variables.$header-text-color;
+                font-size: 0.86em;
+            }
+
+            .translations {
+                float: right;
+
+                .active {
+                    font-weight: 600;
+                }
+            }
+        }
+
+        div.math.block {
+            overflow-x: auto;
+            overflow-y: hidden;
+            text-align: center;
+        }
+
+        code,
+        kbd,
+        samp,
+        pre {
+            font-family: variables.$mono;
+        }
+
+        blockquote,
+        pre {
+            background-color: rgba(128, 128, 128, 0.05);
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            border-left: 8px solid rgba(128, 128, 128, 0.075);
+            border-left-width: 10px;
+        }
+
+        blockquote {
+            margin: 0;
+            padding: 10px 20px;
+            font-weight: 300;
+            font-size: 1.1em;
+        }
+
+        pre {
+            padding: 4px;
+            font-size: .9em;
+            overflow-x: auto;
+            line-height: 1.5em;
+        }
+
+        samp {
+            white-space: pre;
+            display: block;
+            overflow-x: auto;
+        }
+
+        kbd {
+            padding: .1em .6em;
+            border: 1px solid rgba(63, 63, 63, 0.25);
+            box-shadow: 0 1px 0 rgba(63, 63, 63, 0.25);
+            background-color: #fff;
+            color: #333;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 0 .1em;
+            white-space: nowrap;
+            font-size: .78em;
+        }
+
+        tt, a {
+            overflow-wrap: break-word;
+        }
+
+        a.headerlink {
+            margin-left: 0.2em;
+            font-size: 90%;
+
+            &:not(:hover) {
+                color: lightgray;
+            }
+        }
+
+        *:not(pre)>code {
+            font-size: .8em;
+            white-space: nowrap;
+            color: #c25;
+            padding: 1px 3px;
+            background-color: #f7f7f9;
+            border: 1px solid #e1e1e8;
+            border-radius: 3px;
+        }
+
+        .comment-count {
+            font-size: .8em;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+
+            thead:first-child tr:first-child th {
+                border-top: 0;
+            }
+
+            th,
+            td {
+                padding: 8px;
+                line-height: 20px;
+                vertical-align: top;
+                border-top: 1px solid #ddd;
+            }
+        }
+
+        table.highlighttable {
+            width: 100%;
+            table-layout: fixed;
+
+            td {
+                border-style: none;
+                padding: 0px;
+            }
+
+            td.linenos {
+                width: 2.5em;
+
+                pre {
+                    border-left: 0px;
+                    padding-right: 0.8em;
+                    background-color: inherit;
+                    text-align: right;
+                }
+            }
+        }
+
+        /**
+     * Add a bit of padding between each of the entry boxes in the Isso auth
+     * section. By default, they are squished together, which looks terrible.
+     */
+        section#isso-thread .auth-section .input-wrapper {
+            margin-right: 5px;
+        }
+
+        .toc {
+            margin-top: 2em;
+
+            .toctitle {
+                font-size: 1.3em
+            }
+
+            ul {
+                list-style: none;
+                padding-inline-start: 1rem;
+            }
+
+            >ul {
+                padding: 0;
+            }
+        }
+    }
+
+    footer {
+        padding-top: 4px;
+        border-top: variables.$footer-border-color 1px solid;
+
+        p {
+            margin: 2px;
+            text-align: center;
+            padding: 0 40px 0 40px;
+            color: variables.$footer-text-color;
+            font-size: 11px;
+        }
+
+        /**
+     * Flex credits and theme selection separator
+     */
+        span.footer-separator {
+            margin: 0 6px;
+        }
+    }
+}
+
+.tag-cloud {
+    a {
+        background-color: variables.$tag-bg;
+        padding: .2em .6em .2em;
+        font-size: .74em;
+        line-height: 1;
+        color: variables.$tag-text-color;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: .25em;
+    }
+
+    a:hover {
+        background-color: variables.$tag-hover-color;
+    }
+}
+
+a.btn,
+section#isso-thread section.auth-section p.post-action input {
+    background-color: variables.$btn-bg;
+    padding: .6em .6em;
+    font-size: .8em;
+    line-height: 1;
+    color: variables.$btn-text-color;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border: none;
+    border-radius: .25em;
+}
+
+a.btn:hover {
+    background-color: variables.$btn-hover-color;
+}
+
+.center,
+.text-center {
+    text-align: center;
+}
+
+.img-center {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.align-center {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.float-left {
+    float: left;
+}
+
+.float-right {
+    float: right;
+}
+
+div.related-posts {
+    margin: 15px 0 15px 0;
+    padding-bottom: 20px;
+    border-top: variables.$rel-post-border-color 1px solid;
+    border-bottom: variables.$rel-post-border-color 1px solid;
+
+    h4 {
+        margin: 20px 0 25px 0;
+    }
+
+    ul {
+        font-size: 1.1em;
+        padding-left: 12px;
+
+        li {
+            padding: 4px 0 4px 0;
+        }
+    }
+}
+
+ul.list,
+ul.social,
+ul.related-posts {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.list {
+    padding: 1em 0 1em 0;
+
+    li {
+        padding: 4px;
+    }
+}
+
+ul.social {
+    font-size: 1.6em;
+    padding-top: 20px;
+
+    li {
+        display: inline;
+    }
+
+    a:hover {
+        z-index: 2;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    a {
+        display: inline-block;
+        width: 36px;
+        height: 36px;
+        border-radius: 100%;
+        text-align: center;
+        font-size: .8em;
+        line-height: 36px;
+        color: white;
+    }
+
+    a.sc-facebook {
+        background-color: variables.$facebook-bg-color;
+    }
+
+    a.sc-google {
+        background-color: variables.$google-bg-color;
+    }
+
+    a.sc-instagram {
+        background-color: variables.$instagram-bg-color;
+    }
+
+    a.sc-keybase {
+        background-color: variables.$keybase-bg-color;
+    }
+
+    a.sc-pinterest {
+        background-color: variables.$pinterest-bg-color;
+    }
+
+    a.sc-linkedin {
+        background-color: variables.$linkedin-bg-color;
+    }
+
+    a.sc-medium {
+        background-color: variables.$medium-bg-color;
+    }
+
+    a.sc-rss {
+        background-color: variables.$rss-bg-color;
+    }
+
+    a.sc-stack-overflow {
+        background-color: variables.$stack-overflow-bg-color;
+    }
+
+    a.sc-tumblr {
+        background-color: variables.$tumblr-bg-color;
+    }
+
+    a.sc-twitch {
+        background-color: variables.$twitch-bg-color;
+    }
+
+    a.sc-twitter {
+        background-color: variables.$twitter-bg-color;
+    }
+
+    a.sc-youtube {
+        background-color: variables.$youtube-bg-color;
+    }
+
+    a.sc-github,
+    a.sc-github-alt {
+        background-color: variables.$github-bg-color;
+    }
+
+    a.sc-at,
+    a.sc-mailbox,
+    a.sc-envelope {
+        background-color: variables.$email-bg-color;
+    }
+
+    a.sc-clipboard {
+        background-color: variables.$sc-clipboard-bg-color;
+    }
+
+    a.sc-get-pocket {
+        background-color: variables.$get-pocket-bg-color;
+    }
+
+    a.sc-code {
+        background-color: variables.$sc-code-bg-color;
+    }
+
+    a.sc-reddit {
+        background-color: variables.$reddit-bg-color;
+    }
+
+    a.sc-soundcloud {
+        background-color: variables.$soundcloud-bg-color;
+    }
+
+    a.sc-gitlab {
+        background-color: variables.$gitlab-bg-color;
+    }
+
+    a.sc-xing {
+        background-color: variables.$xing-bg-color;
+    }
+
+    a.sc-bitbucket {
+        background-color: variables.$bitbucket-bg-color;
+    }
+
+    a.sc-mastodon {
+        background-color: variables.$mastodon-bg-color;
+    }
+
+    a.sc-diaspora {
+        color: variables.$diaspora-color;
+        background-color: variables.$diaspora-bg-color;
+    }
+
+    a.sc-flickr {
+        background-color: variables.$flickr-bg-color;
+    }
+
+    a.sc-lastfm {
+        background-color: variables.$lastfm-bg-color;
+    }
+
+    a.sc-x-twitter {
+        background-color: variables.$x-twitter-bg-color;
+    }
+}
+
+.ads-aside {
+    display: inline-block;
+    height: 90px;
+    width: 70%;
+}
+
+.ads-responsive {
+    display: inline-block;
+    margin: 6px 0 6px 0;
+    width: 90%;
+    height: 70px;
+    margin-left: 5%;
+}
+
+/* Desktop */
+
+@media screen and (min-width: 768px) {
+    aside {
+        width: 25vw;
+        height: 100vh;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+
+        div {
+            padding: 36px 18px;
+
+            nav {
+                ul {
+                    li {
+                        padding: 0 !important;
+                        display: block;
+                    }
+                }
+            }
+
+            ul.social {
+                padding-top: 32px;
+            }
+        }
+    }
+
+    main {
+        height: 100vh;
+        position: relative;
+        padding-left: 25vw;
+
+        article {
+            max-width: 760px;
+
+            ul.list {
+                li {
+                    padding: 2px;
+                }
+            }
+        }
+    }
+
+    .ads-aside {
+        height: 250px;
+    }
+
+    .ads-responsive {
+        height: 90px;
+    }
+}
+
+/* Admonition */
+div.admonition {
+    margin-bottom: 2.5rem;
+    border-radius: 4px;
+    padding: 0.5em 1.25em 1.25em 1.25em;
+
+    p.admonition-title::before {
+        display: inline-block;
+        font-style: normal;
+        font-variant: normal;
+        text-rendering: auto;
+        font-family: "Font Awesome 5 Free";
+    }
+
+    p.admonition-title {
+        font-weight: 600;
+        line-height: 1.25em;
+        margin-bottom: 1.25em;
+        margin-top: inherit;
+    }
+
+    p,
+    div,
+    pre {
+        margin-bottom: 0;
+    }
+}
+
+div.admonition {
+    color: variables.$admonition-generic-color;
+    background-color: variables.$admonition-generic-bg-color;
+}
+
+div.admonition.attention {
+    p.admonition-title::before {
+        content: variables.$admonition-attention-icon;
+    }
+
+    color: variables.$admonition-attention-color;
+    background-color: variables.$admonition-attention-bg-color;
+}
+
+div.admonition.caution {
+    p.admonition-title::before {
+        content: variables.$admonition-caution-icon;
+    }
+
+    color: variables.$admonition-caution-color;
+    background-color: variables.$admonition-caution-bg-color;
+}
+
+div.admonition.danger {
+    p.admonition-title::before {
+        content: variables.$admonition-danger-icon;
+    }
+
+    color: variables.$admonition-danger-color;
+    background-color: variables.$admonition-danger-bg-color;
+}
+
+div.admonition.error {
+    p.admonition-title::before {
+        content: variables.$admonition-error-icon;
+    }
+
+    color: variables.$admonition-error-color;
+    background-color: variables.$admonition-error-bg-color;
+}
+
+div.admonition.hint {
+    p.admonition-title::before {
+        content: variables.$admonition-hint-icon;
+    }
+
+    color: variables.$admonition-hint-color;
+    background-color: variables.$admonition-hint-bg-color;
+}
+
+div.admonition.important {
+    p.admonition-title::before {
+        content: variables.$admonition-important-icon;
+    }
+
+    color: variables.$admonition-important-color;
+    background-color: variables.$admonition-important-bg-color;
+}
+
+div.admonition.note {
+    p.admonition-title::before {
+        content: variables.$admonition-note-icon;
+    }
+
+    color: variables.$admonition-note-color;
+    background-color: variables.$admonition-note-bg-color;
+}
+
+div.admonition.tip {
+    p.admonition-title::before {
+        content: variables.$admonition-tip-icon;
+    }
+
+    color: variables.$admonition-tip-color;
+    background-color: variables.$admonition-tip-bg-color;
+}
+
+div.admonition.warning {
+    p.admonition-title::before {
+        content: variables.$admonition-warning-icon;
+    }
+
+    color: variables.$admonition-warning-color;
+    background-color: variables.$admonition-warning-bg-color;
+}
+
+figure,
+div.figure {
+    font-size: 90%;
+    color: variables.$figure-color;
+
+    figcaption {
+        margin-top: 0.5em;
+        text-align: center;
+        color: variables.$text-color;
+    }
+
+    img {
+        vertical-align: middle;
+        line-height: 1;
+        display: inline;
+    }
+
+    p {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    p.caption {
+        font-style: italic;
+    }
+
+    div.legend {
+        text-align: initial;
+    }
+}
+
+figure.align-left,
+div.figure.align-left {
+    text-align: left;
+}
+
+figure.align-center,
+div.figure.align-center {
+    text-align: center;
+}
+
+figure.align-right,
+div.figure.align-right {
+    text-align: right;
+}
+
+div.sharebuttons {
+    display: flex;
+}

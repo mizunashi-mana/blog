@@ -1,0 +1,16 @@
+{% if MAIN_MENU %}
+<nav>
+    <a href="{{ SITEURL }}/">ホーム</a>
+    <a href="{{ SITE_URL }}/archives.html">過去の投稿</a>
+    <a href="{{ SITE_URL }}/categories.html">カテゴリ</a>
+    <a href="{{ SITE_URL }}/tags.html">タグ</a>
+
+    {% if FEED_ALL_ATOM %}
+    <a href="{{ FEED_DOMAIN }}/{{ FEED_ALL_ATOM }}">Atom</a>
+    {% endif %}
+
+    {% if FEED_ALL_RSS %}
+    <a href="{{ FEED_DOMAIN }}/{{ FEED_ALL_RSS }}">RSS</a>
+    {% endif %}
+</nav>
+{% endif %}

@@ -14,7 +14,7 @@ beautifulsoup4 = "*"
 pygments = "*"
 pelican-search = "*"
 
-[tool.poetry.dev-dependencies]
+[poetry.group.dev.dependencies]
 docutils = "*"
 rstcheck = "*"
 

@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Enable ja_JP.UTF-8 locale
       run: |
@@ -29,11 +29,6 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: 22
-
-    - name: Install stork
-      run: |
-        sudo wget -O /usr/local/bin/stork https://files.stork-search.net/releases/v1.6.0/stork-ubuntu-22-04
-        sudo chmod +x /usr/local/bin/stork
 
     - name: Cache poetry
       uses: actions/cache@v4

@@ -1,0 +1,18 @@
+{% extends "layout/base.html" %}
+
+{% block title %} &ndash; 作者{% endblock %}
+
+{% block content %}
+<article class="single">
+  <header>
+    <h1 id="authors">作者</h1>
+  </header>
+  <div>
+    <ul class="list">
+      {% for author, articles in authors|sort %}
+      <li><a href="{{ SITEURL }}/{{ author.url }}">{{ author }}</a> ({{ articles|count }})</li>
+      {% endfor %}
+    </ul>
+  </div>
+</article>
+{% endblock %}

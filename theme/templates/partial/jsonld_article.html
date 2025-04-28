@@ -1,0 +1,16 @@
+<script type="application/ld+json">
+{
+    "@context" : "http://schema.org",
+    "@type" : "BlogPost",
+    "name": "{{ article.title|striptags|escape }}",
+    "url" : "{{ SITEURL }}/{{ article.url }}",
+    {% if 'cover' in article.metadata %}
+    "image": "{{ SITEURL }}/{{ article.metadata['cover'] }}",
+    {% else %}
+    "image": "{{ SITELOGO }}",
+    {% endif %}
+    "description": "{{ article.summary|striptags|escape }}",
+    "datePublished": "{{ article.date }}",
+    "dateModified": "{{ article.modified }}"
+}
+</script>
