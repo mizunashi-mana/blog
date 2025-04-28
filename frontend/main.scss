@@ -1,10 +1,7 @@
-article.single {
-  line-height: 2.0;
+@use './style/theme.scss';
+@use './style/github.scss';
+@use './style/pygments.scss';
 
-  pre {
-    line-height: 1.5em;
-  }
-}
 dl.docutils dt {
   padding: .5em;
 }
@@ -27,12 +24,6 @@ table[class="docutils"] {
   }
 }
 
-article.single {
-  tt, a {
-    overflow-wrap: break-word;
-  }
-}
-
 table.docutils.footnote {
   width: 100%;
   table-layout: fixed;
@@ -48,90 +39,4 @@ article.single {
       color: unset;
     }
   }
-
-  table.highlighttable {
-    width: 100%;
-    table-layout: fixed;
-
-    td {
-      border-style: none;
-      padding: 0px;
-    }
-
-    td.linenos {
-      width: 2.5em;
-
-      pre {
-        border-left: 0px;
-        padding-right: 0.8em;
-        background-color: inherit;
-        text-align: right;
-      }
-    }
-  }
-}
-
-article.single {
-  div.math.block {
-    overflow-x: auto;
-    overflow-y: hidden;
-    text-align: center;
-  }
-}
-
-i.fa-link.anchor-link {
-  margin-left: 0.8em;
-  font-size: 90%;
-
-  &:not(:hover) {
-    color: lightgray;
-  }
-}
-
-
-div.sharebuttons {
-  display: flex;
-
-  ul.social li {
-    margin-left: 0.4em;
-  }
-}
-
-
-body {
-  color: #454545;
-}
-aside {
-  color: #444;
-  background-color: #eee;
-
-  a {
-    color: inherit;
-
-    &:hover {
-      color: #555;
-    }
-  }
-}
-ul.social a {
-  color: #ffffff;
-}
-
-
-ul.social {
-  a.sc-clipboard {
-    background-color: lightslategray;
-  }
-
-  a.sc-get-pocket {
-    background-color: lightcoral;
-  }
-
-  a.sc-code {
-    background-color: gray;
-  }
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 400;
 }

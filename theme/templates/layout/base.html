@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="{{ DEFAULT_LANG }}">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% if page in hidden_pages %}
+    <meta name="robots" content="noindex, nofollow" />
+    {% else %}
+    <meta name="robots" content="{{ ROBOTS }}" />
+    {% endif %}
+
+    {% include "partial/icon.html" %}
+
+    {% include "partial/color.html" %}
+
+    {% include "partial/feed.html" %}
+
+    {% include "partial/ga.html" %}
+    {% include "partial/ggst.html" %}
+
+    {% if PGP_KEY %}
+    <link rel="pgpkey" type="application/pgp-keys" href="{{ SITEURL }}/{{ PGP_KEY }}">
+    {% endif %}
+
+    {% if WEBMENTION_URL %}
+    <link rel="webmention" href="{{ WEBMENTION_URL }}" />
+    {% endif %}
+
+    {% if PINGBACK_URL %}
+    <link rel="pingback" href="{{ PINGBACK_URL }}" />
+    {% endif %}
+
+    {% if not PLUGINS or 'seo' not in PLUGINS %}
+    {% if REL_CANONICAL %}
+    {% if page %}
+    <link rel="canonical" href="{{ SITEURL }}/{{ page.url }}">
+    {% elif article %}
+    <link rel="canonical" href="{{ SITEURL }}/{{ article.url }}">
+    {% elif page_name == 'index' and not articles_previous_page %}
+    <link rel="canonical" href="{{ SITEURL }}">
+    {% elif author or category or tag or page_name == 'index' %}
+    <link rel="canonical" href="{{ SITEURL }}/{{ articles_page.url }}">
+    {% else %}
+    <link rel="canonical" href="{{ SITEURL }}/{{ output_file }}">
+    {% endif %}
+    {% endif %}
+    {% endif %}
+
+    {% block meta %}
+    <meta name="author" content="{{ AUTHOR }}" />
+    <meta name="description" content="{{ SITEDESCRIPTION }}" />
+    {% include "partial/og.html" %}
+    {% endblock %}
+
+    <title>{{ SITENAME }}{% block title %}{% endblock %}</title>
+
+    {% include "partial/gtm.html" %}
+
+    <link rel="stylesheet" href="{{ SITE_URL }}/dist-asset/bundle.app.css" />
+    <script src="{{ SITE_URL }}/dist-asset/bundle.app.js" defer async></script>
+</head>
+
+<body
+    {% if not THEME_COLOR_AUTO_DETECT_BROWSER_PREFERENCE %}
+    class="{{ THEME_COLOR|default('light') }}-theme"
+    {% endif %}
+>
+    {% include "partial/gtm_noscript.html" %}
+
+    {% include "partial/sidebar.html" %}
+
+    <main>
+        {% include "partial/nav.html" %}
+
+        {% block content %}
+        {% endblock %}
+
+        {% include "partial/footer.html" %}
+    </main>
+
+    {% include 'partial/github.html' %}
+
+    {% block meta_jsonld %}
+    {% include "partial/jsonld.html" %}
+    {% endblock %}
+</body>
+
+</html>

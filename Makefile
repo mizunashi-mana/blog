@@ -43,7 +43,11 @@ help:
 
 .PHONY: js-build
 js-build:
-	$(WEBPACK)
+	$(WEBPACK) --config webpack.prod.config.js
+
+.PHONY: js-build-dev
+js-build-dev:
+	$(WEBPACK) --config webpack.dev.config.js
 
 .PHONY: html-pelican
 html-pelican: js-build
@@ -51,7 +55,6 @@ html-pelican: js-build
 
 .PHONY: html
 html: html-pelican
-	$(CP) $(PUBLICDIR)/privacy-policy-redirect.html $(OUTPUTDIR)/pages/3-privacy-policy.html
 
 .PHONY: clean
 clean:
@@ -79,7 +82,7 @@ else
 endif
 
 .PHONY: devserver
-devserver: js-build
+devserver: js-build-dev
 ifdef PORT
 	$(PELICAN) -lr $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS) -p $(PORT)
 else
@@ -89,7 +92,6 @@ endif
 .PHONY: publish-pelican
 publish-pelican: js-build
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(PUBLISHCONF) --fatal errors $(PELICANOPTS)
-	rm $(OUTPUTDIR)/search.toml
 
 .PHONY: publish
 publish: publish-pelican

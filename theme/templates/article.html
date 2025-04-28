@@ -1,0 +1,156 @@
+{% extends "layout/base.html" %}
+
+{% set article_full_url = '{base}/{path}'.format(base=SITEURL, path=article.url) %}
+
+{% block meta %}
+<meta name="author" content="{{ article.author.name }}" />
+<meta name="description" content="{{ article.summary|striptags|escape }}" />
+<meta name="keywords" content="{{ article.tags|join(', ')|escape }}">
+
+{% if article.translations -%}
+<link rel="alternate" href="{{ article_full_url }}" hreflang="{{ article.lang }}" />
+{% for a in article.translations %}
+<link rel="alternate" href="{{ SITEURL }}/{{ a.url }}" hreflang="{{ a.lang }}" />
+{% endfor %}
+{% endif %}
+
+{% include "partial/og_article.html" %}
+{% endblock %}
+
+{% block title %} &ndash; {{ article.title|striptags|escape }}{% endblock %}
+
+{% block content %}
+<article class="single">
+    <header>
+        {% if not ARTICLE_HIDE_TRANSLATION %}
+        {% import 'partial/translations.html' as translations with context %}
+        {{ translations.translations_for(article) }}
+        {% endif %}
+        <h1 id="{{ article.slug }}">{{ article.title }}</h1>
+        <p>
+            {{ article.date.strftime('%Y年%m月%d日') }}に投稿
+
+            {% if article.modified and article.date.strftime('%Y%m%d') != article.modified.strftime('%Y%m%d') %}
+                （{{ article.modified.strftime('%Y年%m月%d日') }}に更新）
+            {% endif %}
+
+            {% if article.category %}
+                &#8226; カテゴリ：<a href="{{ SITEURL }}/{{ article.category.url }}">{{ article.category }}</a>
+            {% endif %}
+
+            {% if PLUGINS and 'post_stats' in PLUGINS %}
+                &#8226; 読了目安：{{article.stats['read_mins']}}分
+            {% endif %}
+        </p>
+    </header>
+
+    <div>
+        {{ article.content }}
+    </div>
+
+    <div class="sharebuttons">
+        <ul class="social">
+            <li>
+                <a
+                    class="sc-code"
+                    href="{{ GITHUB_URL }}/blob/master/content/{{ article.get_relative_source_path() }}"
+                    title="GitHubでコードを見る"
+                    target="_blank"
+                >
+                    <i class="fas fa-code"></i>
+                </a>
+            </li>
+            <li>
+                <a
+                    class="sc-mastodon"
+                    href="https://mizunashi-mana.github.io/mastodon-front-gateway/share/?text={{ article.title|urlencode }}&url={{ article_full_url|urlencode }}"
+                    title="Mastodonでシェアする"
+                    target="_blank"
+                >
+                    <i class="fab fa-mastodon"></i>
+                </a>
+            </li>
+            <li>
+                <a
+                    class="sc-x-twitter"
+                    href="https://twitter.com/intent/tweet?text={{ article.title|urlencode }}&tw_p=tweetbutton&url={{ article_full_url|urlencode }}"
+                    title="Xでシェアする"
+                    target="_blank"
+                >
+                    <i class="fab fa-x-twitter"></i>
+                </a>
+            </li>
+            <li>
+                <a
+                    class="sc-facebook"
+                    href="https://www.facebook.com/sharer/sharer.php?src=share_button&u={{ article_full_url|urlencode }}"
+                    title="Facebookでシェアする"
+                    target="_blank"
+                >
+                    <i class="fab fa-facebook"></i>
+                </a>
+            </li>
+            <li>
+                <a
+                    class="sc-get-pocket"
+                    href="https://getpocket.com/edit?url={{ article_full_url|urlencode }}"
+                    title="Pocketに保存する"
+                    target="_blank"
+                >
+                    <i class="fab fa-get-pocket"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="tag-cloud">
+        <p>
+            {% if article.tags %}
+            {% for tag in article.tags %}
+            <a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a>
+            {% endfor %}
+            {% endif %}
+        </p>
+    </div>
+
+    {% include "partial/neighbors.html" %}
+
+    {% if article.related_posts %}
+    <div class="related-posts">
+        <h4>関連記事</h4>
+        <ul class="related-posts">
+            {% for related_post in article.related_posts %}
+                <li><a href="{{ SITEURL }}/{{ related_post.url }}">{{ related_post.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if article.series %}
+    <div class="related-posts">
+        {% set text = SERIES_TEXT|default('Part %(index)s of the %(name)s series') %}
+        <h4>{{ text|format(index=article.series.index, name=article.series.name) }}</h4>
+        {% if article.series.all_previous %}
+        <h5>前の記事</h5>
+        <ul>
+            {% for article in article.series.all_previous %}
+            <li><a href="{{ article_full_url }}">{{ article.title }}</a></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% if article.series.all_next %}
+        <h5>次の記事</h5>
+        <ul>
+            {% for article in article.series.all_next %}
+            <li><a href="{{ article_full_url }}">{{ article.title }}</a></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endif %}
+</article>
+{% endblock %}
+
+{% block meta_jsonld %}
+{% include "partial/jsonld_article.html" %}
+{% endblock %}

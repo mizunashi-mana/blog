@@ -1,40 +1,42 @@
 #!/usr/bin/env node
 
-const KaTeX = require("katex");
+import KaTeX from 'katex';
 
 function katexRenderingPipe(instream, outstream) {
-  let chunkrest = "";
+    let chunkrest = '';
 
-  function onData(chunk) {
-    const chunks = chunk.toString("utf8").split("\t\n");
-    chunks[0] = chunkrest + chunks[0];
+    function onData(chunk) {
+        const chunks = chunk.toString('utf8').split('\n');
+        chunks[0] = chunkrest + chunks[0];
 
-    let l = chunks.length - 1
-    for (i = 0; i < l; i++) {
-      const str = chunks[i].replace(/\t /g, "\t");
-      if (typeof str !== "string") {
-        throw new Error("not string stream");
-      }
+        let l = chunks.length - 1
+        for (let i = 0; i < l; i++) {
+            const content = JSON.parse(chunks[i]);
+            if (typeof content !== 'object' || content === null) {
+                throw new Error(`invalid content: ${content}`);
+            }
 
-      let opts = {
-        strict: (errorCode, errorMsg, _token) => {
-          console.error(errorCode + ":" + errorMsg + ":" + str.substr(1));
-        },
-      };
-      if (str[0] == 'b') {
-        opts.displayMode = true;
-      }
+            let opts = {
+                strict: (errorCode, errorMsg, _token) => {
+                    console.error(`${errorCode}:${errorMsg}:${JSON.stringify(content)}`);
+                },
+            };
+            if (content.m == 'b') {
+                opts.displayMode = true;
+            }
 
-      outstream.write(KaTeX.renderToString(str.substr(1), opts).replace(/\t/g, "\t "));
-      outstream.write("\t\n");
+            outstream.write(JSON.stringify({
+                'r': KaTeX.renderToString(content.t, opts),
+            }));
+            outstream.write("\n");
+        }
+        chunkrest = chunks[l];
     }
-    chunkrest = chunks[l];
-  }
 
-  instream.on("data", onData);
-  instream.on("end", () => {
-    outstream.end('');
-  });
+    instream.on("data", onData);
+    instream.on("end", () => {
+        outstream.end('');
+    });
 }
 
 katexRenderingPipe(process.stdin, process.stdout);

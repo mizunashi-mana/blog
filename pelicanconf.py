@@ -19,7 +19,7 @@ SLUGIFY_SOURCE = 'basename'
 PAGE_ORDER_BY = 'basename'
 PAGES_SORT_ATTRIBUTE = 'source_path'
 
-THEME = './themes/Flex'
+THEME = 'theme'
 PATH = 'content'
 STATIC_PATHS = [
     'asset',
@@ -32,15 +32,13 @@ READERS = {
 }
 SITELOGO = '/asset/profile.png'
 FAVICON = '/asset/favicon.ico'
-CUSTOM_CSS = 'dist-asset/bundle.css'
-JS_FILE = '/dist-asset/bundle.js'
 
 BROWSER_COLOR = '#555'
 ROBOTS = 'index, follow'
 SUMMARY_MAX_LENGTH = 50
 
 CC_LICENSE = {
-    'name': 'Creative Commons Attribution-ShareAlike',
+    'name': 'コモンズ証 表示-継承 4.0 国際',
     'version': '4.0',
     'slug': 'by-sa',
 }
@@ -78,12 +76,6 @@ SOCIAL = (
     ('rss', '/' + FEED_ALL_RSS),
 )
 
-MENUITEMS = (
-    ('Archives', '/archives.html'),
-    ('Categories', '/categories.html'),
-    ('Tags', '/tags.html'),
-)
-
 SITEMAP = {
     'format': 'xml',
     'priorities': {
@@ -110,20 +102,11 @@ PLUGIN_PATHS = [
 ]
 PLUGINS = [
     'headerid',
-    'embed_customjs',
     'katex_math_render',
-    'filetime_from_git',
+    'autocorrect_filetime',
     'sitemap',
     'related_posts',
-    'pelican.plugins.search',
 ]
-
-# For search plugin
-STORK_VERSION = '1.6.0'
-STORK_INPUT_OPTIONS = {
-    'url_prefix': SITEURL,
-    'html_selector': 'main article',
-}
 
 RELATIVE_URLS = True
 

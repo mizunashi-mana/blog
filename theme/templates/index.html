@@ -1,0 +1,52 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+
+{% for article in articles_page.object_list %}
+<article>
+    <header>
+        <h2>
+            <a href="{{ SITEURL }}/{{ article.url }}{% if not DISABLE_URL_HASH %}#{{ article.slug }}{% endif %}">
+                {{ article.title }}
+            </a>
+        </h2>
+        <p>
+            {{ article.date.strftime('%Y年%m月%d日') }}に投稿
+
+            {% if article.category %}
+                &#8226; カテゴリ：<a href="{{ SITEURL }}/{{ article.category.url }}">{{ article.category }}</a>
+            {% endif %}
+
+            {% if article.tags and not HOME_HIDE_TAGS %}
+                &#8226; タグ：{% for tag in article.tags %}<a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a>{% if not loop.last %}、{% endif %}{% endfor %}
+            {% endif %}
+
+            {% if PLUGINS and 'post_stats' in PLUGINS %}
+                &#8226; 読了目安：{{article.stats['read_mins']}}分
+            {% endif %}
+        </p>
+    </header>
+    <div>
+        {% if summarise or article.metadata['summary'] or SUMMARY_MAX_LENGTH %}
+            {% if  article.featured_image %}
+                <img src="{{ article.featured_image }}">
+            {% endif %}
+            <div>{{ article.summary }}</div>
+            {% if article.content != article.summary %}
+                <a class="btn mt-3" href="{{ SITEURL }}/{{ article.url }}{% if not DISABLE_URL_HASH %}#{{ article.slug }}{% endif %}">
+                    続きを読む
+                </a>
+            {% endif %}
+        {% else %}
+            {{ article.content }}
+        {% endif %}
+    </div>
+    {% if not loop.last %}
+        <hr />
+    {% endif %}
+</article>
+{% endfor %}
+
+{% include "partial/pagination.html" %}
+
+{% endblock %}

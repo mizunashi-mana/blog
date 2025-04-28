@@ -30,11 +30,6 @@ jobs:
       with:
         node-version: 22
 
-    - name: Install stork
-      run: |
-        sudo wget -O /usr/local/bin/stork https://files.stork-search.net/releases/v1.6.0/stork-ubuntu-22-04
-        sudo chmod +x /usr/local/bin/stork
-
     - name: Cache poetry
       uses: actions/cache@v4
       with:

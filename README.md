@@ -1,6 +1,6 @@
 # Mizunashi Mana's Blog
 
-[![CircleCI](https://circleci.com/gh/mizunashi-mana/blog.svg?style=svg)](https://circleci.com/gh/mizunashi-mana/blog)
+[![CI Build](https://github.com/mizunashi-mana/blog/actions/workflows/build-for-ci.yml/badge.svg)](https://github.com/mizunashi-mana/blog/actions/workflows/build-for-ci.yml)
 
 Powered by pelican.
 
@@ -8,16 +8,14 @@ https://mizunashi-mana.github.io/blog/
 
 ## Requirements
 
-* poetry: https://python-poetry.org/docs/
-* npm: https://www.npmjs.com/get-npm
+* nix-direnv: https://github.com/nix-community/nix-direnv
 
 ## Installation
 
 ```bash
 git clone --recurse-submodules https://github.com/mizunashi-mana/blog.git
 cd blog
-poetry install
-npm install
+# install requirements automatically by nix-direnv
 make publish
 ```
 

@@ -1,15 +1,17 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+import path from 'path';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import SvgChunkWebpackPlugin from 'svg-chunk-webpack-plugin';
 
-module.exports = {
-    mode: 'production',
-
+export default {
+    mode: 'none',
+    target: 'web',
     entry: {
-        bundle: './frontend/index.ts',
+        app: './frontend/index.ts',
     },
     output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname, 'content/dist-asset')
+        filename: 'bundle.[name].js',
+        path: path.resolve(import.meta.dirname, 'content/dist-asset'),
+        clean: true,
     },
 
     resolve: {
@@ -24,7 +26,6 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
-                exclude: /node_modules/,
             },
             {
                 test: /\.(scss|css)$/,
@@ -36,12 +37,23 @@ module.exports = {
                     {
                         loader: 'postcss-loader',
                     },
-                ]
+                    {
+                        loader: 'sass-loader',
+                    },
+                ],
             },
             {
                 test: /\.(ttf|woff2?)$/,
                 type: 'asset/resource',
-            }
+            },
+            {
+                test: /\.svg$/,
+                use: [
+                    {
+                        loader: SvgChunkWebpackPlugin.loader
+                    },
+                ],
+            },
         ],
     },
 
@@ -51,12 +63,13 @@ module.exports = {
 
     plugins: [
         new MiniCssExtractPlugin({
-            filename: '[name].css'
-        })
+            filename: 'bundle.[name].css'
+        }),
+        new SvgChunkWebpackPlugin(),
     ],
 
     performance: {
-        maxEntrypointSize: 1024 * 1024,
+        maxEntrypointSize: 512 * 1024,
         maxAssetSize: 1024 * 1024,
     },
 };
