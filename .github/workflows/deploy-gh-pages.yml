@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     permissions:
       pages: write
@@ -31,11 +31,6 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: 22
-
-    - name: Install stork
-      run: |
-        sudo wget -O /usr/local/bin/stork https://files.stork-search.net/releases/v1.6.0/stork-ubuntu-22-04
-        sudo chmod +x /usr/local/bin/stork
 
     - name: Cache poetry
       uses: actions/cache@v4
@@ -67,9 +62,9 @@ jobs:
       run: make publish
 
     - name: Upload Pages artifact
-      uses: actions/upload-pages-artifact@v2
+      uses: actions/upload-pages-artifact@v3
       with:
         path: output/
 
     - name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v3
+      uses: actions/deploy-pages@v4
