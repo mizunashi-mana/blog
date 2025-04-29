@@ -2,10 +2,21 @@
     <div>
         <a href="{{ SITEURL }}/">
             {% if SITELOGO %}
-            <img src="{{ SITELOGO }}" alt="{{ SITETITLE }}" title="{{ SITETITLE }}">
+            <img
+                src="{{ SITELOGO }}"
+                alt="{{ SITETITLE }}"
+                title="{{ SITETITLE }}"
+                width="140"
+                height="140"
+                >
             {% else %}
-            <img src="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/img/profile.png" alt="{{ SITETITLE }}"
-                title="{{ SITETITLE }}">
+            <img
+                src="{{ SITEURL }}/{{ THEME_STATIC_DIR }}/img/profile.png"
+                alt="{{ SITETITLE }}"
+                title="{{ SITETITLE }}"
+                width="140"
+                height="140"
+                >
             {% endif %}
         </a>
 
