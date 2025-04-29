@@ -1,6 +1,5 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import SvgChunkWebpackPlugin from 'svg-chunk-webpack-plugin';
 
 export default {
     mode: 'none',
@@ -10,6 +9,7 @@ export default {
     },
     output: {
         filename: 'bundle.[name].js',
+        chunkFilename: 'bundle.[name].[contenthash].js',
         path: path.resolve(import.meta.dirname, 'content/dist-asset'),
         clean: true,
     },
@@ -43,33 +43,25 @@ export default {
                 ],
             },
             {
-                test: /\.(ttf|woff2?)$/,
+                test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
                 type: 'asset/resource',
-            },
-            {
-                test: /\.svg$/,
-                use: [
-                    {
-                        loader: SvgChunkWebpackPlugin.loader
-                    },
-                ],
             },
         ],
     },
 
     resolve: {
-        extensions: ['.tsx', '.ts', '.js'],
+        extensions: ['.tsx', '.ts', '.js', '.css', '.scss'],
     },
 
     plugins: [
         new MiniCssExtractPlugin({
-            filename: 'bundle.[name].css'
+            filename: 'bundle.[name].css',
+            chunkFilename: 'bundle.[name].[contenthash].css',
         }),
-        new SvgChunkWebpackPlugin(),
     ],
 
     performance: {
         maxEntrypointSize: 512 * 1024,
-        maxAssetSize: 1024 * 1024,
+        maxAssetSize: 512 * 1024,
     },
 };

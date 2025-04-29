@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from pelican import signals, contents, utils
-import datetime
+from datetime import datetime
 from .git_process import build_git_process, GitProcess
 
 git_proc = None
