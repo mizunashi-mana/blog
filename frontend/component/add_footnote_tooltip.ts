@@ -1,13 +1,13 @@
 import * as DeviceUtil from '../util/device';
 
-import Tippy from 'tippy.js';
-import 'tippy.js/themes/light-border.css';
-
-export function addFootnoteTooltip(): void {
+export async function addFootnoteTooltip(): Promise<void> {
     // disable tooltips on touch-enabled device
     if (DeviceUtil.isTouchDevice()) {
         return;
     }
+
+    await import('tippy.js/themes/light-border.css');
+    const { default: Tippy } = await import('tippy.js');
 
     let footnoteTitles: {[key: string]: string | undefined;} = {};
     document.querySelectorAll("table.docutils.footnote").forEach(e => {

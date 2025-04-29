@@ -153,7 +153,8 @@ main {
     }
 
     .pagination {
-        margin: 4% 8% 4% 8%;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
         height: 20px;
     }
 
@@ -164,7 +165,9 @@ main {
     }
 
     article {
-        margin: 0 8% 2% 8%;
+        margin: 0 auto;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
         line-height: 2.0;
 
         header {
@@ -243,7 +246,8 @@ main {
             font-size: .78em;
         }
 
-        tt, a {
+        tt,
+        a {
             overflow-wrap: break-word;
         }
 
@@ -594,25 +598,14 @@ ul.social {
     }
 }
 
-.ads-aside {
-    display: inline-block;
-    height: 90px;
-    width: 70%;
-}
-
-.ads-responsive {
-    display: inline-block;
-    margin: 6px 0 6px 0;
-    width: 90%;
-    height: 70px;
-    margin-left: 5%;
-}
-
 /* Desktop */
 
-@media screen and (min-width: 768px) {
+$aside-width: min(25vw, 300px);
+$content-max-width: 1020px;
+
+@media screen and (min-width: 1200px) {
     aside {
-        width: 25vw;
+        width: $aside-width;
         height: 100vh;
         position: fixed;
         z-index: 1000;
@@ -640,10 +633,14 @@ ul.social {
     main {
         height: 100vh;
         position: relative;
-        padding-left: 25vw;
+        padding-left: $aside-width;
+
+        .pagination {
+            max-width: $content-max-width;
+        }
 
         article {
-            max-width: 760px;
+            max-width: $content-max-width;
 
             ul.list {
                 li {
@@ -651,14 +648,6 @@ ul.social {
                 }
             }
         }
-    }
-
-    .ads-aside {
-        height: 250px;
-    }
-
-    .ads-responsive {
-        height: 90px;
     }
 }
 
@@ -824,4 +813,36 @@ div.figure.align-right {
 
 div.sharebuttons {
     display: flex;
+}
+
+dl.docutils dt {
+    padding: .5em;
+}
+
+table[class="docutils"] {
+    margin: auto;
+
+    th,
+    td {
+        border: 1px solid #ddd;
+    }
+
+    tbody {
+        tr {
+            background-color: #fff;
+        }
+
+        tr:nth-child(2n + 1) {
+            background-color: #f6f8fa;
+        }
+    }
+}
+
+table.docutils.footnote {
+    width: 100%;
+    table-layout: fixed;
+
+    td.label {
+        width: 2em;
+    }
 }

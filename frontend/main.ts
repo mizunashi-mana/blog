@@ -5,7 +5,7 @@ import './component/sentry_monitor';
 import * as addFootnoteTooltip from './component/add_footnote_tooltip';
 
 function onLoad(): void {
-    addFootnoteTooltip.addFootnoteTooltip();
+    void addFootnoteTooltip.addFootnoteTooltip();
 }
 
 /*!
