@@ -7,9 +7,7 @@
         "jsx": "react",
         "strict": true
     },
-    "exclude": [
-        "output",
-        "content/dist-asset",
-        "plugins/official"
+    "include": [
+        "theme/src",
     ]
 }

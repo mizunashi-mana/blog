@@ -5,12 +5,12 @@ export default {
     mode: 'none',
     target: 'web',
     entry: {
-        app: './frontend/index.ts',
+        app: './theme/src/index.ts',
     },
     output: {
         filename: 'bundle.[name].js',
         chunkFilename: 'bundle.[name].[contenthash].js',
-        path: path.resolve(import.meta.dirname, 'content/dist-asset'),
+        path: path.resolve(import.meta.dirname, 'theme/content/static/dist-assets'),
         clean: true,
     },
 
@@ -61,7 +61,6 @@ export default {
     ],
 
     performance: {
-        maxEntrypointSize: 512 * 1024,
         maxAssetSize: 512 * 1024,
     },
 };

@@ -8,9 +8,11 @@
 #  * etc.
 #
 
+/tmp/
+
 # for pelican
 /output/
-/content/dist-asset/
+/theme/content/static/dist-assets/
 
 # for python
 __pycache__/

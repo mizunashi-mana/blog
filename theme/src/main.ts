@@ -9,9 +9,11 @@ import './component/sentry_monitor';
 async function main(): Promise<void> {
     await import('./util/polyfills');
 
-    const addFootnoteTooltip = import('./component/add_footnote_tooltip');
     const onLoad = () => {
-        void (async () => await (await addFootnoteTooltip).addFootnoteTooltip())();
+        void (async () => {
+            const { addFootnoteTooltip } = await import('./component/add_footnote_tooltip');
+            await addFootnoteTooltip();
+        })();
     }
 
     /**
