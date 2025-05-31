@@ -1,6 +1,6 @@
 # Mizunashi Mana's Blog
 
-[![CI Build](https://github.com/mizunashi-mana/blog/actions/workflows/build-for-ci.yml/badge.svg)](https://github.com/mizunashi-mana/blog/actions/workflows/build-for-ci.yml)
+[![CI Build](https://github.com/mizunashi-mana/blog/actions/workflows/build.yml/badge.svg)](https://github.com/mizunashi-mana/blog/actions/workflows/build.yml)
 
 Powered by pelican.
 
@@ -8,7 +8,7 @@ https://mizunashi-mana.github.io/blog/
 
 ## Requirements
 
-* nix-direnv: https://github.com/nix-community/nix-direnv
+* devenv: https://devenv.sh/
 
 ## Installation
 

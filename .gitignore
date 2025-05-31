@@ -24,3 +24,13 @@ __pycache__/
 # for pdflatex
 *.log
 *.aux
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml

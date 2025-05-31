@@ -7,30 +7,34 @@ from __future__ import unicode_literals
 
 import os
 import sys
+
 sys.path.append(os.curdir)
 from pelicanconf import *  # noqa: F403
 from pelicanconf import SITELOGO, FAVICON, LINKS, SOCIAL
 
 # If your site is available via HTTPS, make sure SITEURL begins with https://
-SITEURL = 'https://mizunashi-mana.github.io/blog'
+SITEURL = "https://mizunashi-mana.github.io/blog"
 RELATIVE_URLS = False
 
+
 def add_site_url(path):
-  return SITEURL + path
+    return SITEURL + path
+
 
 def add_site_url_to_items(items):
-  new_items = []
-  for i, item in enumerate(items, start=1):
-    link = item['link']
-    if link[0] == '/':
-      link = add_site_url(link)
+    new_items = []
+    for i, item in enumerate(items, start=1):
+        link = item["link"]
+        if link[0] == "/":
+            link = add_site_url(link)
 
-    new_items.append({**item, 'link': link})
+        new_items.append({**item, "link": link})
 
-  return tuple(new_items)
+    return tuple(new_items)
 
-FEED_ALL_ATOM = 'feeds/all.atom.xml'
-CATEGORY_FEED_ATOM = 'feeds/{slug}.atom.xml'
+
+FEED_ALL_ATOM = "feeds/all.atom.xml"
+CATEGORY_FEED_ATOM = "feeds/{slug}.atom.xml"
 
 DELETE_OUTPUT_DIRECTORY = True
 
