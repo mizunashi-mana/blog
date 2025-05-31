@@ -62,17 +62,17 @@ GITHUB_CORNER_URL = GITHUB_URL
 
 # Blogroll
 LINKS = (
-    ('著者について', 'https://mizunashi-mana.github.io/profile'),
-    ('プライバシーポリシー', 'https://mizunashi-mana.github.io/profile/privacy-policy.html'),
+    { 'title': '著者について', 'link': 'https://mizunashi-mana.github.io/profile' },
+    { 'title': 'プライバシーポリシー', 'link': 'https://mizunashi-mana.github.io/profile/privacy-policy.html' },
 )
 
 # Social widget
 SOCIAL = (
-    ('envelope', 'mailto:contact@mizunashi.work'),
-    ('github', 'https://github.com/mizunashi-mana'),
-    ('gitlab', 'https://gitlab.com/mizunashi-mana'),
-    ('mastodon', 'https://ff.mizunashi.work/@me'),
-    ('rss', '/' + FEED_ALL_RSS),
+    { 'icon': 'envelope', 'link': 'mailto:contact@mizunashi.work', 'description': '連絡先メールアドレス' },
+    { 'icon': 'github', 'link': 'https://github.com/mizunashi-mana', 'description': 'GitHub' },
+    { 'icon': 'gitlab', 'link': 'https://gitlab.com/mizunashi-mana', 'description': 'GitLab' },
+    { 'icon': 'mastodon', 'link': 'https://ff.mizunashi.work/@me', 'description': 'Mastodon', 'relme': True },
+    { 'icon': 'rss', 'link': '/' + FEED_ALL_RSS, 'description': 'このブログのフィード' },
 )
 
 SITEMAP = {

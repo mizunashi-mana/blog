@@ -58,9 +58,9 @@
                 {% endfor %}
                 {% endif %}
 
-                {% for name, link in LINKS %}
+                {% for item in LINKS %}
                 <li>
-                    <a target="{{ get_target(link) }}" href="{{ link }}">{{ name }}</a>
+                    <a target="{{ get_target(item['link']) }}" href="{{ item['link'] }}">{{ item['title'] }}</a>
                 </li>
                 {% endfor %}
             </ul>
@@ -69,12 +69,21 @@
 
         {% if SOCIAL %}
         {% set solid = ['at', 'envelope', 'mailbox', 'rss'] %}
-        {% set relme = ['at', 'envelope', 'mailbox', 'mastodon'] %}
         <ul class="social">
-            {% for name, link in SOCIAL %}
+            {% for item in SOCIAL %}
             <li>
-                <a class="sc-{{ name }}" {% if name in relme %}rel="me" {% endif %} href="{{ link }}" target="_blank">
-                    <i class="{% if name in solid %}fa-solid{% else %}fa-brands{% endif %} fa-{{ name }}"></i>
+                <a
+                    class="sc-{{ item['icon'] }}"
+                    {% if item['relme'] %}rel="me" {% endif %}
+                    href="{{ item['link'] }}"
+                    target="_blank"
+                    title="{{ item['description'] }}"
+                    aria-label="{{ item['description'] }}"
+                >
+                    <i
+                        class="{% if item['icon'] in solid %}fa-solid{% else %}fa-brands{% endif %} fa-{{ item['icon'] }}"
+                        aria-hidden="true"
+                        ></i>
                 </a>
             </li>
             {% endfor %}

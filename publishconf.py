@@ -21,12 +21,11 @@ def add_site_url(path):
 def add_site_url_to_items(items):
   new_items = []
   for i, item in enumerate(items, start=1):
-    title = item[0]
-    link = item[1]
+    link = item['link']
     if link[0] == '/':
       link = add_site_url(link)
 
-    new_items.append((title, link))
+    new_items.append({**item, 'link': link})
 
   return tuple(new_items)
 
