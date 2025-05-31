@@ -74,7 +74,7 @@
             <li>
                 <a
                     class="sc-{{ item['icon'] }}"
-                    {% if item['relme'] %}rel="me" {% endif %}
+                    {% if item.get('relme', False) %}rel="me" {% endif %}
                     href="{{ item['link'] }}"
                     target="_blank"
                     title="{{ item['description'] }}"
