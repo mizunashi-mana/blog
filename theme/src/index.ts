@@ -1,4 +1,4 @@
 import './style/theme.scss';
 import './main';
-import('./style/github.scss');
-import('./style/pygments.scss');
+void import('./style/github.scss');
+void import('./style/pygments.scss');

@@ -5,5 +5,5 @@ export default {
     plugins: [
         postcssPresetEnv,
         autoprefixer,
-    ]
+    ],
 };

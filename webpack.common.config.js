@@ -18,14 +18,23 @@ export default {
         alias: {
             katex$: 'katex/dist/katex.mjs',
             katex: 'katex',
-        }
+        },
+        extensions: ['.tsx', '.ts', '.js', '.css', '.scss'],
     },
 
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: 'ts-loader',
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {},
+                    },
+                    {
+                        loader: 'ts-loader',
+                    },
+                ],
             },
             {
                 test: /\.(scss|css)$/,
@@ -47,10 +56,6 @@ export default {
                 type: 'asset/resource',
             },
         ],
-    },
-
-    resolve: {
-        extensions: ['.tsx', '.ts', '.js', '.css', '.scss'],
     },
 
     plugins: [

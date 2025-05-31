@@ -1,0 +1,6 @@
+exclude = [
+    ".venv",
+    "node_modules",
+    "output",
+    "plugins/official",
+]

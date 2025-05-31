@@ -9,16 +9,16 @@ export async function addFootnoteTooltip(): Promise<void> {
     await import('tippy.js/themes/light-border.css');
     const { default: Tippy } = await import('tippy.js');
 
-    let footnoteTitles: {[key: string]: string | undefined;} = {};
-    document.querySelectorAll("table.docutils.footnote").forEach(e => {
-        const eid = e.getAttribute("id");
+    const footnoteTitles: Record<string, string | undefined> = {};
+    document.querySelectorAll('table.docutils.footnote').forEach((e) => {
+        const eid = e.getAttribute('id');
         if (eid !== null) {
-            footnoteTitles[eid] = e.querySelector("td:not(.label)")?.innerHTML;
+            footnoteTitles[eid] = e.querySelector('td:not(.label)')?.innerHTML;
         }
-    })
+    });
 
-    document.querySelectorAll("a.footnote-reference").forEach(e => {
-        const reference = e.getAttribute("href")?.substring(1);
+    document.querySelectorAll('a.footnote-reference').forEach((e) => {
+        const reference = e.getAttribute('href')?.substring(1);
 
         if (reference !== undefined) {
             Tippy(e, {
@@ -30,5 +30,5 @@ export async function addFootnoteTooltip(): Promise<void> {
                 arrow: false,
             });
         }
-    })
+    });
 }

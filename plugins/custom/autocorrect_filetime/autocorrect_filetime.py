@@ -32,7 +32,7 @@ def autocorrect_date_by_filetime(content):
 
     try:
         committed_times = git_proc.get_committed_times(path)
-    except Exception as e:
+    except Exception:
         committed_times = {
             'first_commit_time': None,
             'last_commit_time': None
