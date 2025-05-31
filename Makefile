@@ -10,7 +10,6 @@ OUTPUTDIR=$(BASEDIR)/output
 PUBLICDIR=$(BASEDIR)/public
 CONFFILE=$(BASEDIR)/pelicanconf.py
 PUBLISHCONF=$(BASEDIR)/publishconf.py
-CONTNET_DIST_ASSET_DIR=$(BASEDIR)/content/dist-asset
 
 
 DEBUG ?= 0

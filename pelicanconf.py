@@ -19,11 +19,10 @@ SLUGIFY_SOURCE = 'basename'
 PAGE_ORDER_BY = 'basename'
 PAGES_SORT_ATTRIBUTE = 'source_path'
 
-THEME = 'theme'
+THEME = 'theme/content'
 PATH = 'content'
 STATIC_PATHS = [
     'asset',
-    'dist-asset',
     'articles', # mixed content
 ]
 ARTICLE_PATHS = ['articles']
