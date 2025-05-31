@@ -2,7 +2,7 @@
  * @license MIT https://github.com/alexandrevicenzi/Flex
  * Copyright (c) 2015 Alexandre Vicenzi
  */
-@use "variables";
+@use 'variables';
 
 html,
 body {
@@ -21,27 +21,27 @@ h6 {
 }
 
 h1 {
-    font-size: 2.4em
+    font-size: 2.4em;
 }
 
 h2 {
-    font-size: 2em
+    font-size: 2em;
 }
 
 h3 {
-    font-size: 1.6em
+    font-size: 1.6em;
 }
 
 h4 {
-    font-size: 1.36em
+    font-size: 1.36em;
 }
 
 h5 {
-    font-size: 1.2em
+    font-size: 1.2em;
 }
 
 h6 {
-    font-size: 1.1em
+    font-size: 1.1em;
 }
 
 body {
@@ -105,7 +105,7 @@ aside {
 
         p {
             margin: 0 0 15px;
-            font-size: .92em;
+            font-size: 0.92em;
         }
     }
 
@@ -161,7 +161,7 @@ main {
 
     .social-share {
         p {
-            font-size: .8em;
+            font-size: 0.8em;
         }
     }
 
@@ -169,7 +169,7 @@ main {
         margin: 0 auto;
         margin-bottom: 2rem;
         padding: 0 1rem;
-        line-height: 2.0;
+        line-height: 2;
 
         header {
             h1,
@@ -221,7 +221,7 @@ main {
 
         pre {
             padding: 4px;
-            font-size: .9em;
+            font-size: 0.9em;
             overflow-x: auto;
             line-height: 1.5em;
         }
@@ -233,16 +233,16 @@ main {
         }
 
         kbd {
-            padding: .1em .6em;
+            padding: 0.1em 0.6em;
             border: 1px solid rgb(63 63 63 / 25%);
             box-shadow: 0 1px 0 rgb(63 63 63 / 25%);
             background-color: #fff;
             color: #333;
             border-radius: 3px;
             display: inline-block;
-            margin: 0 .1em;
+            margin: 0 0.1em;
             white-space: nowrap;
-            font-size: .78em;
+            font-size: 0.78em;
         }
 
         tt,
@@ -259,8 +259,8 @@ main {
             }
         }
 
-        *:not(pre)>code {
-            font-size: .8em;
+        *:not(pre) > code {
+            font-size: 0.8em;
             white-space: nowrap;
             color: #c25;
             padding: 1px 3px;
@@ -270,7 +270,7 @@ main {
         }
 
         .comment-count {
-            font-size: .8em;
+            font-size: 0.8em;
         }
 
         table {
@@ -323,7 +323,7 @@ main {
             margin-top: 2em;
 
             .toctitle {
-                font-size: 1.3em
+                font-size: 1.3em;
             }
 
             ul {
@@ -331,7 +331,7 @@ main {
                 padding-inline-start: 1rem;
             }
 
-            >ul {
+            > ul {
                 padding: 0;
             }
         }
@@ -361,14 +361,14 @@ main {
 .tag-cloud {
     a {
         background-color: variables.$tag-bg;
-        padding: .2em .6em;
-        font-size: .74em;
+        padding: 0.2em 0.6em;
+        font-size: 0.74em;
         line-height: 1;
         color: variables.$tag-text-color;
         text-align: center;
         white-space: nowrap;
         vertical-align: baseline;
-        border-radius: .25em;
+        border-radius: 0.25em;
     }
 
     a:hover {
@@ -379,15 +379,15 @@ main {
 a.btn,
 section#isso-thread section.auth-section p.post-action input {
     background-color: variables.$btn-bg;
-    padding: .6em;
-    font-size: .8em;
+    padding: 0.6em;
+    font-size: 0.8em;
     line-height: 1;
     color: variables.$btn-text-color;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
     border: none;
-    border-radius: .25em;
+    border-radius: 0.25em;
 }
 
 a.btn:hover {
@@ -475,7 +475,7 @@ ul.social {
         height: 36px;
         border-radius: 100%;
         text-align: center;
-        font-size: .8em;
+        font-size: 0.8em;
         line-height: 36px;
         color: white;
     }
@@ -664,7 +664,7 @@ div.admonition {
         font-variant: normal;
         text-rendering: auto;
         /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-        font-family: "Font Awesome 5 Free";
+        font-family: 'Font Awesome 5 Free';
     }
 
     p.admonition-title {
@@ -813,10 +813,10 @@ div.sharebuttons {
 }
 
 dl.docutils dt {
-    padding: .5em;
+    padding: 0.5em;
 }
 
-table[class="docutils"] {
+table[class='docutils'] {
     margin: auto;
 
     th,

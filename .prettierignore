@@ -1,0 +1,14 @@
+.*
+node_modules
+output
+plugins/official
+
+**/*.js
+**/*.mjs
+**/*.ts
+**/*.tsx
+**/*.html
+**/*.md
+**/*.json
+**/*.lock
+**/*.yaml
