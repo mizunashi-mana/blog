@@ -99,12 +99,12 @@ aside {
         }
 
         h1 {
-            margin: 15px 0 5px 0;
+            margin: 15px 0 5px;
             font-size: 1em;
         }
 
         p {
-            margin: 0 0 15px 0;
+            margin: 0 0 15px;
             font-size: .92em;
         }
     }
@@ -125,7 +125,7 @@ main {
     nav {
         text-align: center;
         text-transform: uppercase;
-        padding: 14px 0 14px 0;
+        padding: 14px 0;
         border-bottom: variables.$nav-border-color 1px solid;
 
         /**
@@ -149,7 +149,7 @@ main {
     }
 
     .neighbors {
-        margin: 4% 0% 4% 0%;
+        margin: 4% 0%;
         height: 20px;
     }
 
@@ -172,7 +172,6 @@ main {
         line-height: 2.0;
 
         header {
-
             h1,
             h2 {
                 margin-bottom: 0;
@@ -193,8 +192,7 @@ main {
         }
 
         div.math.block {
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow: auto hidden;
             text-align: center;
         }
 
@@ -207,10 +205,10 @@ main {
 
         blockquote,
         pre {
-            background-color: rgba(128, 128, 128, 0.05);
+            background-color: rgb(128 128 128 / 5%);
             border-top-right-radius: 5px;
             border-bottom-right-radius: 5px;
-            border-left: 8px solid rgba(128, 128, 128, 0.075);
+            border-left: 8px solid rgb(128 128 128 / 7.5%);
             border-left-width: 10px;
         }
 
@@ -236,8 +234,8 @@ main {
 
         kbd {
             padding: .1em .6em;
-            border: 1px solid rgba(63, 63, 63, 0.25);
-            box-shadow: 0 1px 0 rgba(63, 63, 63, 0.25);
+            border: 1px solid rgb(63 63 63 / 25%);
+            box-shadow: 0 1px 0 rgb(63 63 63 / 25%);
             background-color: #fff;
             color: #333;
             border-radius: 3px;
@@ -298,14 +296,14 @@ main {
 
             td {
                 border-style: none;
-                padding: 0px;
+                padding: 0;
             }
 
             td.linenos {
                 width: 2.5em;
 
                 pre {
-                    border-left: 0px;
+                    border-left: 0;
                     padding-right: 0.8em;
                     background-color: inherit;
                     text-align: right;
@@ -346,7 +344,7 @@ main {
         p {
             margin: 2px;
             text-align: center;
-            padding: 0 40px 0 40px;
+            padding: 0 40px;
             color: variables.$footer-text-color;
             font-size: 11px;
         }
@@ -363,7 +361,7 @@ main {
 .tag-cloud {
     a {
         background-color: variables.$tag-bg;
-        padding: .2em .6em .2em;
+        padding: .2em .6em;
         font-size: .74em;
         line-height: 1;
         color: variables.$tag-text-color;
@@ -381,7 +379,7 @@ main {
 a.btn,
 section#isso-thread section.auth-section p.post-action input {
     background-color: variables.$btn-bg;
-    padding: .6em .6em;
+    padding: .6em;
     font-size: .8em;
     line-height: 1;
     color: variables.$btn-text-color;
@@ -422,13 +420,13 @@ a.btn:hover {
 }
 
 div.related-posts {
-    margin: 15px 0 15px 0;
+    margin: 15px 0;
     padding-bottom: 20px;
     border-top: variables.$rel-post-border-color 1px solid;
     border-bottom: variables.$rel-post-border-color 1px solid;
 
     h4 {
-        margin: 20px 0 25px 0;
+        margin: 20px 0 25px;
     }
 
     ul {
@@ -436,7 +434,7 @@ div.related-posts {
         padding-left: 12px;
 
         li {
-            padding: 4px 0 4px 0;
+            padding: 4px 0;
         }
     }
 }
@@ -450,7 +448,7 @@ ul.related-posts {
 }
 
 ul.list {
-    padding: 1em 0 1em 0;
+    padding: 1em 0;
 
     li {
         padding: 4px;
@@ -604,7 +602,7 @@ ul.social {
 $aside-width: min(25vw, 300px);
 $content-max-width: 1020px;
 
-@media screen and (min-width: 1200px) {
+@media screen and (width >= 1200px) {
     aside {
         width: $aside-width;
         height: 100vh;
@@ -656,13 +654,16 @@ $content-max-width: 1020px;
 div.admonition {
     margin-bottom: 2.5rem;
     border-radius: 4px;
-    padding: 0.5em 1.25em 1.25em 1.25em;
+    padding: 0.5em 1.25em 1.25em;
+    color: variables.$admonition-generic-color;
+    background-color: variables.$admonition-generic-bg-color;
 
     p.admonition-title::before {
         display: inline-block;
         font-style: normal;
         font-variant: normal;
         text-rendering: auto;
+        /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
         font-family: "Font Awesome 5 Free";
     }
 
@@ -678,11 +679,6 @@ div.admonition {
     pre {
         margin-bottom: 0;
     }
-}
-
-div.admonition {
-    color: variables.$admonition-generic-color;
-    background-color: variables.$admonition-generic-bg-color;
 }
 
 div.admonition.attention {

@@ -1,33 +1,44 @@
-import "core-js";
-
 // http://ajaxian.com/archives/creating-a-queryselector-for-ie-that-runs-at-native-speed
 
 if (!document.querySelectorAll) {
-    let querySelectorAllPolyfill = function (selectors: any) {
-        let styleElement: any = document.createElement('style');
+    const querySelectorAllPolyfill = function (selectors: string): HTMLElement[] {
+        const styleElement = document.createElement('style');
         document.documentElement.firstChild?.appendChild(styleElement);
-        (document as any)["__qsa_results"] = [];
 
-        styleElement["styleSheet"].cssText = selectors
-        + '{x-qsa:expression(document.__qsa_results && document.__qsa_results.push(this))}';
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const documentWithQsa: {
+            __qsa_results?: HTMLElement[] | null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } = document as any;
+        documentWithQsa.__qsa_results = [];
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        (styleElement as any).styleSheet.cssText = selectors
+            + '{x-qsa:expression(document.__qsa_results && document.__qsa_results.push(this))}';
         window.scrollBy(0, 0);
         styleElement.parentNode?.removeChild(styleElement);
 
-        const elements: unknown[] = [];
-        for (const element of (document as any)["__qsa_results"]) {
-            element.style.removeAttribute('x-qsa');
+        const elements: HTMLElement[] = [];
+        for (const element of documentWithQsa.__qsa_results) {
+            if ('removeAttribute' in element.style && typeof element.style.removeAttribute === 'function') {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                element.style.removeAttribute('x-qsa');
+            }
             elements.push(element);
         }
-        (document as any)["__qsa_results"] = null;
+        documentWithQsa.__qsa_results = null;
         return elements;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
     document.querySelectorAll = querySelectorAllPolyfill as any;
 }
 
 if (!document.querySelector) {
-    document.querySelector = function (selectors: any) {
-        let elements = document.querySelectorAll(selectors);
+    document.querySelector = function (selectors: string) {
+        const elements = document.querySelectorAll(selectors);
         return (elements.length > 0) ? elements[0] : null;
     };
 }
+
+export {};
