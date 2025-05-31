@@ -4,8 +4,8 @@
  */
 
 /* Flex colors */
-$orange: #D9411E;
-$light-orange: #FF5A09;
+$orange: #d9411e;
+$light-orange: #ff5a09;
 $white: #fff;
 $grey: #333;
 $light-grey: #eee;
@@ -15,8 +15,12 @@ $solid-dark-grey: #222;
 $very-dark-grey: #1a1a1a;
 
 /* Font family */
-$sans: 'Source Sans Pro', 'Roboto', 'Open Sans', 'Liberation Sans', 'DejaVu Sans', 'Verdana', 'Helvetica', 'Arial', sans-serif;
-$mono: 'Source Code Pro', 'Consolas', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+$sans:
+    'Source Sans Pro', 'Roboto', 'Open Sans', 'Liberation Sans', 'DejaVu Sans',
+    'Verdana', 'Helvetica', 'Arial', sans-serif;
+$mono:
+    'Source Code Pro', 'Consolas', 'Liberation Mono', 'DejaVu Sans Mono',
+    monospace;
 
 /* Body */
 $body-bg: $white;
@@ -82,10 +86,10 @@ $twitter-bg-color: #4da7de;
 $youtube-bg-color: #e02a20;
 $gitlab-bg-color: #fca326;
 $xing-bg-color: #007575;
-$bitbucket-bg-color: #0747A6;
+$bitbucket-bg-color: #0747a6;
 $mastodon-bg-color: #3088d4;
 $diaspora-color: #000;
-$diaspora-bg-color: #D5D5D5;
+$diaspora-bg-color: #d5d5d5;
 $flickr-bg-color: #ff0084;
 $lastfm-bg-color: #d92323;
 $sc-clipboard-bg-color: lightslategray;
@@ -102,7 +106,7 @@ $admonition-attention-color: #856404;
 $admonition-attention-color-dark-theme: #fbda7a;
 $admonition-attention-bg-color: #fff3cd;
 $admonition-attention-bg-color-dark-theme: #4a3900;
-$admonition-attention-icon: "\f071\00a0 ";
+$admonition-attention-icon: '\f071\00a0 ';
 $admonition-caution-color: $admonition-attention-color;
 $admonition-caution-color-dark-theme: $admonition-attention-color-dark-theme;
 $admonition-caution-bg-color: $admonition-attention-bg-color;
@@ -117,17 +121,17 @@ $admonition-danger-color: #721c24;
 $admonition-danger-color-dark-theme: #ebadb3;
 $admonition-danger-bg-color: #f8d7da;
 $admonition-danger-bg-color-dark-theme: #28070a;
-$admonition-danger-icon: "\f06a\00a0 ";
+$admonition-danger-icon: '\f06a\00a0 ';
 $admonition-error-color: $admonition-danger-color;
 $admonition-error-color-dark-theme: $admonition-danger-color-dark-theme;
 $admonition-error-bg-color: $admonition-danger-bg-color;
 $admonition-error-bg-color-dark-theme: $admonition-danger-bg-color-dark-theme;
 $admonition-error-icon: $admonition-danger-icon;
-$admonition-hint-color: #004085 ;
+$admonition-hint-color: #004085;
 $admonition-hint-color-dark-theme: #7abaff;
 $admonition-hint-bg-color: #cce5ff;
 $admonition-hint-bg-color-dark-theme: #001933;
-$admonition-hint-icon: "\f0eb\00a0 ";
+$admonition-hint-icon: '\f0eb\00a0 ';
 $admonition-tip-color: $admonition-hint-color;
 $admonition-tip-color-dark-theme: $admonition-hint-color-dark-theme;
 $admonition-tip-bg-color: $admonition-hint-bg-color;
@@ -137,7 +141,7 @@ $admonition-important-color: #155724;
 $admonition-important-color-dark-theme: #a8eab7;
 $admonition-important-bg-color: #d4edda;
 $admonition-important-bg-color-dark-theme: #122b18;
-$admonition-important-icon: "\f05a\00a0 ";
+$admonition-important-icon: '\f05a\00a0 ';
 $admonition-note-color: $admonition-important-color;
 $admonition-note-color-dark-theme: $admonition-important-color-dark-theme;
 $admonition-note-bg-color: $admonition-important-bg-color;

@@ -32,13 +32,14 @@
       settings.extensions = "\.(js|mjs|tsx?)$";
     };
     nixfmt-rfc-style.enable = true;
+    prettier.enable = true;
     ruff-format.enable = true;
+    shellcheck.enable = true;
+    taplo.enable = true;
     yamlfmt = {
       enable = true;
       settings.lint-only = false;
     };
-    shellcheck.enable = true;
-    taplo.enable = true;
   };
 
   # See full reference at https://devenv.sh/reference/options/
