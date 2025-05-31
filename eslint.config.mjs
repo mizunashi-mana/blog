@@ -10,7 +10,7 @@ export default [
         },
     },
     {
-        files: ['*.{js,mjs}'],
+        files: ['**/*.{js,mjs}'],
         languageOptions: {
             globals: {
                 ...globals.node,

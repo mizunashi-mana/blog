@@ -9,7 +9,7 @@ function katexRenderingPipe(instream, outstream) {
         const chunks = chunk.toString('utf8').split('\n');
         chunks[0] = chunkrest + chunks[0];
 
-        let l = chunks.length - 1
+        let l = chunks.length - 1;
         for (let i = 0; i < l; i++) {
             const content = JSON.parse(chunks[i]);
             if (typeof content !== 'object' || content === null) {
@@ -17,7 +17,7 @@ function katexRenderingPipe(instream, outstream) {
             }
 
             let opts = {
-                strict: (errorCode, errorMsg, _token) => {
+                strict: (errorCode, errorMsg) => {
                     console.error(`${errorCode}:${errorMsg}:${JSON.stringify(content)}`);
                 },
             };
@@ -26,15 +26,15 @@ function katexRenderingPipe(instream, outstream) {
             }
 
             outstream.write(JSON.stringify({
-                'r': KaTeX.renderToString(content.t, opts),
+                r: KaTeX.renderToString(content.t, opts),
             }));
-            outstream.write("\n");
+            outstream.write('\n');
         }
         chunkrest = chunks[l];
     }
 
-    instream.on("data", onData);
-    instream.on("end", () => {
+    instream.on('data', onData);
+    instream.on('end', () => {
         outstream.end('');
     });
 }

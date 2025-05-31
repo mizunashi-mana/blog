@@ -8,7 +8,7 @@ if (!document.querySelectorAll) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const documentWithQsa: {
             __qsa_results?: HTMLElement[] | null;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } = document as any;
         documentWithQsa.__qsa_results = [];
 

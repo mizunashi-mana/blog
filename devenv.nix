@@ -8,8 +8,10 @@
 {
   # https://devenv.sh/packages/
   packages = [
+    pkgs.gnumake
     pkgs.nodejs
     pkgs.python3
+    pkgs.poetry
     pkgs.rustc
   ];
 
@@ -25,10 +27,16 @@
   # https://devenv.sh/git-hooks/
   git-hooks.hooks = {
     actionlint.enable = true;
-    eslint.enable = true;
+    eslint = {
+      enable = true;
+      settings.extensions = "\.(js|mjs|tsx?)$";
+    };
     nixfmt-rfc-style.enable = true;
     ruff-format.enable = true;
-    yamlfmt.enable = true;
+    yamlfmt = {
+      enable = true;
+      settings.lint-only = false;
+    };
     shellcheck.enable = true;
     taplo.enable = true;
   };
