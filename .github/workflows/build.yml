@@ -23,12 +23,6 @@ jobs:
       - uses: cachix/cachix-action@v14
         with:
           name: devenv
-      - name: Cache nix
-        uses: actions/cache@v4
-        with:
-          key: devenv1-${{ runner.os }}-${{ hashFiles('**/devenv.lock') }}
-          path: |
-            /nix/store
       - name: Cache poetry
         uses: actions/cache@v4
         with:
