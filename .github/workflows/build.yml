@@ -49,3 +49,5 @@ jobs:
         run: |
           devenv shell make html
           devenv shell make publish
+        env:
+          LOCALE_ARCHIVE: /usr/lib/locale/locale-archive

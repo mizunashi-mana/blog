@@ -47,6 +47,8 @@ jobs:
         run: devenv shell npm ci
       - name: Build
         run: devenv shell make publish
+        env:
+          LOCALE_ARCHIVE: /usr/lib/locale/locale-archive
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
