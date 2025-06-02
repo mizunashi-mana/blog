@@ -9,6 +9,7 @@ plugins/official
 **/*.tsx
 **/*.html
 **/*.md
+**/*.rst
 **/*.json
 **/*.lock
 **/*.yaml
