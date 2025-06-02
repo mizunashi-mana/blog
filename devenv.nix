@@ -17,28 +17,40 @@
 
   # https://devenv.sh/languages/
   languages = {
-    javascript.enable = true;
     nix.enable = true;
-    python.enable = true;
-    python.poetry.enable = true;
-    typescript.enable = true;
   };
 
   # https://devenv.sh/git-hooks/
   git-hooks.hooks = {
     actionlint.enable = true;
-    eslint = {
-      enable = true;
-      settings.extensions = "\.(js|mjs|tsx?)$";
-    };
     nixfmt-rfc-style.enable = true;
-    prettier.enable = true;
-    ruff-format.enable = true;
     shellcheck.enable = true;
     taplo.enable = true;
     yamlfmt = {
       enable = true;
       settings.lint-only = false;
+    };
+
+    # custom hooks
+    eslint-npm = {
+      enable = true;
+      entry = "npx eslint --fix";
+      files = "\\.(js|mjs|ts|tsx)$";
+    };
+    prettier-npm = {
+      enable = true;
+      entry = "npx prettier --write";
+      files = "\\.(css|scss|sass|less)$";
+    };
+    ruff-format-poetry = {
+      enable = true;
+      entry = "poetry run ruff format";
+      types = [ "python" ];
+    };
+    stylelint-npm = {
+      enable = true;
+      entry = "npx stylelint --fix";
+      files = "\\.(css|scss|sass|less)$";
     };
   };
 
