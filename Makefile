@@ -49,7 +49,7 @@ js-build-dev:
 	$(WEBPACK) --config webpack.dev.config.js
 
 .PHONY: html-pelican
-html-pelican: js-build
+html-pelican: js-build-dev
 	$(PELICAN) $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 
 .PHONY: html
