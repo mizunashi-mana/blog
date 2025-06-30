@@ -11,7 +11,7 @@
     pkgs.gnumake
     pkgs.nodejs
     pkgs.python3
-    pkgs.poetry
+    pkgs.uv
     pkgs.rustc
   ];
 
@@ -42,9 +42,9 @@
       entry = "npx prettier --write";
       files = "\\.(css|scss|sass|less)$";
     };
-    ruff-format-poetry = {
+    ruff-format-uv = {
       enable = true;
-      entry = "poetry run ruff format";
+      entry = "uv run ruff format";
       types = [ "python" ];
     };
     stylelint-npm = {

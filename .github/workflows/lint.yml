@@ -10,33 +10,11 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v26
-      - uses: cachix/cachix-action@v14
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          name: devenv
-      - name: Cache poetry
-        uses: actions/cache@v4
-        with:
-          key: poetry1-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-          path: |
-            ~/.poetry
-            .venv
-      - name: Cache npm
-        uses: actions/cache@v4
-        with:
-          key: npm1-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          path: |
-            ~/.npm
-            node_modules
-      - name: Install by devenv
-        run: |
-          nix profile install nixpkgs#devenv
-          devenv shell echo
-      - name: Install Python packages
-        run: devenv shell poetry install --no-interaction --no-root
-      - name: Install npm packages
-        run: devenv shell npm ci
+          submodules: true
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-devenv
       - name: Run test
         run: devenv test
       - name: CSS Lint

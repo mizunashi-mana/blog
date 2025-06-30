@@ -1,5 +1,5 @@
 PY?=python3
-PELICAN?=poetry run pelican
+PELICAN?=uv run pelican
 WEBPACK?=npx webpack
 PELICANOPTS=
 CP=cp
