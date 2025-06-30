@@ -10,20 +10,20 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v26
-      - uses: cachix/cachix-action@v14
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: cachix/install-nix-action@f0fe604f8a612776892427721526b4c7cfb23aba # v31.4.1
+      - uses: cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad # v16
         with:
           name: devenv
-      - name: Cache poetry
-        uses: actions/cache@v4
+      - name: Cache uv
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          key: poetry1-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: uv1-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
           path: |
-            ~/.poetry
+            ~/.cache/uv
             .venv
       - name: Cache npm
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           key: npm1-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
           path: |
@@ -34,7 +34,7 @@ jobs:
           nix profile install nixpkgs#devenv
           devenv shell echo
       - name: Install Python packages
-        run: devenv shell poetry install --no-interaction --no-root
+        run: devenv shell uv sync
       - name: Install npm packages
         run: devenv shell npm ci
       - name: Run test

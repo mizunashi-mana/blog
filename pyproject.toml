@@ -1,20 +1,18 @@
-[tool.poetry]
+[project]
 name = "blog"
 version = "1.0.0"
 description = ""
-authors = ["Mizunashi Mana <contact@mizunashi.work>"]
-package-mode = false
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "beautifulsoup4>=4.13.4",
+  "gitpython>=3.1.44",
+  "pelican>=4.11.0",
+  "pygments>=2.18.0",
+]
 
-[tool.poetry.dependencies]
-python = ">= 3.12.0,<4"
-pelican = "^4.11.0"
-pygments = "^2.18.0"
-beautifulsoup4 = "^4.13.4"
-gitpython = "^3.1.44"
+[tool.uv]
+package = false
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.11.12"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = ["ruff>=0.12.1"]
