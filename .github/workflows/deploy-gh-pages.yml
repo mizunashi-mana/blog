@@ -10,41 +10,13 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - name: Enable ja_JP.UTF-8 locale
-        run: |
-          sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
-          sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
-          DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: true
           fetch-depth: 0
-      - uses: cachix/install-nix-action@f0fe604f8a612776892427721526b4c7cfb23aba # v31.4.1
-      - uses: cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad # v16
+      - uses: ./.github/actions/setup-devenv
         with:
-          name: devenv
-      - name: Cache uv
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        with:
-          key: uv1-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
-          path: |
-            ~/.cache/uv
-            .venv
-      - name: Cache npm
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        with:
-          key: npm1-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          path: |
-            ~/.npm
-            node_modules
-      - name: Install by devenv
-        run: |
-          nix profile install nixpkgs#devenv
-          devenv shell echo
-      - name: Install Python packages
-        run: devenv shell uv sync
-      - name: Install npm packages
-        run: devenv shell npm ci
+          with-locale: 'true'
       - name: Build
         run: devenv shell make publish
         env:
