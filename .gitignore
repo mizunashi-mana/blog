@@ -10,18 +10,18 @@
 
 /tmp/
 
-# for pelican
+# Pelican
 /output/
 /theme/content/static/dist-assets/
 
-# for python
+# Python
 __pycache__/
 *.pyc
 
-# for npm
+# npm
 /node_modules/
 
-# for pdflatex
+# pdflatex
 *.log
 *.aux
 
@@ -34,3 +34,7 @@ devenv.local.nix
 
 # pre-commit
 .pre-commit-config.yaml
+
+# Playwright
+/test-results/
+/playwright-report/

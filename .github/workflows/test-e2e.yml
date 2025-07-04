@@ -1,0 +1,37 @@
+name: CI E2E Test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-devenv
+        with:
+          with-locale: 'true'
+      - name: Install playwright browsers
+        run: devenv shell env -i "PATH=/usr/bin:$PATH" npx playwright install --with-deps
+      - name: Build site
+        run: |
+          devenv shell make html
+        env:
+          LOCALE_ARCHIVE: /usr/lib/locale/locale-archive
+      - name: Run Playwright tests
+        run: devenv shell npm test
+        env:
+          LOCALE_ARCHIVE: /usr/lib/locale/locale-archive
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

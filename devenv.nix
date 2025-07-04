@@ -9,15 +9,24 @@
   # https://devenv.sh/packages/
   packages = [
     pkgs.gnumake
-    pkgs.nodejs
-    pkgs.python3
-    pkgs.uv
     pkgs.rustc
   ];
 
   # https://devenv.sh/languages/
   languages = {
     nix.enable = true;
+    python = {
+      enable = true;
+      uv = {
+        enable = true;
+      };
+    };
+    javascript = {
+      enable = true;
+      npm = {
+        enable = true;
+      };
+    };
   };
 
   # https://devenv.sh/git-hooks/
