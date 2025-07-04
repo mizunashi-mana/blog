@@ -33,7 +33,7 @@ export default defineConfig({
     ],
 
     webServer: {
-        command: 'python -m http.server 8000 --directory output',
+        command: 'npx serve output --listen 8000',
         port: 8000,
         reuseExistingServer: !process.env.CI,
     },

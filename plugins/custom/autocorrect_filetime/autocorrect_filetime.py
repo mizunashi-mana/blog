@@ -27,7 +27,6 @@ def autocorrect_date_by_filetime(content):
         return
 
     if content.metadata.get("gittime", "true") != "true":
-        # Disable for this content
         return
 
     path = content.source_path
@@ -57,7 +56,6 @@ def autocorrect_date_by_filetime(content):
             fs_stat = os.stat(path)
         content.modified = datetime_from_timestamp(fs_stat.st_mtime, content)
 
-    # Clean up content attributes
     if not hasattr(content, "modified"):
         content.modified = content.date
 

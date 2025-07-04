@@ -39,16 +39,22 @@ export default [
         indent: 4,
         semi: true,
     }),
-    ...typescriptEslint.config(
-        typescriptEslint.configs.recommended,
-        typescriptEslint.configs.strict,
-        typescriptEslint.configs.recommendedTypeChecked,
-        typescriptEslint.configs.stylisticTypeChecked,
-        {
-            files: ['**/*.{js,mjs}'],
-            extends: [typescriptEslint.configs.disableTypeChecked],
+    {
+        files: ['theme/src/**/*', 'tests/**/*'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    patterns: [
+                        {
+                            group: ['./', '../'],
+                            message: '@で始まる絶対パスを使用してください。',
+                        },
+                    ],
+                },
+            ],
         },
-    ),
+    },
     {
         ...eslintPluginPlaywright.configs['flat/recommended'],
         files: ['tests/**/*'],
@@ -59,4 +65,14 @@ export default [
             'playwright/no-skipped-test': 'error',
         },
     },
+    ...typescriptEslint.config(
+        typescriptEslint.configs.recommended,
+        typescriptEslint.configs.strict,
+        typescriptEslint.configs.recommendedTypeChecked,
+        typescriptEslint.configs.stylisticTypeChecked,
+        {
+            files: ['**/*.{js,mjs}'],
+            extends: [typescriptEslint.configs.disableTypeChecked],
+        },
+    ),
 ];

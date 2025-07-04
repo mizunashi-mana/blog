@@ -3,7 +3,6 @@ import { test, expect, devices } from '@playwright/test';
 test.use(devices['Desktop Chrome']);
 test.describe('ツールチップ', () => {
     test('脚注のツールチップが作動すること', async ({ page }) => {
-        // CSSレイアウトの記事に直接アクセス（脚注を含む記事として確認済み）
         await page.goto('/posts/2023/10/display-property-of-css/');
         await page.waitForLoadState('domcontentloaded');
 
@@ -36,7 +35,6 @@ test.describe('ツールチップ', () => {
         const secondFootnote = footnoteLinks.nth(1);
         await expect(secondFootnote).toBeVisible();
 
-        // 前のツールチップを閉じるため少し待機
         await page.mouse.move(0, 0);
         await page.locator('[data-tippy-root] .tippy-box').waitFor({ state: 'hidden', timeout: 1000 }).catch(() => { /* timeout is acceptable */ });
 

@@ -5,7 +5,14 @@
         "module": "ESNext",
         "moduleResolution": "node",
         "jsx": "react",
-        "strict": true
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "declaration": false,
+        "paths": {
+            "@/*": [
+                "./theme/src/*"
+            ]
+        }
     },
     "include": [
         "theme/src",
