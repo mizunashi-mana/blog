@@ -67,16 +67,13 @@ make js-build
 
 # テスト実行
 npm test
-
-# UIモードでテスト
-npm run test:ui
 ```
 
 ### Linting・フォーマット
 
 ```bash
 # CSS lint
-npm run lint:css
+npx stylelint "theme/src/**/*.scss"
 
 # Python lint/format
 ruff check .
@@ -189,7 +186,7 @@ TypeScript設定。厳格な型チェック、ESNext対応。
 1. **ビルドエラー**: `make clean && make html`で再ビルド
 2. **JavaScript エラー**: ブラウザのDevToolsでデバッグ
 3. **CSS 表示崩れ**: `make js-build-dev`で再ビルド
-4. **テスト失敗**: `npm run test:debug`でデバッグ
+4. **テスト失敗**: `npm run test -- --debug`でデバッグ
 
 ### デバッグ方法
 
@@ -201,7 +198,7 @@ make DEBUG=1 html
 make devserver
 
 # テストのデバッグモード
-npm run test:debug
+npm run test -- --debug
 ```
 
 ## 本番環境への配置

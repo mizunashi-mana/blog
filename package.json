@@ -14,7 +14,6 @@
   "main": "theme/src/index.ts",
   "type": "module",
   "scripts": {
-    "lint:css": "stylelint 'theme/src/**/*.scss'",
     "test": "env -i \"PATH=/usr/bin:$PATH\" playwright test"
   },
   "dependencies": {

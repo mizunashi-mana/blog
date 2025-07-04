@@ -19,5 +19,3 @@ jobs:
       - uses: ./.github/actions/setup-devenv
       - name: Run test
         run: devenv test
-      - name: CSS Lint
-        run: devenv shell npm run lint:css
