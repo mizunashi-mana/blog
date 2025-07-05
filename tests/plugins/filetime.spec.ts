@@ -5,11 +5,9 @@ test.describe('双方向型検査記事の日時情報', () => {
         await page.goto('/posts/2023/02/bidirectional-typing/');
         await page.waitForLoadState('domcontentloaded');
 
-        // 記事ページであることを確認
         const article = page.locator('article');
         await expect(article).toBeVisible();
 
-        // タイトルの確認
         const title = page.locator('main h1').first();
         await expect(title).toHaveText('双方向型検査: 検査と構築の融合');
 
@@ -23,7 +21,6 @@ test.describe('双方向型検査記事の日時情報', () => {
         await page.goto('/posts/2023/02/bidirectional-typing/');
         await page.waitForLoadState('domcontentloaded');
 
-        // 記事ページであることを確認
         const article = page.locator('article');
         await expect(article).toBeVisible();
 
@@ -37,7 +34,6 @@ test.describe('双方向型検査記事の日時情報', () => {
         await page.goto('/posts/2023/02/bidirectional-typing/');
         await page.waitForLoadState('domcontentloaded');
 
-        // 記事ページであることを確認
         const article = page.locator('article');
         await expect(article).toBeVisible();
 

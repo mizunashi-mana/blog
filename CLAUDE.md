@@ -21,7 +21,7 @@
 - Pelican (静的サイトジェネレーター)
 - Python (プラグイン開発)
 - uv (Python依存関係管理)
-- Nix (開発環境管理)
+- devenv (Nix開発環境管理)
 
 **品質管理・テスト**
 - ESLint + Prettier (JavaScript/TypeScript)
@@ -76,11 +76,14 @@ npm test
 npx stylelint "theme/src/**/*.scss"
 
 # Python lint/format
-ruff check .
-ruff format .
+uv run ruff check .
+uv run ruff format .
 
 # TypeScript lint
 npx eslint theme/src/
+
+# すべての対象ファイルのフォーマット
+npx prettier --write .
 ```
 
 ## コーディング規約
@@ -91,23 +94,30 @@ npx eslint theme/src/
 
 ### 概要
 
-- **TypeScript/JavaScript**: ESLint + Prettier（4スペースインデント、セミコロン必須、シングルクォート）
+- **TypeScript/JavaScript**: ESLint Flat Config + Prettier（4スペースインデント、セミコロン必須、シングルクォート、絶対パス強制）
 - **SCSS**: Stylelint + Prettier（BEM命名規則、SCSS変数使用、テーマ対応）
 - **Python**: Ruff（Black準拠、型ヒント推奨、docstring必須）
+- **Git Hooks**: devenv.nixによる自動フォーマット（commit時）
 
 ## 重要な設定ファイル
 
 ### webpack.common.config.js
 フロントエンドビルドの基本設定。TypeScript、SCSS、アセット処理を定義。
 
-### playwright.config.ts
-E2Eテスト設定。ベースURL、ブラウザ設定、webServer設定を含む。
+### playwright.config.mjs
+E2Eテスト設定。ベースURL、ブラウザ設定、webServer設定を含む。ES Module形式で記述。
+
+### eslint.config.mjs
+ESLint設定。Flat Config形式でTypeScript、Playwright、スタイルルールを定義。
 
 ### pelicanconf.py
 Pelican設定。プラグイン、テーマ、URL構造を定義。
 
 ### tsconfig.json
-TypeScript設定。厳格な型チェック、ESNext対応。
+TypeScript設定。厳格な型チェック、ESNext対応、絶対パスエイリアス設定。
+
+### devenv.nix
+開発環境の定義。Python、Node.js、Git Hooksの設定を含む。自動フォーマット・リントを実行。
 
 ## 開発時の注意点
 
@@ -137,24 +147,14 @@ TypeScript設定。厳格な型チェック、ESNext対応。
 
 ## テスト方針
 
-### E2Eテスト (Playwright)
-
-現在以下のテストを実装済み：
-
-1. **ホームページのホワイトアウト防止**
-2. **JavaScriptエラー検出**
-3. **数式埋め込み記事の表示**
-4. **ボタンの反応**
-5. **脚注ツールチップの動作**
-6. **基本構造の確認**
-7. **レスポンシブデザイン**
-8. **アクセシビリティ基本要件**
+PlaywrightでのE2Eテストを中心に、フロントエンドの動作確認を行います。
 
 ### テスト実行環境
 
 - ベースURL: `http://localhost:8000`
-- 対象ブラウザ: Chrome、Firefox、Safari
-- 自動的にPythonサーバーを起動
+- 対象ブラウザ: Chrome、Safari、Mobile Chrome
+- 自動的にPython HTTPサーバーを起動
+- タイムアウト: 10秒、リトライあり、スクリーンショット機能あり
 
 ## 新機能開発時のガイドライン
 
@@ -199,6 +199,9 @@ make devserver
 
 # テストのデバッグモード
 npm run test -- --debug
+
+# テストの UI モード（開発時に便利）
+npm run test -- --ui
 ```
 
 ## 本番環境への配置
@@ -207,6 +210,23 @@ npm run test -- --debug
 2. `output/`ディレクトリが配置対象
 3. 静的ファイルホスティングサービスへアップロード
 4. GitHub Actions等でCI/CD可能
+
+## 開発環境の構築
+
+### Dev Container対応
+
+`.devcontainer/devcontainer.json`により、VS Code Dev Containerでの開発環境を提供。
+
+### devenv使用
+
+```bash
+# 開発環境に入る
+devenv shell
+
+# 開発環境でサーバー起動
+devenv shell
+make devserver
+```
 
 ---
 

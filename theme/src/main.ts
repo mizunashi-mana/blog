@@ -1,7 +1,7 @@
-import './lib/fontawesome';
-import './lib/katex';
-import './component/sentry_monitor';
-import './util/polyfills';
+import '@/lib/fontawesome';
+import '@/lib/katex';
+import '@/component/sentry_monitor';
+import '@/util/polyfills';
 
 /*!
  * @license MIT https://github.com/jquery/jquery
@@ -10,7 +10,7 @@ import './util/polyfills';
 function main(): void {
     const onLoad = () => {
         void (async () => {
-            const { addFootnoteTooltip } = await import('./component/add_footnote_tooltip');
+            const { addFootnoteTooltip } = await import('@/component/add_footnote_tooltip');
             await addFootnoteTooltip();
         })();
     };
@@ -32,8 +32,6 @@ function main(): void {
     }
     else {
         document.addEventListener('DOMContentLoaded', completed);
-
-        // A fallback to window.onload, that will always work
         window.addEventListener('load', completed);
     }
 }

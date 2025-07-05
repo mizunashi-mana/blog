@@ -1,7 +1,6 @@
-import * as DeviceUtil from '../util/device';
+import * as DeviceUtil from '@/util/device';
 
 export async function addFootnoteTooltip(): Promise<void> {
-    // disable tooltips on touch-enabled device
     if (DeviceUtil.isTouchDevice()) {
         return;
     }

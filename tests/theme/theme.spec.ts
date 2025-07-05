@@ -6,22 +6,17 @@ test.describe('テーマ', () => {
     test('ホームページがホワイトアウトしないこと', async ({ page }) => {
         await page.goto('/');
 
-        // ページが完全に読み込まれるまで待機
         await page.waitForLoadState('domcontentloaded');
 
-        // bodyが表示されていることを確認
         const body = page.locator('body');
         await expect(body).toBeVisible();
 
-        // メインコンテンツが表示されていることを確認
         const mainContent = page.locator('main, .content, article, body').first();
         await expect(mainContent).toBeVisible();
 
-        // タイトルが表示されていることを確認
         const title = page.locator('h1, .title').first();
         await expect(title).toBeVisible();
 
-        // ページが実際にコンテンツを持っていることを確認（ホワイトアウト防止）
         const hasContent = await page.evaluate((minElements) => {
             const body = document.body;
             const textContent = body.textContent ?? '';
@@ -35,14 +30,12 @@ test.describe('テーマ', () => {
     test('JavaScriptエラーが発生しないこと', async ({ page }) => {
         const jsErrors: string[] = [];
 
-        // コンソールエラーをキャッチ
         page.on('console', (msg) => {
             if (msg.type() === 'error') {
                 jsErrors.push(msg.text());
             }
         });
 
-        // 未処理のエラーをキャッチ
         page.on('pageerror', (error) => {
             jsErrors.push(error.message);
         });
@@ -50,7 +43,6 @@ test.describe('テーマ', () => {
         await page.goto('/');
         await page.waitForLoadState('domcontentloaded');
 
-        // JSエラーがないことを確認
         expect(jsErrors).toHaveLength(0);
     });
 
@@ -58,25 +50,20 @@ test.describe('テーマ', () => {
         await page.goto('/');
         await page.waitForLoadState('domcontentloaded');
 
-        // HTML基本構造の確認
         await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
         await expect(page).toHaveTitle(/続くといいな日記/);
 
-        // メタタグの確認
         const description = page.locator('meta[name="description"]');
         await expect(description).toHaveCount(1);
 
-        // ファビコンの確認
         const favicon = page.locator('link[rel*="icon"]');
         await expect(favicon.first()).toBeAttached();
 
-        // CSSファイルが読み込まれていることを確認
         const stylesheets = page.locator('link[rel="stylesheet"]');
         await expect(stylesheets.first()).toBeAttached();
     });
 
     test('レスポンシブデザインが機能すること', async ({ page }) => {
-    // デスクトップサイズでテスト
         await page.setViewportSize({ width: 1280, height: 720 });
         await page.goto('/');
         await page.waitForLoadState('domcontentloaded');
@@ -84,14 +71,11 @@ test.describe('テーマ', () => {
         const mainContent = page.locator('main, .content').first();
         await expect(mainContent).toBeVisible();
 
-        // モバイルサイズでテスト
         await page.setViewportSize({ width: 375, height: 667 });
         await mainContent.waitFor({ state: 'visible' });
 
-        // メインコンテンツが依然として表示されていることを確認
         await expect(mainContent).toBeVisible();
 
-        // タブレットサイズでテスト
         await page.setViewportSize({ width: 768, height: 1024 });
         await mainContent.waitFor({ state: 'visible' });
 

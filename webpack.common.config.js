@@ -1,5 +1,6 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 export default {
     mode: 'none',
@@ -15,11 +16,8 @@ export default {
     },
 
     resolve: {
-        alias: {
-            katex$: 'katex/dist/katex.mjs',
-            katex: 'katex',
-        },
         extensions: ['.tsx', '.ts', '.js', '.css', '.scss'],
+        plugins: [new TsconfigPathsPlugin()],
     },
 
     module: {
