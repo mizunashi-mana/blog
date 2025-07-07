@@ -1,4 +1,4 @@
-name: CI Lint
+name: CI Test
 on:
   push:
     branches:
@@ -7,7 +7,7 @@ on:
     branches:
       - master
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -17,5 +17,5 @@ jobs:
           submodules: true
           fetch-depth: 0
       - uses: ./.github/actions/setup-devenv
-      - name: Run lint
-        run: devenv test
+      - name: Run pytest
+        run: devenv shell uv run pytest
