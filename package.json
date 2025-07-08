@@ -17,7 +17,7 @@
     "test": "env -i \"PATH=/usr/bin:$PATH\" playwright test"
   },
   "dependencies": {
-    "@babel/runtime": "^7.27.4",
+    "@babel/runtime": "^7.27.6",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@sentry/browser": "^9.35.0",
     "core-js": "^3.43.0",
