@@ -16,17 +16,15 @@ class GitProcess(object):
             first_commit = commit
 
         return {
-            "first_commit_time": first_commit.committed_datetime
-            if first_commit
-            else None,
-            "last_commit_time": last_commit.committed_datetime if last_commit else None,
+            'first_commit_time': first_commit.committed_datetime if first_commit else None,
+            'last_commit_time': last_commit.committed_datetime if last_commit else None,
         }
 
 
 def build_git_process(repo_path: str) -> GitProcess:
     git = Git()
     git.update_environment(
-        GIT_CONFIG_NOSYSTEM="true", HOME=os.getcwd(), XDG_CONFIG_HOME=os.getcwd()
+        GIT_CONFIG_NOSYSTEM='true', HOME=os.getcwd(), XDG_CONFIG_HOME=os.getcwd()
     )
     repo = Repo(repo_path, search_parent_directories=True)
 

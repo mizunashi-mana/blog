@@ -1,3 +1,3 @@
 from .autocorrect_filetime import register
 
-__all__ = ["register"]
+__all__ = ['register']

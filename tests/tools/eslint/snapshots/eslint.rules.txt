@@ -1,0 +1,748 @@
+language: '@/js'
+languageOptions:
+    ecmaVersion: 2026
+    globals:
+        AbortController: false
+        AbortSignal: false
+        AsyncDisposableStack: false
+        Blob: false
+        BroadcastChannel: false
+        Buffer: false
+        ByteLengthQueuingStrategy: false
+        CloseEvent: false
+        CompressionStream: false
+        CountQueuingStrategy: false
+        Crypto: false
+        CryptoKey: false
+        CustomEvent: false
+        DOMException: false
+        DecompressionStream: false
+        DisposableStack: false
+        Event: false
+        EventTarget: false
+        File: false
+        FormData: false
+        Headers: false
+        MessageChannel: false
+        MessageEvent: false
+        MessagePort: false
+        Navigator: false
+        Performance: false
+        PerformanceEntry: false
+        PerformanceMark: false
+        PerformanceMeasure: false
+        PerformanceObserver: false
+        PerformanceObserverEntryList: false
+        PerformanceResourceTiming: false
+        ReadableByteStreamController: false
+        ReadableStream: false
+        ReadableStreamBYOBReader: false
+        ReadableStreamBYOBRequest: false
+        ReadableStreamDefaultController: false
+        ReadableStreamDefaultReader: false
+        Request: false
+        Response: false
+        SubtleCrypto: false
+        SuppressedError: false
+        TextDecoder: false
+        TextDecoderStream: false
+        TextEncoder: false
+        TextEncoderStream: false
+        TransformStream: false
+        TransformStreamDefaultController: false
+        URL: false
+        URLPattern: false
+        URLSearchParams: false
+        WebAssembly: false
+        WebSocket: false
+        WritableStream: false
+        WritableStreamDefaultController: false
+        WritableStreamDefaultWriter: false
+        __dirname: false
+        __filename: false
+        atob: false
+        btoa: false
+        clearImmediate: false
+        clearInterval: false
+        clearTimeout: false
+        console: false
+        crypto: false
+        exports: true
+        fetch: false
+        global: false
+        module: false
+        navigator: false
+        performance: false
+        process: false
+        queueMicrotask: false
+        require: false
+        setImmediate: false
+        setInterval: false
+        setTimeout: false
+        structuredClone: false
+    parser: typescript-eslint/parser@8.33.0
+    parserOptions:
+        program: null
+        project: false
+        projectService: false
+    sourceType: module
+linterOptions:
+    reportUnusedDisableDirectives: 2
+plugins: null
+rules:
+    '@stylistic/array-bracket-spacing':
+    - 2
+    - never
+    '@stylistic/arrow-parens':
+    - 2
+    - as-needed
+    -   requireForBlockBody: true
+    '@stylistic/arrow-spacing':
+    - 2
+    -   after: true
+        before: true
+    '@stylistic/block-spacing':
+    - 2
+    - always
+    '@stylistic/brace-style':
+    - 2
+    - stroustrup
+    -   allowSingleLine: true
+    '@stylistic/comma-dangle':
+    - 2
+    - always-multiline
+    '@stylistic/comma-spacing':
+    - 2
+    -   after: true
+        before: false
+    '@stylistic/comma-style':
+    - 2
+    - last
+    '@stylistic/computed-property-spacing':
+    - 2
+    - never
+    -   enforceForClassMembers: true
+    '@stylistic/dot-location':
+    - 2
+    - property
+    '@stylistic/eol-last':
+    - 2
+    '@stylistic/generator-star-spacing':
+    - 2
+    -   after: true
+        before: false
+    '@stylistic/indent':
+    - 2
+    - 4
+    -   ArrayExpression: 1
+        CallExpression:
+            arguments: 1
+        FunctionDeclaration:
+            body: 1
+            parameters: 1
+        FunctionExpression:
+            body: 1
+            parameters: 1
+        ImportDeclaration: 1
+        MemberExpression: 1
+        ObjectExpression: 1
+        SwitchCase: 1
+        VariableDeclarator: 1
+        flatTernaryExpressions: false
+        ignoreComments: false
+        ignoredNodes:
+        - TSUnionType
+        - TSIntersectionType
+        - TSTypeParameterInstantiation
+        - FunctionExpression > .params[decorators.length > 0]
+        - FunctionExpression > .params > :matches(Decorator, :not(:first-child))
+        offsetTernaryExpressions: true
+        offsetTernaryExpressionsOffsetCallExpressions: true
+        outerIIFEBody: 1
+        tabLength: 4
+    '@stylistic/indent-binary-ops':
+    - 2
+    - 4
+    '@stylistic/jsx-closing-bracket-location':
+    - 2
+    '@stylistic/jsx-closing-tag-location':
+    - 2
+    '@stylistic/jsx-curly-brace-presence':
+    - 2
+    -   propElementValues: always
+    '@stylistic/jsx-curly-newline':
+    - 2
+    '@stylistic/jsx-curly-spacing':
+    - 2
+    - never
+    '@stylistic/jsx-equals-spacing':
+    - 2
+    '@stylistic/jsx-first-prop-new-line':
+    - 2
+    '@stylistic/jsx-function-call-newline':
+    - 2
+    - multiline
+    '@stylistic/jsx-indent-props':
+    - 2
+    - 4
+    '@stylistic/jsx-max-props-per-line':
+    - 2
+    -   maximum: 1
+        when: multiline
+    '@stylistic/jsx-one-expression-per-line':
+    - 2
+    -   allow: single-child
+    '@stylistic/jsx-quotes':
+    - 2
+    '@stylistic/jsx-tag-spacing':
+    - 2
+    -   afterOpening: never
+        beforeClosing: never
+        beforeSelfClosing: always
+        closingSlash: never
+    '@stylistic/jsx-wrap-multilines':
+    - 2
+    -   arrow: parens-new-line
+        assignment: parens-new-line
+        condition: parens-new-line
+        declaration: parens-new-line
+        logical: parens-new-line
+        prop: parens-new-line
+        propertyValue: parens-new-line
+        return: parens-new-line
+    '@stylistic/key-spacing':
+    - 2
+    -   afterColon: true
+        beforeColon: false
+    '@stylistic/keyword-spacing':
+    - 2
+    -   after: true
+        before: true
+    '@stylistic/lines-between-class-members':
+    - 2
+    - always
+    -   exceptAfterOverload: true
+        exceptAfterSingleLine: true
+    '@stylistic/max-statements-per-line':
+    - 2
+    -   max: 1
+    '@stylistic/member-delimiter-style':
+    - 2
+    -   multiline:
+            delimiter: semi
+            requireLast: true
+        multilineDetection: brackets
+        overrides:
+            interface:
+                multiline:
+                    delimiter: semi
+                    requireLast: true
+        singleline:
+            delimiter: semi
+    '@stylistic/multiline-ternary':
+    - 2
+    - always-multiline
+    '@stylistic/new-parens':
+    - 2
+    '@stylistic/no-extra-parens':
+    - 2
+    - functions
+    '@stylistic/no-floating-decimal':
+    - 2
+    '@stylistic/no-mixed-operators':
+    - 2
+    -   allowSamePrecedence: true
+        groups:
+        -   - ==
+            - '!='
+            - ===
+            - '!=='
+            - '>'
+            - '>='
+            - <
+            - <=
+        -   - '&&'
+            - '||'
+        -   - in
+            - instanceof
+    '@stylistic/no-mixed-spaces-and-tabs':
+    - 2
+    '@stylistic/no-multi-spaces':
+    - 2
+    '@stylistic/no-multiple-empty-lines':
+    - 2
+    -   max: 1
+        maxBOF: 0
+        maxEOF: 0
+    '@stylistic/no-tabs':
+    - 2
+    '@stylistic/no-trailing-spaces':
+    - 2
+    '@stylistic/no-whitespace-before-property':
+    - 2
+    '@stylistic/object-curly-spacing':
+    - 2
+    - always
+    '@stylistic/operator-linebreak':
+    - 2
+    - before
+    '@stylistic/padded-blocks':
+    - 2
+    -   blocks: never
+        classes: never
+        switches: never
+    '@stylistic/quote-props':
+    - 2
+    - consistent-as-needed
+    '@stylistic/quotes':
+    - 2
+    - single
+    -   allowTemplateLiterals: true
+        avoidEscape: false
+    '@stylistic/rest-spread-spacing':
+    - 2
+    - never
+    '@stylistic/semi':
+    - 2
+    - always
+    '@stylistic/semi-spacing':
+    - 2
+    -   after: true
+        before: false
+    '@stylistic/space-before-blocks':
+    - 2
+    - always
+    '@stylistic/space-before-function-paren':
+    - 2
+    -   anonymous: always
+        asyncArrow: always
+        named: never
+    '@stylistic/space-in-parens':
+    - 2
+    - never
+    '@stylistic/space-infix-ops':
+    - 2
+    '@stylistic/space-unary-ops':
+    - 2
+    -   nonwords: false
+        words: true
+    '@stylistic/spaced-comment':
+    - 2
+    - always
+    -   block:
+            balanced: true
+            exceptions:
+            - '*'
+            markers:
+            - '!'
+        line:
+            exceptions:
+            - /
+            - '#'
+            markers:
+            - /
+    '@stylistic/template-curly-spacing':
+    - 2
+    '@stylistic/template-tag-spacing':
+    - 2
+    - never
+    '@stylistic/type-annotation-spacing':
+    - 2
+    - {}
+    '@stylistic/type-generic-spacing':
+    - 2
+    '@stylistic/type-named-tuple-spacing':
+    - 2
+    '@stylistic/wrap-iife':
+    - 2
+    - any
+    -   functionPrototypeMethods: true
+    '@stylistic/yield-star-spacing':
+    - 2
+    -   after: true
+        before: false
+    '@typescript-eslint/adjacent-overload-signatures':
+    - 2
+    '@typescript-eslint/array-type':
+    - 2
+    '@typescript-eslint/await-thenable':
+    - 0
+    '@typescript-eslint/ban-ts-comment':
+    - 2
+    -   minimumDescriptionLength: 10
+    '@typescript-eslint/ban-tslint-comment':
+    - 2
+    '@typescript-eslint/class-literal-property-style':
+    - 2
+    '@typescript-eslint/consistent-generic-constructors':
+    - 2
+    '@typescript-eslint/consistent-indexed-object-style':
+    - 2
+    '@typescript-eslint/consistent-return':
+    - 0
+    -   treatUndefinedAsUnspecified: false
+    '@typescript-eslint/consistent-type-assertions':
+    - 2
+    '@typescript-eslint/consistent-type-definitions':
+    - 2
+    '@typescript-eslint/consistent-type-exports':
+    - 0
+    '@typescript-eslint/dot-notation':
+    - 0
+    -   allowIndexSignaturePropertyAccess: false
+        allowKeywords: true
+        allowPattern: ''
+        allowPrivateClassPropertyAccess: false
+        allowProtectedClassPropertyAccess: false
+    '@typescript-eslint/naming-convention':
+    - 0
+    '@typescript-eslint/no-array-constructor':
+    - 2
+    '@typescript-eslint/no-array-delete':
+    - 0
+    '@typescript-eslint/no-base-to-string':
+    - 0
+    '@typescript-eslint/no-confusing-non-null-assertion':
+    - 2
+    '@typescript-eslint/no-confusing-void-expression':
+    - 0
+    '@typescript-eslint/no-deprecated':
+    - 0
+    '@typescript-eslint/no-duplicate-enum-values':
+    - 2
+    '@typescript-eslint/no-duplicate-type-constituents':
+    - 0
+    '@typescript-eslint/no-dynamic-delete':
+    - 2
+    '@typescript-eslint/no-empty-function':
+    - 2
+    -   allow: []
+    '@typescript-eslint/no-empty-object-type':
+    - 2
+    '@typescript-eslint/no-explicit-any':
+    - 2
+    '@typescript-eslint/no-extra-non-null-assertion':
+    - 2
+    '@typescript-eslint/no-extraneous-class':
+    - 2
+    '@typescript-eslint/no-floating-promises':
+    - 0
+    '@typescript-eslint/no-for-in-array':
+    - 0
+    '@typescript-eslint/no-implied-eval':
+    - 0
+    '@typescript-eslint/no-inferrable-types':
+    - 2
+    '@typescript-eslint/no-invalid-void-type':
+    - 2
+    '@typescript-eslint/no-meaningless-void-operator':
+    - 0
+    '@typescript-eslint/no-misused-new':
+    - 2
+    '@typescript-eslint/no-misused-promises':
+    - 0
+    '@typescript-eslint/no-misused-spread':
+    - 0
+    '@typescript-eslint/no-mixed-enums':
+    - 0
+    '@typescript-eslint/no-namespace':
+    - 2
+    '@typescript-eslint/no-non-null-asserted-nullish-coalescing':
+    - 2
+    '@typescript-eslint/no-non-null-asserted-optional-chain':
+    - 2
+    '@typescript-eslint/no-non-null-assertion':
+    - 2
+    '@typescript-eslint/no-redundant-type-constituents':
+    - 0
+    '@typescript-eslint/no-require-imports':
+    - 2
+    '@typescript-eslint/no-this-alias':
+    - 2
+    '@typescript-eslint/no-unnecessary-boolean-literal-compare':
+    - 0
+    '@typescript-eslint/no-unnecessary-condition':
+    - 0
+    '@typescript-eslint/no-unnecessary-qualifier':
+    - 0
+    '@typescript-eslint/no-unnecessary-template-expression':
+    - 0
+    '@typescript-eslint/no-unnecessary-type-arguments':
+    - 0
+    '@typescript-eslint/no-unnecessary-type-assertion':
+    - 0
+    '@typescript-eslint/no-unnecessary-type-constraint':
+    - 2
+    '@typescript-eslint/no-unnecessary-type-conversion':
+    - 0
+    '@typescript-eslint/no-unnecessary-type-parameters':
+    - 0
+    '@typescript-eslint/no-unsafe-argument':
+    - 0
+    '@typescript-eslint/no-unsafe-assignment':
+    - 0
+    '@typescript-eslint/no-unsafe-call':
+    - 0
+    '@typescript-eslint/no-unsafe-declaration-merging':
+    - 2
+    '@typescript-eslint/no-unsafe-enum-comparison':
+    - 0
+    '@typescript-eslint/no-unsafe-function-type':
+    - 2
+    '@typescript-eslint/no-unsafe-member-access':
+    - 0
+    '@typescript-eslint/no-unsafe-return':
+    - 0
+    '@typescript-eslint/no-unsafe-type-assertion':
+    - 0
+    '@typescript-eslint/no-unsafe-unary-minus':
+    - 0
+    '@typescript-eslint/no-unused-expressions':
+    - 2
+    -   allowShortCircuit: false
+        allowTaggedTemplates: false
+        allowTernary: false
+    '@typescript-eslint/no-unused-vars':
+    - 2
+    '@typescript-eslint/no-useless-constructor':
+    - 2
+    '@typescript-eslint/no-wrapper-object-types':
+    - 2
+    '@typescript-eslint/non-nullable-type-assertion-style':
+    - 0
+    '@typescript-eslint/only-throw-error':
+    - 0
+    '@typescript-eslint/prefer-as-const':
+    - 2
+    '@typescript-eslint/prefer-destructuring':
+    - 0
+    '@typescript-eslint/prefer-find':
+    - 0
+    '@typescript-eslint/prefer-for-of':
+    - 2
+    '@typescript-eslint/prefer-function-type':
+    - 2
+    '@typescript-eslint/prefer-includes':
+    - 0
+    '@typescript-eslint/prefer-literal-enum-member':
+    - 2
+    '@typescript-eslint/prefer-namespace-keyword':
+    - 2
+    '@typescript-eslint/prefer-nullish-coalescing':
+    - 0
+    '@typescript-eslint/prefer-optional-chain':
+    - 0
+    '@typescript-eslint/prefer-promise-reject-errors':
+    - 0
+    '@typescript-eslint/prefer-readonly':
+    - 0
+    '@typescript-eslint/prefer-readonly-parameter-types':
+    - 0
+    '@typescript-eslint/prefer-reduce-type-parameter':
+    - 0
+    '@typescript-eslint/prefer-regexp-exec':
+    - 0
+    '@typescript-eslint/prefer-return-this-type':
+    - 0
+    '@typescript-eslint/prefer-string-starts-ends-with':
+    - 0
+    '@typescript-eslint/promise-function-async':
+    - 0
+    '@typescript-eslint/related-getter-setter-pairs':
+    - 0
+    '@typescript-eslint/require-array-sort-compare':
+    - 0
+    '@typescript-eslint/require-await':
+    - 0
+    '@typescript-eslint/restrict-plus-operands':
+    - 0
+    '@typescript-eslint/restrict-template-expressions':
+    - 0
+    '@typescript-eslint/return-await':
+    - 0
+    '@typescript-eslint/strict-boolean-expressions':
+    - 0
+    '@typescript-eslint/switch-exhaustiveness-check':
+    - 0
+    '@typescript-eslint/triple-slash-reference':
+    - 2
+    '@typescript-eslint/unbound-method':
+    - 0
+    '@typescript-eslint/unified-signatures':
+    - 2
+    '@typescript-eslint/use-unknown-in-catch-callback-variable':
+    - 0
+    constructor-super:
+    - 2
+    dot-notation:
+    - 0
+    -   allowKeywords: true
+        allowPattern: ''
+    for-direction:
+    - 2
+    getter-return:
+    - 2
+    -   allowImplicit: false
+    no-array-constructor:
+    - 0
+    no-async-promise-executor:
+    - 2
+    no-case-declarations:
+    - 2
+    no-class-assign:
+    - 2
+    no-compare-neg-zero:
+    - 2
+    no-cond-assign:
+    - 2
+    - except-parens
+    no-const-assign:
+    - 2
+    no-constant-binary-expression:
+    - 2
+    no-constant-condition:
+    - 2
+    -   checkLoops: allExceptWhileTrue
+    no-control-regex:
+    - 2
+    no-debugger:
+    - 2
+    no-delete-var:
+    - 2
+    no-dupe-args:
+    - 2
+    no-dupe-class-members:
+    - 2
+    no-dupe-else-if:
+    - 2
+    no-dupe-keys:
+    - 2
+    no-duplicate-case:
+    - 2
+    no-empty:
+    - 2
+    -   allowEmptyCatch: false
+    no-empty-character-class:
+    - 2
+    no-empty-function:
+    - 0
+    -   allow: []
+    no-empty-pattern:
+    - 2
+    -   allowObjectPatternsAsParameters: false
+    no-empty-static-block:
+    - 2
+    no-ex-assign:
+    - 2
+    no-extra-boolean-cast:
+    - 2
+    - {}
+    no-fallthrough:
+    - 2
+    -   allowEmptyCase: false
+        reportUnusedFallthroughComment: false
+    no-func-assign:
+    - 2
+    no-global-assign:
+    - 2
+    -   exceptions: []
+    no-implied-eval:
+    - 0
+    no-import-assign:
+    - 2
+    no-invalid-regexp:
+    - 2
+    - {}
+    no-irregular-whitespace:
+    - 2
+    -   skipComments: false
+        skipJSXText: false
+        skipRegExps: false
+        skipStrings: true
+        skipTemplates: false
+    no-loss-of-precision:
+    - 2
+    no-misleading-character-class:
+    - 2
+    no-new-native-nonconstructor:
+    - 2
+    no-nonoctal-decimal-escape:
+    - 2
+    no-obj-calls:
+    - 2
+    no-octal:
+    - 2
+    no-prototype-builtins:
+    - 2
+    no-redeclare:
+    - 2
+    -   builtinGlobals: true
+    no-regex-spaces:
+    - 2
+    no-self-assign:
+    - 2
+    -   props: true
+    no-setter-return:
+    - 2
+    no-shadow-restricted-names:
+    - 2
+    -   reportGlobalThis: false
+    no-sparse-arrays:
+    - 2
+    no-this-before-super:
+    - 2
+    no-throw-literal:
+    - 0
+    no-undef:
+    - 2
+    -   typeof: false
+    no-unexpected-multiline:
+    - 2
+    no-unreachable:
+    - 2
+    no-unsafe-finally:
+    - 2
+    no-unsafe-negation:
+    - 2
+    -   enforceForOrderingRelations: false
+    no-unsafe-optional-chaining:
+    - 2
+    -   disallowArithmeticOperators: false
+    no-unused-expressions:
+    - 0
+    -   allowShortCircuit: false
+        allowTaggedTemplates: false
+        allowTernary: false
+        enforceForJSX: false
+        ignoreDirectives: false
+    no-unused-labels:
+    - 2
+    no-unused-private-class-members:
+    - 2
+    no-unused-vars:
+    - 0
+    no-useless-backreference:
+    - 2
+    no-useless-catch:
+    - 2
+    no-useless-constructor:
+    - 0
+    no-useless-escape:
+    - 2
+    -   allowRegexCharacters: []
+    no-with:
+    - 2
+    prefer-promise-reject-errors:
+    - 0
+    -   allowEmptyReject: false
+    require-await:
+    - 0
+    require-yield:
+    - 2
+    use-isnan:
+    - 2
+    -   enforceForIndexOf: false
+        enforceForSwitchCase: true
+    valid-typeof:
+    - 2
+    -   requireStringLiterals: false
