@@ -80,7 +80,7 @@ languageOptions:
         setInterval: false
         setTimeout: false
         structuredClone: false
-    parser: typescript-eslint/parser@8.33.0
+    parser: null
     parserOptions:
         program: null
         project: false

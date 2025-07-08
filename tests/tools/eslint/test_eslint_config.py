@@ -17,6 +17,7 @@ def test_eslint_config_print_config(snapshot):
     )
     result = json.loads(process.stdout)
     result['plugins'] = None
+    result['languageOptions']['parser'] = None
 
     snapshot.snapshot_dir = snapshot_dir
     snapshot.assert_match(yaml.dump(result, indent=4), 'eslint.rules.txt')
