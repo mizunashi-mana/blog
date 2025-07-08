@@ -35,7 +35,7 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-playwright": "^2.2.0",
     "file-loader": "^6.2.0",
-    "globals": "^16.2.0",
+    "globals": "^16.3.0",
     "mini-css-extract-plugin": "^2.9.2",
     "postcss-loader": "^8.1.1",
     "postcss-preset-env": "^10.2.4",
