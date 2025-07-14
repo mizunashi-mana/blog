@@ -43,7 +43,7 @@
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
     "serve": "^14.2.4",
-    "stylelint": "^16.20.0",
+    "stylelint": "^16.21.1",
     "stylelint-config-standard-scss": "^15.0.1",
     "stylelint-prettier": "^5.0.3",
     "ts-loader": "^9.5.2",
