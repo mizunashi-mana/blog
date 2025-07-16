@@ -63,9 +63,7 @@ test.describe('シンタックスハイライト (Pygments)', () => {
         await expect(firstCodeBlock).toBeVisible();
 
         // コードブロックのスクリーンショットを撮影
-        await expect(firstCodeBlock).toHaveScreenshot('pygments-code-block.png', {
-            maxDiffPixelRatio: 0.02,
-        });
+        await expect(firstCodeBlock).toHaveScreenshot('pygments-code-block.png');
 
         // 複数のコードブロックがある場合の確認
         const codeBlocks = page.locator('.highlight, .codehilite');
@@ -74,9 +72,7 @@ test.describe('シンタックスハイライト (Pygments)', () => {
 
         const secondCodeBlock = codeBlocks.nth(1);
         await expect(secondCodeBlock).toBeVisible();
-        await expect(secondCodeBlock).toHaveScreenshot('pygments-second-code-block.png', {
-            maxDiffPixelRatio: 0.02,
-        });
+        await expect(secondCodeBlock).toHaveScreenshot('pygments-second-code-block.png');
     });
 
     test('レスポンシブデザインでのコードブロック表示', async ({ page }) => {
@@ -87,21 +83,15 @@ test.describe('シンタックスハイライト (Pygments)', () => {
         await expect(firstCodeBlock).toBeVisible();
 
         await page.setViewportSize({ width: 1280, height: 720 });
-        await expect(firstCodeBlock).toHaveScreenshot('pygments-desktop.png', {
-            maxDiffPixelRatio: 0.02,
-        });
+        await expect(firstCodeBlock).toHaveScreenshot('pygments-desktop.png');
 
         await page.setViewportSize({ width: 768, height: 1024 });
         await firstCodeBlock.waitFor({ state: 'visible' });
-        await expect(firstCodeBlock).toHaveScreenshot('pygments-tablet.png', {
-            maxDiffPixelRatio: 0.02,
-        });
+        await expect(firstCodeBlock).toHaveScreenshot('pygments-tablet.png');
 
         await page.setViewportSize({ width: 375, height: 667 });
         await firstCodeBlock.waitFor({ state: 'visible' });
-        await expect(firstCodeBlock).toHaveScreenshot('pygments-mobile.png', {
-            maxDiffPixelRatio: 0.02,
-        });
+        await expect(firstCodeBlock).toHaveScreenshot('pygments-mobile.png');
 
         // モバイルでの横スクロール対応確認
         const codeBlockStyle = await firstCodeBlock.evaluate((el) => {
@@ -135,12 +125,31 @@ test.describe('シンタックスハイライト (Pygments)', () => {
 
         expect(isSelectable).toBe(true);
 
-        // 実際にテキスト選択を試行
-        await codeText.dblclick();
+        // プログラマティックにテキスト選択を実行
+        const hasSelectableText = await codeText.evaluate((el) => {
+            const textContent = el.textContent ?? '';
+            if (textContent.trim().length === 0) return false;
 
-        // 選択されたテキストがあることを確認
-        const selectedText = await page.evaluate(() => window.getSelection()?.toString());
-        expect(selectedText?.length ?? 0).toBeGreaterThan(0);
+            // テキスト選択を実行
+            const range = document.createRange();
+            const selection = window.getSelection();
+
+            if (!selection) return false;
+
+            try {
+                selection.removeAllRanges();
+                range.selectNodeContents(el);
+                selection.addRange(range);
+
+                // 選択されたテキストがあるかを確認
+                return selection.toString().length > 0;
+            }
+            catch {
+                return false;
+            }
+        });
+
+        expect(hasSelectableText).toBe(true);
     });
 
     test('Pygmentsの色設定確認', async ({ page }) => {

@@ -20,7 +20,7 @@ jobs:
         with:
           with-locale: 'true'
       - name: Install playwright browsers
-        run: devenv shell env -i "PATH=/usr/bin:$PATH" npx playwright install --with-deps
+        run: devenv shell ./scripts/playwright.sh install --with-deps
       - name: Build site
         run: |
           devenv shell make html
@@ -28,7 +28,7 @@ jobs:
           LOCALE_ARCHIVE: /usr/lib/locale/locale-archive
       - name: Run Playwright tests
         id: playwright-tests
-        run: devenv shell npm test
+        run: devenv shell ./scripts/playwright.sh test
         continue-on-error: true
         env:
           LOCALE_ARCHIVE: /usr/lib/locale/locale-archive
