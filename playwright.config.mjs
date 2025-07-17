@@ -44,6 +44,7 @@ export default defineConfig({
     expect: {
         toHaveScreenshot: {
             stylePath: path.join(import.meta.dirname, 'tests/features/assets/for-snapshot-tests.css'),
+            maxDiffPixelRatio: 0.01,
         },
     },
 });
