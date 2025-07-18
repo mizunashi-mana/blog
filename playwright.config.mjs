@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'node:path';
 
 export default defineConfig({
     testDir: './tests/features',
@@ -32,9 +33,18 @@ export default defineConfig({
         },
     ],
 
-    webServer: {
-        command: 'npx serve output --listen 8000',
-        port: 8000,
-        reuseExistingServer: !process.env.CI,
+    webServer: [
+        {
+            command: 'npx tsx ./scripts/test-server.ts',
+            port: 8000,
+            reuseExistingServer: !process.env.CI,
+        },
+    ],
+
+    expect: {
+        toHaveScreenshot: {
+            stylePath: path.join(import.meta.dirname, 'tests/features/assets/for-snapshot-tests.css'),
+            maxDiffPixelRatio: 0.01,
+        },
     },
 });

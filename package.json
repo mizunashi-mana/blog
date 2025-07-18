@@ -14,7 +14,7 @@
   "main": "theme/src/index.ts",
   "type": "module",
   "scripts": {
-    "test": "env -i \"PATH=/usr/bin:$PATH\" playwright test"
+    "test": "./scripts/playwright.sh test"
   },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
@@ -26,14 +26,16 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.28.0",
-    "@playwright/test": "^1.52.0",
+    "@playwright/test": "^1.54.0",
     "@stylistic/eslint-plugin": "^5.1.0",
+    "@types/express": "^5.0.3",
     "autoprefixer": "^10.4.21",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
     "eslint": "^9.31.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-playwright": "^2.2.0",
+    "express": "^5.1.0",
     "file-loader": "^6.2.0",
     "globals": "^16.3.0",
     "mini-css-extract-plugin": "^2.9.2",
@@ -42,12 +44,12 @@
     "prettier": "^3.6.2",
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
-    "serve": "^14.2.4",
     "stylelint": "^16.21.1",
     "stylelint-config-standard-scss": "^15.0.1",
     "stylelint-prettier": "^5.0.3",
     "ts-loader": "^9.5.2",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.36.0",
     "webpack": "^5.100.1",

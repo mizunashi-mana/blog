@@ -22,7 +22,7 @@ export default [
         },
     },
     {
-        files: ['theme/src/**/*', 'tests/**/*'],
+        files: ['theme/src/**/*', 'tests/**/*', 'scripts/**/*'],
         languageOptions: {
             globals: {
                 ...globals.commonjs,
