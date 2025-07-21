@@ -33,6 +33,13 @@
     };
   };
 
+  # https://devenv.sh/scripts/
+  scripts = {
+    install-all = {
+      exec = "uv sync && npm install";
+    };
+  };
+
   # https://devenv.sh/git-hooks/
   git-hooks.hooks = {
     actionlint.enable = true;
