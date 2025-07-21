@@ -140,9 +140,11 @@ rules:
         FunctionDeclaration:
             body: 1
             parameters: 1
+            returnType: 1
         FunctionExpression:
             body: 1
             parameters: 1
+            returnType: 1
         ImportDeclaration: 1
         MemberExpression: 1
         ObjectExpression: 1
@@ -297,7 +299,7 @@ rules:
     '@stylistic/quotes':
     - 2
     - single
-    -   allowTemplateLiterals: true
+    -   allowTemplateLiterals: always
         avoidEscape: false
     '@stylistic/rest-spread-spacing':
     - 2

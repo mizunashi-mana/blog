@@ -15,7 +15,8 @@ https://mizunashi-mana.github.io/blog/
 ```bash
 git clone --recurse-submodules https://github.com/mizunashi-mana/blog.git
 cd blog
-# install requirements automatically by nix-direnv
+devenv shell echo
+install-all
 make publish
 ```
 
