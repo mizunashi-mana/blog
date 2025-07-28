@@ -32,7 +32,7 @@
     "autoprefixer": "^10.4.21",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
-    "eslint": "^9.31.0",
+    "eslint": "^9.32.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-playwright": "^2.2.0",
     "express": "^5.1.0",
