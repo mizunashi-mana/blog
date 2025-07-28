@@ -17,7 +17,7 @@
     "test": "./scripts/playwright.sh test"
   },
   "dependencies": {
-    "@babel/runtime": "^7.27.6",
+    "@babel/runtime": "^7.28.2",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@sentry/browser": "^9.35.0",
     "core-js": "^3.44.0",
