@@ -18,4 +18,4 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/setup-devenv
       - name: Run lint
-        run: devenv test
+        run: devenv shell pre-commit run --all-files
