@@ -1,2818 +1,848 @@
-analyze.detect-string-imports:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to detect imports from string literals. When enabled, Ruff will
-        search for string
-
-        literals that "look like" import paths, and include them in the import map,
-        if they resolve
-
-        to valid Python modules.'
-    example: detect-string-imports = true
-    scope: null
-    value_type: bool
-analyze.direction:
-    default: '"dependencies"'
-    deprecated: null
-    doc: 'Whether to generate a map from file to files that it depends on (dependencies)
-        or files that
-
-        depend on it (dependents).'
-    example: direction = "dependencies"
-    scope: null
-    value_type: '"dependents" | "dependencies"'
-analyze.exclude:
-    default: '[]'
-    deprecated: null
-    doc: "A list of file patterns to exclude from analysis in addition to the files\
-        \ excluded globally (see [`exclude`](#exclude), and [`extend-exclude`](#extend-exclude)).\n\
-        \nExclusions are based on globs, and can be either:\n\n- Single-path patterns,\
-        \ like `.mypy_cache` (to exclude any directory\n  named `.mypy_cache` in the\
-        \ tree), `foo.py` (to exclude any file named\n  `foo.py`), or `foo_*.py` (to\
-        \ exclude any file matching `foo_*.py` ).\n- Relative patterns, like `directory/foo.py`\
-        \ (to exclude that specific\n  file) or `directory/*.py` (to exclude any Python\
-        \ files in\n  `directory`). Note that these paths are relative to the project\
-        \ root\n  (e.g., the directory containing your `pyproject.toml`).\n\nFor more\
-        \ information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax)."
-    example: exclude = ["generated"]
-    scope: null
-    value_type: list[str]
-analyze.include-dependencies:
-    default: '{}'
-    deprecated: null
-    doc: 'A map from file path to the list of Python or non-Python file paths or globs
-        that should be
-
-        considered dependencies of that file, regardless of whether relevant imports
-        are detected.'
-    example: '"foo/bar.py" = ["foo/baz/*.py"]
-
-        "foo/baz/reader.py" = ["configs/bar.json"]'
-    scope: include-dependencies
-    value_type: dict[str, list[str]]
-analyze.preview:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to enable preview mode. When preview mode is enabled, Ruff will
-        expose unstable
-
-        commands.'
-    example: '# Enable preview features.
-
-        preview = true'
-    scope: null
-    value_type: bool
-builtins:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of builtins to treat as defined references, in addition to the
-
-        system builtins.'
-    example: builtins = ["_"]
-    scope: null
-    value_type: list[str]
-cache-dir:
-    default: '".ruff_cache"'
-    deprecated: null
-    doc: 'A path to the cache directory.
-
-
-        By default, Ruff stores cache results in a `.ruff_cache` directory in
-
-        the current project root.
-
-
-        However, Ruff will also respect the `RUFF_CACHE_DIR` environment
-
-        variable, which takes precedence over that default.
-
-
-        This setting will override even the `RUFF_CACHE_DIR` environment
-
-        variable, if set.'
-    example: cache-dir = "~/.cache/ruff"
-    scope: null
-    value_type: str
-exclude:
-    default: '[".bzr", ".direnv", ".eggs", ".git", ".git-rewrite", ".hg", ".mypy_cache",
-        ".nox", ".pants.d", ".pytype", ".ruff_cache", ".svn", ".tox", ".venv", "__pypackages__",
-        "_build", "buck-out", "dist", "node_modules", "venv"]'
-    deprecated: null
-    doc: "A list of file patterns to exclude from formatting and linting.\n\nExclusions\
-        \ are based on globs, and can be either:\n\n- Single-path patterns, like `.mypy_cache`\
-        \ (to exclude any directory\n  named `.mypy_cache` in the tree), `foo.py`\
-        \ (to exclude any file named\n  `foo.py`), or `foo_*.py` (to exclude any file\
-        \ matching `foo_*.py` ).\n- Relative patterns, like `directory/foo.py` (to\
-        \ exclude that specific\n  file) or `directory/*.py` (to exclude any Python\
-        \ files in\n  `directory`). Note that these paths are relative to the project\
-        \ root\n  (e.g., the directory containing your `pyproject.toml`).\n\nFor more\
-        \ information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).\n\
-        \nNote that you'll typically want to use\n[`extend-exclude`](#extend-exclude)\
-        \ to modify the excluded paths."
-    example: exclude = [".venv"]
-    scope: null
-    value_type: list[str]
-extend:
-    default: 'null'
-    deprecated: null
-    doc: 'A path to a local `pyproject.toml` file to merge into this
-
-        configuration. User home directory and environment variables will be
-
-        expanded.
-
-
-        To resolve the current `pyproject.toml` file, Ruff will first resolve
-
-        this base configuration file, then merge in any properties defined
-
-        in the current configuration file.'
-    example: '# Extend the `pyproject.toml` file in the parent directory.
-
-        extend = "../pyproject.toml"
-
-        # But use a different line length.
-
-        line-length = 100'
-    scope: null
-    value_type: str
-extend-exclude:
-    default: '[]'
-    deprecated: null
-    doc: "A list of file patterns to omit from formatting and linting, in addition\
-        \ to those\nspecified by [`exclude`](#exclude).\n\nExclusions are based on\
-        \ globs, and can be either:\n\n- Single-path patterns, like `.mypy_cache`\
-        \ (to exclude any directory\n  named `.mypy_cache` in the tree), `foo.py`\
-        \ (to exclude any file named\n  `foo.py`), or `foo_*.py` (to exclude any file\
-        \ matching `foo_*.py` ).\n- Relative patterns, like `directory/foo.py` (to\
-        \ exclude that specific\n  file) or `directory/*.py` (to exclude any Python\
-        \ files in\n  `directory`). Note that these paths are relative to the project\
-        \ root\n  (e.g., the directory containing your `pyproject.toml`).\n\nFor more\
-        \ information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax)."
-    example: '# In addition to the standard set of exclusions, omit all tests, plus
-        a specific file.
-
-        extend-exclude = ["tests", "src/bad.py"]'
-    scope: null
-    value_type: list[str]
-extend-include:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of file patterns to include when linting, in addition to those
-
-        specified by [`include`](#include).
-
-
-        Inclusion are based on globs, and should be single-path patterns, like
-
-        `*.pyw`, to include any file with the `.pyw` extension.
-
-
-        For more information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: '# In addition to the standard set of inclusions, include `.pyw` files.
-
-        extend-include = ["*.pyw"]'
-    scope: null
-    value_type: list[str]
-fix:
-    default: 'false'
-    deprecated: null
-    doc: 'Enable fix behavior by-default when running `ruff` (overridden
-
-        by the `--fix` and `--no-fix` command-line flags).
-
-        Only includes automatic fixes unless `--unsafe-fixes` is provided.'
-    example: fix = true
-    scope: null
-    value_type: bool
-fix-only:
-    default: 'false'
-    deprecated: null
-    doc: Like [`fix`](#fix), but disables reporting on leftover violation. Implies
-        [`fix`](#fix).
-    example: fix-only = true
-    scope: null
-    value_type: bool
-force-exclude:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to enforce [`exclude`](#exclude) and [`extend-exclude`](#extend-exclude)
-        patterns,
-
-        even for paths that are passed to Ruff explicitly. Typically, Ruff will lint
-
-        any paths passed in directly, even if they would typically be
-
-        excluded. Setting `force-exclude = true` will cause Ruff to
-
-        respect these exclusions unequivocally.
-
-
-        This is useful for [`pre-commit`](https://pre-commit.com/), which explicitly
-        passes all
-
-        changed files to the [`ruff-pre-commit`](https://github.com/astral-sh/ruff-pre-commit)
-
-        plugin, regardless of whether they''re marked as excluded by Ruff''s own
-
-        settings.'
-    example: force-exclude = true
-    scope: null
-    value_type: bool
-format.docstring-code-format:
-    default: 'false'
-    deprecated: null
-    doc: "Whether to format code snippets in docstrings.\n\nWhen this is enabled,\
-        \ Python code examples within docstrings are\nautomatically reformatted.\n\
-        \nFor example, when this is enabled, the following code:\n\n```python\ndef\
-        \ f(x):\n    \"\"\"\n    Something about `f`. And an example in doctest format:\n\
-        \n    >>> f(  x  )\n\n    Markdown is also supported:\n\n    ```py\n    f(\
-        \  x  )\n    ```\n\n    As are reStructuredText literal blocks::\n\n     \
-        \   f(  x  )\n\n\n    And reStructuredText code blocks:\n\n    .. code-block::\
-        \ python\n\n        f(  x  )\n    \"\"\"\n    pass\n```\n\n... will be reformatted\
-        \ (assuming the rest of the options are set to\ntheir defaults) as:\n\n```python\n\
-        def f(x):\n    \"\"\"\n    Something about `f`. And an example in doctest\
-        \ format:\n\n    >>> f(x)\n\n    Markdown is also supported:\n\n    ```py\n\
-        \    f(x)\n    ```\n\n    As are reStructuredText literal blocks::\n\n   \
-        \     f(x)\n\n\n    And reStructuredText code blocks:\n\n    .. code-block::\
-        \ python\n\n        f(x)\n    \"\"\"\n    pass\n```\n\nIf a code snippet in\
-        \ a docstring contains invalid Python code or if the\nformatter would otherwise\
-        \ write invalid Python code, then the code\nexample is ignored by the formatter\
-        \ and kept as-is.\n\nCurrently, doctest, Markdown, reStructuredText literal\
-        \ blocks, and\nreStructuredText code blocks are all supported and automatically\n\
-        recognized. In the case of unlabeled fenced code blocks in Markdown and\n\
-        reStructuredText literal blocks, the contents are assumed to be Python\nand\
-        \ reformatted. As with any other format, if the contents aren't valid\nPython,\
-        \ then the block is left untouched automatically."
-    example: '# Enable reformatting of code snippets in docstrings.
-
-        docstring-code-format = true'
-    scope: null
-    value_type: bool
-format.docstring-code-line-length:
-    default: '"dynamic"'
-    deprecated: null
-    doc: "Set the line length used when formatting code snippets in docstrings.\n\n\
-        This only has an effect when the `docstring-code-format` setting is\nenabled.\n\
-        \nThe default value for this setting is `\"dynamic\"`, which has the effect\n\
-        of ensuring that any reformatted code examples in docstrings adhere to\nthe\
-        \ global line length configuration that is used for the surrounding\nPython\
-        \ code. The point of this setting is that it takes the indentation\nof the\
-        \ docstring into account when reformatting code examples.\n\nAlternatively,\
-        \ this can be set to a fixed integer, which will result\nin the same line\
-        \ length limit being applied to all reformatted code\nexamples in docstrings.\
-        \ When set to a fixed integer, the indent of the\ndocstring is not taken into\
-        \ account. That is, this may result in lines\nin the reformatted code example\
-        \ that exceed the globally configured\nline length limit.\n\nFor example,\
-        \ when this is set to `20` and [`docstring-code-format`](#docstring-code-format)\n\
-        is enabled, then this code:\n\n```python\ndef f(x):\n    '''\n    Something\
-        \ about `f`. And an example:\n\n    .. code-block:: python\n\n        foo,\
-        \ bar, quux = this_is_a_long_line(lion, hippo, lemur, bear)\n    '''\n   \
-        \ pass\n```\n\n... will be reformatted (assuming the rest of the options are\
-        \ set\nto their defaults) as:\n\n```python\ndef f(x):\n    \"\"\"\n    Something\
-        \ about `f`. And an example:\n\n    .. code-block:: python\n\n        (\n\
-        \            foo,\n            bar,\n            quux,\n        ) = this_is_a_long_line(\n\
-        \            lion,\n            hippo,\n            lemur,\n            bear,\n\
-        \        )\n    \"\"\"\n    pass\n```"
-    example: '# Format all docstring code snippets with a line length of 60.
-
-        docstring-code-line-length = 60'
-    scope: null
-    value_type: int | "dynamic"
-format.exclude:
-    default: '[]'
-    deprecated: null
-    doc: "A list of file patterns to exclude from formatting in addition to the files\
-        \ excluded globally (see [`exclude`](#exclude), and [`extend-exclude`](#extend-exclude)).\n\
-        \nExclusions are based on globs, and can be either:\n\n- Single-path patterns,\
-        \ like `.mypy_cache` (to exclude any directory\n  named `.mypy_cache` in the\
-        \ tree), `foo.py` (to exclude any file named\n  `foo.py`), or `foo_*.py` (to\
-        \ exclude any file matching `foo_*.py` ).\n- Relative patterns, like `directory/foo.py`\
-        \ (to exclude that specific\n  file) or `directory/*.py` (to exclude any Python\
-        \ files in\n  `directory`). Note that these paths are relative to the project\
-        \ root\n  (e.g., the directory containing your `pyproject.toml`).\n\nFor more\
-        \ information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax)."
-    example: exclude = ["generated"]
-    scope: null
-    value_type: list[str]
-format.indent-style:
-    default: '"space"'
-    deprecated: null
-    doc: "Whether to use spaces or tabs for indentation.\n\n`indent-style = \"space\"\
-        ` (default):\n\n```python\ndef f():\n    print(\"Hello\") #  Spaces indent\
-        \ the `print` statement.\n```\n\n`indent-style = \"tab\"`:\n\n```python\n\
-        def f():\n    print(\"Hello\") #  A tab `\\t` indents the `print` statement.\n\
-        ```\n\nPEP 8 recommends using spaces for [indentation](https://peps.python.org/pep-0008/#indentation).\n\
-        We care about accessibility; if you do not need tabs for accessibility, we\
-        \ do not recommend you use them.\n\nSee [`indent-width`](#indent-width) to\
-        \ configure the number of spaces per indentation and the tab width."
-    example: '# Use tabs instead of 4 space indentation.
-
-        indent-style = "tab"'
-    scope: null
-    value_type: '"space" | "tab"'
-format.line-ending:
-    default: '"auto"'
-    deprecated: null
-    doc: 'The character Ruff uses at the end of a line.
-
-
-        * `auto`: The newline style is detected automatically on a file per file basis.
-        Files with mixed line endings will be converted to the first detected line
-        ending. Defaults to `\n` for files that contain no line endings.
-
-        * `lf`: Line endings will be converted to `\n`. The default line ending on
-        Unix.
-
-        * `cr-lf`: Line endings will be converted to `\r\n`. The default line ending
-        on Windows.
-
-        * `native`: Line endings will be converted to `\n` on Unix and `\r\n` on Windows.'
-    example: '# Use `\n` line endings for all files
-
-        line-ending = "lf"'
-    scope: null
-    value_type: '"auto" | "lf" | "cr-lf" | "native"'
-format.preview:
-    default: 'false'
-    deprecated: null
-    doc: Whether to enable the unstable preview style formatting.
-    example: '# Enable preview style formatting.
-
-        preview = true'
-    scope: null
-    value_type: bool
-format.quote-style:
-    default: '"double"'
-    deprecated: null
-    doc: 'Configures the preferred quote character for strings. The recommended options
-        are
-
-
-        * `double` (default): Use double quotes `"`
-
-        * `single`: Use single quotes `''`
-
-
-        In compliance with [PEP 8](https://peps.python.org/pep-0008/) and [PEP 257](https://peps.python.org/pep-0257/),
-
-        Ruff prefers double quotes for triple quoted strings and docstrings even when
-        using `quote-style = "single"`.
-
-
-        Ruff deviates from using the configured quotes if doing so prevents the need
-        for
-
-        escaping quote characters inside the string:
-
-
-        ```python
-
-        a = "a string without any quotes"
-
-        b = "It''s monday morning"
-
-        ```
-
-
-        Ruff will change the quotes of the string assigned to `a` to single quotes
-        when using `quote-style = "single"`.
-
-        However, Ruff uses double quotes for the string assigned to `b` because using
-        single quotes would require escaping the `''`,
-
-        which leads to the less readable code: `''It\''s monday morning''`.
-
-
-        In addition, Ruff supports the quote style `preserve` for projects that already
-        use
-
-        a mixture of single and double quotes and can''t migrate to the `double` or
-        `single` style.
-
-        The quote style `preserve` leaves the quotes of all strings unchanged.'
-    example: '# Prefer single quotes over double quotes.
-
-        quote-style = "single"'
-    scope: null
-    value_type: '"double" | "single" | "preserve"'
-format.skip-magic-trailing-comma:
-    default: 'false'
-    deprecated: null
-    doc: "Ruff uses existing trailing commas as an indication that short lines should\
-        \ be left separate.\nIf this option is set to `true`, the magic trailing comma\
-        \ is ignored.\n\nFor example, Ruff leaves the arguments separate even though\n\
-        collapsing the arguments to a single line doesn't exceed the line length if\
-        \ `skip-magic-trailing-comma = false`:\n\n```python\n# The arguments remain\
-        \ on separate lines because of the trailing comma after `b`\ndef test(\n \
-        \   a,\n    b,\n): pass\n```\n\nSetting `skip-magic-trailing-comma = true`\
-        \ changes the formatting to:\n\n```python\n# The arguments remain on separate\
-        \ lines because of the trailing comma after `b`\ndef test(a, b):\n    pass\n\
-        ```"
-    example: skip-magic-trailing-comma = true
-    scope: null
-    value_type: bool
-include:
-    default: '["*.py", "*.pyi", "*.ipynb", "**/pyproject.toml"]'
-    deprecated: null
-    doc: 'A list of file patterns to include when linting.
-
-
-        Inclusion are based on globs, and should be single-path patterns, like
-
-        `*.pyw`, to include any file with the `.pyw` extension. `pyproject.toml` is
-
-        included here not for configuration but because we lint whether e.g. the
-
-        `[project]` matches the schema.
-
-
-        Notebook files (`.ipynb` extension) are included by default on Ruff 0.6.0+.
-
-
-        For more information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: include = ["*.py"]
-    scope: null
-    value_type: list[str]
-indent-width:
-    default: '4'
-    deprecated: null
-    doc: 'The number of spaces per indentation level (tab).
-
-
-        Used by the formatter and when enforcing long-line violations (like `E501`)
-        to determine the visual
-
-        width of a tab.
-
-
-        This option changes the number of spaces the formatter inserts when
-
-        using soft-tabs (`indent-style = space`).
-
-
-        PEP 8 recommends using 4 spaces per [indentation level](https://peps.python.org/pep-0008/#indentation).'
-    example: indent-width = 2
-    scope: null
-    value_type: int
-line-length:
-    default: '88'
-    deprecated: null
-    doc: 'The line length to use when enforcing long-lines violations (like `E501`)
-
-        and at which `isort` and the formatter prefers to wrap lines.
-
-
-        The length is determined by the number of characters per line, except for
-        lines containing East Asian characters or emojis.
-
-        For these lines, the [unicode width](https://unicode.org/reports/tr11/) of
-        each character is added up to determine the length.
-
-
-        The value must be greater than `0` and less than or equal to `320`.
-
-
-        Note: While the formatter will attempt to format lines such that they remain
-
-        within the `line-length`, it isn''t a hard upper bound, and formatted lines
-        may
-
-        exceed the `line-length`.
-
-
-        See [`pycodestyle.max-line-length`](#lint_pycodestyle_max-line-length) to
-        configure different lengths for `E501` and the formatter.'
-    example: '# Allow lines to be as long as 120.
-
-        line-length = 120'
-    scope: null
-    value_type: int
-lint.allowed-confusables:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of allowed "confusable" Unicode characters to ignore when
-
-        enforcing `RUF001`, `RUF002`, and `RUF003`.'
-    example: "# Allow minus-sign (U+2212), greek-small-letter-rho (U+03C1), and the\
-        \ asterisk-operator (U+2217),\n# which could be confused for \"-\", \"p\"\
-        , and \"*\", respectively.\nallowed-confusables = [\"\u2212\", \"\u03C1\"\
-        , \"\u2217\"]"
-    scope: null
-    value_type: list[str]
-lint.dummy-variable-rgx:
-    default: '"^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"'
-    deprecated: null
-    doc: 'A regular expression used to identify "dummy" variables, or those which
-
-        should be ignored when enforcing (e.g.) unused-variable rules. The
-
-        default expression matches `_`, `__`, and `_var`, but not `_var_`.'
-    example: '# Only ignore variables named "_".
-
-        dummy-variable-rgx = "^_$"'
-    scope: null
-    value_type: str
-lint.exclude:
-    default: '[]'
-    deprecated: null
-    doc: "A list of file patterns to exclude from linting in addition to the files\
-        \ excluded globally (see [`exclude`](#exclude), and [`extend-exclude`](#extend-exclude)).\n\
-        \nExclusions are based on globs, and can be either:\n\n- Single-path patterns,\
-        \ like `.mypy_cache` (to exclude any directory\n  named `.mypy_cache` in the\
-        \ tree), `foo.py` (to exclude any file named\n  `foo.py`), or `foo_*.py` (to\
-        \ exclude any file matching `foo_*.py` ).\n- Relative patterns, like `directory/foo.py`\
-        \ (to exclude that specific\n  file) or `directory/*.py` (to exclude any Python\
-        \ files in\n  `directory`). Note that these paths are relative to the project\
-        \ root\n  (e.g., the directory containing your `pyproject.toml`).\n\nFor more\
-        \ information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax)."
-    example: exclude = ["generated"]
-    scope: null
-    value_type: list[str]
-lint.explicit-preview-rules:
-    default: 'false'
-    deprecated: null
-    doc: "Whether to require exact codes to select preview rules. When enabled,\n\
-        preview rules will not be selected by prefixes \u2014 the full code of each\n\
-        preview rule will be required to enable the rule."
-    example: '# Require explicit selection of preview rules.
-
-        explicit-preview-rules = true'
-    scope: null
-    value_type: bool
-lint.extend-fixable:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of rule codes or prefixes to consider fixable, in addition to those
-
-        specified by [`fixable`](#lint_fixable).'
-    example: '# Enable fix for flake8-bugbear (`B`), on top of any rules specified
-        by `fixable`.
-
-        extend-fixable = ["B"]'
-    scope: null
-    value_type: list[RuleSelector]
-lint.extend-ignore:
-    default: '[]'
-    deprecated:
-        message: The `extend-ignore` option is now interchangeable with [`ignore`](#lint_ignore).
-            Please update your configuration to use the [`ignore`](#lint_ignore) option
-            instead.
-        since: null
-    doc: 'A list of rule codes or prefixes to ignore, in addition to those
-
-        specified by `ignore`.'
-    example: '# Skip unused variable rules (`F841`).
-
-        extend-ignore = ["F841"]'
-    scope: null
-    value_type: list[RuleSelector]
-lint.extend-per-file-ignores:
-    default: '{}'
-    deprecated: null
-    doc: 'A list of mappings from file pattern to rule codes or prefixes to
-
-        exclude, in addition to any rules excluded by [`per-file-ignores`](#lint_per-file-ignores).'
-    example: '# Also ignore `E402` in all `__init__.py` files.
-
-        "__init__.py" = ["E402"]'
-    scope: extend-per-file-ignores
-    value_type: dict[str, list[RuleSelector]]
-lint.extend-safe-fixes:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of rule codes or prefixes for which unsafe fixes should be considered
-
-        safe.'
-    example: '# Allow applying all unsafe fixes in the `E` rules and `F401` without
-        the `--unsafe-fixes` flag
-
-        extend-safe-fixes = ["E", "F401"]'
-    scope: null
-    value_type: list[RuleSelector]
-lint.extend-select:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of rule codes or prefixes to enable, in addition to those
-
-        specified by [`select`](#lint_select).'
-    example: '# On top of the default `select` (`E4`, E7`, `E9`, and `F`), enable
-        flake8-bugbear (`B`) and flake8-quotes (`Q`).
-
-        extend-select = ["B", "Q"]'
-    scope: null
-    value_type: list[RuleSelector]
-lint.extend-unsafe-fixes:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of rule codes or prefixes for which safe fixes should be considered
-
-        unsafe.'
-    example: '# Require the `--unsafe-fixes` flag when fixing the `E` rules and `F401`
-
-        extend-unsafe-fixes = ["E", "F401"]'
-    scope: null
-    value_type: list[RuleSelector]
-lint.external:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of rule codes or prefixes that are unsupported by Ruff, but should
-        be
-
-        preserved when (e.g.) validating `# noqa` directives. Useful for
-
-        retaining `# noqa` directives that cover plugins not yet implemented
-
-        by Ruff.'
-    example: '# Avoiding flagging (and removing) any codes starting with `V` from
-        any
-
-        # `# noqa` directives, despite Ruff''s lack of support for `vulture`.
-
-        external = ["V"]'
-    scope: null
-    value_type: list[str]
-lint.fixable:
-    default: '["ALL"]'
-    deprecated: null
-    doc: 'A list of rule codes or prefixes to consider fixable. By default,
-
-        all rules are considered fixable.'
-    example: '# Only allow fix behavior for `E` and `F` rules.
-
-        fixable = ["E", "F"]'
-    scope: null
-    value_type: list[RuleSelector]
-lint.flake8-annotations.allow-star-arg-any:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to suppress `ANN401` for dynamically typed `*args` and
-
-        `**kwargs` arguments.'
-    example: allow-star-arg-any = true
-    scope: null
-    value_type: bool
-lint.flake8-annotations.ignore-fully-untyped:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to suppress `ANN*` rules for any declaration
-
-        that hasn''t been typed at all.
-
-        This makes it easier to gradually add types to a codebase.'
-    example: ignore-fully-untyped = true
-    scope: null
-    value_type: bool
-lint.flake8-annotations.mypy-init-return:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to allow the omission of a return type hint for `__init__` if at
-
-        least one argument is annotated.'
-    example: mypy-init-return = true
-    scope: null
-    value_type: bool
-lint.flake8-annotations.suppress-dummy-args:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to suppress `ANN000`-level violations for arguments matching the
-
-        "dummy" variable regex (like `_`).'
-    example: suppress-dummy-args = true
-    scope: null
-    value_type: bool
-lint.flake8-annotations.suppress-none-returning:
-    default: 'false'
-    deprecated: null
-    doc: "Whether to suppress `ANN200`-level violations for functions that meet\n\
-        either of the following criteria:\n\n- Contain no `return` statement.\n- Explicit\
-        \ `return` statement(s) all return `None` (explicitly or\n  implicitly)."
-    example: suppress-none-returning = true
-    scope: null
-    value_type: bool
-lint.flake8-bandit.allowed-markup-calls:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of callable names, whose result may be safely passed into
-
-        [`markupsafe.Markup`](https://markupsafe.palletsprojects.com/en/stable/escaping/#markupsafe.Markup).
-
-
-        Expects to receive a list of fully-qualified names (e.g., `bleach.clean`,
-        rather than `clean`).
-
-
-        This setting helps you avoid false positives in code like:
-
-
-        ```python
-
-        from bleach import clean
-
-        from markupsafe import Markup
-
-
-        cleaned_markup = Markup(clean(some_user_input))
-
-        ```
-
-
-        Where the use of [`bleach.clean`](https://bleach.readthedocs.io/en/latest/clean.html)
-
-        usually ensures that there''s no XSS vulnerability.
-
-
-        Although it is not recommended, you may also use this setting to whitelist
-        other
-
-        kinds of calls, e.g. calls to i18n translation functions, where how safe that
-        is
-
-        will depend on the implementation and how well the translations are audited.
-
-
-        Another common use-case is to wrap the output of functions that generate markup
-
-        like [`xml.etree.ElementTree.tostring`](https://docs.python.org/3/library/xml.etree.elementtree.html#xml.etree.ElementTree.tostring)
-
-        or template rendering engines where sanitization of potential user input is
-        either
-
-        already baked in or has to happen before rendering.'
-    example: allowed-markup-calls = ["bleach.clean", "my_package.sanitize"]
-    scope: null
-    value_type: list[str]
-lint.flake8-bandit.check-typed-exception:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to disallow `try`-`except`-`pass` (`S110`) for specific
-
-        exception types. By default, `try`-`except`-`pass` is only
-
-        disallowed for `Exception` and `BaseException`.'
-    example: check-typed-exception = true
-    scope: null
-    value_type: bool
-lint.flake8-bandit.extend-markup-names:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of additional callable names that behave like
-
-        [`markupsafe.Markup`](https://markupsafe.palletsprojects.com/en/stable/escaping/#markupsafe.Markup).
-
-
-        Expects to receive a list of fully-qualified names (e.g., `webhelpers.html.literal`,
-        rather than
-
-        `literal`).'
-    example: extend-markup-names = ["webhelpers.html.literal", "my_package.Markup"]
-    scope: null
-    value_type: list[str]
-lint.flake8-bandit.hardcoded-tmp-directory:
-    default: '["/tmp", "/var/tmp", "/dev/shm"]'
-    deprecated: null
-    doc: A list of directories to consider temporary (see `S108`).
-    example: hardcoded-tmp-directory = ["/foo/bar"]
-    scope: null
-    value_type: list[str]
-lint.flake8-bandit.hardcoded-tmp-directory-extend:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of directories to consider temporary, in addition to those
-
-        specified by [`hardcoded-tmp-directory`](#lint_flake8-bandit_hardcoded-tmp-directory)
-        (see `S108`).'
-    example: hardcoded-tmp-directory-extend = ["/foo/bar"]
-    scope: null
-    value_type: list[str]
-lint.flake8-boolean-trap.extend-allowed-calls:
-    default: '[]'
-    deprecated: null
-    doc: 'Additional callable functions with which to allow boolean traps.
-
-
-        Expects to receive a list of fully-qualified names (e.g., `pydantic.Field`,
-        rather than
-
-        `Field`).'
-    example: extend-allowed-calls = ["pydantic.Field", "django.db.models.Value"]
-    scope: null
-    value_type: list[str]
-lint.flake8-bugbear.extend-immutable-calls:
-    default: '[]'
-    deprecated: null
-    doc: 'Additional callable functions to consider "immutable" when evaluating, e.g.,
-        the
-
-        `function-call-in-default-argument` rule (`B008`) or `function-call-in-dataclass-defaults`
-
-        rule (`RUF009`).
-
-
-        Expects to receive a list of fully-qualified names (e.g., `fastapi.Query`,
-        rather than
-
-        `Query`).'
-    example: '# Allow default arguments like, e.g., `data: List[str] = fastapi.Query(None)`.
-
-        extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]'
-    scope: null
-    value_type: list[str]
-lint.flake8-builtins.allowed-modules:
-    default: '[]'
-    deprecated: null
-    doc: List of builtin module names to allow.
-    example: allowed-modules = ["secrets"]
-    scope: null
-    value_type: list[str]
-lint.flake8-builtins.builtins-allowed-modules:
-    default: '[]'
-    deprecated:
-        message: '`builtins-allowed-modules` has been renamed to `allowed-modules`.
-            Use that instead.'
-        since: 0.10.0
-    doc: 'DEPRECATED: This option has been renamed to `allowed-modules`. Use `allowed-modules`
-        instead.
-
-
-        List of builtin module names to allow.
-
-
-        This option is ignored if both `allowed-modules` and `builtins-allowed-modules`
-        are set.'
-    example: builtins-allowed-modules = ["secrets"]
-    scope: null
-    value_type: list[str]
-lint.flake8-builtins.builtins-ignorelist:
-    default: '[]'
-    deprecated:
-        message: '`builtins-ignorelist` has been renamed to `ignorelist`. Use that
-            instead.'
-        since: 0.10.0
-    doc: 'DEPRECATED: This option has been renamed to `ignorelist`. Use `ignorelist`
-        instead.
-
-
-        Ignore list of builtins.
-
-
-        This option is ignored if both `ignorelist` and `builtins-ignorelist` are
-        set.'
-    example: builtins-ignorelist = ["id"]
-    scope: null
-    value_type: list[str]
-lint.flake8-builtins.builtins-strict-checking:
-    default: 'false'
-    deprecated:
-        message: '`builtins-strict-checking` has been renamed to `strict-checking`.
-            Use that instead.'
-        since: 0.10.0
-    doc: 'DEPRECATED: This option has been renamed to `strict-checking`. Use `strict-checking`
-        instead.
-
-
-        Compare module names instead of full module paths.
-
-
-        This option is ignored if both `strict-checking` and `builtins-strict-checking`
-        are set.'
-    example: builtins-strict-checking = true
-    scope: null
-    value_type: bool
-lint.flake8-builtins.ignorelist:
-    default: '[]'
-    deprecated: null
-    doc: Ignore list of builtins.
-    example: ignorelist = ["id"]
-    scope: null
-    value_type: list[str]
-lint.flake8-builtins.strict-checking:
-    default: 'false'
-    deprecated: null
-    doc: 'Compare module names instead of full module paths.
-
-
-        Used by [`A005` - `stdlib-module-shadowing`](https://docs.astral.sh/ruff/rules/stdlib-module-shadowing/).'
-    example: strict-checking = true
-    scope: null
-    value_type: bool
-lint.flake8-comprehensions.allow-dict-calls-with-keyword-arguments:
-    default: 'false'
-    deprecated: null
-    doc: Allow `dict` calls that make use of keyword arguments (e.g., `dict(a=1, b=2)`).
-    example: allow-dict-calls-with-keyword-arguments = true
-    scope: null
-    value_type: bool
-lint.flake8-copyright.author:
-    default: 'null'
-    deprecated: null
-    doc: 'Author to enforce within the copyright notice. If provided, the
-
-        author must be present immediately following the copyright notice.'
-    example: author = "Ruff"
-    scope: null
-    value_type: str
-lint.flake8-copyright.min-file-size:
-    default: '0'
-    deprecated: null
-    doc: 'A minimum file size (in bytes) required for a copyright notice to
-
-        be enforced. By default, all files are validated.'
-    example: '# Avoid enforcing a header on files smaller than 1024 bytes.
-
-        min-file-size = 1024'
-    scope: null
-    value_type: int
-lint.flake8-copyright.notice-rgx:
-    default: "\"(?i)Copyright\\s+((?:\\(C\\)|\xA9)\\s+)?\\d{4}((-|,\\s)\\d{4})*\""
-    deprecated: null
-    doc: "The regular expression used to match the copyright notice, compiled\nwith\
-        \ the [`regex`](https://docs.rs/regex/latest/regex/) crate.\nDefaults to `(?i)Copyright\\\
-        s+((?:\\(C\\)|\xA9)\\s+)?\\d{4}((-|,\\s)\\d{4})*`, which matches\nthe following:\n\
-        \n- `Copyright 2023`\n- `Copyright (C) 2023`\n- `Copyright 2021-2023`\n- `Copyright\
-        \ (C) 2021-2023`\n- `Copyright (C) 2021, 2023`"
-    example: notice-rgx = "(?i)Copyright \\(C\\) \\d{4}"
-    scope: null
-    value_type: str
-lint.flake8-errmsg.max-string-length:
-    default: '0'
-    deprecated: null
-    doc: Maximum string length for string literals in exception messages.
-    example: max-string-length = 20
-    scope: null
-    value_type: int
-lint.flake8-gettext.extend-function-names:
-    default: '[]'
-    deprecated: null
-    doc: 'Additional function names to consider as internationalization calls, in
-        addition to those
-
-        included in [`function-names`](#lint_flake8-gettext_function-names).'
-    example: extend-function-names = ["ugettetxt"]
-    scope: null
-    value_type: list[str]
-lint.flake8-gettext.function-names:
-    default: '["_", "gettext", "ngettext"]'
-    deprecated: null
-    doc: The function names to consider as internationalization calls.
-    example: function-names = ["_", "gettext", "ngettext", "ugettetxt"]
-    scope: null
-    value_type: list[str]
-lint.flake8-implicit-str-concat.allow-multiline:
-    default: 'true'
-    deprecated: null
-    doc: 'Whether to allow implicit string concatenations for multiline strings.
-
-        By default, implicit concatenations of multiline strings are
-
-        allowed (but continuation lines, delimited with a backslash, are
-
-        prohibited).
-
-
-        Setting `allow-multiline = false` will automatically disable the
-
-        `explicit-string-concatenation` (`ISC003`) rule. Otherwise, both
-
-        implicit and explicit multiline string concatenations would be seen
-
-        as violations, making it impossible to write a linter-compliant multiline
-
-        string.'
-    example: allow-multiline = false
-    scope: null
-    value_type: bool
-lint.flake8-import-conventions.aliases:
-    default: '{"altair": "alt", "matplotlib": "mpl", "matplotlib.pyplot": "plt", "numpy":
-        "np", "numpy.typing": "npt", "pandas": "pd", "seaborn": "sns", "tensorflow":
-        "tf", "tkinter":  "tk", "holoviews": "hv", "panel": "pn", "plotly.express":
-        "px", "polars": "pl", "pyarrow": "pa", "xml.etree.ElementTree": "ET"}'
-    deprecated: null
-    doc: 'The conventional aliases for imports. These aliases can be extended by
-
-        the [`extend-aliases`](#lint_flake8-import-conventions_extend-aliases) option.'
-    example: '# Declare the default aliases.
-
-        altair = "alt"
-
-        "matplotlib.pyplot" = "plt"
-
-        numpy = "np"
-
-        pandas = "pd"
-
-        seaborn = "sns"
-
-        scipy = "sp"'
-    scope: aliases
-    value_type: dict[str, str]
-lint.flake8-import-conventions.banned-aliases:
-    default: '{}'
-    deprecated: null
-    doc: A mapping from module to its banned import aliases.
-    example: '# Declare the banned aliases.
-
-        "tensorflow.keras.backend" = ["K"]'
-    scope: banned-aliases
-    value_type: dict[str, list[str]]
-lint.flake8-import-conventions.banned-from:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of modules that should not be imported from using the
-
-        `from ... import ...` syntax.
-
-
-        For example, given `banned-from = ["pandas"]`, `from pandas import DataFrame`
-
-        would be disallowed, while `import pandas` would be allowed.'
-    example: '# Declare the banned `from` imports.
-
-        banned-from = ["typing"]'
-    scope: null
-    value_type: list[str]
-lint.flake8-import-conventions.extend-aliases:
-    default: '{}'
-    deprecated: null
-    doc: 'A mapping from module to conventional import alias. These aliases will
-
-        be added to the [`aliases`](#lint_flake8-import-conventions_aliases) mapping.'
-    example: '# Declare a custom alias for the `dask` module.
-
-        "dask.dataframe" = "dd"'
-    scope: extend-aliases
-    value_type: dict[str, str]
-lint.flake8-pytest-style.fixture-parentheses:
-    default: 'false'
-    deprecated: null
-    doc: 'Boolean flag specifying whether `@pytest.fixture()` without parameters
-
-        should have parentheses. If the option is set to `false` (the default),
-
-        `@pytest.fixture` is valid and `@pytest.fixture()` is invalid. If set
-
-        to `true`, `@pytest.fixture()` is valid and `@pytest.fixture` is
-
-        invalid.'
-    example: fixture-parentheses = true
-    scope: null
-    value_type: bool
-lint.flake8-pytest-style.mark-parentheses:
-    default: 'false'
-    deprecated: null
-    doc: 'Boolean flag specifying whether `@pytest.mark.foo()` without parameters
-
-        should have parentheses. If the option is set to `false` (the
-
-        default), `@pytest.mark.foo` is valid and `@pytest.mark.foo()` is
-
-        invalid. If set to `true`, `@pytest.mark.foo()` is valid and
-
-        `@pytest.mark.foo` is invalid.'
-    example: mark-parentheses = true
-    scope: null
-    value_type: bool
-lint.flake8-pytest-style.parametrize-names-type:
-    default: tuple
-    deprecated: null
-    doc: "Expected type for multiple argument names in `@pytest.mark.parametrize`.\n\
-        The following values are supported:\n\n- `csv` \u2014 a comma-separated list,\
-        \ e.g.\n  `@pytest.mark.parametrize(\"name1,name2\", ...)`\n- `tuple` (default)\
-        \ \u2014 e.g.\n  `@pytest.mark.parametrize((\"name1\", \"name2\"), ...)`\n\
-        - `list` \u2014 e.g. `@pytest.mark.parametrize([\"name1\", \"name2\"], ...)`"
-    example: parametrize-names-type = "list"
-    scope: null
-    value_type: '"csv" | "tuple" | "list"'
-lint.flake8-pytest-style.parametrize-values-row-type:
-    default: tuple
-    deprecated: null
-    doc: "Expected type for each row of values in `@pytest.mark.parametrize` in\n\
-        case of multiple parameters. The following values are supported:\n\n- `tuple`\
-        \ (default) \u2014 e.g.\n  `@pytest.mark.parametrize((\"name1\", \"name2\"\
-        ), [(1, 2), (3, 4)])`\n- `list` \u2014 e.g.\n  `@pytest.mark.parametrize((\"\
-        name1\", \"name2\"), [[1, 2], [3, 4]])`"
-    example: parametrize-values-row-type = "list"
-    scope: null
-    value_type: '"tuple" | "list"'
-lint.flake8-pytest-style.parametrize-values-type:
-    default: list
-    deprecated: null
-    doc: "Expected type for the list of values rows in `@pytest.mark.parametrize`.\n\
-        The following values are supported:\n\n- `tuple` \u2014 e.g. `@pytest.mark.parametrize(\"\
-        name\", (1, 2, 3))`\n- `list` (default) \u2014 e.g. `@pytest.mark.parametrize(\"\
-        name\", [1, 2, 3])`"
-    example: parametrize-values-type = "tuple"
-    scope: null
-    value_type: '"tuple" | "list"'
-lint.flake8-pytest-style.raises-extend-require-match-for:
-    default: '[]'
-    deprecated: null
-    doc: 'List of additional exception names that require a match= parameter in a
-
-        `pytest.raises()` call. This extends the default list of exceptions
-
-        that require a match= parameter.
-
-        This option is useful if you want to extend the default list of
-
-        exceptions that require a match= parameter without having to specify
-
-        the entire list.
-
-        Note that this option does not remove any exceptions from the default
-
-        list.
-
-
-        Supports glob patterns. For more information on the glob syntax, refer
-
-        to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: raises-extend-require-match-for = ["requests.RequestException"]
-    scope: null
-    value_type: list[str]
-lint.flake8-pytest-style.raises-require-match-for:
-    default: '["BaseException", "Exception", "ValueError", "OSError", "IOError", "EnvironmentError",
-        "socket.error"]'
-    deprecated: null
-    doc: 'List of exception names that require a match= parameter in a
-
-        `pytest.raises()` call.
-
-
-        Supports glob patterns. For more information on the glob syntax, refer
-
-        to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: raises-require-match-for = ["requests.RequestException"]
-    scope: null
-    value_type: list[str]
-lint.flake8-pytest-style.warns-extend-require-match-for:
-    default: '[]'
-    deprecated: null
-    doc: 'List of additional warning names that require a match= parameter in a
-
-        `pytest.warns()` call. This extends the default list of warnings that
-
-        require a match= parameter.
-
-
-        This option is useful if you want to extend the default list of warnings
-
-        that require a match= parameter without having to specify the entire
-
-        list.
-
-
-        Note that this option does not remove any warnings from the default
-
-        list.
-
-
-        Supports glob patterns. For more information on the glob syntax, refer
-
-        to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: warns-extend-require-match-for = ["requests.RequestsWarning"]
-    scope: null
-    value_type: list[str]
-lint.flake8-pytest-style.warns-require-match-for:
-    default: '["Warning", "UserWarning", "DeprecationWarning"]'
-    deprecated: null
-    doc: 'List of warning names that require a match= parameter in a
-
-        `pytest.warns()` call.
-
-
-        Supports glob patterns. For more information on the glob syntax, refer
-
-        to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: warns-require-match-for = ["requests.RequestsWarning"]
-    scope: null
-    value_type: list[str]
-lint.flake8-quotes.avoid-escape:
-    default: 'true'
-    deprecated: null
-    doc: 'Whether to avoid using single quotes if a string contains single quotes,
-
-        or vice-versa with double quotes, as per [PEP 8](https://peps.python.org/pep-0008/#string-quotes).
-
-        This minimizes the need to escape quotation marks within strings.'
-    example: '# Don''t bother trying to avoid escapes.
-
-        avoid-escape = false'
-    scope: null
-    value_type: bool
-lint.flake8-quotes.docstring-quotes:
-    default: '"double"'
-    deprecated: null
-    doc: 'Quote style to prefer for docstrings (either "single" or "double").
-
-
-        When using the formatter, only "double" is compatible, as the formatter
-
-        enforces double quotes for docstrings strings.'
-    example: docstring-quotes = "single"
-    scope: null
-    value_type: '"single" | "double"'
-lint.flake8-quotes.inline-quotes:
-    default: '"double"'
-    deprecated: null
-    doc: 'Quote style to prefer for inline strings (either "single" or
-
-        "double").
-
-
-        When using the formatter, ensure that [`format.quote-style`](#format_quote-style)
-        is set to
-
-        the same preferred quote style.'
-    example: inline-quotes = "single"
-    scope: null
-    value_type: '"single" | "double"'
-lint.flake8-quotes.multiline-quotes:
-    default: '"double"'
-    deprecated: null
-    doc: 'Quote style to prefer for multiline strings (either "single" or
-
-        "double").
-
-
-        When using the formatter, only "double" is compatible, as the formatter
-
-        enforces double quotes for multiline strings.'
-    example: multiline-quotes = "single"
-    scope: null
-    value_type: '"single" | "double"'
-lint.flake8-self.extend-ignore-names:
-    default: '[]'
-    deprecated: null
-    doc: 'Additional names to ignore when considering `flake8-self` violations,
-
-        in addition to those included in [`ignore-names`](#lint_flake8-self_ignore-names).'
-    example: extend-ignore-names = ["_base_manager", "_default_manager",  "_meta"]
-    scope: null
-    value_type: list[str]
-lint.flake8-self.ignore-names:
-    default: '["_make", "_asdict", "_replace", "_fields", "_field_defaults", "_name_",
-        "_value_"]'
-    deprecated: null
-    doc: A list of names to ignore when considering `flake8-self` violations.
-    example: ignore-names = ["_new"]
-    scope: null
-    value_type: list[str]
-lint.flake8-tidy-imports.ban-relative-imports:
-    default: '"parents"'
-    deprecated: null
-    doc: 'Whether to ban all relative imports (`"all"`), or only those imports
-
-        that extend into the parent module or beyond (`"parents"`).'
-    example: '# Disallow all relative imports.
-
-        ban-relative-imports = "all"'
-    scope: null
-    value_type: '"parents" | "all"'
-lint.flake8-tidy-imports.banned-api:
-    default: '{}'
-    deprecated: null
-    doc: 'Specific modules or module members that may not be imported or accessed.
-
-        Note that this rule is only meant to flag accidental uses,
-
-        and can be circumvented via `eval` or `importlib`.'
-    example: '"cgi".msg = "The cgi module is deprecated, see https://peps.python.org/pep-0594/#cgi."
-
-        "typing.TypedDict".msg = "Use typing_extensions.TypedDict instead."'
-    scope: banned-api
-    value_type: 'dict[str, { "msg": str }]'
-lint.flake8-tidy-imports.banned-module-level-imports:
-    default: '[]'
-    deprecated: null
-    doc: 'List of specific modules that may not be imported at module level, and should
-        instead be
-
-        imported lazily (e.g., within a function definition, or an `if TYPE_CHECKING:`
-
-        block, or some other nested context).'
-    example: '# Ban certain modules from being imported at module level, instead requiring
-
-        # that they''re imported lazily (e.g., within a function definition).
-
-        banned-module-level-imports = ["torch", "tensorflow"]'
-    scope: null
-    value_type: list[str]
-lint.flake8-type-checking.exempt-modules:
-    default: '["typing"]'
-    deprecated: null
-    doc: 'Exempt certain modules from needing to be moved into type-checking
-
-        blocks.'
-    example: exempt-modules = ["typing", "typing_extensions"]
-    scope: null
-    value_type: list[str]
-lint.flake8-type-checking.quote-annotations:
-    default: 'false'
-    deprecated: null
-    doc: "Whether to add quotes around type annotations, if doing so would allow\n\
-        the corresponding import to be moved into a type-checking block.\n\nFor example,\
-        \ in the following, Python requires that `Sequence` be\navailable at runtime,\
-        \ despite the fact that it's only used in a type\nannotation:\n\n```python\n\
-        from collections.abc import Sequence\n\n\ndef func(value: Sequence[int]) ->\
-        \ None:\n    ...\n```\n\nIn other words, moving `from collections.abc import\
-        \ Sequence` into an\n`if TYPE_CHECKING:` block above would cause a runtime\
-        \ error, as the\ntype would no longer be available at runtime.\n\nBy default,\
-        \ Ruff will respect such runtime semantics and avoid moving\nthe import to\
-        \ prevent such runtime errors.\n\nSetting `quote-annotations` to `true` will\
-        \ instruct Ruff to add quotes\naround the annotation (e.g., `\"Sequence[int]\"\
-        `), which in turn enables\nRuff to move the import into an `if TYPE_CHECKING:`\
-        \ block, like so:\n\n```python\nfrom typing import TYPE_CHECKING\n\nif TYPE_CHECKING:\n\
-        \    from collections.abc import Sequence\n\n\ndef func(value: \"Sequence[int]\"\
-        ) -> None:\n    ...\n```\n\nNote that this setting has no effect when `from\
-        \ __future__ import annotations`\nis present, as `__future__` annotations\
-        \ are always treated equivalently\nto quoted annotations."
-    example: '# Add quotes around type annotations, if doing so would allow
-
-        # an import to be moved into a type-checking block.
-
-        quote-annotations = true'
-    scope: null
-    value_type: bool
-lint.flake8-type-checking.runtime-evaluated-base-classes:
-    default: '[]'
-    deprecated: null
-    doc: 'Exempt classes that list any of the enumerated classes as a base class
-
-        from needing to be moved into type-checking blocks.
-
-
-        Common examples include Pydantic''s `pydantic.BaseModel` and SQLAlchemy''s
-
-        `sqlalchemy.orm.DeclarativeBase`, but can also support user-defined
-
-        classes that inherit from those base classes. For example, if you define
-
-        a common `DeclarativeBase` subclass that''s used throughout your project
-
-        (e.g., `class Base(DeclarativeBase) ...` in `base.py`), you can add it to
-
-        this list (`runtime-evaluated-base-classes = ["base.Base"]`) to exempt
-
-        models from being moved into type-checking blocks.'
-    example: runtime-evaluated-base-classes = ["pydantic.BaseModel", "sqlalchemy.orm.DeclarativeBase"]
-    scope: null
-    value_type: list[str]
-lint.flake8-type-checking.runtime-evaluated-decorators:
-    default: '[]'
-    deprecated: null
-    doc: 'Exempt classes and functions decorated with any of the enumerated
-
-        decorators from being moved into type-checking blocks.
-
-
-        Common examples include Pydantic''s `@pydantic.validate_call` decorator
-
-        (for functions) and attrs'' `@attrs.define` decorator (for classes).
-
-
-        This also supports framework decorators like FastAPI''s `fastapi.FastAPI.get`
-
-        which will work across assignments in the same module.
-
-
-        For example:
-
-        ```python
-
-        import fastapi
-
-
-        app = FastAPI("app")
-
-
-        @app.get("/home")
-
-        def home() -> str: ...
-
-        ```
-
-
-        Here `app.get` will correctly be identified as `fastapi.FastAPI.get`.'
-    example: runtime-evaluated-decorators = ["pydantic.validate_call", "attrs.define"]
-    scope: null
-    value_type: list[str]
-lint.flake8-type-checking.strict:
-    default: 'false'
-    deprecated: null
-    doc: 'Enforce `TC001`, `TC002`, and `TC003` rules even when valid runtime imports
-
-        are present for the same module.
-
-
-        See flake8-type-checking''s [strict](https://github.com/snok/flake8-type-checking#strict)
-        option.'
-    example: strict = true
-    scope: null
-    value_type: bool
-lint.flake8-unused-arguments.ignore-variadic-names:
-    default: 'false'
-    deprecated: null
-    doc: Whether to allow unused variadic arguments, like `*args` and `**kwargs`.
-    example: ignore-variadic-names = true
-    scope: null
-    value_type: bool
-lint.ignore:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of rule codes or prefixes to ignore. Prefixes can specify exact
-
-        rules (like `F841`), entire categories (like `F`), or anything in
-
-        between.
-
-
-        When breaking ties between enabled and disabled rules (via `select` and
-
-        `ignore`, respectively), more specific prefixes override less
-
-        specific prefixes. `ignore` takes precedence over `select` if the same
-
-        prefix appears in both.'
-    example: '# Skip unused variable rules (`F841`).
-
-        ignore = ["F841"]'
-    scope: null
-    value_type: list[RuleSelector]
-lint.ignore-init-module-imports:
-    default: 'true'
-    deprecated:
-        message: '`ignore-init-module-imports` will be removed in a future version
-            because F401 now recommends appropriate fixes for unused imports in `__init__.py`
-            (currently in preview mode). See documentation for more information and
-            please update your configuration.'
-        since: 0.4.4
-    doc: 'Avoid automatically removing unused imports in `__init__.py` files. Such
-
-        imports will still be flagged, but with a dedicated message suggesting
-
-        that the import is either added to the module''s `__all__` symbol, or
-
-        re-exported with a redundant alias (e.g., `import os as os`).
-
-
-        This option is enabled by default, but you can opt-in to removal of imports
-
-        via an unsafe fix.'
-    example: ignore-init-module-imports = false
-    scope: null
-    value_type: bool
-lint.isort.case-sensitive:
-    default: 'false'
-    deprecated: null
-    doc: Sort imports taking into account case sensitivity.
-    example: case-sensitive = true
-    scope: null
-    value_type: bool
-lint.isort.classes:
-    default: '[]'
-    deprecated: null
-    doc: 'An override list of tokens to always recognize as a Class for
-
-        [`order-by-type`](#lint_isort_order-by-type) regardless of casing.'
-    example: classes = ["SVC"]
-    scope: null
-    value_type: list[str]
-lint.isort.combine-as-imports:
-    default: 'false'
-    deprecated: null
-    doc: 'Combines as imports on the same line. See isort''s [`combine-as-imports`](https://pycqa.github.io/isort/docs/configuration/options.html#combine-as-imports)
-
-        option.'
-    example: combine-as-imports = true
-    scope: null
-    value_type: bool
-lint.isort.constants:
-    default: '[]'
-    deprecated: null
-    doc: 'An override list of tokens to always recognize as a CONSTANT
-
-        for [`order-by-type`](#lint_isort_order-by-type) regardless of casing.'
-    example: constants = ["constant"]
-    scope: null
-    value_type: list[str]
-lint.isort.default-section:
-    default: '"third-party"'
-    deprecated: null
-    doc: Define a default section for any imports that don't fit into the specified
-        [`section-order`](#lint_isort_section-order).
-    example: default-section = "first-party"
-    scope: null
-    value_type: str
-lint.isort.detect-same-package:
-    default: 'true'
-    deprecated: null
-    doc: 'Whether to automatically mark imports from within the same package as first-party.
-
-        For example, when `detect-same-package = true`, then when analyzing files
-        within the
-
-        `foo` package, any imports from within the `foo` package will be considered
-        first-party.
-
-
-        This heuristic is often unnecessary when `src` is configured to detect all
-        first-party
-
-        sources; however, if `src` is _not_ configured, this heuristic can be useful
-        to detect
-
-        first-party imports from _within_ (but not _across_) first-party packages.'
-    example: detect-same-package = false
-    scope: null
-    value_type: bool
-lint.isort.extra-standard-library:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of modules to consider standard-library, in addition to those
-
-        known to Ruff in advance.
-
-
-        Supports glob patterns. For more information on the glob syntax, refer
-
-        to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: extra-standard-library = ["path"]
-    scope: null
-    value_type: list[str]
-lint.isort.force-single-line:
-    default: 'false'
-    deprecated: null
-    doc: Forces all from imports to appear on their own line.
-    example: force-single-line = true
-    scope: null
-    value_type: bool
-lint.isort.force-sort-within-sections:
-    default: 'false'
-    deprecated: null
-    doc: 'Don''t sort straight-style imports (like `import sys`) before from-style
-
-        imports (like `from itertools import groupby`). Instead, sort the
-
-        imports by module, independent of import style.'
-    example: force-sort-within-sections = true
-    scope: null
-    value_type: bool
-lint.isort.force-to-top:
-    default: '[]'
-    deprecated: null
-    doc: Force specific imports to the top of their appropriate section.
-    example: force-to-top = ["src"]
-    scope: null
-    value_type: list[str]
-lint.isort.force-wrap-aliases:
-    default: 'false'
-    deprecated: null
-    doc: "Force `import from` statements with multiple members and at least one\n\
-        alias (e.g., `import A as B`) to wrap such that every line contains\nexactly\
-        \ one member. For example, this formatting would be retained,\nrather than\
-        \ condensing to a single line:\n\n```python\nfrom .utils import (\n    test_directory\
-        \ as test_directory,\n    test_id as test_id\n)\n```\n\nNote that this setting\
-        \ is only effective when combined with\n`combine-as-imports = true`. When\
-        \ [`combine-as-imports`](#lint_isort_combine-as-imports) isn't\nenabled, every\
-        \ aliased `import from` will be given its own line, in\nwhich case, wrapping\
-        \ is not necessary.\n\nWhen using the formatter, ensure that [`format.skip-magic-trailing-comma`](#format_skip-magic-trailing-comma)\
-        \ is set to `false` (default)\nwhen enabling `force-wrap-aliases` to avoid\
-        \ that the formatter collapses members if they all fit on a single line."
-    example: 'force-wrap-aliases = true
-
-        combine-as-imports = true'
-    scope: null
-    value_type: bool
-lint.isort.forced-separate:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of modules to separate into auxiliary block(s) of imports,
-
-        in the order specified.'
-    example: forced-separate = ["tests"]
-    scope: null
-    value_type: list[str]
-lint.isort.from-first:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to place `import from` imports before straight imports when sorting.
-
-
-        For example, by default, imports will be sorted such that straight imports
-        appear
-
-        before `import from` imports, as in:
-
-        ```python
-
-        import os
-
-        import sys
-
-        from typing import List
-
-        ```
-
-
-        Setting `from-first = true` will instead sort such that `import from` imports
-        appear
-
-        before straight imports, as in:
-
-        ```python
-
-        from typing import List
-
-        import os
-
-        import sys
-
-        ```'
-    example: from-first = true
-    scope: null
-    value_type: bool
-lint.isort.known-first-party:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of modules to consider first-party, regardless of whether they
-
-        can be identified as such via introspection of the local filesystem.
-
-
-        Supports glob patterns. For more information on the glob syntax, refer
-
-        to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: known-first-party = ["src"]
-    scope: null
-    value_type: list[str]
-lint.isort.known-local-folder:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of modules to consider being a local folder.
-
-        Generally, this is reserved for relative imports (`from . import module`).
-
-
-        Supports glob patterns. For more information on the glob syntax, refer
-
-        to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: known-local-folder = ["src"]
-    scope: null
-    value_type: list[str]
-lint.isort.known-third-party:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of modules to consider third-party, regardless of whether they
-
-        can be identified as such via introspection of the local filesystem.
-
-
-        Supports glob patterns. For more information on the glob syntax, refer
-
-        to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: known-third-party = ["src"]
-    scope: null
-    value_type: list[str]
-lint.isort.length-sort:
-    default: 'false'
-    deprecated: null
-    doc: 'Sort imports by their string length, such that shorter imports appear
-
-        before longer imports. For example, by default, imports will be sorted
-
-        alphabetically, as in:
-
-        ```python
-
-        import collections
-
-        import os
-
-        ```
-
-
-        Setting `length-sort = true` will instead sort such that shorter imports
-
-        appear before longer imports, as in:
-
-        ```python
-
-        import os
-
-        import collections
-
-        ```'
-    example: length-sort = true
-    scope: null
-    value_type: bool
-lint.isort.length-sort-straight:
-    default: 'false'
-    deprecated: null
-    doc: 'Sort straight imports by their string length. Similar to [`length-sort`](#lint_isort_length-sort),
-
-        but applies only to straight imports and doesn''t affect `from` imports.'
-    example: length-sort-straight = true
-    scope: null
-    value_type: bool
-lint.isort.lines-after-imports:
-    default: '-1'
-    deprecated: null
-    doc: 'The number of blank lines to place after imports.
-
-        Use `-1` for automatic determination.
-
-
-        Ruff uses at most one blank line after imports in typing stub files (files
-        with `.pyi` extension) in accordance to
-
-        the typing style recommendations ([source](https://typing.python.org/en/latest/guides/writing_stubs.html#blank-lines)).
-
-
-        When using the formatter, only the values `-1`, `1`, and `2` are compatible
-        because
-
-        it enforces at least one empty and at most two empty lines after imports.'
-    example: '# Use a single line after each import block.
-
-        lines-after-imports = 1'
-    scope: null
-    value_type: int
-lint.isort.lines-between-types:
-    default: '0'
-    deprecated: null
-    doc: 'The number of lines to place between "direct" and `import from` imports.
-
-
-        When using the formatter, only the values `0` and `1` are compatible because
-
-        it preserves up to one empty line after imports in nested blocks.'
-    example: '# Use a single line between direct and from import.
-
-        lines-between-types = 1'
-    scope: null
-    value_type: int
-lint.isort.no-lines-before:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of sections that should _not_ be delineated from the previous
-
-        section via empty lines.'
-    example: no-lines-before = ["future", "standard-library"]
-    scope: null
-    value_type: list["future" | "standard-library" | "third-party" | "first-party"
-        | "local-folder" | str]
-lint.isort.no-sections:
-    default: 'false'
-    deprecated: null
-    doc: 'Put all imports into the same section bucket.
-
-
-        For example, rather than separating standard library and third-party imports,
-        as in:
-
-        ```python
-
-        import os
-
-        import sys
-
-
-        import numpy
-
-        import pandas
-
-        ```
-
-
-        Setting `no-sections = true` will instead group all imports into a single
-        section:
-
-        ```python
-
-        import numpy
-
-        import os
-
-        import pandas
-
-        import sys
-
-        ```'
-    example: no-sections = true
-    scope: null
-    value_type: bool
-lint.isort.order-by-type:
-    default: 'true'
-    deprecated: null
-    doc: 'Order imports by type, which is determined by case, in addition to
-
-        alphabetically.'
-    example: order-by-type = true
-    scope: null
-    value_type: bool
-lint.isort.relative-imports-order:
-    default: '"furthest-to-closest"'
-    deprecated: null
-    doc: 'Whether to place "closer" imports (fewer `.` characters, most local)
-
-        before "further" imports (more `.` characters, least local), or vice
-
-        versa.
-
-
-        The default ("furthest-to-closest") is equivalent to isort''s
-
-        [`reverse-relative`](https://pycqa.github.io/isort/docs/configuration/options.html#reverse-relative)
-        default (`reverse-relative = false`); setting
-
-        this to "closest-to-furthest" is equivalent to isort''s
-
-        `reverse-relative = true`.'
-    example: relative-imports-order = "closest-to-furthest"
-    scope: null
-    value_type: '"furthest-to-closest" | "closest-to-furthest"'
-lint.isort.required-imports:
-    default: '[]'
-    deprecated: null
-    doc: Add the specified import line to all files.
-    example: required-imports = ["from __future__ import annotations"]
-    scope: null
-    value_type: list[str]
-lint.isort.section-order:
-    default: '["future", "standard-library", "third-party", "first-party", "local-folder"]'
-    deprecated: null
-    doc: Override in which order the sections should be output. Can be used to move
-        custom sections.
-    example: section-order = ["future", "standard-library", "first-party", "local-folder",
-        "third-party"]
-    scope: null
-    value_type: list["future" | "standard-library" | "third-party" | "first-party"
-        | "local-folder" | str]
-lint.isort.sections:
-    default: '{}'
-    deprecated: null
-    doc: "A list of mappings from section names to modules.\n\nBy default, imports\
-        \ are categorized according to their type (e.g., `future`, `third-party`,\n\
-        and so on). This setting allows you to group modules into custom sections,\
-        \ to augment or\noverride the built-in sections.\n\nFor example, to group\
-        \ all testing utilities, you could create a `testing` section:\n```toml\n\
-        testing = [\"pytest\", \"hypothesis\"]\n```\n\nThe values in the list are\
-        \ treated as glob patterns. For example, to match all packages in\nthe LangChain\
-        \ ecosystem (`langchain-core`, `langchain-openai`, etc.):\n```toml\nlangchain\
-        \ = [\"langchain-*\"]\n```\n\nCustom sections should typically be inserted\
-        \ into the [`section-order`](#lint_isort_section-order) list to ensure that\n\
-        they're displayed as a standalone group and in the intended order, as in:\n\
-        ```toml\nsection-order = [\n  \"future\",\n  \"standard-library\",\n  \"third-party\"\
-        ,\n  \"first-party\",\n  \"local-folder\",\n  \"testing\"\n]\n```\n\nIf a\
-        \ custom section is omitted from [`section-order`](#lint_isort_section-order),\
-        \ imports in that section will be\nassigned to the [`default-section`](#lint_isort_default-section)\
-        \ (which defaults to `third-party`)."
-    example: '# Group all Django imports into a separate section.
-
-        "django" = ["django"]'
-    scope: sections
-    value_type: dict[str, list[str]]
-lint.isort.single-line-exclusions:
-    default: '[]'
-    deprecated: null
-    doc: One or more modules to exclude from the single line rule.
-    example: single-line-exclusions = ["os", "json"]
-    scope: null
-    value_type: list[str]
-lint.isort.split-on-trailing-comma:
-    default: 'true'
-    deprecated: null
-    doc: 'If a comma is placed after the last member in a multi-line import, then
-
-        the imports will never be folded into one line.
-
-
-        See isort''s [`split-on-trailing-comma`](https://pycqa.github.io/isort/docs/configuration/options.html#split-on-trailing-comma)
-        option.
-
-
-        When using the formatter, ensure that [`format.skip-magic-trailing-comma`](#format_skip-magic-trailing-comma)
-        is set to `false` (default) when enabling `split-on-trailing-comma`
-
-        to avoid that the formatter removes the trailing commas.'
-    example: split-on-trailing-comma = false
-    scope: null
-    value_type: bool
-lint.isort.variables:
-    default: '[]'
-    deprecated: null
-    doc: 'An override list of tokens to always recognize as a var
-
-        for [`order-by-type`](#lint_isort_order-by-type) regardless of casing.'
-    example: variables = ["VAR"]
-    scope: null
-    value_type: list[str]
-lint.logger-objects:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of objects that should be treated equivalently to a
-
-        `logging.Logger` object.
-
-
-        This is useful for ensuring proper diagnostics (e.g., to identify
-
-        `logging` deprecations and other best-practices) for projects that
-
-        re-export a `logging.Logger` object from a common module.
-
-
-        For example, if you have a module `logging_setup.py` with the following
-
-        contents:
-
-        ```python
-
-        import logging
-
-
-        logger = logging.getLogger(__name__)
-
-        ```
-
-
-        Adding `"logging_setup.logger"` to `logger-objects` will ensure that
-
-        `logging_setup.logger` is treated as a `logging.Logger` object when
-
-        imported from other modules (e.g., `from logging_setup import logger`).'
-    example: logger-objects = ["logging_setup.logger"]
-    scope: null
-    value_type: list[str]
-lint.mccabe.max-complexity:
-    default: '10'
-    deprecated: null
-    doc: The maximum McCabe complexity to allow before triggering `C901` errors.
-    example: '# Flag errors (`C901`) whenever the complexity level exceeds 5.
-
-        max-complexity = 5'
-    scope: null
-    value_type: int
-lint.pep8-naming.classmethod-decorators:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of decorators that, when applied to a method, indicate that the
-
-        method should be treated as a class method (in addition to the builtin
-
-        `@classmethod`).
-
-
-        For example, Ruff will expect that any method decorated by a decorator
-
-        in this list takes a `cls` argument as its first argument.
-
-
-        Expects to receive a list of fully-qualified names (e.g., `pydantic.validator`,
-
-        rather than `validator`) or alternatively a plain name which is then matched
-        against
-
-        the last segment in case the decorator itself consists of a dotted name.'
-    example: "classmethod-decorators = [\n    # Allow Pydantic's `@validator` decorator\
-        \ to trigger class method treatment.\n    \"pydantic.validator\",\n    # Allow\
-        \ SQLAlchemy's dynamic decorators, like `@field.expression`, to trigger class\
-        \ method treatment.\n    \"declared_attr\",\n    \"expression\",\n    \"comparator\"\
-        ,\n]"
-    scope: null
-    value_type: list[str]
-lint.pep8-naming.extend-ignore-names:
-    default: '[]'
-    deprecated: null
-    doc: 'Additional names (or patterns) to ignore when considering `pep8-naming`
-        violations,
-
-        in addition to those included in [`ignore-names`](#lint_pep8-naming_ignore-names).
-
-
-        Supports glob patterns. For example, to ignore all names starting with `test_`
-
-        or ending with `_test`, you could use `ignore-names = ["test_*", "*_test"]`.
-
-        For more information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: extend-ignore-names = ["callMethod"]
-    scope: null
-    value_type: list[str]
-lint.pep8-naming.ignore-names:
-    default: '["setUp", "tearDown", "setUpClass", "tearDownClass", "setUpModule",
-        "tearDownModule", "asyncSetUp", "asyncTearDown", "setUpTestData", "failureException",
-        "longMessage", "maxDiff"]'
-    deprecated: null
-    doc: 'A list of names (or patterns) to ignore when considering `pep8-naming` violations.
-
-
-        Supports glob patterns. For example, to ignore all names starting with `test_`
-
-        or ending with `_test`, you could use `ignore-names = ["test_*", "*_test"]`.
-
-        For more information on the glob syntax, refer to the [`globset` documentation](https://docs.rs/globset/latest/globset/#syntax).'
-    example: ignore-names = ["callMethod"]
-    scope: null
-    value_type: list[str]
-lint.pep8-naming.staticmethod-decorators:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of decorators that, when applied to a method, indicate that the
-
-        method should be treated as a static method (in addition to the builtin
-
-        `@staticmethod`).
-
-
-        For example, Ruff will expect that any method decorated by a decorator
-
-        in this list has no `self` or `cls` argument.
-
-
-        Expects to receive a list of fully-qualified names (e.g., `belay.Device.teardown`,
-
-        rather than `teardown`) or alternatively a plain name which is then matched
-        against
-
-        the last segment in case the decorator itself consists of a dotted name.'
-    example: '# Allow Belay''s `@Device.teardown` decorator to trigger static method
-        treatment.
-
-        staticmethod-decorators = ["belay.Device.teardown"]'
-    scope: null
-    value_type: list[str]
-lint.per-file-ignores:
-    default: '{}'
-    deprecated: null
-    doc: 'A list of mappings from file pattern to rule codes or prefixes to
-
-        exclude, when considering any matching files. An initial ''!'' negates
-
-        the file pattern.'
-    example: '# Ignore `E402` (import violations) in all `__init__.py` files, and
-        in `path/to/file.py`.
-
-        "__init__.py" = ["E402"]
-
-        "path/to/file.py" = ["E402"]
-
-        # Ignore `D` rules everywhere except for the `src/` directory.
-
-        "!src/**.py" = ["D"]'
-    scope: per-file-ignores
-    value_type: dict[str, list[RuleSelector]]
-lint.preview:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to enable preview mode. When preview mode is enabled, Ruff will
-
-        use unstable rules and fixes.'
-    example: '# Enable preview features.
-
-        preview = true'
-    scope: null
-    value_type: bool
-lint.pycodestyle.ignore-overlong-task-comments:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether line-length violations (`E501`) should be triggered for
-
-        comments starting with [`task-tags`](#lint_task-tags) (by default: "TODO",
-        "FIXME",
-
-        and "XXX").'
-    example: ignore-overlong-task-comments = true
-    scope: null
-    value_type: bool
-lint.pycodestyle.max-doc-length:
-    default: 'null'
-    deprecated: null
-    doc: 'The maximum line length to allow for [`doc-line-too-long`](https://docs.astral.sh/ruff/rules/doc-line-too-long/)
-        violations within
-
-        documentation (`W505`), including standalone comments. By default,
-
-        this is set to `null` which disables reporting violations.
-
-
-        The length is determined by the number of characters per line, except for
-        lines containing Asian characters or emojis.
-
-        For these lines, the [unicode width](https://unicode.org/reports/tr11/) of
-        each character is added up to determine the length.
-
-
-        See the [`doc-line-too-long`](https://docs.astral.sh/ruff/rules/doc-line-too-long/)
-        rule for more information.'
-    example: max-doc-length = 88
-    scope: null
-    value_type: int
-lint.pycodestyle.max-line-length:
-    default: 'null'
-    deprecated: null
-    doc: 'The maximum line length to allow for [`line-too-long`](https://docs.astral.sh/ruff/rules/line-too-long/)
-        violations. By default,
-
-        this is set to the value of the [`line-length`](#line-length) option.
-
-
-        Use this option when you want to detect extra-long lines that the formatter
-        can''t automatically split by setting
-
-        `pycodestyle.line-length` to a value larger than [`line-length`](#line-length).
-
-
-        ```toml
-
-        # The formatter wraps lines at a length of 88.
-
-        line-length = 88
-
-
-        [pycodestyle]
-
-        # E501 reports lines that exceed the length of 100.
-
-        max-line-length = 100
-
-        ```
-
-
-        The length is determined by the number of characters per line, except for
-        lines containing East Asian characters or emojis.
-
-        For these lines, the [unicode width](https://unicode.org/reports/tr11/) of
-        each character is added up to determine the length.
-
-
-        See the [`line-too-long`](https://docs.astral.sh/ruff/rules/line-too-long/)
-        rule for more information.'
-    example: max-line-length = 100
-    scope: null
-    value_type: int
-lint.pydoclint.ignore-one-line-docstrings:
-    default: 'false'
-    deprecated: null
-    doc: 'Skip docstrings which fit on a single line.
-
-
-        Note: The corresponding setting in `pydoclint`
-
-        is named `skip-checking-short-docstrings`.'
-    example: '# Skip docstrings which fit on a single line.
-
-        ignore-one-line-docstrings = true'
-    scope: null
-    value_type: bool
-lint.pydocstyle.convention:
-    default: 'null'
-    deprecated: null
-    doc: 'Whether to use Google-style, NumPy-style conventions, or the [PEP 257](https://peps.python.org/pep-0257/)
-
-        defaults when analyzing docstring sections.
-
-
-        Enabling a convention will disable all rules that are not included in
-
-        the specified convention. As such, the intended workflow is to enable a
-
-        convention and then selectively enable or disable any additional rules
-
-        on top of it.
-
-
-        For example, to use Google-style conventions but avoid requiring
-
-        documentation for every function parameter:
-
-
-        ```toml
-
-        [tool.ruff.lint]
-
-        # Enable all `pydocstyle` rules, limiting to those that adhere to the
-
-        # Google convention via `convention = "google"`, below.
-
-        select = ["D"]
-
-
-        # On top of the Google convention, disable `D417`, which requires
-
-        # documentation for every function parameter.
-
-        ignore = ["D417"]
-
-
-        [tool.ruff.lint.pydocstyle]
-
-        convention = "google"
-
-        ```
-
-
-        To enable an additional rule that''s excluded from the convention,
-
-        select the desired rule via its fully qualified rule code (e.g.,
-
-        `D400` instead of `D4` or `D40`):
-
-
-        ```toml
-
-        [tool.ruff.lint]
-
-        # Enable D400 on top of the Google convention.
-
-        extend-select = ["D400"]
-
-
-        [tool.ruff.lint.pydocstyle]
-
-        convention = "google"
-
-        ```'
-    example: '# Use Google-style docstrings.
-
-        convention = "google"'
-    scope: null
-    value_type: '"google" | "numpy" | "pep257"'
-lint.pydocstyle.ignore-decorators:
-    default: '[]'
-    deprecated: null
-    doc: 'Ignore docstrings for functions or methods decorated with the
-
-        specified fully-qualified decorators.'
-    example: ignore-decorators = ["typing.overload"]
-    scope: null
-    value_type: list[str]
-lint.pydocstyle.ignore-var-parameters:
-    default: 'false'
-    deprecated: null
-    doc: If set to `true`, ignore missing documentation for `*args` and `**kwargs`
-        parameters.
-    example: ignore-var-parameters = true
-    scope: null
-    value_type: bool
-lint.pydocstyle.property-decorators:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of decorators that, when applied to a method, indicate that the
-
-        method should be treated as a property (in addition to the builtin
-
-        `@property` and standard-library `@functools.cached_property`).
-
-
-        For example, Ruff will expect that any method decorated by a decorator
-
-        in this list can use a non-imperative summary line.'
-    example: property-decorators = ["gi.repository.GObject.Property"]
-    scope: null
-    value_type: list[str]
-lint.pyflakes.allowed-unused-imports:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of modules to ignore when considering unused imports.
-
-
-        Used to prevent violations for specific modules that are known to have side
-        effects on
-
-        import (e.g., `hvplot.pandas`).
-
-
-        Modules in this list are expected to be fully-qualified names (e.g., `hvplot.pandas`).
-        Any
-
-        submodule of a given module will also be ignored (e.g., given `hvplot`, `hvplot.pandas`
-
-        will also be ignored).'
-    example: allowed-unused-imports = ["hvplot.pandas"]
-    scope: null
-    value_type: list[str]
-lint.pyflakes.extend-generics:
-    default: '[]'
-    deprecated: null
-    doc: 'Additional functions or classes to consider generic, such that any
-
-        subscripts should be treated as type annotation (e.g., `ForeignKey` in
-
-        `django.db.models.ForeignKey["User"]`.
-
-
-        Expects to receive a list of fully-qualified names (e.g., `django.db.models.ForeignKey`,
-
-        rather than `ForeignKey`).'
-    example: extend-generics = ["django.db.models.ForeignKey"]
-    scope: null
-    value_type: list[str]
-lint.pylint.allow-dunder-method-names:
-    default: '[]'
-    deprecated: null
-    doc: 'Dunder methods name to allow, in addition to the default set from the
-
-        Python standard library (see `PLW3201`).'
-    example: allow-dunder-method-names = ["__tablename__", "__table_args__"]
-    scope: null
-    value_type: list[str]
-lint.pylint.allow-magic-value-types:
-    default: '["str", "bytes"]'
-    deprecated: null
-    doc: Constant types to ignore when used as "magic values" (see `PLR2004`).
-    example: allow-magic-value-types = ["int"]
-    scope: null
-    value_type: list["str" | "bytes" | "complex" | "float" | "int"]
-lint.pylint.max-args:
-    default: '5'
-    deprecated: null
-    doc: 'Maximum number of arguments allowed for a function or method definition
-
-        (see `PLR0913`).'
-    example: max-args = 10
-    scope: null
-    value_type: int
-lint.pylint.max-bool-expr:
-    default: '5'
-    deprecated: null
-    doc: 'Maximum number of Boolean expressions allowed within a single `if` statement
-
-        (see `PLR0916`).'
-    example: max-bool-expr = 10
-    scope: null
-    value_type: int
-lint.pylint.max-branches:
-    default: '12'
-    deprecated: null
-    doc: Maximum number of branches allowed for a function or method body (see `PLR0912`).
-    example: max-branches = 15
-    scope: null
-    value_type: int
-lint.pylint.max-locals:
-    default: '15'
-    deprecated: null
-    doc: Maximum number of local variables allowed for a function or method body (see
-        `PLR0914`).
-    example: max-locals = 20
-    scope: null
-    value_type: int
-lint.pylint.max-nested-blocks:
-    default: '5'
-    deprecated: null
-    doc: 'Maximum number of nested blocks allowed within a function or method body
-
-        (see `PLR1702`).'
-    example: max-nested-blocks = 10
-    scope: null
-    value_type: int
-lint.pylint.max-positional-args:
-    default: '5'
-    deprecated: null
-    doc: 'Maximum number of positional arguments allowed for a function or method
-        definition
-
-        (see `PLR0917`).
-
-
-        If not specified, defaults to the value of `max-args`.'
-    example: max-positional-args = 3
-    scope: null
-    value_type: int
-lint.pylint.max-public-methods:
-    default: '20'
-    deprecated: null
-    doc: Maximum number of public methods allowed for a class (see `PLR0904`).
-    example: max-public-methods = 30
-    scope: null
-    value_type: int
-lint.pylint.max-returns:
-    default: '6'
-    deprecated: null
-    doc: 'Maximum number of return statements allowed for a function or method
-
-        body (see `PLR0911`)'
-    example: max-returns = 10
-    scope: null
-    value_type: int
-lint.pylint.max-statements:
-    default: '50'
-    deprecated: null
-    doc: Maximum number of statements allowed for a function or method body (see `PLR0915`).
-    example: max-statements = 75
-    scope: null
-    value_type: int
-lint.pyupgrade.keep-runtime-typing:
-    default: 'false'
-    deprecated: null
-    doc: "Whether to avoid [PEP 585](https://peps.python.org/pep-0585/) (`List[int]`\
-        \ -> `list[int]`) and [PEP 604](https://peps.python.org/pep-0604/)\n(`Union[str,\
-        \ int]` -> `str | int`) rewrites even if a file imports\n`from __future__\
-        \ import annotations`.\n\nThis setting is only applicable when the target\
-        \ Python version is below\n3.9 and 3.10 respectively, and is most commonly\
-        \ used when working with\nlibraries like Pydantic and FastAPI, which rely\
-        \ on the ability to parse\ntype annotations at runtime. The use of `from __future__\
-        \ import annotations`\ncauses Python to treat the type annotations as strings,\
-        \ which typically\nallows for the use of language features that appear in\
-        \ later Python\nversions but are not yet supported by the current version\
-        \ (e.g., `str |\nint`). However, libraries that rely on runtime type annotations\
-        \ will\nbreak if the annotations are incompatible with the current Python\n\
-        version.\n\nFor example, while the following is valid Python 3.8 code due\
-        \ to the\npresence of `from __future__ import annotations`, the use of `str\
-        \ | int`\nprior to Python 3.10 will cause Pydantic to raise a `TypeError`\
-        \ at\nruntime:\n\n```python\nfrom __future__ import annotations\n\nimport\
-        \ pydantic\n\nclass Foo(pydantic.BaseModel):\n    bar: str | int\n```"
-    example: '# Preserve types, even if a file imports `from __future__ import annotations`.
-
-        keep-runtime-typing = true'
-    scope: null
-    value_type: bool
-lint.ruff.allowed-markup-calls:
-    default: '[]'
-    deprecated:
-        message: The `allowed-markup-names` option has been moved to the `flake8-bandit`
-            section of the configuration.
-        since: 0.10.0
-    doc: 'A list of callable names, whose result may be safely passed into
-
-        [`markupsafe.Markup`](https://markupsafe.palletsprojects.com/en/stable/escaping/#markupsafe.Markup).
-
-
-        Expects to receive a list of fully-qualified names (e.g., `bleach.clean`,
-        rather than `clean`).
-
-
-        This setting helps you avoid false positives in code like:
-
-
-        ```python
-
-        from bleach import clean
-
-        from markupsafe import Markup
-
-
-        cleaned_markup = Markup(clean(some_user_input))
-
-        ```
-
-
-        Where the use of [`bleach.clean`](https://bleach.readthedocs.io/en/latest/clean.html)
-
-        usually ensures that there''s no XSS vulnerability.
-
-
-        Although it is not recommended, you may also use this setting to whitelist
-        other
-
-        kinds of calls, e.g. calls to i18n translation functions, where how safe that
-        is
-
-        will depend on the implementation and how well the translations are audited.
-
-
-        Another common use-case is to wrap the output of functions that generate markup
-
-        like [`xml.etree.ElementTree.tostring`](https://docs.python.org/3/library/xml.etree.elementtree.html#xml.etree.ElementTree.tostring)
-
-        or template rendering engines where sanitization of potential user input is
-        either
-
-        already baked in or has to happen before rendering.'
-    example: allowed-markup-calls = ["bleach.clean", "my_package.sanitize"]
-    scope: null
-    value_type: list[str]
-lint.ruff.extend-markup-names:
-    default: '[]'
-    deprecated:
-        message: The `extend-markup-names` option has been moved to the `flake8-bandit`
-            section of the configuration.
-        since: 0.10.0
-    doc: 'A list of additional callable names that behave like
-
-        [`markupsafe.Markup`](https://markupsafe.palletsprojects.com/en/stable/escaping/#markupsafe.Markup).
-
-
-        Expects to receive a list of fully-qualified names (e.g., `webhelpers.html.literal`,
-        rather than
-
-        `literal`).'
-    example: extend-markup-names = ["webhelpers.html.literal", "my_package.Markup"]
-    scope: null
-    value_type: list[str]
-lint.ruff.parenthesize-tuple-in-subscript:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to prefer accessing items keyed by tuples with
-
-        parentheses around the tuple (see `RUF031`).'
-    example: '# Make it a violation to use a tuple in a subscript without parentheses.
-
-        parenthesize-tuple-in-subscript = true'
-    scope: null
-    value_type: bool
-lint.select:
-    default: '["E4", "E7", "E9", "F"]'
-    deprecated: null
-    doc: 'A list of rule codes or prefixes to enable. Prefixes can specify exact
-
-        rules (like `F841`), entire categories (like `F`), or anything in
-
-        between.
-
-
-        When breaking ties between enabled and disabled rules (via `select` and
-
-        `ignore`, respectively), more specific prefixes override less
-
-        specific prefixes. `ignore` takes precedence over `select` if the
-
-        same prefix appears in both.'
-    example: '# On top of the defaults (`E4`, E7`, `E9`, and `F`), enable flake8-bugbear
-        (`B`) and flake8-quotes (`Q`).
-
-        select = ["E4", "E7", "E9", "F", "B", "Q"]'
-    scope: null
-    value_type: list[RuleSelector]
-lint.task-tags:
-    default: '["TODO", "FIXME", "XXX"]'
-    deprecated: null
-    doc: 'A list of task tags to recognize (e.g., "TODO", "FIXME", "XXX").
-
-
-        Comments starting with these tags will be ignored by commented-out code
-
-        detection (`ERA`), and skipped by line-length rules (`E501`) if
-
-        [`ignore-overlong-task-comments`](#lint_pycodestyle_ignore-overlong-task-comments)
-        is set to `true`.'
-    example: task-tags = ["HACK"]
-    scope: null
-    value_type: list[str]
-lint.typing-extensions:
-    default: 'true'
-    deprecated: null
-    doc: 'Whether to allow imports from the third-party `typing_extensions` module
-        for Python versions
-
-        before a symbol was added to the first-party `typing` module.
-
-
-        Many rules try to import symbols from the `typing` module but fall back to
-
-        `typing_extensions` for earlier versions of Python. This option can be used
-        to disable this
-
-        fallback behavior in cases where `typing_extensions` is not installed.'
-    example: '# Disable `typing_extensions` imports
-
-        typing-extensions = false'
-    scope: null
-    value_type: bool
-lint.typing-modules:
-    default: '[]'
-    deprecated: null
-    doc: 'A list of modules whose exports should be treated equivalently to
-
-        members of the `typing` module.
-
-
-        This is useful for ensuring proper type annotation inference for
-
-        projects that re-export `typing` and `typing_extensions` members
-
-        from a compatibility module. If omitted, any members imported from
-
-        modules apart from `typing` and `typing_extensions` will be treated
-
-        as ordinary Python objects.'
-    example: typing-modules = ["airflow.typing_compat"]
-    scope: null
-    value_type: list[str]
-lint.unfixable:
-    default: '[]'
-    deprecated: null
-    doc: A list of rule codes or prefixes to consider non-fixable.
-    example: '# Disable fix for unused imports (`F401`).
-
-        unfixable = ["F401"]'
-    scope: null
-    value_type: list[RuleSelector]
-namespace-packages:
-    default: '[]'
-    deprecated: null
-    doc: 'Mark the specified directories as namespace packages. For the purpose of
-
-        module resolution, Ruff will treat those directories and all their subdirectories
-
-        as if they contained an `__init__.py` file.'
-    example: namespace-packages = ["airflow/providers"]
-    scope: null
-    value_type: list[str]
-output-format:
-    default: '"full"'
-    deprecated: null
-    doc: 'The style in which violation messages should be formatted: `"full"` (default)
-
-        (shows source), `"concise"`, `"grouped"` (group messages by file), `"json"`
-
-        (machine-readable), `"junit"` (machine-readable XML), `"github"` (GitHub
-
-        Actions annotations), `"gitlab"` (GitLab CI code quality report),
-
-        `"pylint"` (Pylint text format) or `"azure"` (Azure Pipeline logging commands).'
-    example: '# Group violations by containing file.
-
-        output-format = "grouped"'
-    scope: null
-    value_type: '"full" | "concise" | "grouped" | "json" | "junit" | "github" | "gitlab"
-        | "pylint" | "azure"'
-per-file-target-version:
-    default: '{}'
-    deprecated: null
-    doc: 'A list of mappings from glob-style file pattern to Python version to use
-        when checking the
-
-        corresponding file(s).
-
-
-        This may be useful for overriding the global Python version settings in `target-version`
-        or
-
-        `requires-python` for a subset of files. For example, if you have a project
-        with a minimum
-
-        supported Python version of 3.9 but a subdirectory of developer scripts that
-        want to use a
-
-        newer feature like the `match` statement from Python 3.10, you can use
-
-        `per-file-target-version` to specify `"developer_scripts/*.py" = "py310"`.
-
-
-        This setting is used by the linter to enforce any enabled version-specific
-        lint rules, as
-
-        well as by the formatter for any version-specific formatting options, such
-        as parenthesizing
-
-        context managers on Python 3.10+.'
-    example: '# Override the project-wide Python version for a developer scripts directory:
-
-        "scripts/*.py" = "py312"'
-    scope: per-file-target-version
-    value_type: dict[str, PythonVersion]
-preview:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to enable preview mode. When preview mode is enabled, Ruff will
-
-        use unstable rules, fixes, and formatting.'
-    example: '# Enable preview features.
-
-        preview = true'
-    scope: null
-    value_type: bool
-required-version:
-    default: 'null'
-    deprecated: null
-    doc: 'Enforce a requirement on the version of Ruff, to enforce at runtime.
-
-        If the version of Ruff does not meet the requirement, Ruff will exit
-
-        with an error.
-
-
-        Useful for unifying results across many environments, e.g., with a
-
-        `pyproject.toml` file.
-
-
-        Accepts a [PEP 440](https://peps.python.org/pep-0440/) specifier, like `==0.3.1`
-        or `>=0.3.1`.'
-    example: required-version = ">=0.0.193"
-    scope: null
-    value_type: str
-respect-gitignore:
-    default: 'true'
-    deprecated: null
-    doc: 'Whether to automatically exclude files that are ignored by `.ignore`,
-
-        `.gitignore`, `.git/info/exclude`, and global `gitignore` files.
-
-        Enabled by default.'
-    example: respect-gitignore = false
-    scope: null
-    value_type: bool
-show-fixes:
-    default: 'false'
-    deprecated: null
-    doc: 'Whether to show an enumeration of all fixed lint violations
-
-        (overridden by the `--show-fixes` command-line flag).'
-    example: '# Enumerate all fixed violations.
-
-        show-fixes = true'
-    scope: null
-    value_type: bool
-src:
-    default: '[".", "src"]'
-    deprecated: null
-    doc: "The directories to consider when resolving first- vs. third-party\nimports.\n\
-        \nWhen omitted, the `src` directory will typically default to including both:\n\
-        \n1. The directory containing the nearest `pyproject.toml`, `ruff.toml`, or\
-        \ `.ruff.toml` file (the \"project root\").\n2. The `\"src\"` subdirectory\
-        \ of the project root.\n\nThese defaults ensure that Ruff supports both flat\
-        \ layouts and `src` layouts out-of-the-box.\n(If a configuration file is explicitly\
-        \ provided (e.g., via the `--config` command-line\nflag), the current working\
-        \ directory will be considered the project root.)\n\nAs an example, consider\
-        \ an alternative project structure, like:\n\n```text\nmy_project\n\u251C\u2500\
-        \u2500 pyproject.toml\n\u2514\u2500\u2500 lib\n    \u2514\u2500\u2500 my_package\n\
-        \        \u251C\u2500\u2500 __init__.py\n        \u251C\u2500\u2500 foo.py\n\
-        \        \u2514\u2500\u2500 bar.py\n```\n\nIn this case, the `./lib` directory\
-        \ should be included in the `src` option\n(e.g., `src = [\"lib\"]`), such\
-        \ that when resolving imports, `my_package.foo`\nis considered first-party.\n\
-        \nThis field supports globs. For example, if you have a series of Python\n\
-        packages in a `python_modules` directory, `src = [\"python_modules/*\"]`\n\
-        would expand to incorporate all packages in that directory. User home\ndirectory\
-        \ and environment variables will also be expanded."
-    example: '# Allow imports relative to the "src" and "test" directories.
-
-        src = ["src", "test"]'
-    scope: null
-    value_type: list[str]
-target-version:
-    default: '"py39"'
-    deprecated: null
-    doc: 'The minimum Python version to target, e.g., when considering automatic
-
-        code upgrades, like rewriting type annotations. Ruff will not propose
-
-        changes using features that are not available in the given version.
-
-
-        For example, to represent supporting Python >=3.10 or ==3.10
-
-        specify `target-version = "py310"`.
-
-
-        If you''re already using a `pyproject.toml` file, we recommend
-
-        `project.requires-python` instead, as it''s based on Python packaging
-
-        standards, and will be respected by other tools. For example, Ruff
-
-        treats the following as identical to `target-version = "py38"`:
-
-
-        ```toml
-
-        [project]
-
-        requires-python = ">=3.8"
-
-        ```
-
-
-        If both are specified, `target-version` takes precedence over
-
-        `requires-python`. See [_Inferring the Python version_](https://docs.astral.sh/ruff/configuration/#inferring-the-python-version)
-
-        for a complete description of how the `target-version` is determined
-
-        when left unspecified.
-
-
-        Note that a stub file can [sometimes make use of a typing feature](https://typing.python.org/en/latest/spec/distributing.html#syntax)
-
-        before it is available at runtime, as long as the stub does not make
-
-        use of new *syntax*. For example, a type checker will understand
-
-        `int | str` in a stub as being a `Union` type annotation, even if the
-
-        type checker is run using Python 3.9, despite the fact that the `|`
-
-        operator can only be used to create union types at runtime on Python
-
-        3.10+. As such, Ruff will often recommend newer features in a stub
-
-        file than it would for an equivalent runtime file with the same target
-
-        version.'
-    example: '# Always generate Python 3.7-compatible code.
-
-        target-version = "py37"'
-    scope: null
-    value_type: '"py37" | "py38" | "py39" | "py310" | "py311" | "py312" | "py313"'
-unsafe-fixes:
-    default: 'null'
-    deprecated: null
-    doc: 'Enable application of unsafe fixes.
-
-        If excluded, a hint will be displayed when unsafe fixes are available.
-
-        If set to false, the hint will be hidden.'
-    example: unsafe-fixes = true
-    scope: null
-    value_type: bool
+Resolved settings for: "./pelicanconf.py"
+Settings path: "./ruff.toml"
+
+# General Settings
+cache_dir = "./.ruff_cache"
+fix = false
+fix_only = false
+output_format = full
+show_fixes = false
+unsafe_fixes = hint
+
+# File Resolver Settings
+file_resolver.exclude = [
+	".venv",
+	"node_modules",
+	"output",
+	"plugins/official",
+]
+file_resolver.extend_exclude = []
+file_resolver.force_exclude = false
+file_resolver.include = [
+	"*.py",
+	"*.pyi",
+	"*.ipynb",
+	"**/pyproject.toml",
+]
+file_resolver.extend_include = []
+file_resolver.respect_gitignore = true
+file_resolver.project_root = "."
+
+# Linter Settings
+linter.exclude = []
+linter.project_root = "."
+linter.rules.enabled = [
+	unary-prefix-increment-decrement (B002),
+	assignment-to-os-environ (B003),
+	unreliable-callable-check (B004),
+	strip-with-multi-characters (B005),
+	mutable-argument-default (B006),
+	unused-loop-control-variable (B007),
+	function-call-in-default-argument (B008),
+	get-attr-with-constant (B009),
+	set-attr-with-constant (B010),
+	assert-false (B011),
+	jump-statement-in-finally (B012),
+	redundant-tuple-in-exception-handler (B013),
+	duplicate-handler-exception (B014),
+	useless-comparison (B015),
+	raise-literal (B016),
+	assert-raises-exception (B017),
+	useless-expression (B018),
+	cached-instance-method (B019),
+	loop-variable-overrides-iterator (B020),
+	f-string-docstring (B021),
+	useless-contextlib-suppress (B022),
+	function-uses-loop-variable (B023),
+	abstract-base-class-without-abstract-method (B024),
+	duplicate-try-block-exception (B025),
+	star-arg-unpacking-after-keyword-arg (B026),
+	empty-method-without-abstract-decorator (B027),
+	no-explicit-stacklevel (B028),
+	except-with-empty-tuple (B029),
+	except-with-non-exception-classes (B030),
+	reuse-of-groupby-generator (B031),
+	unintentional-type-annotation (B032),
+	duplicate-value (B033),
+	re-sub-positional-args (B034),
+	static-key-dict-comprehension (B035),
+	mutable-contextvar-default (B039),
+	raise-without-from-inside-except (B904),
+	zip-without-explicit-strict (B905),
+	batched-without-explicit-strict (B911),
+	unnecessary-generator-list (C400),
+	unnecessary-generator-set (C401),
+	unnecessary-generator-dict (C402),
+	unnecessary-list-comprehension-set (C403),
+	unnecessary-list-comprehension-dict (C404),
+	unnecessary-literal-set (C405),
+	unnecessary-literal-dict (C406),
+	unnecessary-collection-call (C408),
+	unnecessary-literal-within-tuple-call (C409),
+	unnecessary-literal-within-list-call (C410),
+	unnecessary-list-call (C411),
+	unnecessary-call-around-sorted (C413),
+	unnecessary-double-cast-or-process (C414),
+	unnecessary-subscript-reversal (C415),
+	unnecessary-comprehension (C416),
+	unnecessary-map (C417),
+	unnecessary-literal-within-dict-call (C418),
+	unnecessary-comprehension-in-call (C419),
+	unnecessary-dict-comprehension-for-iterable (C420),
+	unnecessary-placeholder (PIE790),
+	duplicate-class-field-definition (PIE794),
+	non-unique-enums (PIE796),
+	unnecessary-spread (PIE800),
+	unnecessary-dict-kwargs (PIE804),
+	reimplemented-container-builtin (PIE807),
+	unnecessary-range-start (PIE808),
+	multiple-starts-ends-with (PIE810),
+	unnecessary-return-none (RET501),
+	implicit-return-value (RET502),
+	implicit-return (RET503),
+	unnecessary-assign (RET504),
+	superfluous-else-return (RET505),
+	superfluous-else-raise (RET506),
+	superfluous-else-continue (RET507),
+	superfluous-else-break (RET508),
+	duplicate-isinstance-call (SIM101),
+	collapsible-if (SIM102),
+	needless-bool (SIM103),
+	suppressible-exception (SIM105),
+	return-in-try-except-finally (SIM107),
+	compare-with-tuple (SIM109),
+	reimplemented-builtin (SIM110),
+	uncapitalized-environment-variables (SIM112),
+	enumerate-for-loop (SIM113),
+	if-with-same-arms (SIM114),
+	open-file-with-context-handler (SIM115),
+	if-else-block-instead-of-dict-lookup (SIM116),
+	multiple-with-statements (SIM117),
+	in-dict-keys (SIM118),
+	negate-equal-op (SIM201),
+	negate-not-equal-op (SIM202),
+	double-negation (SIM208),
+	if-expr-with-true-false (SIM210),
+	if-expr-with-false-true (SIM211),
+	if-expr-with-twisted-arms (SIM212),
+	expr-and-not-expr (SIM220),
+	expr-or-not-expr (SIM221),
+	expr-or-true (SIM222),
+	expr-and-false (SIM223),
+	yoda-conditions (SIM300),
+	if-else-block-instead-of-dict-get (SIM401),
+	split-static-string (SIM905),
+	dict-get-with-none-default (SIM910),
+	zip-dict-keys-and-values (SIM911),
+	os-path-abspath (PTH100),
+	os-chmod (PTH101),
+	os-mkdir (PTH102),
+	os-makedirs (PTH103),
+	os-rename (PTH104),
+	os-replace (PTH105),
+	os-rmdir (PTH106),
+	os-remove (PTH107),
+	os-unlink (PTH108),
+	os-getcwd (PTH109),
+	os-path-exists (PTH110),
+	os-path-expanduser (PTH111),
+	os-path-isdir (PTH112),
+	os-path-isfile (PTH113),
+	os-path-islink (PTH114),
+	os-readlink (PTH115),
+	os-stat (PTH116),
+	os-path-isabs (PTH117),
+	os-path-join (PTH118),
+	os-path-basename (PTH119),
+	os-path-dirname (PTH120),
+	os-path-samefile (PTH121),
+	os-path-splitext (PTH122),
+	builtin-open (PTH123),
+	py-path (PTH124),
+	path-constructor-current-directory (PTH201),
+	os-path-getsize (PTH202),
+	os-path-getatime (PTH203),
+	os-path-getmtime (PTH204),
+	os-path-getctime (PTH205),
+	os-sep-split (PTH206),
+	glob (PTH207),
+	os-listdir (PTH208),
+	invalid-pathlib-with-suffix (PTH210),
+	unsorted-imports (I001),
+	missing-required-import (I002),
+	invalid-class-name (N801),
+	invalid-function-name (N802),
+	invalid-argument-name (N803),
+	invalid-first-argument-name-for-class-method (N804),
+	invalid-first-argument-name-for-method (N805),
+	non-lowercase-variable-in-function (N806),
+	dunder-function-name (N807),
+	constant-imported-as-non-constant (N811),
+	lowercase-imported-as-non-lowercase (N812),
+	camelcase-imported-as-lowercase (N813),
+	camelcase-imported-as-constant (N814),
+	mixed-case-variable-in-class-scope (N815),
+	mixed-case-variable-in-global-scope (N816),
+	camelcase-imported-as-acronym (N817),
+	error-suffix-on-exception-name (N818),
+	invalid-module-name (N999),
+	mixed-spaces-and-tabs (E101),
+	multiple-imports-on-one-line (E401),
+	module-import-not-at-top-of-file (E402),
+	line-too-long (E501),
+	multiple-statements-on-one-line-colon (E701),
+	multiple-statements-on-one-line-semicolon (E702),
+	useless-semicolon (E703),
+	none-comparison (E711),
+	true-false-comparison (E712),
+	not-in-test (E713),
+	not-is-test (E714),
+	type-comparison (E721),
+	bare-except (E722),
+	lambda-assignment (E731),
+	ambiguous-variable-name (E741),
+	ambiguous-class-name (E742),
+	ambiguous-function-name (E743),
+	io-error (E902),
+	tab-indentation (W191),
+	trailing-whitespace (W291),
+	missing-newline-at-end-of-file (W292),
+	blank-line-with-whitespace (W293),
+	doc-line-too-long (W505),
+	invalid-escape-sequence (W605),
+	unused-import (F401),
+	import-shadowed-by-loop-var (F402),
+	undefined-local-with-import-star (F403),
+	late-future-import (F404),
+	undefined-local-with-import-star-usage (F405),
+	undefined-local-with-nested-import-star-usage (F406),
+	future-feature-not-defined (F407),
+	percent-format-invalid-format (F501),
+	percent-format-expected-mapping (F502),
+	percent-format-expected-sequence (F503),
+	percent-format-extra-named-arguments (F504),
+	percent-format-missing-argument (F505),
+	percent-format-mixed-positional-and-named (F506),
+	percent-format-positional-count-mismatch (F507),
+	percent-format-star-requires-sequence (F508),
+	percent-format-unsupported-format-character (F509),
+	string-dot-format-invalid-format (F521),
+	string-dot-format-extra-named-arguments (F522),
+	string-dot-format-extra-positional-arguments (F523),
+	string-dot-format-missing-arguments (F524),
+	string-dot-format-mixing-automatic (F525),
+	f-string-missing-placeholders (F541),
+	multi-value-repeated-key-literal (F601),
+	multi-value-repeated-key-variable (F602),
+	expressions-in-star-assignment (F621),
+	multiple-starred-expressions (F622),
+	assert-tuple (F631),
+	is-literal (F632),
+	invalid-print-syntax (F633),
+	if-tuple (F634),
+	break-outside-loop (F701),
+	continue-outside-loop (F702),
+	yield-outside-function (F704),
+	return-outside-function (F706),
+	default-except-not-last (F707),
+	forward-annotation-syntax-error (F722),
+	redefined-while-unused (F811),
+	undefined-name (F821),
+	undefined-export (F822),
+	undefined-local (F823),
+	unused-variable (F841),
+	unused-annotation (F842),
+	raise-not-implemented (F901),
+	useless-metaclass-type (UP001),
+	type-of-primitive (UP003),
+	useless-object-inheritance (UP004),
+	deprecated-unittest-alias (UP005),
+	non-pep585-annotation (UP006),
+	non-pep604-annotation-union (UP007),
+	super-call-with-parameters (UP008),
+	utf8-encoding-declaration (UP009),
+	unnecessary-future-import (UP010),
+	lru-cache-without-parameters (UP011),
+	unnecessary-encode-utf8 (UP012),
+	convert-typed-dict-functional-to-class (UP013),
+	convert-named-tuple-functional-to-class (UP014),
+	redundant-open-modes (UP015),
+	datetime-timezone-utc (UP017),
+	native-literals (UP018),
+	typing-text-str-alias (UP019),
+	open-alias (UP020),
+	replace-universal-newlines (UP021),
+	replace-stdout-stderr (UP022),
+	deprecated-c-element-tree (UP023),
+	os-error-alias (UP024),
+	unicode-kind-prefix (UP025),
+	deprecated-mock-import (UP026),
+	yield-in-for-loop (UP028),
+	unnecessary-builtin-import (UP029),
+	format-literals (UP030),
+	printf-string-formatting (UP031),
+	f-string (UP032),
+	lru-cache-with-maxsize-none (UP033),
+	extraneous-parentheses (UP034),
+	deprecated-import (UP035),
+	outdated-version-block (UP036),
+	quoted-annotation (UP037),
+	non-pep604-isinstance (UP038),
+	unnecessary-class-parentheses (UP039),
+	non-pep695-type-alias (UP040),
+	timeout-error-alias (UP041),
+	unnecessary-default-type-args (UP043),
+	non-pep646-unpack (UP044),
+	non-pep604-annotation-optional (UP045),
+	non-pep695-generic-class (UP046),
+	non-pep695-generic-function (UP047),
+	private-type-parameter (UP049),
+	collection-literal-concatenation (RUF005),
+	asyncio-dangling-task (RUF006),
+	zip-instead-of-pairwise (RUF007),
+	mutable-dataclass-default (RUF008),
+	function-call-in-dataclass-default-argument (RUF009),
+	explicit-f-string-type-conversion (RUF010),
+	mutable-class-default (RUF012),
+	implicit-optional (RUF013),
+	unnecessary-iterable-allocation-for-first-element (RUF015),
+	invalid-index-type (RUF016),
+	quadratic-list-summation (RUF017),
+	assignment-in-assert (RUF018),
+	unnecessary-key-check (RUF019),
+	never-union (RUF020),
+	parenthesize-chained-operators (RUF021),
+	unsorted-dunder-all (RUF022),
+	unsorted-dunder-slots (RUF023),
+	mutable-fromkeys-value (RUF024),
+	default-factory-kwarg (RUF026),
+	invalid-formatter-suppression-comment (RUF028),
+	assert-with-print-message (RUF030),
+	decimal-from-float-literal (RUF032),
+	post-init-default (RUF033),
+	useless-if-else (RUF034),
+	invalid-assert-message-literal-argument (RUF040),
+	unnecessary-nested-literal (RUF041),
+	unnecessary-cast-to-int (RUF046),
+	map-int-version-parsing (RUF048),
+	dataclass-enum (RUF049),
+	if-key-in-dict-del (RUF051),
+	class-with-mixed-type-vars (RUF053),
+	unnecessary-round (RUF057),
+	starmap-zip (RUF058),
+	unused-noqa (RUF100),
+	redirected-noqa (RUF101),
+	invalid-pyproject-toml (RUF200),
+]
+linter.rules.should_fix = [
+	unary-prefix-increment-decrement (B002),
+	assignment-to-os-environ (B003),
+	unreliable-callable-check (B004),
+	strip-with-multi-characters (B005),
+	mutable-argument-default (B006),
+	unused-loop-control-variable (B007),
+	function-call-in-default-argument (B008),
+	get-attr-with-constant (B009),
+	set-attr-with-constant (B010),
+	assert-false (B011),
+	jump-statement-in-finally (B012),
+	redundant-tuple-in-exception-handler (B013),
+	duplicate-handler-exception (B014),
+	useless-comparison (B015),
+	raise-literal (B016),
+	assert-raises-exception (B017),
+	useless-expression (B018),
+	cached-instance-method (B019),
+	loop-variable-overrides-iterator (B020),
+	f-string-docstring (B021),
+	useless-contextlib-suppress (B022),
+	function-uses-loop-variable (B023),
+	abstract-base-class-without-abstract-method (B024),
+	duplicate-try-block-exception (B025),
+	star-arg-unpacking-after-keyword-arg (B026),
+	empty-method-without-abstract-decorator (B027),
+	no-explicit-stacklevel (B028),
+	except-with-empty-tuple (B029),
+	except-with-non-exception-classes (B030),
+	reuse-of-groupby-generator (B031),
+	unintentional-type-annotation (B032),
+	duplicate-value (B033),
+	re-sub-positional-args (B034),
+	static-key-dict-comprehension (B035),
+	mutable-contextvar-default (B039),
+	raise-without-from-inside-except (B904),
+	zip-without-explicit-strict (B905),
+	batched-without-explicit-strict (B911),
+	unnecessary-generator-list (C400),
+	unnecessary-generator-set (C401),
+	unnecessary-generator-dict (C402),
+	unnecessary-list-comprehension-set (C403),
+	unnecessary-list-comprehension-dict (C404),
+	unnecessary-literal-set (C405),
+	unnecessary-literal-dict (C406),
+	unnecessary-collection-call (C408),
+	unnecessary-literal-within-tuple-call (C409),
+	unnecessary-literal-within-list-call (C410),
+	unnecessary-list-call (C411),
+	unnecessary-call-around-sorted (C413),
+	unnecessary-double-cast-or-process (C414),
+	unnecessary-subscript-reversal (C415),
+	unnecessary-comprehension (C416),
+	unnecessary-map (C417),
+	unnecessary-literal-within-dict-call (C418),
+	unnecessary-comprehension-in-call (C419),
+	unnecessary-dict-comprehension-for-iterable (C420),
+	unnecessary-placeholder (PIE790),
+	duplicate-class-field-definition (PIE794),
+	non-unique-enums (PIE796),
+	unnecessary-spread (PIE800),
+	unnecessary-dict-kwargs (PIE804),
+	reimplemented-container-builtin (PIE807),
+	unnecessary-range-start (PIE808),
+	multiple-starts-ends-with (PIE810),
+	unnecessary-return-none (RET501),
+	implicit-return-value (RET502),
+	implicit-return (RET503),
+	unnecessary-assign (RET504),
+	superfluous-else-return (RET505),
+	superfluous-else-raise (RET506),
+	superfluous-else-continue (RET507),
+	superfluous-else-break (RET508),
+	duplicate-isinstance-call (SIM101),
+	collapsible-if (SIM102),
+	needless-bool (SIM103),
+	suppressible-exception (SIM105),
+	return-in-try-except-finally (SIM107),
+	compare-with-tuple (SIM109),
+	reimplemented-builtin (SIM110),
+	uncapitalized-environment-variables (SIM112),
+	enumerate-for-loop (SIM113),
+	if-with-same-arms (SIM114),
+	open-file-with-context-handler (SIM115),
+	if-else-block-instead-of-dict-lookup (SIM116),
+	multiple-with-statements (SIM117),
+	in-dict-keys (SIM118),
+	negate-equal-op (SIM201),
+	negate-not-equal-op (SIM202),
+	double-negation (SIM208),
+	if-expr-with-true-false (SIM210),
+	if-expr-with-false-true (SIM211),
+	if-expr-with-twisted-arms (SIM212),
+	expr-and-not-expr (SIM220),
+	expr-or-not-expr (SIM221),
+	expr-or-true (SIM222),
+	expr-and-false (SIM223),
+	yoda-conditions (SIM300),
+	if-else-block-instead-of-dict-get (SIM401),
+	split-static-string (SIM905),
+	dict-get-with-none-default (SIM910),
+	zip-dict-keys-and-values (SIM911),
+	os-path-abspath (PTH100),
+	os-chmod (PTH101),
+	os-mkdir (PTH102),
+	os-makedirs (PTH103),
+	os-rename (PTH104),
+	os-replace (PTH105),
+	os-rmdir (PTH106),
+	os-remove (PTH107),
+	os-unlink (PTH108),
+	os-getcwd (PTH109),
+	os-path-exists (PTH110),
+	os-path-expanduser (PTH111),
+	os-path-isdir (PTH112),
+	os-path-isfile (PTH113),
+	os-path-islink (PTH114),
+	os-readlink (PTH115),
+	os-stat (PTH116),
+	os-path-isabs (PTH117),
+	os-path-join (PTH118),
+	os-path-basename (PTH119),
+	os-path-dirname (PTH120),
+	os-path-samefile (PTH121),
+	os-path-splitext (PTH122),
+	builtin-open (PTH123),
+	py-path (PTH124),
+	path-constructor-current-directory (PTH201),
+	os-path-getsize (PTH202),
+	os-path-getatime (PTH203),
+	os-path-getmtime (PTH204),
+	os-path-getctime (PTH205),
+	os-sep-split (PTH206),
+	glob (PTH207),
+	os-listdir (PTH208),
+	invalid-pathlib-with-suffix (PTH210),
+	unsorted-imports (I001),
+	missing-required-import (I002),
+	invalid-class-name (N801),
+	invalid-function-name (N802),
+	invalid-argument-name (N803),
+	invalid-first-argument-name-for-class-method (N804),
+	invalid-first-argument-name-for-method (N805),
+	non-lowercase-variable-in-function (N806),
+	dunder-function-name (N807),
+	constant-imported-as-non-constant (N811),
+	lowercase-imported-as-non-lowercase (N812),
+	camelcase-imported-as-lowercase (N813),
+	camelcase-imported-as-constant (N814),
+	mixed-case-variable-in-class-scope (N815),
+	mixed-case-variable-in-global-scope (N816),
+	camelcase-imported-as-acronym (N817),
+	error-suffix-on-exception-name (N818),
+	invalid-module-name (N999),
+	mixed-spaces-and-tabs (E101),
+	multiple-imports-on-one-line (E401),
+	module-import-not-at-top-of-file (E402),
+	line-too-long (E501),
+	multiple-statements-on-one-line-colon (E701),
+	multiple-statements-on-one-line-semicolon (E702),
+	useless-semicolon (E703),
+	none-comparison (E711),
+	true-false-comparison (E712),
+	not-in-test (E713),
+	not-is-test (E714),
+	type-comparison (E721),
+	bare-except (E722),
+	lambda-assignment (E731),
+	ambiguous-variable-name (E741),
+	ambiguous-class-name (E742),
+	ambiguous-function-name (E743),
+	io-error (E902),
+	tab-indentation (W191),
+	trailing-whitespace (W291),
+	missing-newline-at-end-of-file (W292),
+	blank-line-with-whitespace (W293),
+	doc-line-too-long (W505),
+	invalid-escape-sequence (W605),
+	unused-import (F401),
+	import-shadowed-by-loop-var (F402),
+	undefined-local-with-import-star (F403),
+	late-future-import (F404),
+	undefined-local-with-import-star-usage (F405),
+	undefined-local-with-nested-import-star-usage (F406),
+	future-feature-not-defined (F407),
+	percent-format-invalid-format (F501),
+	percent-format-expected-mapping (F502),
+	percent-format-expected-sequence (F503),
+	percent-format-extra-named-arguments (F504),
+	percent-format-missing-argument (F505),
+	percent-format-mixed-positional-and-named (F506),
+	percent-format-positional-count-mismatch (F507),
+	percent-format-star-requires-sequence (F508),
+	percent-format-unsupported-format-character (F509),
+	string-dot-format-invalid-format (F521),
+	string-dot-format-extra-named-arguments (F522),
+	string-dot-format-extra-positional-arguments (F523),
+	string-dot-format-missing-arguments (F524),
+	string-dot-format-mixing-automatic (F525),
+	f-string-missing-placeholders (F541),
+	multi-value-repeated-key-literal (F601),
+	multi-value-repeated-key-variable (F602),
+	expressions-in-star-assignment (F621),
+	multiple-starred-expressions (F622),
+	assert-tuple (F631),
+	is-literal (F632),
+	invalid-print-syntax (F633),
+	if-tuple (F634),
+	break-outside-loop (F701),
+	continue-outside-loop (F702),
+	yield-outside-function (F704),
+	return-outside-function (F706),
+	default-except-not-last (F707),
+	forward-annotation-syntax-error (F722),
+	redefined-while-unused (F811),
+	undefined-name (F821),
+	undefined-export (F822),
+	undefined-local (F823),
+	unused-variable (F841),
+	unused-annotation (F842),
+	raise-not-implemented (F901),
+	useless-metaclass-type (UP001),
+	type-of-primitive (UP003),
+	useless-object-inheritance (UP004),
+	deprecated-unittest-alias (UP005),
+	non-pep585-annotation (UP006),
+	non-pep604-annotation-union (UP007),
+	super-call-with-parameters (UP008),
+	utf8-encoding-declaration (UP009),
+	unnecessary-future-import (UP010),
+	lru-cache-without-parameters (UP011),
+	unnecessary-encode-utf8 (UP012),
+	convert-typed-dict-functional-to-class (UP013),
+	convert-named-tuple-functional-to-class (UP014),
+	redundant-open-modes (UP015),
+	datetime-timezone-utc (UP017),
+	native-literals (UP018),
+	typing-text-str-alias (UP019),
+	open-alias (UP020),
+	replace-universal-newlines (UP021),
+	replace-stdout-stderr (UP022),
+	deprecated-c-element-tree (UP023),
+	os-error-alias (UP024),
+	unicode-kind-prefix (UP025),
+	deprecated-mock-import (UP026),
+	yield-in-for-loop (UP028),
+	unnecessary-builtin-import (UP029),
+	format-literals (UP030),
+	printf-string-formatting (UP031),
+	f-string (UP032),
+	lru-cache-with-maxsize-none (UP033),
+	extraneous-parentheses (UP034),
+	deprecated-import (UP035),
+	outdated-version-block (UP036),
+	quoted-annotation (UP037),
+	non-pep604-isinstance (UP038),
+	unnecessary-class-parentheses (UP039),
+	non-pep695-type-alias (UP040),
+	timeout-error-alias (UP041),
+	unnecessary-default-type-args (UP043),
+	non-pep646-unpack (UP044),
+	non-pep604-annotation-optional (UP045),
+	non-pep695-generic-class (UP046),
+	non-pep695-generic-function (UP047),
+	private-type-parameter (UP049),
+	collection-literal-concatenation (RUF005),
+	asyncio-dangling-task (RUF006),
+	zip-instead-of-pairwise (RUF007),
+	mutable-dataclass-default (RUF008),
+	function-call-in-dataclass-default-argument (RUF009),
+	explicit-f-string-type-conversion (RUF010),
+	mutable-class-default (RUF012),
+	implicit-optional (RUF013),
+	unnecessary-iterable-allocation-for-first-element (RUF015),
+	invalid-index-type (RUF016),
+	quadratic-list-summation (RUF017),
+	assignment-in-assert (RUF018),
+	unnecessary-key-check (RUF019),
+	never-union (RUF020),
+	parenthesize-chained-operators (RUF021),
+	unsorted-dunder-all (RUF022),
+	unsorted-dunder-slots (RUF023),
+	mutable-fromkeys-value (RUF024),
+	default-factory-kwarg (RUF026),
+	invalid-formatter-suppression-comment (RUF028),
+	assert-with-print-message (RUF030),
+	decimal-from-float-literal (RUF032),
+	post-init-default (RUF033),
+	useless-if-else (RUF034),
+	invalid-assert-message-literal-argument (RUF040),
+	unnecessary-nested-literal (RUF041),
+	unnecessary-cast-to-int (RUF046),
+	map-int-version-parsing (RUF048),
+	dataclass-enum (RUF049),
+	if-key-in-dict-del (RUF051),
+	class-with-mixed-type-vars (RUF053),
+	unnecessary-round (RUF057),
+	starmap-zip (RUF058),
+	unused-noqa (RUF100),
+	redirected-noqa (RUF101),
+	invalid-pyproject-toml (RUF200),
+]
+linter.per_file_ignores = {}
+linter.safety_table.forced_safe = []
+linter.safety_table.forced_unsafe = []
+linter.unresolved_target_version = 3.12
+linter.per_file_target_version = {}
+linter.preview = disabled
+linter.explicit_preview_rules = false
+linter.extension = ExtensionMapping({})
+linter.allowed_confusables = []
+linter.builtins = []
+linter.dummy_variable_rgx = ^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$
+linter.external = []
+linter.ignore_init_module_imports = true
+linter.logger_objects = []
+linter.namespace_packages = []
+linter.src = [
+	".",
+	"./src",
+]
+linter.tab_size = 4
+linter.line_length = 100
+linter.task_tags = [
+	TODO,
+	FIXME,
+	XXX,
+]
+linter.typing_modules = []
+linter.typing_extensions = true
+
+# Linter Plugins
+linter.flake8_annotations.mypy_init_return = false
+linter.flake8_annotations.suppress_dummy_args = false
+linter.flake8_annotations.suppress_none_returning = false
+linter.flake8_annotations.allow_star_arg_any = false
+linter.flake8_annotations.ignore_fully_untyped = false
+linter.flake8_bandit.hardcoded_tmp_directory = [
+	/tmp,
+	/var/tmp,
+	/dev/shm,
+]
+linter.flake8_bandit.check_typed_exception = false
+linter.flake8_bandit.extend_markup_names = []
+linter.flake8_bandit.allowed_markup_calls = []
+linter.flake8_bugbear.extend_immutable_calls = []
+linter.flake8_builtins.allowed_modules = []
+linter.flake8_builtins.ignorelist = []
+linter.flake8_builtins.strict_checking = false
+linter.flake8_comprehensions.allow_dict_calls_with_keyword_arguments = false
+linter.flake8_copyright.notice_rgx = (?i)Copyright\s+((?:\(C\)|©)\s+)?\d{4}((-|,\s)\d{4})*
+linter.flake8_copyright.author = none
+linter.flake8_copyright.min_file_size = 0
+linter.flake8_errmsg.max_string_length = 0
+linter.flake8_gettext.functions_names = [
+	_,
+	gettext,
+	ngettext,
+]
+linter.flake8_implicit_str_concat.allow_multiline = true
+linter.flake8_import_conventions.aliases = {
+	altair = alt,
+	holoviews = hv,
+	matplotlib = mpl,
+	matplotlib.pyplot = plt,
+	networkx = nx,
+	numpy = np,
+	numpy.typing = npt,
+	pandas = pd,
+	panel = pn,
+	plotly.express = px,
+	polars = pl,
+	pyarrow = pa,
+	seaborn = sns,
+	tensorflow = tf,
+	tkinter = tk,
+	xml.etree.ElementTree = ET,
+}
+linter.flake8_import_conventions.banned_aliases = {}
+linter.flake8_import_conventions.banned_from = []
+linter.flake8_pytest_style.fixture_parentheses = false
+linter.flake8_pytest_style.parametrize_names_type = tuple
+linter.flake8_pytest_style.parametrize_values_type = list
+linter.flake8_pytest_style.parametrize_values_row_type = tuple
+linter.flake8_pytest_style.raises_require_match_for = [
+	BaseException,
+	Exception,
+	ValueError,
+	OSError,
+	IOError,
+	EnvironmentError,
+	socket.error,
+]
+linter.flake8_pytest_style.raises_extend_require_match_for = []
+linter.flake8_pytest_style.mark_parentheses = false
+linter.flake8_quotes.inline_quotes = double
+linter.flake8_quotes.multiline_quotes = double
+linter.flake8_quotes.docstring_quotes = double
+linter.flake8_quotes.avoid_escape = true
+linter.flake8_self.ignore_names = [
+	_make,
+	_asdict,
+	_replace,
+	_fields,
+	_field_defaults,
+	_name_,
+	_value_,
+]
+linter.flake8_tidy_imports.ban_relative_imports = "parents"
+linter.flake8_tidy_imports.banned_api = {}
+linter.flake8_tidy_imports.banned_module_level_imports = []
+linter.flake8_type_checking.strict = false
+linter.flake8_type_checking.exempt_modules = [
+	typing,
+	typing_extensions,
+]
+linter.flake8_type_checking.runtime_required_base_classes = []
+linter.flake8_type_checking.runtime_required_decorators = []
+linter.flake8_type_checking.quote_annotations = false
+linter.flake8_unused_arguments.ignore_variadic_names = false
+linter.isort.required_imports = []
+linter.isort.combine_as_imports = false
+linter.isort.force_single_line = false
+linter.isort.force_sort_within_sections = false
+linter.isort.detect_same_package = true
+linter.isort.case_sensitive = false
+linter.isort.force_wrap_aliases = false
+linter.isort.force_to_top = []
+linter.isort.known_modules = {}
+linter.isort.order_by_type = true
+linter.isort.relative_imports_order = furthest_to_closest
+linter.isort.single_line_exclusions = []
+linter.isort.split_on_trailing_comma = true
+linter.isort.classes = []
+linter.isort.constants = []
+linter.isort.variables = []
+linter.isort.no_lines_before = []
+linter.isort.lines_after_imports = -1
+linter.isort.lines_between_types = 0
+linter.isort.forced_separate = []
+linter.isort.section_order = [
+	known { type = future },
+	known { type = standard_library },
+	known { type = third_party },
+	known { type = first_party },
+	known { type = local_folder },
+]
+linter.isort.default_section = known { type = third_party }
+linter.isort.no_sections = false
+linter.isort.from_first = false
+linter.isort.length_sort = false
+linter.isort.length_sort_straight = false
+linter.mccabe.max_complexity = 10
+linter.pep8_naming.ignore_names = [
+	setUp,
+	tearDown,
+	setUpClass,
+	tearDownClass,
+	setUpModule,
+	tearDownModule,
+	asyncSetUp,
+	asyncTearDown,
+	setUpTestData,
+	failureException,
+	longMessage,
+	maxDiff,
+]
+linter.pep8_naming.classmethod_decorators = []
+linter.pep8_naming.staticmethod_decorators = []
+linter.pycodestyle.max_line_length = 100
+linter.pycodestyle.max_doc_length = none
+linter.pycodestyle.ignore_overlong_task_comments = false
+linter.pyflakes.extend_generics = []
+linter.pyflakes.allowed_unused_imports = []
+linter.pylint.allow_magic_value_types = [
+	str,
+	bytes,
+]
+linter.pylint.allow_dunder_method_names = []
+linter.pylint.max_args = 5
+linter.pylint.max_positional_args = 5
+linter.pylint.max_returns = 6
+linter.pylint.max_bool_expr = 5
+linter.pylint.max_branches = 12
+linter.pylint.max_statements = 50
+linter.pylint.max_public_methods = 20
+linter.pylint.max_locals = 15
+linter.pyupgrade.keep_runtime_typing = false
+linter.ruff.parenthesize_tuple_in_subscript = false
+
+# Formatter Settings
+formatter.exclude = []
+formatter.unresolved_target_version = 3.12
+formatter.per_file_target_version = {}
+formatter.preview = disabled
+formatter.line_width = 100
+formatter.line_ending = auto
+formatter.indent_style = space
+formatter.indent_width = 4
+formatter.quote_style = single
+formatter.magic_trailing_comma = respect
+formatter.docstring_code_format = disabled
+formatter.docstring_code_line_width = dynamic
+
+# Analyze Settings
+analyze.exclude = []
+analyze.preview = disabled
+analyze.target_version = 3.12
+analyze.string_imports = disabled
+analyze.extension = ExtensionMapping({})
+analyze.include_dependencies = {}

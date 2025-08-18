@@ -38,6 +38,15 @@
     install-all = {
       exec = "uv sync && npm install";
     };
+    lint-all = {
+      exec = "pre-commit run --all-files";
+    };
+    test-all = {
+      exec = "uv run pytest && ./scripts/playwright.sh test";
+    };
+    test-update-snapshots = {
+      exec = "uv run pytest --snapshot-update";
+    };
   };
 
   # https://devenv.sh/git-hooks/
