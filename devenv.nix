@@ -44,8 +44,11 @@
     test-all = {
       exec = "uv run pytest && ./scripts/playwright.sh test";
     };
-    test-update-snapshots = {
+    test-update-snapshots-pytest = {
       exec = "uv run pytest --snapshot-update";
+    };
+    test-update-snapshots-playwright = {
+      exec = "./scripts/playwright.sh test --update-snapshots";
     };
   };
 
@@ -59,11 +62,18 @@
       enable = true;
       settings.lint-only = false;
     };
+    pretty-format-json = {
+      enable = true;
+      settings = {
+        autofix = true;
+        no-sort-keys = true;
+      };
+    };
 
     # custom hooks
     eslint-npm = {
       enable = true;
-      entry = "npx eslint --fix";
+      entry = "npx eslint --fix --cache";
       files = "\\.(js|mjs|ts|tsx)$";
     };
     prettier-npm = {

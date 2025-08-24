@@ -90,6 +90,22 @@ linterOptions:
     reportUnusedDisableDirectives: 2
 plugins: null
 rules:
+    '@eslint-community/eslint-comments/disable-enable-pair':
+    - 2
+    -   allowWholeFile: true
+    '@eslint-community/eslint-comments/no-aggregating-enable':
+    - 2
+    '@eslint-community/eslint-comments/no-duplicate-disable':
+    - 2
+    '@eslint-community/eslint-comments/no-unlimited-disable':
+    - 2
+    '@eslint-community/eslint-comments/no-unused-enable':
+    - 2
+    '@eslint-community/eslint-comments/require-description':
+    - 2
+    -   ignore:
+        - eslint-enable
+        - eslint-env
     '@stylistic/array-bracket-spacing':
     - 2
     - never
@@ -585,6 +601,60 @@ rules:
     getter-return:
     - 2
     -   allowImplicit: false
+    import-x/default:
+    - 2
+    import-x/export:
+    - 2
+    import-x/first:
+    - 2
+    import-x/named:
+    - 2
+    import-x/namespace:
+    - 2
+    import-x/no-absolute-path:
+    - 2
+    -   amd: false
+        commonjs: true
+        esmodule: true
+    import-x/no-duplicates:
+    - 2
+    import-x/no-extraneous-dependencies:
+    - 2
+    import-x/no-named-as-default:
+    - 2
+    import-x/no-named-as-default-member:
+    - 2
+    import-x/no-named-default:
+    - 2
+    import-x/no-unresolved:
+    - 2
+    import-x/no-webpack-loader-syntax:
+    - 2
+    import-x/order:
+    - 2
+    -   alphabetize:
+            caseInsensitive: true
+            order: asc
+            orderImportKind: ignore
+        distinctGroup: false
+        groups:
+        - builtin
+        - external
+        - internal
+        -   - parent
+            - sibling
+            - index
+        - type
+        named: false
+        pathGroups:
+        -   group: external
+            pattern: react
+            position: before
+        pathGroupsExcludedImportTypes:
+        - builtin
+        - react
+        sortTypesGroup: false
+        warnOnUnassignedImports: false
     no-array-constructor:
     - 0
     no-async-promise-executor:
@@ -740,6 +810,8 @@ rules:
     require-await:
     - 0
     require-yield:
+    - 2
+    unused-imports/no-unused-imports:
     - 2
     use-isnan:
     - 2

@@ -1,5 +1,5 @@
-import { defineConfig, devices } from '@playwright/test';
 import path from 'node:path';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
     testDir: './tests/features',
@@ -35,7 +35,7 @@ export default defineConfig({
 
     webServer: [
         {
-            command: 'npx tsx ./scripts/test-server.ts',
+            command: 'tsx ./scripts/test-server.ts',
             port: 8000,
             reuseExistingServer: !process.env.CI,
         },

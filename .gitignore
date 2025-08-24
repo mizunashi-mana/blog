@@ -10,6 +10,10 @@
 
 /tmp/
 /core
+*.bak
+
+# ESLint
+.eslintcache
 
 # Pelican
 /output/
