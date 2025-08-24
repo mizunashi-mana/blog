@@ -1,6 +1,6 @@
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { merge } from 'webpack-merge';
 import commonConfig from './webpack.common.config.js';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 const enableAnalyzer = process.env.ENABLE_ANALYZER === 'true';
 

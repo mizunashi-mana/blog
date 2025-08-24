@@ -11,6 +11,9 @@
 /tmp/
 /core
 
+# ESLint
+.eslintcache
+
 # Pelican
 /output/
 /theme/content/static/dist-assets/

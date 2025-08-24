@@ -15,10 +15,5 @@
                 "./theme/src/*"
             ]
         }
-    },
-    "include": [
-        "theme/src",
-        "tests",
-        "scripts"
-    ]
+    }
 }

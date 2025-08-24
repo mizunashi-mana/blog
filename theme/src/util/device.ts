@@ -7,6 +7,6 @@ export function isTouchDevice(): boolean {
         return false;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ポリーフィル定義のため
     return document instanceof (window.DocumentTouch as any);
 }
