@@ -62,6 +62,13 @@
       enable = true;
       settings.lint-only = false;
     };
+    pretty-format-json = {
+      enable = true;
+      settings = {
+        autofix = true;
+        no-sort-keys = true;
+      };
+    };
 
     # custom hooks
     eslint-npm = {

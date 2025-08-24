@@ -35,7 +35,7 @@ export default defineConfig({
 
     webServer: [
         {
-            command: 'npx tsx ./scripts/test-server.ts',
+            command: 'tsx ./scripts/test-server.ts',
             port: 8000,
             reuseExistingServer: !process.env.CI,
         },

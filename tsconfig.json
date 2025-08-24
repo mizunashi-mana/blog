@@ -1,19 +1,23 @@
 {
-    "compilerOptions": {
-        "sourceMap": true,
-        "target": "ES2022",
-        "module": "ES2022",
-        "moduleResolution": "node",
-        "jsx": "react",
-        "strict": true,
-        "noUncheckedIndexedAccess": true,
-        "declaration": false,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "paths": {
-            "@/*": [
-                "./theme/src/*"
-            ]
-        }
+  "compilerOptions": {
+    "sourceMap": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "jsx": "react",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "declaration": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@/*": [
+        "./theme/src/*"
+      ]
     }
+  },
+  "exclude": [
+    "node_modules",
+    "plugins/official"
+  ]
 }

@@ -19,30 +19,3 @@
     font-style: normal;
     font-display: swap;
 }
-
-/* スクリーンショットテスト用の正規化 */
-
-/* CI環境とローカル環境での差異を最小化 */
-.highlight,
-.codehilite,
-pre.literal-block {
-    /* 行の高さを固定 */
-    line-height: 1.4 !important;
-
-    /* パディングを固定 */
-    padding: 1rem !important;
-
-    /* マージンを固定 */
-    margin: 1rem 0 !important;
-}
-
-/* コードブロック内のpreタグ */
-.highlight pre,
-.codehilite pre {
-    /* 行の高さを固定 */
-    line-height: 1.4 !important;
-
-    /* マージン・パディングをリセット */
-    margin: 0 !important;
-    padding: 0 !important;
-}
