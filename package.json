@@ -28,7 +28,7 @@
     "@eslint-community/eslint-plugin-eslint-comments": "^4.5.0",
     "@eslint/js": "^9.34.0",
     "@mizunashi_mana/claude-code-hook-sdk": "^6.0.0",
-    "@playwright/test": "^1.55.0",
+    "@playwright/test": "^1.56.1",
     "@stylistic/eslint-plugin": "^5.2.3",
     "@types/express": "^5.0.3",
     "autoprefixer": "^10.4.21",
