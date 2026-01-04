@@ -18,6 +18,7 @@ languageOptions:
         DOMException: false
         DecompressionStream: false
         DisposableStack: false
+        ErrorEvent: false
         Event: false
         EventTarget: false
         File: false
@@ -42,6 +43,7 @@ languageOptions:
         ReadableStreamDefaultReader: false
         Request: false
         Response: false
+        Storage: false
         SubtleCrypto: false
         SuppressedError: false
         TextDecoder: false
@@ -70,12 +72,14 @@ languageOptions:
         exports: true
         fetch: false
         global: false
+        localStorage: false
         module: false
         navigator: false
         performance: false
         process: false
         queueMicrotask: false
         require: false
+        sessionStorage: false
         setImmediate: false
         setInterval: false
         setTimeout: false
@@ -171,11 +175,7 @@ rules:
         ignoredNodes:
         - TSUnionType
         - TSIntersectionType
-        - TSTypeParameterInstantiation
-        - FunctionExpression > .params[decorators.length > 0]
-        - FunctionExpression > .params > :matches(Decorator, :not(:first-child))
         offsetTernaryExpressions: true
-        offsetTernaryExpressionsOffsetCallExpressions: true
         outerIIFEBody: 1
         tabLength: 4
     '@stylistic/indent-binary-ops':
@@ -524,6 +524,8 @@ rules:
     - 2
     '@typescript-eslint/no-useless-constructor':
     - 2
+    '@typescript-eslint/no-useless-default-assignment':
+    - 0
     '@typescript-eslint/no-wrapper-object-types':
     - 2
     '@typescript-eslint/non-nullable-type-assertion-style':
@@ -736,6 +738,7 @@ rules:
     - 2
     no-misleading-character-class:
     - 2
+    -   allowEscape: false
     no-new-native-nonconstructor:
     - 2
     no-nonoctal-decimal-escape:

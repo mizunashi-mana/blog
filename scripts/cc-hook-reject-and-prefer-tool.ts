@@ -16,16 +16,6 @@ void runHook({
                 },
                 {
                     type: 'regex',
-                    match: /&\s*$/,
-                    preferTool: 'Use manage-bg MCP instead',
-                },
-                {
-                    type: 'regex',
-                    match: /(^| )pkill( |$)/,
-                    preferTool: 'Use manage-bg MCP instead',
-                },
-                {
-                    type: 'regex',
                     match: /^devenv shell/,
                     preferTool: '`devenv shell` is not needed. Run command directly.',
                 },
