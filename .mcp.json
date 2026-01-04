@@ -1,11 +1,5 @@
 {
   "mcpServers": {
-    "eslint": {
-      "command": "npx",
-      "args": [
-        "@eslint/mcp"
-      ]
-    },
     "playwright": {
       "command": "npx",
       "args": [
@@ -18,12 +12,6 @@
         "@mizunashi_mana/safe-file-deletion-mcp",
         "--allowed-directories=.",
         "--protected-patterns=.git,.claude,.devenv,node_modules,output"
-      ]
-    },
-    "manage-bg": {
-      "command": "npx",
-      "args": [
-        "@mizunashi_mana/manage-bg-mcp"
       ]
     }
   }

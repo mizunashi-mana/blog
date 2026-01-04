@@ -168,6 +168,7 @@ linter.rules.enabled = [
 	glob (PTH207),
 	os-listdir (PTH208),
 	invalid-pathlib-with-suffix (PTH210),
+	os-symlink (PTH211),
 	unsorted-imports (I001),
 	missing-required-import (I002),
 	invalid-class-name (N801),
@@ -287,7 +288,6 @@ linter.rules.enabled = [
 	deprecated-import (UP035),
 	outdated-version-block (UP036),
 	quoted-annotation (UP037),
-	non-pep604-isinstance (UP038),
 	unnecessary-class-parentheses (UP039),
 	non-pep695-type-alias (UP040),
 	timeout-error-alias (UP041),
@@ -297,6 +297,7 @@ linter.rules.enabled = [
 	non-pep695-generic-class (UP046),
 	non-pep695-generic-function (UP047),
 	private-type-parameter (UP049),
+	useless-class-metaclass-type (UP050),
 	collection-literal-concatenation (RUF005),
 	asyncio-dangling-task (RUF006),
 	zip-instead-of-pairwise (RUF007),
@@ -323,6 +324,7 @@ linter.rules.enabled = [
 	useless-if-else (RUF034),
 	invalid-assert-message-literal-argument (RUF040),
 	unnecessary-nested-literal (RUF041),
+	pytest-raises-ambiguous-pattern (RUF043),
 	unnecessary-cast-to-int (RUF046),
 	map-int-version-parsing (RUF048),
 	dataclass-enum (RUF049),
@@ -330,6 +332,7 @@ linter.rules.enabled = [
 	class-with-mixed-type-vars (RUF053),
 	unnecessary-round (RUF057),
 	starmap-zip (RUF058),
+	unused-unpacked-variable (RUF059),
 	unused-noqa (RUF100),
 	redirected-noqa (RUF101),
 	invalid-pyproject-toml (RUF200),
@@ -471,6 +474,7 @@ linter.rules.should_fix = [
 	glob (PTH207),
 	os-listdir (PTH208),
 	invalid-pathlib-with-suffix (PTH210),
+	os-symlink (PTH211),
 	unsorted-imports (I001),
 	missing-required-import (I002),
 	invalid-class-name (N801),
@@ -590,7 +594,6 @@ linter.rules.should_fix = [
 	deprecated-import (UP035),
 	outdated-version-block (UP036),
 	quoted-annotation (UP037),
-	non-pep604-isinstance (UP038),
 	unnecessary-class-parentheses (UP039),
 	non-pep695-type-alias (UP040),
 	timeout-error-alias (UP041),
@@ -600,6 +603,7 @@ linter.rules.should_fix = [
 	non-pep695-generic-class (UP046),
 	non-pep695-generic-function (UP047),
 	private-type-parameter (UP049),
+	useless-class-metaclass-type (UP050),
 	collection-literal-concatenation (RUF005),
 	asyncio-dangling-task (RUF006),
 	zip-instead-of-pairwise (RUF007),
@@ -626,6 +630,7 @@ linter.rules.should_fix = [
 	useless-if-else (RUF034),
 	invalid-assert-message-literal-argument (RUF040),
 	unnecessary-nested-literal (RUF041),
+	pytest-raises-ambiguous-pattern (RUF043),
 	unnecessary-cast-to-int (RUF046),
 	map-int-version-parsing (RUF048),
 	dataclass-enum (RUF049),
@@ -633,6 +638,7 @@ linter.rules.should_fix = [
 	class-with-mixed-type-vars (RUF053),
 	unnecessary-round (RUF057),
 	starmap-zip (RUF058),
+	unused-unpacked-variable (RUF059),
 	unused-noqa (RUF100),
 	redirected-noqa (RUF101),
 	invalid-pyproject-toml (RUF200),
@@ -822,6 +828,7 @@ linter.pylint.max_branches = 12
 linter.pylint.max_statements = 50
 linter.pylint.max_public_methods = 20
 linter.pylint.max_locals = 15
+linter.pylint.max_nested_blocks = 5
 linter.pyupgrade.keep_runtime_typing = false
 linter.ruff.parenthesize_tuple_in_subscript = false
 
@@ -846,3 +853,4 @@ analyze.target_version = 3.12
 analyze.string_imports = disabled
 analyze.extension = ExtensionMapping({})
 analyze.include_dependencies = {}
+analyze.type_checking_imports = true
