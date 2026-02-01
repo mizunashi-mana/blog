@@ -15,7 +15,7 @@ runs:
         sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
         sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
         DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
-    - uses: cachix/install-nix-action@7ab6e7fd29da88e74b1e314a4ae9ac6b5cda3801 # v31.8.0
+    - uses: cachix/install-nix-action@4e002c8ec80594ecd40e759629461e26c8abed15 # v31.9.0
     - uses: cachix/cachix-action@3ba601ff5bbb07c7220846facfa2cd81eeee15a1 # v16
       with:
         name: devenv
