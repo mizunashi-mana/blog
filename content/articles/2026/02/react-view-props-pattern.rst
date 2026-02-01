@@ -51,14 +51,12 @@ View / State 分離パターン
 ``View`` （ビュー）
     ``ViewProps`` 型を受け取り、どの要素をどう描画し、どのイベントをハンドリングするかを定義する。JSX の本体。
 
-State / Handler / Selector は ``useViewProps`` というカスタムフックにまとめ、コンポーネントは ``useViewProps`` の戻り値である ``ViewProps`` からビューを記述する。 ``useViewProps`` は MVVM における ViewModel に近い役割を果たしており、内部の状態をビューが消費可能な形に変換して提供する。これにより以下の単方向データフローを実現する::
+State / Handler / Selector は ``useViewProps`` というカスタムフックにまとめ、コンポーネントは ``useViewProps`` の戻り値である ``ViewProps`` からビューを記述する。 ``useViewProps`` は MVVM における ViewModel に近い役割を果たしており、内部の状態をビューが消費可能な形に変換して提供する。これにより以下の単方向データフローを実現する:
 
-    View（イベント発火）
-      → Handler（dispatch）
-        → State（状態更新）
-          → Selector（派生データ計算）
-            → ViewProps
-              → View（再描画）
+.. image:: {attach}react-view-props-pattern/view-props-pattern-dataflow.png
+  :alt: View / State 分離パターンの単方向データフロー
+  :align: center
+  :width: 600px
 
 具体的なコード例を見てみよう。フィルタ付き Todo リストを題材にする。まず、State として状態の型と reducer を定義する。状態は Todo の配列と現在のフィルタモードだけを保持し、ビューでの使いやすさなどとは切り離して最小限の情報に留めるのが大事だ:
 
