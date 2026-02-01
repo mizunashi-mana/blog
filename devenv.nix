@@ -6,10 +6,6 @@
   ...
 }:
 {
-  env = {
-    UV_LINK_MODE = "copy";
-  };
-
   # https://devenv.sh/packages/
   packages = [
     pkgs.gnumake

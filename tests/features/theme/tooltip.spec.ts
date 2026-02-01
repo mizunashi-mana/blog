@@ -1,6 +1,7 @@
 import { test, expect, devices } from '@playwright/test';
 
 test.use(devices['Desktop Chrome']);
+
 test.describe('ツールチップ', () => {
     test('脚注のツールチップが作動すること', async ({ page }) => {
         await page.goto('/posts/2023/10/display-property-of-css/');
