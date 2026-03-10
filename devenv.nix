@@ -23,6 +23,7 @@
     };
     javascript = {
       enable = true;
+      package = pkgs.nodejs;
       npm = {
         enable = true;
       };
@@ -35,7 +36,7 @@
       exec = "uv sync && npm install";
     };
     lint-all = {
-      exec = "pre-commit run --all-files";
+      exec = "prek run --all-files";
     };
     test-all = {
       exec = "uv run pytest && ./scripts/playwright.sh test";
