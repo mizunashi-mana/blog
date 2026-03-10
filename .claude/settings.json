@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(./scripts/playwright.sh test:*)",
-      "Bash(make:*)"
+      "Bash(make:*)",
+      "Bash(uv run pytest:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

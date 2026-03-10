@@ -70,6 +70,7 @@ linter.rules.enabled = [
 	raise-without-from-inside-except (B904),
 	zip-without-explicit-strict (B905),
 	batched-without-explicit-strict (B911),
+	map-without-explicit-strict (B912),
 	unnecessary-generator-list (C400),
 	unnecessary-generator-set (C401),
 	unnecessary-generator-dict (C402),
@@ -291,6 +292,7 @@ linter.rules.enabled = [
 	unnecessary-class-parentheses (UP039),
 	non-pep695-type-alias (UP040),
 	timeout-error-alias (UP041),
+	replace-str-enum (UP042),
 	unnecessary-default-type-args (UP043),
 	non-pep646-unpack (UP044),
 	non-pep604-annotation-optional (UP045),
@@ -322,6 +324,7 @@ linter.rules.enabled = [
 	decimal-from-float-literal (RUF032),
 	post-init-default (RUF033),
 	useless-if-else (RUF034),
+	unnecessary-empty-iterable-within-deque-call (RUF037),
 	invalid-assert-message-literal-argument (RUF040),
 	unnecessary-nested-literal (RUF041),
 	pytest-raises-ambiguous-pattern (RUF043),
@@ -333,8 +336,14 @@ linter.rules.enabled = [
 	unnecessary-round (RUF057),
 	starmap-zip (RUF058),
 	unused-unpacked-variable (RUF059),
+	in-empty-collection (RUF060),
+	legacy-form-pytest-raises (RUF061),
+	non-octal-permissions (RUF064),
 	unused-noqa (RUF100),
 	redirected-noqa (RUF101),
+	invalid-rule-code (RUF102),
+	invalid-suppression-comment (RUF103),
+	unmatched-suppression-comment (RUF104),
 	invalid-pyproject-toml (RUF200),
 ]
 linter.rules.should_fix = [
@@ -376,6 +385,7 @@ linter.rules.should_fix = [
 	raise-without-from-inside-except (B904),
 	zip-without-explicit-strict (B905),
 	batched-without-explicit-strict (B911),
+	map-without-explicit-strict (B912),
 	unnecessary-generator-list (C400),
 	unnecessary-generator-set (C401),
 	unnecessary-generator-dict (C402),
@@ -597,6 +607,7 @@ linter.rules.should_fix = [
 	unnecessary-class-parentheses (UP039),
 	non-pep695-type-alias (UP040),
 	timeout-error-alias (UP041),
+	replace-str-enum (UP042),
 	unnecessary-default-type-args (UP043),
 	non-pep646-unpack (UP044),
 	non-pep604-annotation-optional (UP045),
@@ -628,6 +639,7 @@ linter.rules.should_fix = [
 	decimal-from-float-literal (RUF032),
 	post-init-default (RUF033),
 	useless-if-else (RUF034),
+	unnecessary-empty-iterable-within-deque-call (RUF037),
 	invalid-assert-message-literal-argument (RUF040),
 	unnecessary-nested-literal (RUF041),
 	pytest-raises-ambiguous-pattern (RUF043),
@@ -639,14 +651,20 @@ linter.rules.should_fix = [
 	unnecessary-round (RUF057),
 	starmap-zip (RUF058),
 	unused-unpacked-variable (RUF059),
+	in-empty-collection (RUF060),
+	legacy-form-pytest-raises (RUF061),
+	non-octal-permissions (RUF064),
 	unused-noqa (RUF100),
 	redirected-noqa (RUF101),
+	invalid-rule-code (RUF102),
+	invalid-suppression-comment (RUF103),
+	unmatched-suppression-comment (RUF104),
 	invalid-pyproject-toml (RUF200),
 ]
 linter.per_file_ignores = {}
 linter.safety_table.forced_safe = []
 linter.safety_table.forced_unsafe = []
-linter.unresolved_target_version = 3.12
+linter.unresolved_target_version = 3.13
 linter.per_file_target_version = {}
 linter.preview = disabled
 linter.explicit_preview_rules = false
@@ -778,6 +796,7 @@ linter.isort.classes = []
 linter.isort.constants = []
 linter.isort.variables = []
 linter.isort.no_lines_before = []
+linter.isort.import_headings = {}
 linter.isort.lines_after_imports = -1
 linter.isort.lines_between_types = 0
 linter.isort.forced_separate = []
@@ -835,7 +854,7 @@ linter.ruff.strictly_empty_init_modules = false
 
 # Formatter Settings
 formatter.exclude = []
-formatter.unresolved_target_version = 3.12
+formatter.unresolved_target_version = 3.13
 formatter.per_file_target_version = {}
 formatter.preview = disabled
 formatter.line_width = 100
@@ -850,7 +869,7 @@ formatter.docstring_code_line_width = dynamic
 # Analyze Settings
 analyze.exclude = []
 analyze.preview = disabled
-analyze.target_version = 3.12
+analyze.target_version = 3.13
 analyze.string_imports = disabled
 analyze.extension = ExtensionMapping({})
 analyze.include_dependencies = {}
