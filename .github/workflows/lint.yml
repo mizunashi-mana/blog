@@ -17,4 +17,4 @@ jobs:
           submodules: true
       - uses: ./.github/actions/setup-devenv
       - name: Run lint
-        run: devenv shell pre-commit run --all-files
+        run: devenv shell prek run --all-files
