@@ -7,17 +7,17 @@ test.describe('アイコン表示', () => {
 
         // Font Awesomeのスタイルシートが読み込まれていることを確認
         const fontAwesomeCSS = await page.evaluate(() => {
+            const hasFontAwesomeRule = (rule: CSSRule) =>
+                rule.cssText.includes('fa-') || rule.cssText.includes('FontAwesome');
+
             const stylesheets = Array.from(document.styleSheets);
             return stylesheets.some((sheet) => {
                 try {
-                    return sheet.href?.includes('fontawesome')
-                        ?? Array.from(sheet.cssRules ?? []).some(rule =>
-                            rule.cssText?.includes('fa-')
-                            ?? rule.cssText?.includes('FontAwesome'),
-                        );
+                    return (sheet.href?.includes('fontawesome') ?? false)
+                        || Array.from(sheet.cssRules).some(hasFontAwesomeRule);
                 }
                 catch {
-                    return sheet.href?.includes('fontawesome');
+                    return sheet.href?.includes('fontawesome') ?? false;
                 }
             });
         });
@@ -37,7 +37,7 @@ test.describe('アイコン表示', () => {
         const actualIconCount = await iconElements.count();
 
         // アイコンが存在する場合のみ詳細テストを実行
-        for (let i = 0; i < Math.min(3, actualIconCount); i++) {
+        for (let i = 0; i < Math.min(3, actualIconCount); i += 1) {
             const icon = iconElements.nth(i);
             await expect(icon).toBeVisible();
 
@@ -55,7 +55,7 @@ test.describe('アイコン表示', () => {
             });
 
             // Font Awesomeフォントが適用されていることを確認
-            expect(iconStyle.fontFamily).toMatch(/Font ?Awesome|fa/i);
+            expect(iconStyle.fontFamily).toMatch(/Font ?Awesome|fa/iv);
 
             // ::before疑似要素にコンテンツが設定されていることを確認（アイコンの実体）
             expect(iconStyle.beforeContent).not.toBe('none');
@@ -84,7 +84,7 @@ test.describe('アイコン表示', () => {
         expect(socialIconCount).toBeGreaterThanOrEqual(0);
 
         // ソーシャルアイコンが存在する場合のみテストを実行
-        for (let i = 0; i < Math.min(3, socialIconCount); i++) {
+        for (let i = 0; i < Math.min(3, socialIconCount); i += 1) {
             const socialIcon = socialIcons.nth(i);
             await expect(socialIcon).toBeVisible();
 
@@ -94,7 +94,7 @@ test.describe('アイコン表示', () => {
             expect(linkCount).toBeGreaterThanOrEqual(0);
 
             // リンクが存在する場合のみテスト
-            for (let j = 0; j < Math.min(1, linkCount); j++) {
+            for (let j = 0; j < Math.min(1, linkCount); j += 1) {
                 await expect(parentLink.nth(j)).toHaveAttribute('href');
             }
         }
@@ -110,7 +110,7 @@ test.describe('アイコン表示', () => {
         expect(themeIconCount).toBeGreaterThanOrEqual(0);
 
         // テーマアイコンが存在する場合のみテストを実行
-        for (let i = 0; i < Math.min(1, themeIconCount); i++) {
+        for (let i = 0; i < Math.min(1, themeIconCount); i += 1) {
             const themeIcon = themeIcons.nth(i);
             await expect(themeIcon).toBeVisible();
 
@@ -138,7 +138,7 @@ test.describe('アイコン表示', () => {
         expect(navIconCount).toBeGreaterThanOrEqual(0);
 
         // ナビゲーションアイコンが存在する場合のみテストを実行
-        for (let i = 0; i < Math.min(3, navIconCount); i++) {
+        for (let i = 0; i < Math.min(3, navIconCount); i += 1) {
             const navIcon = navIcons.nth(i);
             await expect(navIcon).toBeVisible();
         }

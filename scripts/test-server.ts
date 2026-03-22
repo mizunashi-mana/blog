@@ -1,11 +1,8 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import * as express from 'express';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const projectRoot = path.resolve(__dirname, '..');
-const listenPort = process.env.PORT ? parseInt(process.env.PORT, 10) : 8000;
+const projectRoot = path.resolve(import.meta.dirname, '..');
+const listenPort = process.env.PORT !== undefined && process.env.PORT !== '' ? parseInt(process.env.PORT, 10) : 8000;
 
 const app = express.default();
 

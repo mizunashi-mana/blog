@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
@@ -23,7 +23,7 @@ export default {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /\.tsx?$/v,
                 use: [
                     {
                         loader: 'babel-loader',
@@ -35,7 +35,7 @@ export default {
                 ],
             },
             {
-                test: /\.(scss|css)$/,
+                test: /\.(?:scss|css)$/v,
                 use: [
                     MiniCssExtractPlugin.loader,
                     {
@@ -50,7 +50,7 @@ export default {
                 ],
             },
             {
-                test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
+                test: /\.(?:woff|woff2|eot|ttf|otf|svg)$/v,
                 type: 'asset/resource',
             },
         ],

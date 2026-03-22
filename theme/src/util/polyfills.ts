@@ -1,5 +1,6 @@
 // http://ajaxian.com/archives/creating-a-queryselector-for-ie-that-runs-at-native-speed
 
+/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-deprecated, @typescript-eslint/no-unsafe-type-assertion -- ポリフィル定義のため、非推奨APIの参照と型アサーションが必要 */
 if (!document.querySelectorAll) {
     const querySelectorAllPolyfill = function (selectors: string): HTMLElement[] {
         const styleElement = document.createElement('style');
@@ -13,8 +14,8 @@ if (!document.querySelectorAll) {
         documentWithQsa.__qsa_results = [];
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access -- ポリーフィル定義のため
-        (styleElement as any).styleSheet.cssText = selectors
-            + '{x-qsa:expression(document.__qsa_results && document.__qsa_results.push(this))}';
+        (styleElement as any).styleSheet.cssText = `${selectors
+        }{x-qsa:expression(document.__qsa_results && document.__qsa_results.push(this))}`;
         window.scrollBy(0, 0);
         styleElement.parentNode?.removeChild(styleElement);
 
@@ -30,15 +31,15 @@ if (!document.querySelectorAll) {
         return elements;
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ポリーフィル定義のため
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ポリフィル定義のため
     document.querySelectorAll = querySelectorAllPolyfill as any;
 }
 
-if (!document.querySelector) {
-    document.querySelector = function (selectors: string) {
-        const elements = document.querySelectorAll(selectors);
-        return (elements.length > 0) ? elements[0] : null;
-    };
-}
+// eslint-disable-next-line @typescript-eslint/unbound-method -- ポリフィル定義のため
+document.querySelector ||= function (selectors: string) {
+    const elements = document.querySelectorAll(selectors);
+    return (elements.length > 0) ? elements[0] : null;
+};
+/* eslint-enable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-deprecated, @typescript-eslint/no-unsafe-type-assertion */
 
 export {};

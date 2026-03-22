@@ -19,7 +19,7 @@ test.describe('テーマ', () => {
 
         const hasContent = await page.evaluate((minElements) => {
             const body = document.body;
-            const textContent = body.textContent ?? '';
+            const textContent = body.textContent ?? ''; // eslint-disable-line @typescript-eslint/no-unnecessary-condition -- textContent can be null on some elements
             const hasVisibleElements = body.querySelectorAll('*').length > minElements;
             return textContent.trim().length > 0 && hasVisibleElements;
         }, MIN_VISIBLE_ELEMENTS);
@@ -51,7 +51,7 @@ test.describe('テーマ', () => {
         await page.waitForLoadState('domcontentloaded');
 
         await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
-        await expect(page).toHaveTitle(/続くといいな日記/);
+        await expect(page).toHaveTitle(/続くといいな日記/v);
 
         const description = page.locator('meta[name="description"]');
         await expect(description).toHaveCount(1);
@@ -91,22 +91,22 @@ test.describe('テーマ', () => {
         await expect(headings.first()).toBeVisible();
 
         // 表示されているリンクにテキストがあることを確認
-        const visibleLinks = page.locator('a:visible').filter({ hasText: /.+/ });
+        const visibleLinks = page.locator('a:visible').filter({ hasText: /.+/v });
         const linkCount = await visibleLinks.count();
 
-        for (let i = 0; i < Math.min(3, linkCount); i++) {
+        for (let i = 0; i < Math.min(3, linkCount); i += 1) {
             const link = visibleLinks.nth(i);
             // リンクにアクセシブルなテキストがあることを確認
             await expect(link).toHaveAttribute('href');
             // リンクにテキストまたはラベルがあることを確認
-            await expect(link).toHaveText(/.+/);
+            await expect(link).toHaveText(/.+/v);
         }
 
         // 画像にalt属性があることを確認
         const images = page.locator('img');
         const imageCount = await images.count();
 
-        for (let i = 0; i < Math.min(3, imageCount); i++) {
+        for (let i = 0; i < Math.min(3, imageCount); i += 1) {
             const img = images.nth(i);
             await expect(img).toHaveAttribute('alt');
         }

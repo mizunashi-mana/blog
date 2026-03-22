@@ -6,17 +6,17 @@ void runHook({
             preferAnotherTools: [
                 {
                     type: 'regex',
-                    match: /(^| )playwright( |$)/,
+                    match: /(?:^| )playwright(?:$| )/v,
                     preferTool: 'Use ./scripts/playwright.sh instead',
                 },
                 {
                     type: 'regex',
-                    match: /(^| )rm(|dir)( |$)/,
+                    match: /(?:^| )rm(?:dir)?(?:$| )/v,
                     preferTool: 'Use safe-file-deletion MCP instead',
                 },
                 {
                     type: 'regex',
-                    match: /^devenv shell/,
+                    match: /^devenv shell/v,
                     preferTool: '`devenv shell` is not needed. Run command directly.',
                 },
             ],
