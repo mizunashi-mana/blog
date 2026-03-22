@@ -2,17 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(./scripts/playwright.sh test:*)",
+      "Bash(lint-all:*)",
       "Bash(make:*)",
       "Bash(uv run pytest:*)"
     ]
   },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "eslint",
-    "playwright",
-    "manage-bg",
-    "safe-file-delete"
-  ],
   "hooks": {
     "PostToolUse": [
       {
@@ -21,17 +15,6 @@
           {
             "type": "command",
             "command": "npx tsx scripts/cc-hook-format-on-post-tool.ts"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "npx tsx scripts/cc-hook-reject-and-prefer-tool.ts"
           }
         ]
       }

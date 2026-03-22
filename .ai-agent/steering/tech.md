@@ -22,7 +22,7 @@
 
 ### 品質管理
 
-- **ESLint** + **Prettier** - TypeScript/JavaScript
+- **ESLint** (`@mizunashi_mana/eslint-config-refined`) + **Prettier** - TypeScript/JavaScript
 - **Stylelint** - SCSS
 - **Ruff** - Python
 - **Playwright** - E2E テスト（Chrome, Safari, Mobile Chrome）
