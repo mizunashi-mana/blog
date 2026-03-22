@@ -12,9 +12,9 @@ test.describe('双方向型検査記事の日時情報', () => {
         await expect(title).toHaveText('双方向型検査: 検査と構築の融合');
 
         // 作成日時の確認 (2023年2月21日 - 最初のコミット日)
-        const dateInfo = page.locator('main article p').filter({ hasText: /2023年02月21日に投稿/ });
+        const dateInfo = page.locator('main article p').filter({ hasText: /2023年02月21日に投稿/v });
         await expect(dateInfo).toBeVisible();
-        await expect(dateInfo).toHaveText(/2023年02月21日に投稿/);
+        await expect(dateInfo).toHaveText(/2023年02月21日に投稿/v);
     });
 
     test('双方向型検査記事の更新日時が正しく表示されること', async ({ page }) => {
@@ -25,9 +25,9 @@ test.describe('双方向型検査記事の日時情報', () => {
         await expect(article).toBeVisible();
 
         // 更新日時の確認 (2023年3月4日 - 最終更新日)
-        const updateInfo = page.locator('main article p').filter({ hasText: /（2023年03月04日に更新）/ });
+        const updateInfo = page.locator('main article p').filter({ hasText: /（2023年03月04日に更新）/v });
         await expect(updateInfo).toBeVisible();
-        await expect(updateInfo).toHaveText(/（2023年03月04日に更新）/);
+        await expect(updateInfo).toHaveText(/（2023年03月04日に更新）/v);
     });
 
     test('双方向型検査記事の作成日時と更新日時が両方表示されること', async ({ page }) => {
@@ -38,13 +38,13 @@ test.describe('双方向型検査記事の日時情報', () => {
         await expect(article).toBeVisible();
 
         const fullDateInfo = page.locator('main article p').filter({
-            hasText: /2023年02月21日に投稿/,
+            hasText: /2023年02月21日に投稿/v,
         });
         await expect(fullDateInfo).toBeVisible();
 
         // 作成日時と更新日時が同じ段落に表示されていることを確認
         const dateText = await fullDateInfo.textContent();
-        expect(dateText).toMatch(/（2023年03月04日に更新）/);
+        expect(dateText).toMatch(/（2023年03月04日に更新）/v);
     });
 
     test('双方向型検査記事のメタデータに構造化された日付情報が含まれること', async ({ page }) => {

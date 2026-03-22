@@ -21,7 +21,7 @@ function main(): void {
     const completed = () => {
         document.removeEventListener('DOMContentLoaded', completed);
         window.removeEventListener('load', completed);
-        void onLoad();
+        onLoad();
     };
 
     if (

@@ -4,8 +4,16 @@ languageOptions:
     globals:
         AbortController: false
         AbortSignal: false
+        AggregateError: false
+        Array: false
+        ArrayBuffer: false
         AsyncDisposableStack: false
+        Atomics: false
+        BigInt: false
+        BigInt64Array: false
+        BigUint64Array: false
         Blob: false
+        Boolean: false
         BroadcastChannel: false
         Buffer: false
         ByteLengthQueuingStrategy: false
@@ -16,18 +24,37 @@ languageOptions:
         CryptoKey: false
         CustomEvent: false
         DOMException: false
+        DataView: false
+        Date: false
         DecompressionStream: false
         DisposableStack: false
+        Error: false
         ErrorEvent: false
+        EvalError: false
         Event: false
         EventTarget: false
         File: false
+        FinalizationRegistry: false
+        Float32Array: false
+        Float64Array: false
         FormData: false
+        Function: false
         Headers: false
+        Infinity: false
+        Int16Array: false
+        Int32Array: false
+        Int8Array: false
+        Intl: false
+        JSON: false
+        Map: false
+        Math: false
         MessageChannel: false
         MessageEvent: false
         MessagePort: false
+        NaN: false
         Navigator: false
+        Number: false
+        Object: false
         Performance: false
         PerformanceEntry: false
         PerformanceMark: false
@@ -35,33 +62,53 @@ languageOptions:
         PerformanceObserver: false
         PerformanceObserverEntryList: false
         PerformanceResourceTiming: false
+        Promise: false
+        Proxy: false
+        RangeError: false
         ReadableByteStreamController: false
         ReadableStream: false
         ReadableStreamBYOBReader: false
         ReadableStreamBYOBRequest: false
         ReadableStreamDefaultController: false
         ReadableStreamDefaultReader: false
+        ReferenceError: false
+        Reflect: false
+        RegExp: false
         Request: false
         Response: false
+        Set: false
+        SharedArrayBuffer: false
         Storage: false
+        String: false
         SubtleCrypto: false
         SuppressedError: false
+        Symbol: false
+        SyntaxError: false
         TextDecoder: false
         TextDecoderStream: false
         TextEncoder: false
         TextEncoderStream: false
         TransformStream: false
         TransformStreamDefaultController: false
+        TypeError: false
+        URIError: false
         URL: false
         URLPattern: false
         URLSearchParams: false
+        Uint16Array: false
+        Uint32Array: false
+        Uint8Array: false
+        Uint8ClampedArray: false
+        WeakMap: false
+        WeakRef: false
+        WeakSet: false
         WebAssembly: false
         WebSocket: false
         WritableStream: false
         WritableStreamDefaultController: false
         WritableStreamDefaultWriter: false
-        __dirname: false
-        __filename: false
+        __dirname: 'off'
+        __filename: 'off'
         atob: false
         btoa: false
         clearImmediate: false
@@ -69,26 +116,40 @@ languageOptions:
         clearTimeout: false
         console: false
         crypto: false
-        exports: true
+        decodeURI: false
+        decodeURIComponent: false
+        encodeURI: false
+        encodeURIComponent: false
+        escape: false
+        eval: false
+        exports: 'off'
         fetch: false
         global: false
+        globalThis: false
+        isFinite: false
+        isNaN: false
         localStorage: false
-        module: false
+        module: 'off'
         navigator: false
+        parseFloat: false
+        parseInt: false
         performance: false
         process: false
         queueMicrotask: false
-        require: false
+        require: 'off'
         sessionStorage: false
         setImmediate: false
         setInterval: false
         setTimeout: false
         structuredClone: false
+        undefined: false
+        unescape: false
     parser: null
     parserOptions:
         program: null
         project: false
         projectService: false
+        sourceType: module
     sourceType: module
 linterOptions:
     reportUnusedDisableDirectives: 2
@@ -110,6 +171,31 @@ rules:
     -   ignore:
         - eslint-enable
         - eslint-env
+    '@mizunashi_mana/promise/always-return':
+    - 2
+    -   ignoreLastCallback: true
+    '@mizunashi_mana/promise/catch-or-return':
+    - 2
+    '@mizunashi_mana/promise/no-callback-in-promise':
+    - 1
+    '@mizunashi_mana/promise/no-multiple-resolved':
+    - 2
+    '@mizunashi_mana/promise/no-nesting':
+    - 1
+    '@mizunashi_mana/promise/no-new-statics':
+    - 2
+    '@mizunashi_mana/promise/no-promise-in-callback':
+    - 2
+    '@mizunashi_mana/promise/no-return-in-finally':
+    - 1
+    '@mizunashi_mana/promise/no-return-wrap':
+    - 2
+    '@mizunashi_mana/promise/param-names':
+    - 2
+    '@mizunashi_mana/promise/prefer-await-to-then':
+    - 2
+    '@mizunashi_mana/promise/valid-params':
+    - 1
     '@stylistic/array-bracket-spacing':
     - 2
     - never
@@ -409,28 +495,44 @@ rules:
     - 2
     '@typescript-eslint/array-type':
     - 2
+    -   default: array-simple
     '@typescript-eslint/await-thenable':
     - 0
     '@typescript-eslint/ban-ts-comment':
     - 2
-    -   minimumDescriptionLength: 10
+    -   minimumDescriptionLength: 3
+        ts-check: false
+        ts-expect-error: allow-with-description
+        ts-ignore: true
+        ts-nocheck: true
     '@typescript-eslint/ban-tslint-comment':
     - 2
     '@typescript-eslint/class-literal-property-style':
     - 2
+    - fields
     '@typescript-eslint/consistent-generic-constructors':
     - 2
+    - constructor
     '@typescript-eslint/consistent-indexed-object-style':
     - 2
+    - record
     '@typescript-eslint/consistent-return':
     - 0
     -   treatUndefinedAsUnspecified: false
     '@typescript-eslint/consistent-type-assertions':
     - 2
+    -   assertionStyle: as
+        objectLiteralTypeAssertions: never
     '@typescript-eslint/consistent-type-definitions':
-    - 2
+    - 0
     '@typescript-eslint/consistent-type-exports':
     - 0
+    -   fixMixedExportsWithInlineTypeSpecifier: true
+    '@typescript-eslint/consistent-type-imports':
+    - 2
+    -   disallowTypeAnnotations: true
+        fixStyle: inline-type-imports
+        prefer: type-imports
     '@typescript-eslint/dot-notation':
     - 0
     -   allowIndexSignaturePropertyAccess: false
@@ -438,8 +540,40 @@ rules:
         allowPattern: ''
         allowPrivateClassPropertyAccess: false
         allowProtectedClassPropertyAccess: false
+    '@typescript-eslint/max-params':
+    - 2
+    -   max: 4
+    '@typescript-eslint/method-signature-style':
+    - 2
+    - property
     '@typescript-eslint/naming-convention':
     - 0
+    -   format:
+        - camelCase
+        leadingUnderscore: allow
+        selector: default
+        trailingUnderscore: allow
+    -   format:
+        - camelCase
+        - PascalCase
+        selector: import
+    -   format:
+        - camelCase
+        - PascalCase
+        - UPPER_CASE
+        leadingUnderscore: allow
+        selector: variable
+        trailingUnderscore: allow
+    -   format:
+        - PascalCase
+        selector: typeLike
+    -   format:
+        - PascalCase
+        selector: enumMember
+    -   format: null
+        selector: objectLiteralProperty
+    -   format: null
+        selector: typeProperty
     '@typescript-eslint/no-array-constructor':
     - 2
     '@typescript-eslint/no-array-delete':
@@ -450,6 +584,8 @@ rules:
     - 2
     '@typescript-eslint/no-confusing-void-expression':
     - 0
+    -   ignoreArrowShorthand: true
+        ignoreVoidOperator: true
     '@typescript-eslint/no-deprecated':
     - 0
     '@typescript-eslint/no-duplicate-enum-values':
@@ -460,7 +596,10 @@ rules:
     - 2
     '@typescript-eslint/no-empty-function':
     - 2
-    -   allow: []
+    -   allow:
+        - arrowFunctions
+        - functions
+        - methods
     '@typescript-eslint/no-empty-object-type':
     - 2
     '@typescript-eslint/no-explicit-any':
@@ -469,18 +608,22 @@ rules:
     - 2
     '@typescript-eslint/no-extraneous-class':
     - 2
+    -   allowWithDecorator: true
     '@typescript-eslint/no-floating-promises':
     - 0
     '@typescript-eslint/no-for-in-array':
     - 0
     '@typescript-eslint/no-implied-eval':
     - 0
-    '@typescript-eslint/no-inferrable-types':
+    '@typescript-eslint/no-import-type-side-effects':
     - 2
     '@typescript-eslint/no-invalid-void-type':
     - 2
+    '@typescript-eslint/no-loop-func':
+    - 2
     '@typescript-eslint/no-meaningless-void-operator':
     - 0
+    -   checkNever: true
     '@typescript-eslint/no-misused-new':
     - 2
     '@typescript-eslint/no-misused-promises':
@@ -507,6 +650,9 @@ rules:
     - 0
     '@typescript-eslint/no-unnecessary-condition':
     - 0
+    -   allowConstantLoopConditions: true
+    '@typescript-eslint/no-unnecessary-parameter-property-assignment':
+    - 2
     '@typescript-eslint/no-unnecessary-qualifier':
     - 0
     '@typescript-eslint/no-unnecessary-template-expression':
@@ -543,15 +689,27 @@ rules:
     - 0
     '@typescript-eslint/no-unused-expressions':
     - 2
-    -   allowShortCircuit: false
-        allowTaggedTemplates: false
+    -   allowShortCircuit: true
+        allowTaggedTemplates: true
         allowTernary: false
     '@typescript-eslint/no-unused-vars':
     - 2
+    -   argsIgnorePattern: ^_
+        caughtErrorsIgnorePattern: ^_
+        destructuredArrayIgnorePattern: ^_
+        varsIgnorePattern: ^_
+    '@typescript-eslint/no-use-before-define':
+    - 2
+    -   allowNamedExports: false
+        classes: false
+        functions: false
+        variables: true
     '@typescript-eslint/no-useless-constructor':
     - 2
     '@typescript-eslint/no-useless-default-assignment':
     - 0
+    '@typescript-eslint/no-useless-empty-export':
+    - 2
     '@typescript-eslint/no-wrapper-object-types':
     - 2
     '@typescript-eslint/non-nullable-type-assertion-style':
@@ -598,39 +756,85 @@ rules:
     - 0
     '@typescript-eslint/require-array-sort-compare':
     - 0
+    -   ignoreStringArrays: true
     '@typescript-eslint/require-await':
     - 0
     '@typescript-eslint/restrict-plus-operands':
     - 0
     '@typescript-eslint/restrict-template-expressions':
     - 0
+    -   allowNumber: true
     '@typescript-eslint/return-await':
     - 0
+    - in-try-catch
     '@typescript-eslint/strict-boolean-expressions':
     - 0
+    -   allowAny: false
+        allowNullableBoolean: false
+        allowNullableNumber: false
+        allowNullableObject: true
+        allowNullableString: false
+        allowNumber: false
+        allowString: false
     '@typescript-eslint/strict-void-return':
     - 0
+    -   allowReturnAny: false
     '@typescript-eslint/switch-exhaustiveness-check':
     - 0
+    -   allowDefaultCaseForExhaustiveSwitch: false
+        considerDefaultExhaustiveForUnions: true
+        requireDefaultForNonUnion: false
     '@typescript-eslint/triple-slash-reference':
     - 2
+    -   lib: never
+        path: never
+        types: never
     '@typescript-eslint/unbound-method':
     - 0
     '@typescript-eslint/unified-signatures':
     - 2
+    -   ignoreDifferentlyNamedParameters: false
     '@typescript-eslint/use-unknown-in-catch-callback-variable':
     - 0
+    accessor-pairs:
+    - 2
+    -   enforceForClassMembers: true
+        enforceForTSTypes: false
+        getWithoutSet: false
+        setWithoutGet: true
+    array-callback-return:
+    - 2
+    -   allowImplicit: false
+        allowVoid: false
+        checkForEach: false
+    complexity:
+    - 2
+    -   max: 20
+        variant: modified
+    consistent-this:
+    - 2
+    - that
     constructor-super:
     - 2
-    dot-notation:
-    - 0
-    -   allowKeywords: true
-        allowPattern: ''
+    curly:
+    - 2
+    - multi-line
+    default-case-last:
+    - 2
+    eqeqeq:
+    - 2
+    - always
     for-direction:
     - 2
     getter-return:
     - 2
     -   allowImplicit: false
+    grouped-accessor-pairs:
+    - 2
+    - getBeforeSet
+    -   enforceForTSTypes: false
+    guard-for-in:
+    - 2
     import-x/default:
     - 2
     import-x/export:
@@ -638,7 +842,7 @@ rules:
     import-x/first:
     - 2
     import-x/named:
-    - 2
+    - 0
     import-x/namespace:
     - 2
     import-x/no-absolute-path:
@@ -651,9 +855,9 @@ rules:
     import-x/no-extraneous-dependencies:
     - 2
     import-x/no-named-as-default:
-    - 2
+    - 0
     import-x/no-named-as-default-member:
-    - 2
+    - 0
     import-x/no-named-default:
     - 2
     import-x/no-unresolved:
@@ -666,7 +870,7 @@ rules:
             caseInsensitive: true
             order: asc
             orderImportKind: ignore
-        distinctGroup: false
+        distinctGroup: true
         groups:
         - builtin
         - external
@@ -676,18 +880,92 @@ rules:
             - index
         - type
         named: false
-        pathGroups:
-        -   group: external
-            pattern: react
-            position: before
-        pathGroupsExcludedImportTypes:
-        - builtin
-        - react
+        newlines-between: never
         sortTypesGroup: false
         warnOnUnassignedImports: false
+    logical-assignment-operators:
+    - 2
+    - always
+    -   enforceForIfStatements: true
+    max-depth:
+    - 2
+    -   max: 5
+    max-lines:
+    - 2
+    -   max: 400
+        skipBlankLines: true
+        skipComments: true
+    max-nested-callbacks:
+    - 2
+    -   max: 3
+    n/handle-callback-err:
+    - 2
+    - ^(err|error)$
+    n/hashbang:
+    - 2
+    n/no-callback-literal:
+    - 2
+    n/no-deprecated-api:
+    - 2
+    n/no-exports-assign:
+    - 2
+    n/no-extraneous-import:
+    - 0
+    n/no-extraneous-require:
+    - 2
+    n/no-missing-import:
+    - 0
+    n/no-missing-require:
+    - 2
+    n/no-new-require:
+    - 2
+    n/no-path-concat:
+    - 2
+    n/no-process-exit:
+    - 2
+    n/no-unpublished-bin:
+    - 2
+    n/no-unpublished-import:
+    - 0
+    n/no-unpublished-require:
+    - 2
+    n/no-unsupported-features/es-builtins:
+    - 2
+    n/no-unsupported-features/es-syntax:
+    - 2
+    -   ignores:
+        - modules
+    n/no-unsupported-features/node-builtins:
+    - 2
+    n/prefer-node-protocol:
+    - 2
+    n/process-exit-as-throw:
+    - 2
+    new-cap:
+    - 2
+    -   capIsNew: false
+        capIsNewExceptions:
+        - Array
+        - Boolean
+        - Date
+        - Error
+        - Function
+        - Number
+        - Object
+        - RegExp
+        - String
+        - Symbol
+        - BigInt
+        newIsCap: true
+        newIsCapExceptions: []
+        properties: true
+    no-alert:
+    - 2
     no-array-constructor:
     - 0
     no-async-promise-executor:
+    - 2
+    no-caller:
     - 2
     no-case-declarations:
     - 2
@@ -697,14 +975,19 @@ rules:
     - 2
     no-cond-assign:
     - 2
-    - except-parens
+    - always
+    no-console:
+    - 2
+    - {}
     no-const-assign:
     - 2
     no-constant-binary-expression:
     - 2
     no-constant-condition:
     - 2
-    -   checkLoops: allExceptWhileTrue
+    -   checkLoops: false
+    no-constructor-return:
+    - 2
     no-control-regex:
     - 2
     no-debugger:
@@ -723,18 +1006,23 @@ rules:
     - 2
     no-empty:
     - 2
-    -   allowEmptyCatch: false
+    -   allowEmptyCatch: true
     no-empty-character-class:
     - 2
-    no-empty-function:
-    - 0
-    -   allow: []
     no-empty-pattern:
     - 2
     -   allowObjectPatternsAsParameters: false
     no-empty-static-block:
     - 2
+    no-eval:
+    - 2
+    -   allowIndirect: false
     no-ex-assign:
+    - 2
+    no-extend-native:
+    - 2
+    -   exceptions: []
+    no-extra-bind:
     - 2
     no-extra-boolean-cast:
     - 2
@@ -748,10 +1036,17 @@ rules:
     no-global-assign:
     - 2
     -   exceptions: []
+    no-implicit-globals:
+    - 2
+    -   lexicalBindings: false
     no-implied-eval:
     - 0
     no-import-assign:
     - 2
+    no-inner-declarations:
+    - 2
+    - both
+    -   blockScopedFunctions: disallow
     no-invalid-regexp:
     - 2
     - {}
@@ -762,18 +1057,54 @@ rules:
         skipRegExps: false
         skipStrings: true
         skipTemplates: false
+    no-iterator:
+    - 2
+    no-labels:
+    - 2
+    -   allowLoop: false
+        allowSwitch: false
+    no-lone-blocks:
+    - 2
+    no-lonely-if:
+    - 2
     no-loss-of-precision:
     - 2
     no-misleading-character-class:
     - 2
     -   allowEscape: false
+    no-multi-assign:
+    - 2
+    -   ignoreNonDeclaration: false
+    no-multi-str:
+    - 2
+    no-new:
+    - 2
+    no-new-func:
+    - 2
     no-new-native-nonconstructor:
+    - 2
+    no-new-wrappers:
     - 2
     no-nonoctal-decimal-escape:
     - 2
     no-obj-calls:
     - 2
+    no-object-constructor:
+    - 2
     no-octal:
+    - 2
+    no-octal-escape:
+    - 2
+    no-param-reassign:
+    - 2
+    -   props: true
+    no-plusplus:
+    - 2
+    -   allowForLoopAfterthoughts: false
+    no-promise-executor-return:
+    - 2
+    -   allowVoid: false
+    no-proto:
     - 2
     no-prototype-builtins:
     - 2
@@ -782,27 +1113,61 @@ rules:
     -   builtinGlobals: true
     no-regex-spaces:
     - 2
+    no-restricted-globals:
+    - 2
+    -   message: Use local parameter instead.
+        name: event
+    -   message: Do not commit fdescribe.
+        name: fdescribe
+    no-restricted-imports:
+    - 0
+    -   patterns:
+        -   group:
+            - ../
+            message: Use absolute paths starting with @
+    no-return-assign:
+    - 2
+    - always
+    no-script-url:
+    - 2
     no-self-assign:
     - 2
     -   props: true
+    no-self-compare:
+    - 2
+    no-sequences:
+    - 2
+    -   allowInParentheses: false
     no-setter-return:
     - 2
     no-shadow-restricted-names:
     - 2
-    -   reportGlobalThis: false
+    -   reportGlobalThis: true
     no-sparse-arrays:
+    - 2
+    no-template-curly-in-string:
     - 2
     no-this-before-super:
     - 2
     no-throw-literal:
     - 0
+    no-unassigned-vars:
+    - 2
     no-undef:
     - 2
     -   typeof: false
     no-unexpected-multiline:
     - 2
+    no-unmodified-loop-condition:
+    - 2
+    no-unneeded-ternary:
+    - 2
+    -   defaultAssignment: false
     no-unreachable:
     - 2
+    no-unreachable-loop:
+    - 2
+    -   ignore: []
     no-unsafe-finally:
     - 2
     no-unsafe-negation:
@@ -824,30 +1189,122 @@ rules:
     - 2
     no-unused-vars:
     - 0
+    no-useless-assignment:
+    - 2
     no-useless-backreference:
+    - 2
+    no-useless-call:
     - 2
     no-useless-catch:
     - 2
-    no-useless-constructor:
-    - 0
+    no-useless-computed-key:
+    - 2
+    -   enforceForClassMembers: true
+    no-useless-concat:
+    - 2
     no-useless-escape:
     - 2
     -   allowRegexCharacters: []
+    no-useless-rename:
+    - 2
+    -   ignoreDestructuring: false
+        ignoreExport: false
+        ignoreImport: false
+    no-useless-return:
+    - 2
+    no-var:
+    - 2
+    no-void:
+    - 2
+    -   allowAsStatement: true
     no-with:
+    - 2
+    object-shorthand:
+    - 2
+    - properties
+    -   avoidQuotes: true
+    one-var:
+    - 2
+    -   initialized: never
+    operator-assignment:
+    - 2
+    - always
+    prefer-arrow-callback:
+    - 2
+    -   allowNamedFunctions: true
+        allowUnboundThis: true
+    prefer-const:
+    - 2
+    -   destructuring: all
+        ignoreReadBeforeAssign: false
+    prefer-exponentiation-operator:
+    - 2
+    prefer-named-capture-group:
+    - 2
+    prefer-numeric-literals:
+    - 2
+    prefer-object-has-own:
+    - 2
+    prefer-object-spread:
     - 2
     prefer-promise-reject-errors:
     - 0
     -   allowEmptyReject: false
+    prefer-regex-literals:
+    - 2
+    -   disallowRedundantWrapping: true
+    prefer-template:
+    - 2
+    preserve-caught-error:
+    - 2
+    -   requireCatchParameter: true
+    radix:
+    - 2
+    - always
     require-await:
     - 0
+    require-unicode-regexp:
+    - 2
+    -   requireFlag: v
     require-yield:
     - 2
+    symbol-description:
+    - 2
+    unicode-bom:
+    - 2
+    - never
     unused-imports/no-unused-imports:
     - 2
     use-isnan:
     - 2
-    -   enforceForIndexOf: false
+    -   enforceForIndexOf: true
         enforceForSwitchCase: true
     valid-typeof:
     - 2
-    -   requireStringLiterals: false
+    -   requireStringLiterals: true
+    yoda:
+    - 2
+    - never
+    -   exceptRange: false
+        onlyEquality: false
+settings:
+    import-x/extensions:
+    - .ts
+    - .tsx
+    - .cts
+    - .mts
+    - .js
+    - .jsx
+    - .cjs
+    - .mjs
+    import-x/external-module-folders:
+    - node_modules
+    - node_modules/@types
+    import-x/parsers:
+        '@typescript-eslint/parser':
+        - .ts
+        - .tsx
+        - .cts
+        - .mts
+    import-x/resolver:
+        typescript: true

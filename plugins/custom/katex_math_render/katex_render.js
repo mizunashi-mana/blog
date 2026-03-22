@@ -9,19 +9,19 @@ function katexRenderingPipe(instream, outstream) {
         const chunks = chunk.toString('utf8').split('\n');
         chunks[0] = chunkrest + chunks[0];
 
-        let l = chunks.length - 1;
-        for (let i = 0; i < l; i++) {
+        const l = chunks.length - 1;
+        for (let i = 0; i < l; i += 1) {
             const content = JSON.parse(chunks[i]);
             if (typeof content !== 'object' || content === null) {
                 throw new Error(`invalid content: ${content}`);
             }
 
-            let opts = {
+            const opts = {
                 strict: (errorCode, errorMsg) => {
-                    console.error(`${errorCode}:${errorMsg}:${JSON.stringify(content)}`);
+                    process.stderr.write(`${errorCode}:${errorMsg}:${JSON.stringify(content)}\n`);
                 },
             };
-            if (content.m == 'b') {
+            if (content.m === 'b') {
                 opts.displayMode = true;
             }
 

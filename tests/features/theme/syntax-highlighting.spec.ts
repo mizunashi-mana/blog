@@ -28,7 +28,7 @@ test.describe('シンタックスハイライト (Pygments)', () => {
 
         // コードブロックにスタイルが適用されていることを確認
         expect(codeBlockStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)'); // 背景色がある
-        expect(codeBlockStyle.fontFamily).toMatch(/mono|consola|courier/i); // モノスペースフォント
+        expect(codeBlockStyle.fontFamily).toMatch(/mono|consola|courier/iv); // モノスペースフォント
         expect(codeBlockStyle.fontSize).toBeTruthy(); // フォントサイズが設定されている
 
         // シンタックスハイライトのクラスが存在することを確認
@@ -37,7 +37,7 @@ test.describe('シンタックスハイライト (Pygments)', () => {
         expect(highlightCount).toBeGreaterThan(0);
 
         // ハイライト要素が実際に色付けされていることを確認
-        for (let i = 0; i < Math.min(3, highlightCount); i++) {
+        for (let i = 0; i < Math.min(3, highlightCount); i += 1) {
             const element = highlightElements.nth(i);
             await expect(element).toBeVisible();
 
@@ -103,7 +103,7 @@ test.describe('シンタックスハイライト (Pygments)', () => {
         });
 
         // 横スクロールの設定を確認（visible, auto, scrollのいずれかであることを確認）
-        expect(codeBlockStyle.overflowX).toMatch(/visible|auto|scroll/);
+        expect(codeBlockStyle.overflowX).toMatch(/visible|auto|scroll/v);
     });
 
     test('コードブロック内のテキスト選択機能', async ({ page }) => {
@@ -127,7 +127,7 @@ test.describe('シンタックスハイライト (Pygments)', () => {
 
         // プログラマティックにテキスト選択を実行
         const hasSelectableText = await codeText.evaluate((el) => {
-            const textContent = el.textContent ?? '';
+            const textContent = el.textContent ?? ''; // eslint-disable-line @typescript-eslint/no-unnecessary-condition -- textContent can be null on some elements
             if (textContent.trim().length === 0) return false;
 
             // テキスト選択を実行
@@ -169,7 +169,7 @@ test.describe('シンタックスハイライト (Pygments)', () => {
             const elementCount = await elements.count();
 
             // 要素が存在する場合のみテスト
-            for (let i = 0; i < Math.min(1, elementCount); i++) {
+            for (let i = 0; i < Math.min(1, elementCount); i += 1) {
                 const element = elements.nth(i);
                 await expect(element).toBeVisible();
 

@@ -18,7 +18,7 @@ test.describe('ツールチップ', () => {
 
         // 脚注のテキストが正しいことを確認（[1]など）
         const footnoteText = await firstFootnote.textContent();
-        expect(footnoteText).toMatch(/\[\d+\]/);
+        expect(footnoteText).toMatch(/\[\d+\]/v);
 
         // デスクトップデバイスでのツールチップテスト
         // 脚注にホバーしてツールチップが表示されることを確認
@@ -48,7 +48,7 @@ test.describe('ツールチップ', () => {
         expect(secondTooltipCount).toBeGreaterThanOrEqual(0); // ツールチップはオプショナル
 
         // 記事タイトルが正しく表示されていることを確認
-        const articleTitle = page.locator('h1').filter({ hasText: /ボックスタイプとCSSレイアウト/ });
+        const articleTitle = page.locator('h1').filter({ hasText: /ボックスタイプとCSSレイアウト/v });
         await expect(articleTitle).toBeVisible();
     });
 });
