@@ -127,7 +127,7 @@ test.describe('シンタックスハイライト (Pygments)', () => {
 
         // プログラマティックにテキスト選択を実行
         const hasSelectableText = await codeText.evaluate((el) => {
-            const textContent = el.textContent;
+            const textContent = el.textContent ?? ''; // eslint-disable-line @typescript-eslint/no-unnecessary-condition -- textContent can be null on some elements
             if (textContent.trim().length === 0) return false;
 
             // テキスト選択を実行
