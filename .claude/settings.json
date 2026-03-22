@@ -4,7 +4,8 @@
       "Bash(./scripts/playwright.sh test:*)",
       "Bash(lint-all:*)",
       "Bash(make:*)",
-      "Bash(uv run pytest:*)"
+      "Bash(uv run pytest:*)",
+      "Skill(autodev-create-pr)"
     ]
   },
   "hooks": {
