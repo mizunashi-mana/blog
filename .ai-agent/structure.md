@@ -17,6 +17,7 @@ blog/
 │   └── surveys/              # 技術調査
 ├── .claude/                  # Claude Code 設定
 │   ├── settings.json         # Claude Code 設定
+│   ├── settings.local.json   # Claude Code ローカル設定（gitignore）
 │   └── skills/               # autodev スキル群
 ├── .github/                  # GitHub 関連
 │   ├── actions/              # カスタム Actions
@@ -40,6 +41,9 @@ blog/
 │   │   └── katex_math_render/     # KaTeX 数式サーバーサイドレンダリング
 │   └── official/             # 公式プラグイン（git submodule）
 ├── scripts/                  # ユーティリティスクリプト
+│   ├── cc-hook-*.ts          # Claude Code フック（フォーマット、ツール制御）
+│   ├── playwright.sh         # Playwright テスト実行ヘルパー
+│   └── test-server.ts        # テスト用 HTTP サーバー
 ├── tests/                    # テスト
 │   ├── features/             # Playwright E2E テスト
 │   │   ├── assets/           # アセット関連テスト
