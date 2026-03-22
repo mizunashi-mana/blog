@@ -52,7 +52,7 @@
   # https://devenv.sh/git-hooks/
   git-hooks.hooks = {
     actionlint.enable = true;
-    nixfmt-rfc-style.enable = true;
+    nixfmt.enable = true;
     shellcheck.enable = true;
     taplo.enable = true;
     yamlfmt = {
