@@ -15,7 +15,7 @@ runs:
         sudo sed -i 's/# ja_JP\.UTF-8/ja_JP\.UTF-8/' /etc/locale.gen
         sudo update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX
         DEBIAN_FRONTEND=noninteractive sudo -E dpkg-reconfigure locales
-    - uses: cachix/install-nix-action@19effe9fe722874e6d46dd7182e4b8b7a43c4a99 # v31.10.0
+    - uses: cachix/install-nix-action@96951a368ba55167b55f1c916f7d416bac6505fe # v31.10.3
       with:
         extra_nix_config: |
           accept-flake-config = true
