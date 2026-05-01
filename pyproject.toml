@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
   "beautifulsoup4>=4.13.4",
-  "gitpython>=3.1.44",
+  "gitpython>=3.1.49",
   "pelican>=4.11.0",
   "pygments>=2.18.0",
   "pytz>=2025.2",
